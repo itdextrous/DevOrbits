@@ -1,0 +1,142 @@
+@using Microsoft.AspNetCore.Identity
+@using MyVoltage.Models
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject MyVoltage.Services.CustomerProvider customerProvider
+
+
+<form enctype="multipart/form-data">
+    <div class="sidebar">
+        <!--
+            <div class="logo">
+                <a href=""><img src="/logo" alt="MyVoltage"></a>
+            </div>
+        -->
+
+        <div class="sidebar-wrapper mt-3">
+            <ul class="nav flex-column">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var linkDisabled = "";
+                    var rechargeAdminLinkDisabled = "";
+
+                    if (@User.IsInRole(MyVoltage.Data.UserRoleEnum.Technician.ToString()))
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/technician/changecompany"><i class="fas fa-info"></i>Company: @(!string.IsNullOrEmpty(customerProvider.CompanyName) ? customerProvider.CompanyName : "None")</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/dashboard"><i class="fas fa-desktop"></i>Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/map"><i class="fas fa-globe-africa"></i>Vehicle Overview</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/buildingdetails"><i class="fas fa-building"></i>Building Details</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/offlinegateways"><i class="fas fa-handshake"></i>Communication Gateways</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/offlinedevices"><i class="fas fa-handshake-slash"></i>Offline Devices</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/devices"><i class="fas fa-network-wired"></i>All Devices</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/newdevices"><i class="fas fa-list"></i>Newly Added Devices</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/adddevice"><i class="fas fa-plus"></i>Add Device to Gateway</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/tokenlog"><i class="fas fa-wifi"></i>Token Log</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/technician/tokensender"><i class="fas fa-key"></i>Token Sender</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-power-off"></i>Log Out</a></li>
+                    }
+                    else if (@User.IsInRole(MyVoltage.Data.UserRoleEnum.CompanyAdmin.ToString()))
+                    {
+                        @if (@User.IsInRole("CompanyAdmin"))
+                        {
+                            if (@HttpContextAccessor.HttpContext.Session.GetString("CustomerID") == null || (@HttpContextAccessor.HttpContext.Session.GetString("CustomerID") != null && @HttpContextAccessor.HttpContext.Session.GetString("CustomerID").Equals(String.Empty)))
+                            {
+                                linkDisabled = "disabled";
+                            }
+                        }
+                        @if (string.IsNullOrEmpty(customerProvider.CompanyBalanceCheckSkybillCustomerNo))
+                        {
+                            rechargeAdminLinkDisabled = "disabled";
+                        }
+                        @if (customerProvider.DidPayAccount)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="/companyadmin/welcomepage">
+                                    <i class="fas fa-info"></i>Customer:
+                                    @if (@HttpContextAccessor.HttpContext.Session.GetString("CustomerID") == null || (@HttpContextAccessor.HttpContext.Session.GetString("CustomerID") != null && @HttpContextAccessor.HttpContext.Session.GetString("CustomerID").Equals(String.Empty)))
+                                    {
+                                        <text>Select customer to start</text>
+                                    }
+                                    else
+                                    {
+                                        @HttpContextAccessor.HttpContext.Session.GetString("CustomerID")
+                                    }
+                                </a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-search"></i><input type="text" id="customerSearch" /></a></li>
+                            <li class="nav-item"><a class="nav-link" href="/map"><i class="fas fa-globe-africa"></i>Global Overview</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Administration"><i class="fas fa-screwdriver"></i>Administration</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/CreditControlView"><i class="fas fa-dollar-sign"></i>Credit Control View</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/companyAdmin/offlinegateways"><i class="fas fa-handshake"></i>Communication Gateways</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/companyAdmin/offlinedevices"><i class="fas fa-handshake-slash"></i>Offline Devices</a></li>
+                            @*<li class="nav-item"><a class="nav-link" href="/Connector"><i class="fas fa-bolt"></i>Connector</a></li>*@
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/dashboard"><i class="fas fa-desktop"></i>Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/map"><i class="fas fa-globe-africa"></i>Map Overview</a></li>
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/billing"><i class="fas fa-file-alt"></i>Billing</a></li>
+                            @*<li class="nav-item"><a class="nav-link" href="/companyadmin/TSInvoices"><i class="fas fa-file-excel"></i>Report</a></li>*@
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/usage"><i class="fas fa-tachometer-alt"></i>Usage</a></li>
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/Account/contact"><i class="fas fa-phone"></i>Contact Service Provider</a></li>
+                            @*<li class="nav-item"><a class="nav-link @linkDisabled" href="/historicaldata"><i class="fas fa-chart-bar"></i>Historical Data Summary</a></li>*@
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/recharge"><i class="fas fa-dollar-sign"></i>Recharge</a></li>
+                            @if (customerProvider != null && customerProvider.AccountType == 2)
+                            {
+                                <li class="nav-item"><a class="nav-link @linkDisabled" href="/balanceredeem"><i class="fas fa-dollar-sign"></i>Redeem To Units</a></li>
+                            }
+                            <li class="nav-item"><a class="nav-link" href="/profile"><i class="fas fa-user-circle"></i>Profile</a></li>
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/odoreadings"><i class="fas fa-tachometer-alt"></i>Odo readings</a></li>
+                            @*<li class="nav-item"><a class="nav-link" href="/billing/externalchargesschedulingimport"><i class="fas fa-file-invoice-dollar"></i>External Charges</a></li>*@
+                            <li class="nav-item"><a class="nav-link" href="/companyadmin/ReceiptLog"><i class="fas fa-dollar-sign"></i>Receipt Log</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/companyAdmin/notificationlog"><i class="fas fa-envelope"></i>Notification Log</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/companyAdmin/tokenlog"><i class="fas fa-wifi"></i>Token Log</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/companyadmin/buildingdetails"><i class="fas fa-building"></i>Building Details</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/companyadmin/buildingcouncildetails"><i class="fas fa-landmark"></i>Building Council Details</a></li>
+                            @*<li class="nav-item"><a class="nav-link" href="/companyAdmin/bulkcommunication"><i class="fas fa-mail-bulk"></i>Bulk Communication</a></li>*@
+                            <li class="nav-item"><a class="nav-link" href="/companyAdmin/pqallocation"><i class="fas fa-cog"></i>PQ Allocation</a></li>
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/highusagecalc"><i class="fas fa-angry"></i>Protest Tool</a></li>
+                            <li class="nav-item"><a class="nav-link @linkDisabled" href="/usagecalc"><i class="fas fa-calculator"></i>Usage Calculator</a></li>
+                        }
+                        else
+                        {
+
+                        }
+                        <li class="nav-item"><a class="nav-link @rechargeAdminLinkDisabled" href="/companyAdmin/recharge"><i class="fas fa-dollar-sign"></i>Admin Recharge</a></li>
+                        <li class="nav-item"><a class="nav-link @rechargeAdminLinkDisabled" href="/companyAdmin/billing"><i class="fas fa-file-alt"></i>Admin Billing</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-power-off"></i>Log Out</a></li>
+                    }
+                    else
+                    {
+
+                        <li class="nav-item"><a class="nav-link" href="/smartview"><i class="fas fa-street-view"></i>Smart View</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-desktop"></i>Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Customer_Insights"><i class="fas fa-search-plus"></i>Insights</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/map"><i class="fas fa-globe-africa"></i>Map Overview</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/billing"><i class="fas fa-file-alt"></i>Billing</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Customer_AccountStatement"><i class="fas fa-file-invoice"></i>Statement and Invoices</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/usage"><i class="fas fa-tachometer-alt"></i>Usage</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Customer_Tariff"><i class="fas fa-dollar-sign"></i>Tariff</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Account/contact"><i class="fas fa-phone"></i>Contact Service Provider</a></li>
+                        @*<li class="nav-item"><a class="nav-link" href="/highusagecalc"><i class="fas fa-angry"></i>Protest Tool</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/usagecalc"><i class="fas fa-calculator"></i>Usage Calculator</a></li>*@
+                        @*<li class="nav-item"><a class="nav-link" href="/historicaldata"><i class="fas fa-chart-bar"></i>Historical Data Summary</a></li>*@
+                        <li class="nav-item"><a class="nav-link" href="/recharge"><i class="fas fa-dollar-sign"></i>Recharge</a></li>
+                        @*@if (customerProvider != null && customerProvider.AccountType == 2)
+                        {
+                            <li class="nav-item"><a class="nav-link" href="/balanceredeem"><i class="fas fa-dollar-sign"></i>Redeem To Units</a></li>
+                        }*@
+                        <li class="nav-item"><a class="nav-link" href="/profile"><i class="fas fa-user-circle"></i>Profile</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-power-off"></i>Log Out</a></li>
+                    }
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Register"><i class="fas fa-plus-circle"></i>Register</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login"><i class="fas fa-user"></i>Log in</a></li>
+                }
+            </ul>
+        </div>
+
+    </div>
+</form>

@@ -1,0 +1,67 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorChecklistSummaryModel
+
+@{
+    ViewData["Title"] = "Mirror Meter Auditing - Mirror Checklist Summary";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header text-right">
+                @*<a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails" class="btn btn-outline-primary">More Details&nbsp;<i class="fas fa-chevron-right"></i></a>*@
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Customers Count</th>
+                            <th scope="col">Meter Count</th>
+                            <th scope="col">Meters Checked</th>
+                            <th scope="col">Meters Left</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A02_MirrorMeterAuditing_MirrorChecklistSummaryItems)
+                        {
+                            string rowclass = "";
+                            if (item.Status == MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorChecklistSummaryItem.StatusType.Outstanding)
+                            {
+                                rowclass = " class=\"table-danger\"";
+                            }
+                            else if (item.Status == MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorChecklistSummaryItem.StatusType.Completed)
+                            {
+                                rowclass = " class=\"table-success\"";
+                            }
+                            <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');" @Html.Raw(rowclass)>
+                                <td scope="col">@item.CompanyName</td>
+                                <td scope="col">@item.CustomersCount</td>
+                                <td scope="col">@item.MetersCount</td>
+                                <td scope="col">@item.MetersCapturedCount</td>
+                                <td scope="col">@item.MetersLeft</td>
+                                <td scope="col">@item.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorChecklistDetails';
+        }
+    </script>
+}

@@ -1,0 +1,38 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_PrepaidControl_SummaryModel
+@using MyVoltage.Extensions; 
+@using MyVoltage.Data;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.StatusType.Problematic)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.StatusType.AttentionRequired)
+    {
+        rowclass = "table-warning";
+        cellClass = " class=\"text-orange font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.StatusType.Ok)
+    {
+        rowclass = "table-success";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+}
+<td scope="col">@Model.CompanyName</td>
+<td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+<td scope="col">@Model.CustomerInPrepaidModeCount</td>
+<td scope="col">@Model.CustomersInWalletOrPostPaidModeCount</td>
+<td scope="col">@Model.CustomersWithZeroWalletBalanceCount</td>
+<td scope="col">@Model.CustomersWithWalletBalanceCount</td>
+<script>
+    $(document).ready(function () {
+        if (@Model.CustomerInPrepaidModeCount == 0) {
+            $('#@Model.TableRowID').css("display", "none");
+        }
+        else {
+            $('#@Model.TableRowID').attr("class", '@rowclass');
+        }
+    });
+</script>

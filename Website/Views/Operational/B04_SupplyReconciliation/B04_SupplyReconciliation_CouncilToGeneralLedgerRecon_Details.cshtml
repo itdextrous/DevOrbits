@@ -1,0 +1,305 @@
+@model MyVoltage.Models.OperationalModels.B04_SupplyReconciliationModels.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    bool isFirst = true;
+}
+@using MyVoltage.Extensions;
+@using System.Linq;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <span>Please select a company from the sidebar to see results.</span>
+}
+else if (Model.InvalidBuildingCouncilDetails)
+{
+    <span>Building Council Details incorrect or not found. Please check the <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_AccountPaymentCapture">Account Payments - Account Payment Details</a>.</span>
+}
+else
+{
+    <div class="row mb-md-2">
+        <div class="col-12">
+            From Date:
+            <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+            To Date:
+            <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col text-left">
+            <select class="form-control" id="buildingCouncilID">
+                <option value="">[All Account Numbers]</option>
+                @foreach (SelectListItem item in Model.AccountNo)
+                {
+                    @if (item.Selected)
+                    {
+                        <option value="@item.Value" selected="selected">@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row mb-md-2">
+        <div class="col-12">
+            Resource:
+            <div class="row">
+                <div class="col-12">
+                    @if (Model.ProductIDs.Count == 0 || Model.ProductIDs.Count == Model.BuildingCouncilInvoiceResourceTypes.Count)
+                    {
+                        <input type="checkbox" name="product_" id="product_" class="form-check-inline" checked="checked" />
+                        <span>Select All / None</span>
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="product_" id="product_" class="form-check-inline" />
+                        <span>Select All / None</span>
+                    }
+                </div>
+            </div>
+            @foreach (var bCT in Model.BuildingCouncilInvoiceResourceTypes)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        @if (Model.ProductIDs.Count == 0 || Model.ProductIDs.Contains(bCT.ID.ToString()))
+                        {
+                            <input type="checkbox" name="product_@bCT.ID" id="product_@bCT.ID" class="form-check-inline" checked="checked" />
+                        }
+                        else
+                        {
+                            <input type="checkbox" name="product_@bCT.ID" id="product_@bCT.ID" class="form-check-inline" />
+                        }
+                        @bCT.ResourceTypeName
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+            &nbsp;
+            <a href="/operational/B04_SupplyReconciliation/B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+        </div>
+    </div>
+    @*    <div class="row">
+        <div class="col-12 table-success">
+        Legend: Invoices approved.
+        </div>
+        </div>
+        <div class="row">
+        <div class="col-12 table-warning">
+        Legend: Invoices pending approval.
+        </div>
+        </div>
+    *@    <div class="row">
+        <div class="col-12">
+            @if (Model.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_DetailsItems.Count == 0)
+            {
+                <span>There are no outstanding entries for @operationalProvider.CompanyName</span>
+            }
+            else
+            {
+                <table class="table table-striped table-hover table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Account No</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table-right">Month</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).Count() + 2)" scope="col" class="text-nowrap text-center border-table-spanned">Transactions</th>
+                            <th rowspan="2" class="text-nowrap text-center border-table-right">&nbsp;</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).Count() + 2)" scope="col" class="text-nowrap text-center border-table-spanned">Transactions per month per GENERAL LEDGER</th>
+                            <th rowspan="2" class="text-nowrap text-center border-table-right">&nbsp;</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).Count() + 2)" scope="col" class="text-nowrap text-center border-table-spanned">Diff</th>
+                            <th rowspan="2" class="text-nowrap text-center border-table-right">&nbsp;</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).Count() + 2)" scope="col" class="text-nowrap text-center border-table-spanned">Cumulative Diff</th>
+                        </tr>
+                        <tr>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                            <th scope="col" class="text-center border-table-sides">Total</th>
+                            <th scope="col" class="text-center border-table-sides">Cumulative Total</th>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                            <th scope="col" class="text-center border-table-sides">Total</th>
+                            <th scope="col" class="text-center border-table-sides">Cumulative Total</th>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                            <th scope="col" class="text-center border-table-sides">Total</th>
+                            <th scope="col" class="text-center border-table-sides">Cumulative Total</th>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            decimal leftCumValue = 0;
+                            decimal rightCumValue = 0;
+                            decimal diffCumValue = 0;
+                        }
+                        @foreach (var item in Model.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_DetailsItems)
+                        {
+                            @foreach (var itemMonth in item.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_DetailsItemMonths)
+                            {
+                                leftCumValue += itemMonth.TotalCharges;
+                                rightCumValue += itemMonth.MonthlyTotalCharges;
+                                diffCumValue = leftCumValue - rightCumValue;
+                                string cellClass = "";
+                                string pickedUpPrevious = "";
+                                string pickedUpDiff = "";
+                                string rowClass = "";
+                                if (itemMonth.Month > Model.ToDate
+                                || itemMonth.Month < Model.FromDate)
+                                {
+                                    continue;
+                                }
+                                <tr class="@Html.Raw(rowClass)">
+                                    <td scope="col" class="text-nowrap text-left border-table">@item.AccountNo</td>
+                                    <td scope="col" class="text-nowrap text-left border-table-right">@itemMonth.Month.ToMonth()</td>
+                                    @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                    {
+                                        if (resourceType.SortOrder == 1)
+                                        {
+                                            continue;
+                                        }
+                                        if (itemMonth.Resourcees.ContainsKey(resourceType.ResourceTypeName))
+                                        {
+                                            <td style="cursor:pointer;" onclick="RedirectToB04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths('@(new DateTime(itemMonth.Month.Year, itemMonth.Month.Month, 1))', '@item.AccountNo', '@resourceType.ID')" scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@itemMonth.Resourcees[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                        }
+                                        else
+                                        {
+                                            <td scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-nowrap text-center border-table">-</td>
+                                        }
+                                    }
+                                    <td style="cursor:pointer;" onclick="RedirectToB04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths('@(new DateTime(itemMonth.Month.Year, itemMonth.Month.Month, 1))', '@item.AccountNo', '')" scope="col" title="@item.AccountNo - Total Charges" class="text-right text-nowrap border-table-sides">@itemMonth.TotalCharges.ToMoneyNoDecimal("R")</td>
+                                    <td scope="col" title="@item.AccountNo - Cumulative Total Charges" class="text-right text-nowrap border-table-sides">@itemMonth.CumulativeTotalCharges.ToMoneyNoDecimal("R")</td>
+                                    <td scope="col" class="text-nowrap text-left border-table-right"></td>
+                                    @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                    {
+                                        if (resourceType.SortOrder == 1)
+                                        {
+                                            continue;
+                                        }
+                                        if (itemMonth.MonthlyResourcees.ContainsKey(resourceType.ResourceTypeName))
+                                        {
+                                            <td style="cursor:pointer;" onclick="RedirectToC02_GeneralLedgerReport_Details('@(new DateTime(itemMonth.Month.Year, itemMonth.Month.Month, 1))', '@(new DateTime(itemMonth.Month.Year, itemMonth.Month.Month, DateTime.DaysInMonth(itemMonth.Month.Year, itemMonth.Month.Month)))')" scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@itemMonth.MonthlyResourcees[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                        }
+                                        else
+                                        {
+                                            <td scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-nowrap text-center border-table">-</td>
+                                        }
+                                    }
+                                    <td scope="col" title="@item.AccountNo - Total Charges" class="text-right text-nowrap border-table-sides">@itemMonth.MonthlyTotalCharges.ToMoneyNoDecimal("R")</td>
+                                    <td scope="col" title="@item.AccountNo - Cumulative Total Charges" class="text-right text-nowrap border-table-sides">@itemMonth.CumulativeMonthlyTotalCharges.ToMoneyNoDecimal("R")</td>
+                                    <td scope="col" class="text-nowrap text-left border-table-right"></td>
+                                    @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                    {
+                                        if (resourceType.SortOrder == 1)
+                                        {
+                                            continue;
+                                        }
+                                        if (itemMonth.ResourcesDiff.ContainsKey(resourceType.ResourceTypeName))
+                                        {
+                                            <td scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@itemMonth.ResourcesDiff[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                        }
+                                        else
+                                        {
+                                            <td scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-nowrap text-center border-table">-</td>
+                                        }
+                                    }
+                                    <td scope="col" title="@item.AccountNo - Diff" class="text-right text-nowrap border-table-sides @((Convert.ToInt32(itemMonth.MonthlyDiff) != 0 ? "text-red" : "text-success"))">@itemMonth.MonthlyDiff.ToMoneyNoDecimal("R")</td>
+                                    <td scope="col" title="@item.AccountNo - Cumulative Diff" class="text-right text-nowrap border-table-sides">@itemMonth.CumulativeDiff.ToMoneyNoDecimal("R")</td>
+                                    <td scope="col" class="text-nowrap text-left border-table-right"></td>
+                                    @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.Where(p => Model.ProductIDs.Contains(p.ID.ToString())).OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                    {
+                                        if (resourceType.SortOrder == 1)
+                                        {
+                                            continue;
+                                        }
+                                        if (itemMonth.ResourcesCumulativeDiff.ContainsKey(resourceType.ResourceTypeName))
+                                        {
+                                            <td scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@itemMonth.ResourcesCumulativeDiff[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                        }
+                                        else
+                                        {
+                                            <td scope="col" title="@item.AccountNo - @resourceType.ResourceTypeName" class="text-nowrap text-center border-table">-</td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $("#product_").change(function () {
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BuildingCouncilInvoiceResourceTypes)));
+            $(products).each(function () {
+                $("#product_" + this.ID).prop("checked", $("#product_").prop("checked"));
+            });
+        });
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BuildingCouncilInvoiceResourceTypes)));
+            var productsString = "";
+            $(products).each(function () {
+                if ($("#product_" + this.ID).prop("checked") == true) {
+                    if (productsString == "") {
+                        productsString = this.ID;
+                    }
+                    else {
+                        productsString = productsString + "-" + this.ID;
+                    }
+                }
+            });
+            document.location.href = window.location.href.split('?')[0] + '?AccountNo=' + $("#buildingCouncilID").val() + '&FromDate=' + $("#fromDate").val() + '&ToDate=' + $("#toDate").val() + '&productID=' + productsString;
+        }
+        function RedirectToC02_GeneralLedgerReport_Details(fromDate, toDate) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_Details?from=' + fromDate + '&to=' + toDate + '&JNA=Supply Creditors&JNO=5310';
+        }
+        function RedirectToB04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths(fromDate, accountNo, resTypeID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B04_SupplyReconciliation/B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths?from=' + fromDate + '&AccountNo=' + accountNo + '&ResourceType=' + resTypeID;
+        }
+    </script>
+}

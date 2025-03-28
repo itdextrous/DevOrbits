@@ -1,0 +1,102 @@
+﻿@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_JournalSagepayRelease_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_JournalSagepayRelease_Details.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-4 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select company to start...
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                if (Model.IsSuccess)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Journal successfully added.
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col">
+                                <a href="/Operational/J_Finance/J_Finance_JournalSagepayRelease_Details" class="btn btn-outline-primary"><i class="fas fa-plus-circle"></i>&nbsp;Capture New</a>
+                            </div>
+                            <div class="col">
+                                <a href="/operational/J_Finance/J_Finance_JournalSagepayRelease_Summary" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back To List</a>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+                else
+                {
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="J_Finance_JournalSagepayRelease_Details" enctype="multipart/form-data">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label">Company</label>
+                                </div>
+                                <div class="col">
+                                    @operationalProvider.CompanyName
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label" asp-for="SkybillSagepayBalance"></label>
+                                </div>
+                                <div class="col">
+                                    @Model.SkybillSagepayBalance.ToMoneyNoDecimal()
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label" asp-for="Amount"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" asp-for="Amount" />
+                                    <span asp-validation-for="Amount"></span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-12 text-red font-weight-bold">
+                                        @Model.ErrorMessage
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-12 text-right">
+                                    <button type="submit" class="btn btn-outline-primary float-right"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

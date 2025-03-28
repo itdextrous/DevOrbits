@@ -1,0 +1,145 @@
+@model MyVoltage.Models.OperationalModels.B04_SupplyReconciliationModels.B04_SupplyReconciliation_CouncilCalendarMonthRecon_ExceptionsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B04_SupplyReconciliation_CouncilCalendarMonthRecon_Exceptions.GetDescription();
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            Month:
+                            <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            @Html.DropDownList("AccountNo", Model.AccountNo, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            @Html.DropDownList("ResourceType", Model.ResourceType, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12 text-left">
+                            <a href="/operational/B04_SupplyReconciliation/B04_SupplyReconciliation_CouncilCalendarMonthRecon_Exceptions" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+                            &nbsp;
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Account No</th>
+                                <th scope="col">Tax Invoice No</th>
+                                <th scope="col">Tax Invoice Date</th>
+                                <th scope="col">Resource Type</th>
+                                <th scope="col">Council Statement No</th>
+                                <th scope="col">Invoice Item</th>
+                                <th scope="col">Charge Type</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Month</th>
+                                <th scope="col" class="text-right">Days</th>
+                                <th scope="col" class="text-right">Units</th>
+                                <th scope="col" class="text-right">Rate</th>
+                                <th scope="col" class="text-right">Amount<br />(Excl. VAT)</th>
+                                <th scope="col" class="text-right">VAT</th>
+                                <th scope="col" class="text-right">Amount<br />(Incl. VAT)</th>
+                                <th>Payable By Service Provider</th>
+                                <th>Payable By Client</th>
+                                <th>Reason</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.BuildingCouncilDetails_InvoiceItem_Months)
+                            {
+                                <tr>
+                                    <td scope="col">@item.AccountNo</td>
+                                    <td scope="col">@item.TaxInvoiceNo</td>
+                                    <td scope="col">@item.TaxInvoiceDate.ToDateShort()</td>
+                                    <td scope="col">@(item.InvoiceItem != null ? item.InvoiceItem.ResourceType : "MISSING")</td>
+                                    <td scope="col">@(item.InvoiceItem != null ? item.InvoiceItem.BuildingCouncilDetails_InvoiceID.ToString() : "MISSING")</td>
+                                    <td scope="col">@(item.InvoiceItem != null ? item.InvoiceItem.ID.ToString() : "MISSING")</td>
+                                    <td scope="col">@(item.InvoiceItem != null ? item.InvoiceItem.ChargeType : "MISSING")</td>
+                                    <td scope="col">@(item.InvoiceItem != null ? item.InvoiceItem.ProductName : "MISSING")</td>
+                                    <td scope="col">@item.Month.ToMonth()</td>
+                                    <td scope="col" class="text-right">@item.NoOfDays</td>
+                                    <td scope="col" class="text-right">@item.Units.ToMoney()</td>
+                                    <td scope="col" class="text-right">@item.Rate.ToString("N4")</td>
+                                    <td scope="col" class="text-right">@item.AmountExclVAT.ToMoney()</td>
+                                    <td scope="col" class="text-right">@item.VAT.ToMoney()</td>
+                                    <td scope="col" class="text-right">@item.AmountInclVAT.ToMoney()</td>
+                                    <td class="text-nowrap text-right">@(item.InvoiceItem != null ? ((item.InvoiceItem.PayableByServiceProviderPerc.HasValue ? item.InvoiceItem.PayableByServiceProviderPerc.Value : 0) * item.AmountInclVAT).ToMoneyNoDecimal("R") : "MISSING")</td>
+                                    <td class="text-nowrap text-right">@(item.InvoiceItem != null ? ((item.InvoiceItem.PayableByClientPerc.HasValue ? item.InvoiceItem.PayableByClientPerc.Value : 0) * item.AmountInclVAT).ToMoneyNoDecimal("R") : "MISSING")</td>
+                                    <td scope="col">@item.Reason</td>
+                                    <td scope="col">
+                                        @if (item.InvoiceItem != null)
+                                        {
+                                            <a title="Edit" href="#" onclick="RedirectToDetails('@item.InvoiceItem.BuildingCouncilDetails_InvoiceID', '@item.InvoiceItem.ID')" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+                                        }
+                                        <a title="Delete" href="#" onclick="ConfirmDelete('@(item.InvoiceItem != null ? item.InvoiceItem.BuildingCouncilDetails_InvoiceID : 0)', '@item.ID');" class="btn btn-sm text-red"><i class="fas fa-trash-alt"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function ConfirmDelete(invoiceID, itemID) {
+            if (confirm('Are you use you want to delete this item?')) {
+                document.location.href = "/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItem_Month_Remove/" + invoiceID + "/" + itemID + "?R=" + encodeURIComponent(document.location.href);
+            }
+        }
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+
+            document.location.href = '/operational/B04_SupplyReconciliation/B04_SupplyReconciliation_CouncilCalendarMonthRecon_Exceptions?from=' + $("#fromDate").val() + '&AccountNo=' + $("#AccountNo").val() + '&ResourceType=' + $("#ResourceType").val();
+        }
+        function RedirectToDetails(invID, itemID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItem/' + invID + '/' + itemID;
+        }
+    </script>
+}

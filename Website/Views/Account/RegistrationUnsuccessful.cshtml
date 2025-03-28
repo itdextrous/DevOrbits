@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Registration";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div class="accounts_pages">
+    <div class="account_form text-center">
+        <div class="w-100 registerTabs">
+            <div class="row">
+                <div class="col justify-content-center text-center d-flex">
+                    <a href="/">
+                        <img src="/images/MVClientZoneLogo.png" height="115" alt="" class="d-block mx-auto MVClientZoneLogo">
+                    </a>
+                </div>
+            </div>
+            <h2 class="text-white mb-0 mt-75">Registration <br />failed...</h2>
+            <div class="text-white queries_text mt-25 line_height_24">
+                Please contact our <br />customer care team for assistance.
+            </div>
+            <div class="text-white queries_text mt-50">
+                <p class="m-0">Email: <a href="mailto:info@myvoltage.co.za?Subject=Registration" class="decoration_none">info@myvoltage.co.za</a></p>
+                <p class="mt-20 mb_20">Phone: <a href="tel:087 057 2561" class="decoration_none color-inherit">087 057 2561</a></p>
+                <a asp-controller="Account" asp-action="RegisterOptions" class="text-islandsunrise">Back to register page</a>
+            </div>
+            <div class="mt-50 text-center">
+                <img src="/images/Slogan_white.png" class="slogan_img" height="72" alt="">
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,79 @@
+﻿@model MyVoltage.Models.PaymentViewModels.PaymentResultModel
+
+@{
+    ViewBag.Title = "Payment Result";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div class="paymentMobilePage account_form">
+    <div class="py-4 text-center">
+        @if (Model.PaymentStatus != (int)MyVoltage.Data.PaymentStatusEnum.Approved)
+        {
+            <h1 class="text-midnight mb-2">Unsuccessful</h1>
+            <h2 class="payment_heading mb-4" data-bind="text: Reason"></h2>
+            <p class="lead m-0">If you believe the payment should have been successful please contact us at <b><a href="mailto:info@myvoltage.co.za">info@myvoltage.co.za</a></b>.</p>
+            <a onclick="changeColor()" href="@(Model.Payment.IsOperationalRecharge.HasValue && Model.Payment.IsOperationalRecharge.Value ? "/operational/Customer/Customer_Recharge" : (Model.Payment.IsMobile.HasValue && Model.Payment.IsMobile.Value ? "/rechargemobile" : "/clientzone/recharge"))" class="btn btn-default mt-30 try_again_btn">I want to try again</a>
+
+        }
+        else
+        {
+            <h2 class="payment_heading">Your <br>transaction was <br>successful!</h2>
+            <a href="/" data-bind="click: Continue" class="btn btn-default mt-30">My Dashboard</a>
+        }
+    </div>
+</div>
+
+@section Scripts
+        {
+    <script src="~/js/knockout.js"></script>
+
+    <script>
+        function sleep(ms)
+        {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function Status()
+        {
+            var self = this;
+            this.Loading = ko.observable(true);
+            this.Reason = ko.observable('@Model.Reason');
+
+            this.Continue = function ()
+            {
+                window.location.href = "/dashboard";
+            }
+
+            this.LoadResult = function ()
+            {
+                $.get('/payment/status/@Model.PayRequestID',
+                function (data)
+                {
+                    if (!data.reason || data.reason.length == 0)
+                    {
+                        sleep(1000).then(() =>
+                        {
+                            self.LoadResult();
+                        });
+
+                        return;
+                    }
+
+                    self.Loading(false);
+                    self.Reason(data.reason);
+                });
+            }
+
+            this.LoadResult();
+        }
+
+        var model = new Status();
+        ko.applyBindings(model);
+
+        function changeColor(){
+            $('.try_again_btn').attr('style', 'background:#F7931D');
+        }
+
+    </script>
+}
+

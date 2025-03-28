@@ -1,0 +1,186 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_MeterModeReviewModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_MeterModeReview.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerNumber} - {operationalProvider.CustomerMeterSerial}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-1 text-left">
+                        <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterModeDetails" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_CreditControlReview, MyVoltage.Data.SecureAreaActionEnum.Add) && !string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                    {
+                        <div class="col-2 text-right text-red font-weight-bold">
+                            Change Meter Status To:
+                        </div>
+                        <div class="col-9">
+                            <a href="#" onclick="DoAction('clear-tamper');" class="btn btn-outline-primary">Clear Tamper</a>
+                            <a href="#" onclick="DoAction('clear-credit');" class="btn btn-outline-primary">Clear Credit</a>
+                            <a href="#" onclick="DoAction('set-postpaid');" class="btn btn-outline-primary">Set Postpaid</a>
+                            <a href="#" onclick="DoAction('set-prepaid');" class="btn btn-outline-primary">Set Prepaid</a>
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-body">
+                    @if (Model.MeterModeResult != null)
+                    {
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">
+                                        Time Logged
+                                    </th>
+                                    <th scope="col">
+                                        Active Energy
+                                    </th>
+                                    <th scope="col">
+                                        Remaining Credit
+                                    </th>
+                                    <th scope="col">
+                                        Contactor State
+                                    </th>
+                                    <th scope="col">
+                                        Active Energy Diff
+                                    </th>
+                                    <th scope="col">
+                                        Remaining Credit Diff
+                                    </th>
+                                    <th scope="col">
+                                        Calculated Deviation
+                                    </th>
+                                    <th scope="col">
+                                        Meter Mode
+                                    </th>
+                                    <th scope="col">
+                                        Account Type
+                                    </th>
+                                    <th scope="col">
+                                        Is Match
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.MeterModeResult.MeterModeRegisterItems)
+                                {
+                                    <tr>
+                                        <td scope="col">@item.TimeLogged.ToDateAndTimeShort()</td>
+                                        <td scope="col">@item.ActiveEnergy.ToMoneyNoDecimal()</td>
+                                        <td scope="col">@item.RemainingCredit.ToMoneyNoDecimal()</td>
+                                        <td scope="col">@item.ContactorState</td>
+                                        <td scope="col">@item.ActiveEnergyDiff.ToMoneyNoDecimal()</td>
+                                        <td scope="col">@item.RemainingCreditDiff.ToMoneyNoDecimal()</td>
+                                        <td scope="col">@item.CalculatedDeviation.ToMoneyNoDecimal()</td>
+                                        <td scope="col">@item.MeterMode.GetDescription()</td>
+                                        <td scope="col">@Model.MeterModeResult.SkybillCustomer.AccountType</td>
+                                        <td scope="col">@item.IsMeterModeTheSame.ToBoolean()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+
+                <div id="deviceDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Device Details...
+                    </div>
+                </div>
+
+                <div id="billingDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Billing Details...
+                    </div>
+                </div>
+
+                <div id="customerDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Details...
+                    </div>
+                </div>
+
+                <div id="customerUsage" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Usage...
+                    </div>
+                </div>
+
+                <div id="customerMeterList" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter List...
+                    </div>
+                </div>
+
+                <div id="customerGraphsDaily" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter Graphs...
+                    </div>
+                </div>
+
+                <div id="customerOccupancyStatus" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Occupancy Status...
+                    </div>
+                </div>
+            }
+
+            <div class="card-footer align-middle">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#customerGraphsDaily").load('@Url.Content($"/operational/shared/meter/GraphDaily/{(int)MyVoltage.Data.AccountTypeEnum.PrepaidCredit}/{(int)MyVoltage.Data.MeterTypeEnum.Balance}/{DateTime.Now.Year}/{DateTime.Now.Month}")');
+            $("#deviceDetails").load('@Url.Content("/operational/shared/meter/DeviceDetails")');
+            $("#billingDetails").load('@Url.Content("/operational/shared/meter/billingDetails")');
+            $("#customerDetails").load('@Url.Content("/operational/shared/customer/customerdetails")');
+            $("#customerUsage").load('@Url.Content("/operational/shared/customer/customerusage")');
+            $("#customerMeterList").load('@Url.Content("/operational/shared/customer/customermeterlist")');
+            $("#customerOccupancyStatus").load('@Url.Content("/operational/shared/customer/customeroccupancystatus")');
+        });
+        function DoAction(type) {
+            $("#loaderContent").css("display", "block");
+
+        $.post("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterModeReviewSendToken/@operationalProvider.CustomerMeterSerial/" + type,
+        {
+        })
+            .done(function( data ) {
+            $("#loaderContent").css("display", "none");
+            if (data == "true") {
+                alert("Success");
+                window.location.reload();
+            }
+            else {
+                alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+            }
+            });
+
+        }
+
+    </script>
+}

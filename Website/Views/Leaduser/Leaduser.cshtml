@@ -1,0 +1,58 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.LeaduserProvider leaduserProvider;
+@{
+    ViewData["Title"] = "Smart View";
+    Layout = "LayoutLeaduser";
+}
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="container consumptioninsights custom_container">
+    <div class="row align-items-end mt-45 mt-xxl-0">
+        <div class="col-xxl d-none d-xxl-block">
+            <hr class="mt-45 mb-0" />
+        </div>
+        <div class="col-xxl">
+            <div class="chartBgBox">
+            </div>
+        </div>
+        <div class="col-xxl">
+            <div class="hello text-grape text-nowrap h3 text-end" data-bs-toggle="tooltip" data-bs-placement="top" id="fullnameDiv">
+                Hello <span id="fullname" onmouseover="checkFullNameOverflow()">@leaduserProvider.D01_LeadGeneratorUser.FullName</span>
+            </div>
+            <hr class="mt-45 mb-0" />
+        </div>
+    </div>
+
+    <div class="blockSection">
+    </div>
+    <div class="footer page_footer mt-45 mx-auto">
+        <div class="text-grape queries_text mt-45 text-center">
+            <p class="m-0">Please email queries to: <a href="mailto:info@myvoltage.co.za?Subject=Website%20enquiry" class="decoration_none">info@myvoltage.co.za</a></p>
+        </div>
+        <div class="mt-45 text-center">
+            <img src="~/images/clientzone/Slogan_hi-quality.png" class="slogan_img" height="66" alt="">
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        });
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        function checkFullNameOverflow() {
+            let el = $('#fullnameDiv');
+            let fullNameEl = $('#fullname');
+
+            if (fullNameEl.width() < 232) {
+                el.removeAttr('data-bs-original-title');
+            } else {
+                el.attr('data-bs-original-title', fullNameEl.text());
+            }
+        }
+
+    </script>
+}

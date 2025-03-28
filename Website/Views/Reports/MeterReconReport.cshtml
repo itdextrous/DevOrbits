@@ -1,0 +1,76 @@
+﻿@model MyVoltage.Models.ReportsViewModels.MeterReconReportViewModel
+
+@{
+    ViewData["Title"] = "Meter Recon Report";
+}
+@using (Html.BeginForm())
+{
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label asp-for="Serial" class="control-label"></label>
+                <input asp-for="Serial" class="form-control" />
+                <span asp-validation-for="Serial" class="text-red"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-red"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label asp-for="WaterMeterResourceType" class="control-label"></label>
+                <br />
+                @foreach (var item in Model.WaterMeterResourceType)
+                {
+                    @Html.RadioButton("WaterMeterResourceType", item.Value, isChecked: item.Selected)
+                    <span>&nbsp;</span>
+                    @item.Text
+                    <br />
+                }
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Request Report</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Result))
+        {
+            <div class="row">
+                <span class="text-red">@Model.Result</span>
+            </div>
+        }
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/reports/deviceserials",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })  
+    </script>
+}

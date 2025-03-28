@@ -1,0 +1,171 @@
+@model MyVoltage.Models.ClientzoneModels.CurrentBillingCycleModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@{
+    ViewData["Title"] = "Billing - Current billing cycle";
+    Layout = "LayoutClientzone";
+}
+
+<div class="container consumptioninsights">
+    <div class="pt_m_45 mb-m25">
+        <h3 class="text-center page_heading">Billing information</h3>
+        <h4 class="text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">Billing cycle</h4>
+    </div>
+
+    <div class="mt-85 max-w-415">
+        <div class="mb-30">
+            <input onkeydown="return false" data-date-end-date="0d" type="text" name="date" class="form-control-trim invoiceDateInput datePicker_input" id="SelectedMonth" placeholder="yyyy-mm" value="@(Model.SelectedMonth.ToString("yyyy-MM"))" autocomplete="off">
+        </div>
+        <div class="mt-45 text-center PDFButtons" id="PDFButton">
+            <a href="#" id="diaplayPdf" class="btn btn-islandsunrise" onclick="GetInvoice();">Display PDF</a>
+            <a class="btn btn-islandsunrise PDF_default_btn pdfDisable" id="dwnldPdfBilling" onclick="DownloadInvoice();">Download PDF</a>
+        </div>
+    </div>
+
+    <div id="divResult" class="mt-85 pt-85 billing_page_view" style="display:none;">
+        <div id="invoice_view"></div>
+    </div>
+
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(() => {
+            $(".invoiceDateInput").datepicker({
+                format: "yyyy-mm",
+                startView: "months",
+                minViewMode: "months",
+                autoclose: "true",
+                startDate: '-12M'
+            });
+            enableDisableBtn();
+        })
+        var loaderCount = 0;
+
+        //select box js start
+        const inputs = document.getElementsByClassName('js-static-input');
+        const selects = document.getElementsByClassName('js-select');
+
+        for (let i = 0; i < inputs.length; i++) {
+            getSelected(i);
+            selects[i].addEventListener("change", function () {
+                getSelected(i);
+            });
+        }
+        function getSelected(i) {
+            inputs[i].value = selects[i].options[selects[i].selectedIndex].text;
+        }
+        //select box js end
+
+
+        $('#billingLI').addClass("active");
+        $('#Billing_collapse').addClass("show");
+
+        function GetInvoice() {
+            $("#divResult").fadeOut();
+            //$("#loaderContent").css("display", "block");
+            addLoaderToDisplayBtn();
+
+            if ($("#SelectedMonth").val() == '') {
+                toastr.warning('Please select a month');
+                //alert('Please select a month');
+                $('#SelectedMonth').focus();
+                $("#loaderContent").css("display", "none");
+            }
+            else {
+                //var url = '/clientzone/billing/currentbillingcycle_downloadpdf?d=' + $("#SelectedMonth").val() + ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@clientzoneProvider.ShowCostInclVAT&PV=t');
+                //$("#downloadLink").attr("href", url);
+
+                $("#invoice_view").load('@Url.Content("/clientzone/billing/currentbillingcyclediv")?d=' + $("#SelectedMonth").val() + ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@clientzoneProvider.ShowCostInclVAT'), function () {
+                    $("#divResult").fadeIn();
+                    $("#PDFButton").addClass('PDFButtonDiv');
+                    //$("#loaderContent").css("display", "none");
+                    removeDisplayBtnLoader();
+                });
+            }
+        }
+
+        function saveByteArray(reportName, base64) {
+            var link = document.createElement('a');
+            link.href = "data:application/pdf;base64," + base64;
+            link.download = reportName;
+            link.click();
+        };
+
+        async function DownloadInvoice() {
+            $("#loaderContent").css("display", "block");
+            if ($("#SelectedMonth").val() == '') {
+                toastr.warning('Please select a month');
+                //alert('Please select a month');
+                $('#SelectedMonth').focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            var url = '/clientzone/billing/currentbillingcycle_downloadjson?d=' + $("#SelectedMonth").val() + ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@clientzoneProvider.ShowCostInclVAT&PV=t');
+            //window.open(url);
+
+            try {
+                var result = await $.get(url);
+                if (result) {
+                    saveByteArray(result?.name, result?.data);
+                    $("#loaderContent").css("display", "none");
+                } else {
+                    toastr.error("Something went wrong. Please try again later.");
+                }
+            } catch (err) {
+                toastr.error("Something went wrong. Please try again later.");
+            }
+
+            //window.location.href = url;
+        }
+
+        $(".datePicker_input").change(function () {
+            $("#divResult").fadeOut();
+            enableDisableBtn();
+        })
+
+        function enableDisableBtn() {
+            //$("#loaderContent").css("display", "block");
+            downloadBtnLoader();
+
+            var url = '/clientzone/billing/currentbillingcyclediv?d=' + $("#SelectedMonth").val() +
+                ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@(clientzoneProvider.ShowCostInclVAT)&CheckPV=t');
+            $.ajax(url)
+                .done((response)=>{
+                    if (response == 0) {
+                        $("#dwnldPdfBilling").addClass('pdfDisable');
+                    } else {
+                        $("#dwnldPdfBilling").removeClass('pdfDisable');
+                    }
+                }).fail(function (err) {
+                    
+                })
+                .always(function () {
+                    $('#dwnldPdfBilling').html('Download PDF');
+                });
+                
+        }
+
+        $("#SelectedMonth").click(()=>{
+            $("#SelectedMonth").datepicker("update");
+        })
+
+        function downloadBtnLoader(){
+            $('#dwnldPdfBilling').text('')
+            $('#dwnldPdfBilling').html('<i class="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>');
+            $('#dwnldPdfBilling').addClass('pdfDisable');
+        }
+
+        function addLoaderToDisplayBtn() {
+            $('#diaplayPdf').text('')
+            $('#diaplayPdf').html('<i class="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>');
+            $('#diaplayPdf').addClass('pdfDisable');
+        }
+
+        function removeDisplayBtnLoader() {
+            $('#diaplayPdf').html('Display PDF');
+            $("#diaplayPdf").removeClass('pdfDisable');
+        }
+
+    </script>
+}

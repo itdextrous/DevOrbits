@@ -1,0 +1,408 @@
+@model MyVoltage.Models.LeaduserModels.PropertiesModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"Properties";
+    Layout = "LayoutLeaduser";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="lead_pages">
+    <div class="container">
+        <div class="text-center">
+            <h3 class="page_heading">lead portfolio</h3>
+            <h4 class="sub_heading mt-20 SemiBold">User leads</h4>
+        </div>
+
+        <div class="mt-40">
+            <div class="d-flex align-items-center justify-content-between mb-10">
+                
+                @if (Convert.ToInt32(ViewData["propCount"]) > 0)
+                {
+                    <span class="sorting_data" id="topPagingBtns">
+                      @*  <a href="#" type="button" id="showAllButton">Show all</a>
+                        <a href="#" type="button" id="showLessButton" style="display: none;">Show less</a>
+                        | 1- 20 of 35*@
+                    </span>
+
+                    <button type="button" class="btn btn-grape filter_btn shadow-none" data-bs-toggle="modal" data-bs-target="#filtersModal" style="display:none">
+                        <i class="fas fa-sliders-h me-2"></i>Filters
+                    </button>
+                }
+            </div>
+            <div class="modal fade filter_modal" id="filtersModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Please select filters:</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="filter_type pt-1">
+                                <div class="row">
+                                    <div class="col-sm-6 pb-3 pb-sm-0">
+                                        <label class="control-label">Property name</label>
+                                        <input id="propName" type="text" class="form-control-trim mt-5" />
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="control-label">Status</label>
+                                        @Html.DropDownList("Status", Model.Status, new { @class = "form-control-trim mt-5" })
+                                       @* <select class="form-control-trim mt-5">
+                                            <option></option>
+                                            <option>L00. Lead Creation</option>
+                                            <option>L01. Lead Generation</option>
+                                            <option>LO90. Rejected</option>
+                                            <option>On hold</option>
+                                            <option>L099. Closed</option>
+                                        </select>*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter_type">
+                                <h5>Sort property alphabetically</h5>
+                                <div class="filter_option">
+                                    <label class="custom_check">
+                                        <input type="radio" value="a-e" name="sortAlpha">
+                                        <span class="checkmark">A - E</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="radio" value="f-j" name="sortAlpha">
+                                        <span class="checkmark">F - J</span>
+                                    </label>
+                                    <label class="custom_check" value="a-e" name="sortAlpha">
+                                        <input type="radio" value="k-p" name="sortAlpha">
+                                        <span class="checkmark">K - P</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="radio" value="q-z" name="sortAlpha">
+                                        <span class="checkmark">Q - Z</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="filter_type">
+                                <h5>Property type</h5>
+                                <div class="filter_option type_filters">
+                                    <label class="custom_check">
+                                        <input type="radio" name="propertyType" value="8-11-2">
+                                        <span class="checkbox_type">
+                                            <img src="/images/leaduser/house_icon.svg" alt="Residential" />
+                                            Residential
+                                        </span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="radio" name="propertyType" value="10-3-9">
+                                        <span class="checkbox_type">
+                                            <img src="/images/leaduser/commercial_icon.svg" alt="Commercial" />
+                                            Commercial
+                                        </span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="radio" name="propertyType" value="5">
+                                        <span class="checkbox_type">
+                                            <img src="/images/leaduser/corporate_icon.svg" alt="Corporate" />
+                                            Corporate
+                                        </span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="radio" name="propertyType" value="6-4">
+                                        <span class="checkbox_type">
+                                            <img src="/images/leaduser/hospitality_icon.svg" alt="Hospitality" />
+                                            Hospitality
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="filter_type">
+                                <h5>Product type</h5>
+                                <div class="filter_option">
+                                    <label class="custom_check">
+                                        <input type="checkbox" value="@((int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Electricity)" name="ProductID">
+                                        <span class="checkmark">Electricity</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox" value="@((int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Water)" name="ProductID">
+                                        <span class="checkmark">Water</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox" value="@((int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Gas)" name="ProductID">
+                                        <span class="checkmark">Gas</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox" value="@((int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Solar)" name="ProductID">
+                                        <span class="checkmark">Solar</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox" value="@((int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Generator)" name="ProductID">
+                                        <span class="checkmark">Generator</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="filter_type">
+                                <h5>Lead source</h5>
+                                <div class="filter_option">
+                                    <label class="custom_check">
+                                        <input type="checkbox">
+                                        <span class="checkmark">Generator</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox">
+                                        <span class="checkmark">LinkedIn</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox">
+                                        <span class="checkmark">Facebook</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox">
+                                        <span class="checkmark">Google Ads</span>
+                                    </label>
+                                    <label class="custom_check">
+                                        <input type="checkbox">
+                                        <span class="checkmark">Referral</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-link m-0 reset-filter">Clear all</button>
+                            <button type="button" class="btn btn-grape m-0" data-bs-dismiss="modal" onclick="RedirectToUserFilter()">Apply All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive calc_height">
+                <table class="table table-design table-striped table-hover mb-5" id="propertiesTbl">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" scope="col" hidden></th>
+                            <th rowspan="2" scope="col" class="property_type">Property Type</th>
+                            <th rowspan="2" scope="col" class="text-nowrap name_col">Property name</th>
+                            <th rowspan="2" scope="col" class="units_no">No. of Units</th>
+                            <th rowspan="2" scope="col" class="w_95">No. of Metering Points</th>
+                            <th rowspan="2" scope="col" class="text-nowrap">Date created</th>
+                            <th rowspan="2" scope="col" class="text-nowrap">Lead source</th>
+                            <th rowspan="2" scope="col" class="text-nowrap assign_col">Assigned to</th>
+                            <th rowspan="2" scope="col" class="status_col">Status</th>
+                            <th rowspan="2" scope="col" class="changeStatus">Last status change</th>
+                            <th rowspan="2" scope="col" class="w_75">Days active</th>
+                            <th colspan="5" scope="col" class="text-center">Product type</th>
+                        </tr>
+                        <tr class="product_type">
+                            <th scope="col" class="text-center">
+                                <img src="/images/leaduser/Electricity-icon.png" alt="electricity" />
+                            </th>
+                            <th scope="col" class="text-center">
+                                <img src="/images/leaduser/water_icon.png" alt="Water" />
+                            </th>
+                            <th scope="col" class="text-center">
+                                <img src="/images/leaduser/Gas_Icon.png" alt="Gas" />
+                            </th>
+                            <th scope="col" class="text-center">
+                                <img src="/images/leaduser/solar_icon.png" alt="Gas" />
+                            </th>
+                            <th scope="col" class="text-center">
+                                <img src="/images/leaduser/Generator_icon.png" alt="Gas" />
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="propertiesRws">
+                        @*<div class="text-islandsunrise text-center d-flex align-items-center justify-content-center">
+                            <i class="fas fa-spinner fa-spin fa-2x me-2"></i><h6 class="m-0">Loading Details...</h6>
+                        </div>*@
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        var propertiestableEl;
+        const pageLength = 10;
+        
+        $(document).ready(function () {
+
+            $("#loaderContent").css("display", "block");
+            $('#propertiesRws').load('@Url.Content("/leaduser/D01_Leads_Properties_Table")', {}, () => {
+                let rowCount = $(`#propertiesTbl tbody tr`)?.length;
+                if (rowCount > 1) {
+                    $('.filter_btn').show();
+                    if (rowCount >= pageLength)
+                        initializeDataTable();
+                    else $("#loaderContent").css("display", "none");
+                }else{
+                    $("#loaderContent").css("display", "none");
+                }
+            });
+
+            $(document).on('click', '#showAllButton', function () {
+                // Show all rows by setting the page length to -1 (display all records)
+                propertiestableEl.page.len(-1).draw();
+
+                // Hide the "Show All" button
+                $('#showAllButton').hide();
+                $('#showLessButton').show();
+            });
+
+            $(document).on('click', '#showLessButton', function () {
+                // Revert to the original page length (e.g., 10)
+                propertiestableEl.page.len(pageLength).draw();
+
+                // Hide the "Revert" button and show the "Show All" button
+                $('#showLessButton').hide();
+                $('#showAllButton').show();
+            });
+        
+        });
+
+        function initializeDataTable(){
+            $("#loaderContent").css("display", "none");
+
+            var dataExists = checkDataExists('propertiesTbl');
+
+            if (!dataExists) return;
+
+            propertiestableEl = $('#propertiesTbl').DataTable({
+                ordering: false,
+                "searching": false,
+                "pageLength": pageLength,
+                pagingTag: 'button',
+                "pagingType": "simple",
+                "lengthChange": false,
+                "language": {
+                    "info": "<span> <a href='#' type='button' id='showAllButton'>Show all</a><a href='#' type='button' id='showLessButton' style='display: none;'>Show less</a><span id='showAllDivider'> | </span></span>_START_-_END_ of _TOTAL_",
+                },
+            });
+
+            $('#topPagingBtns').html($('#propertiesTbl_info'));
+            $('#topPagingBtns').append($('#propertiesTbl_paginate'))
+
+            addPagingButtons();
+
+            // Add a draw callback to handle button visibility
+            propertiestableEl.on('draw', function () {
+                var currentPage = propertiestableEl.page();
+
+                if (currentPage === 0) {
+                    $('.previous').hide();
+                } else {
+                    $('.previous').show();
+                }
+
+                if (currentPage === propertiestableEl.page.info().pages - 1) {
+                    $('.next').hide();
+                } else {
+                    $('.next').show();
+                }
+
+                if (propertiestableEl.page.info().recordsTotal <= pageLength) {
+                    $('#showAllButton').hide();
+                } else {
+                    $('#showAllButton').show();
+                }
+
+                if ($('#showAllButton').css('display') == 'none' && $('#showLessButton').css('display') == 'none') {
+                    $('#showAllDivider').hide();
+                }else{
+                    $('#showAllDivider').show();
+                }
+
+                addPagingButtons();
+
+            });
+
+            propertiestableEl.draw()
+        }
+
+        function checkDataExists(tableId) {
+            // Use DataTables API to get the table instance
+            var colCount = $(`#${tableId} tbody tr:first td`)?.length;
+            var rowCount = $(`#${tableId} tbody tr`)?.length;
+
+            // Check if the table contains any valid rows
+            return !(rowCount === 1 && colCount === 1);
+        }
+        
+        function addPagingButtons(){
+            $('.next').addClass('arrow_slide');
+            $('.previous').addClass('arrow_slide');
+            $('.next').html('<img src="/images/leaduser/select_arrow.svg" alt="arrow" />');
+            $('.previous').html('<img src="/images/leaduser/select_arrow.svg" alt="arrow" />');
+        }
+
+
+        function RedirectToUserFilter(){
+
+            $("#loaderContent").css("display", "block");
+
+            let productIds = [];
+            let sortRange = $('input[name="sortAlpha"]:checked').val()?.split('-');
+            let propertyType = $('input[name="propertyType"]:checked').val()?.split('-');
+            let leadSource = [];
+
+            $("input:checkbox[name=ProductID]:checked").each(function () {
+                productIds.push($(this).val());
+            });
+
+            let data = {
+                statusID: $("#Status").val(),
+                propertyName: $('#propName').val(),
+                sortRange: sortRange,
+                propertyType: propertyType,
+                productType: productIds,
+                leadSource: leadSource,
+            };
+
+            if (checkDataExists('propertiesTbl') && propertiestableEl && $.fn.DataTable.isDataTable('#propertiesTbl'))
+                propertiestableEl.destroy();
+                
+            $('#propertiesRws').empty();
+            $('#topPagingBtns').html('');
+
+            $('#propertiesRws').load('@Url.Content("/leaduser/D01_Leads_Properties_Table")', data, () => {
+                let rowCount = $(`#propertiesTbl tbody tr`)?.length;
+                if (rowCount > 1) {
+                    $('.filter_btn').show();
+                    if (rowCount >= pageLength)
+                        initializeDataTable();
+                    else $("#loaderContent").css("display", "none");
+                } else {
+                    $("#loaderContent").css("display", "none");
+                }
+            })
+
+        }
+
+        $('.reset-filter').click(()=>{
+            $('#Status').val('')
+            $('#propName').val('');
+            $('input:checked').each((index, item) => {
+                item.checked = false;
+            })
+        })
+
+        $('input[name="propertyType"], input[name="sortAlpha"]').click(function () {
+            var $radio = $(this);
+
+            // if this was previously checked
+            if ($radio.data('waschecked') == true) {
+                $radio.prop('checked', false);
+                $radio.data('waschecked', false);
+            }
+            else
+                $radio.data('waschecked', true);
+
+            // remove was checked from other radios
+            $(`input[name=${$radio[0].name}]:not([value=${$radio.val()}])`).data('waschecked', false);
+        });
+
+    </script>
+}

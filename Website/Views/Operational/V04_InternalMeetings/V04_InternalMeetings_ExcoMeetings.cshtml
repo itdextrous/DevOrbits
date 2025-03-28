@@ -1,0 +1,258 @@
+@model MyVoltage.Models.OperationalModels.V04_InternalMeetingsModels.V04_InternalMeetings_ExcoMeetingsModel
+@using MyVoltage.Extensions;
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        Due Date From
+                    </div>
+                    <div class="col">
+                        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        Due Date To
+                    </div>
+                    <div class="col">
+                        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" />
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="SecureAreaGroupID" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("SecureAreaGroupID", Model.SecureAreaGroupID, new { @class = "form-control" })
+                        <span asp-validation-for="SecureAreaGroupID" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Company" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "form-control" })
+                        <span asp-validation-for="Company" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ResponsibleUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                        <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ReportingToUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "form-control" })
+                        <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Priority" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Priority", Model.Priority, new { @class = "form-control" })
+                        <span asp-validation-for="Priority" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+                (Tip: Use Ctrl + F to search)<br />
+                Click on a Task ID to view details
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Task ID</th>
+                    <th scope="col">Workflow Group</th>
+                    <th scope="col">Task Type</th>
+                    <th scope="col">Level</th>
+                    <th scope="col">Company</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Due Date</th>
+                    <th scope="col">Responsible Person</th>
+                    <th scope="col">Reporting To Person</th>
+                    <th scope="col">Last Comment</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.V04_InternalMeetings_ExcoMeetingsItems)
+                {
+                    string companyName = item.CompanyID.HasValue ? opProv.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                    string rowclass = "";
+                    if (item.Level.HasValue)
+                    {
+                        switch (item.Level.Value)
+                        {
+                            case 5:
+                                rowclass = "table-danger";
+                                break;
+                            case 4:
+                                rowclass = "table-primary";
+                                break;
+                            case 3:
+                                rowclass = "table-warning";
+                                break;
+                            case 2:
+                                rowclass = "table-success";
+                                break;
+                            case 1:
+                                rowclass = "table-info";
+                                break;
+                        }
+                    }
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col" title="View @item.ID Task Details" style="max-width:150px;">
+                            <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A08_Tasks/A08_Task_Review/@item.TaskTypeID/@item.ID">@item.ID</a>
+                        </td>
+                        <td scope="col" title="Workflow Group">@item.A08_Tasks_TypeItem.SecureAreaGroup.GetDescription()</td>
+                        <td scope="col">@item.A08_Tasks_TypeItem.Heading</td>
+                        <td scope="col" title="Level">@item.Level</td>
+                        <td scope="col">@companyName</td>
+                        <td scope="col" title="Created @((DateTime.Now - item.DateCreated).TotalDays.ToString("N")) days ago">@item.DateCreated.ToDateAndTimeShort()</td>
+                        <td scope="col" title="Due Date">@item.DueDate.ToDateShort()</td>
+                        <td scope="col">@item.ResponsibleUserUsername</td>
+                        <td scope="col">@item.ReportingToUserUsername</td>
+                        <td scope="col">@Html.Raw(item.LatestComment)</td>
+                        <td scope="col">@(item.A08_Tasks_TypeItem.SiteAdmin_Priority != null ? item.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                        <td scope="col">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-nowrap">Flag ID</th>
+                    <th scope="col" class="text-nowrap">Flag Type</th>
+                    <th scope="col" class="text-nowrap">Level</th>
+                    <th scope="col" class="text-nowrap">Company</th>
+                    <th scope="col" class="text-nowrap">Linked to</th>
+                    <th scope="col" class="text-nowrap">Customer No</th>
+                    <th scope="col" class="text-nowrap">Reason For Flag</th>
+                    <th scope="col" class="text-nowrap">Last Comment</th>
+                    <th scope="col" class="text-nowrap">Created</th>
+                    <th scope="col" class="text-nowrap">Due Date</th>
+                    <th scope="col" class="text-nowrap">Responsible Person</th>
+                    <th scope="col" class="text-nowrap">Priority</th>
+                    <th scope="col" class="text-nowrap">Status</th>
+                    <th scope="col" class="text-nowrap">Last Viewed</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.A09_Flags_CompanyDetailsItems)
+                {
+                    string lastViewed = "";
+
+                    if (item.DateLastViewed.HasValue)
+                    {
+                        lastViewed = item.DateLastViewed.ToDateAndTimeShort();
+                        lastViewed = lastViewed + " - " + userManager.FindByIdAsync(item.DateLastViewdBy).Result.UserName;
+                    }
+                    string rowclass = "";
+                    if (item.Level.HasValue)
+                    {
+                        switch (item.Level.Value)
+                        {
+                            case 5:
+                                rowclass = "table-danger";
+                                break;
+                            case 4:
+                                rowclass = "table-primary";
+                                break;
+                            case 3:
+                                rowclass = "table-warning";
+                                break;
+                            case 2:
+                                rowclass = "table-success";
+                                break;
+                            case 1:
+                                rowclass = "table-info";
+                                break;
+                        }
+                    }
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col" class="text-nowrap" title="Flag ID"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.FlagTypeID/@item.ID">@item.ID</a></td>
+                        <td scope="col" class="text-nowrap">@item.A09_Flags_TypeItem.FlagTypeName</td>
+                        <td scope="col" class="text-nowrap">@item.Level</td>
+                        <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                        <td scope="col" class="text-nowrap">@item.LinkedObjectDBTableName - @item.LinkedObjectUniqueID</td>
+                        <td scope="col" class="text-nowrap">@item.CustomerNo</td>
+                        <td scope="col">@item.ReasonForFlag</td>
+                        <td scope="col">@Html.Raw(item.LatestComment)</td>
+                        <td scope="col" class="text-nowrap" title="Created @((DateTime.Now - item.Created).TotalDays.ToString("N")) days ago">@item.Created.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-nowrap">@item.DueDate.ToDateShort()</td>
+                        <td scope="col" class="text-nowrap">@item.AssignedToUsername</td>
+                        <td scope="col" class="text-nowrap">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "Unknown")</td>
+                        <td scope="col" class="text-nowrap">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                        <td scope="col" class="text-nowrap">@lastViewed</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = window.location.href.split('?')[0] + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&Department=' + $("#Department").val() + '&SecureAreaGroupID=' + $("#SecureAreaGroupID").val() + '&Company=' + $("#Company").val() + '&ResponsibleUser=' + $("#ResponsibleUser").val() + '&ReportingToUser=' + $("#ReportingToUser").val() + '&Priority=' + $("#Priority").val();
+        }
+    </script>
+}

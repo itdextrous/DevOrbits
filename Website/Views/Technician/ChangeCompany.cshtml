@@ -1,0 +1,59 @@
+@model MyVoltage.Models.TechnicianViewModels.ChangeCompanyViewModel
+@{
+    ViewData["Title"] = "Change Company";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<form asp-action="ChangeCompany" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+
+                        <div class="row">
+                            <div class="col"><label asp-for="CompanyName" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" id="CompanyName_Search" asp-for="CompanyName" />
+                                <span asp-validation-for="CompanyName" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <input type="submit" value="Select Company" class="btn btn-default" />
+                        </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CompanyName_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/technician/companysearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

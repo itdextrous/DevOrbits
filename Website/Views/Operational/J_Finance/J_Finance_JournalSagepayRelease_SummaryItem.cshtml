@@ -1,0 +1,20 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_JournalSagepayRelease_SummaryModel
+@using MyVoltage.Extensions; 
+@using MyVoltage.Data;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (!Model.SkybillSagePayBalance.HasValue)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+}
+<td scope="col">@Model.CompanyName</td>
+<td scope="col">@Model.SkybillSagePayBalance.ToMoneyNoDecimal("R")</td>
+<td scope="col" title="@Model.NetcashBalanceDate.ToDateAndTimeShort(true)">@Model.NetcashBalance.ToMoneyNoDecimal("R")</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

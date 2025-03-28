@@ -1,0 +1,105 @@
+@model MyVoltage.Models.OperationalModels.C05_MonthlyManualInvoicing.C05_MonthlyManualInvoicing_BillingsToOwner_DetailModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = "Billings to Owner - Detail";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-6 text-left">
+                        <a href="/operational/C05_MonthlyManualInvoicing/C05_MonthlyManualInvoicing_BillingsToOwner_Summary" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                        &nbsp;(Tip: Use Ctrl + F to search)
+                    </div>
+                    <div class="col-6 text-right">
+                        <a href="/operational/C05_MonthlyManualInvoicing/C05_MonthlyManualInvoicing_BillingsToOwner_Capture" class="btn btn-outline-primary"><i class="fas fa-plus-circle"></i>&nbsp;Add New</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.C05_MonthlyManualInvoicing_BillingsToOwner_DetailItems.Count == 0)
+                    {
+                        <span>There are no entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Company Name</th>
+                                    <th scope="col">Billing Month</th>
+                                    <th scope="col">Billing Date</th>
+                                    <th scope="col">Billing Type</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itemC in Model.C05_MonthlyManualInvoicing_BillingsToOwner_DetailItems)
+                                {
+                                    string rowclass = "";
+                                    string cellClass = "";
+                                    //if (itemC.TodayAction == "None" && ((!itemC.Units.HasValue || itemC.Units.Value <= 0) && (!itemC.UnitsPastWeek.HasValue || itemC.UnitsPastWeek.Value <= 0)))
+                                    //{
+                                    //    rowclass = " class=\"table-danger\"";
+                                    //    cellClass = " class=\"text-red font-weight-bold\"";
+                                    //}
+                                    //else if (itemC.TodayAction != "None" && !itemC.TodayAction.Contains("Sorted"))
+                                    //{
+                                    //    rowclass = " class=\"table-warning\"";
+                                    //    cellClass = " class=\"text-orange font-weight-bold\"";
+                                    //}
+                                    //else if (itemC.TodayAction.Contains("Sorted"))
+                                    //{
+                                    //    rowclass = " class=\"table-success\"";
+                                    //    cellClass = " class=\"text-green font-weight-bold\"";
+                                    //}
+                                    //else if ((itemC.Units.HasValue && itemC.Units.Value > 0) || (itemC.UnitsPastWeek.HasValue && itemC.UnitsPastWeek.Value > 0))
+                                    //{
+                                    //    rowclass = " class=\"table-success\"";
+                                    //    cellClass = " class=\"text-green font-weight-bold\"";
+                                    //}
+                                    <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View" onclick="RedirectToVerification('@operationalProvider.CompanyID', '@itemC.ID');">
+                                        <td scope="col">@operationalProvider.CompanyName</td>
+                                        <td scope="col">@itemC.BillingMonth.ToMonth()</td>
+                                        <td scope="col">@itemC.BillingDate.ToDateShort()</td>
+                                        <td scope="col">@itemC.ReportTypeName</td>
+                                        <td scope="col">@(itemC.CreatedDate.ToDateAndTimeShort()) - (@itemC.CreatedByName)</td>
+                                        <td scope="col">@(itemC.UpdatedDate.ToDateAndTimeShort(true)) - (@itemC.UpdatedByName)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(companyID, captureID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/C05_MonthlyManualInvoicing/C05_MonthlyManualInvoicing_BillingsToOwner_Capture/' + captureID;
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

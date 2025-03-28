@@ -1,0 +1,31 @@
+@model MyVoltage.Models.OperationalModels.C05_MonthlyManualInvoicing.C05_MonthlyManualInvoicing_BillingsToOwner_SummaryItemModel
+@using MyVoltage.Extensions;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.C05_MonthlyManualInvoicing.C05_MonthlyManualInvoicing_BillingsToOwner_SummaryItemModel.StatusType.Outstanding)
+    {
+        rowclass = " class=\"table-danger\"";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.C05_MonthlyManualInvoicing.C05_MonthlyManualInvoicing_BillingsToOwner_SummaryItemModel.StatusType.TooLongAgo)
+    {
+        rowclass = " class=\"table-warning\"";
+        cellClass = " class=\"text-orange font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.C05_MonthlyManualInvoicing.C05_MonthlyManualInvoicing_BillingsToOwner_SummaryItemModel.StatusType.Reviewed)
+    {
+        rowclass = " class=\"table-success\"";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+}
+<td scope="col">@Model.CompanyName</td>
+<td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+<td scope="col">@Model.LatestReportMonth.ToDateAndTimeShort()</td>
+<td scope="col">@Model.ReportCount</td>
+<td scope="col">@Model.ProblematicReportCount</td>
+<script>
+    $(document).ready(function () {
+            $('#@Model.TableRowID').addClass('@rowclass');
+        });
+</script>

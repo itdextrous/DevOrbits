@@ -1,0 +1,164 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeterModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails.GetDescription() + " - " + operationalProvider.CompanyName + " - Meter";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetails" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+
+                }
+                else
+                {
+
+                    <div class="card-header">
+                        <div class="col border border-primary rounded p-2 m-2">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h6>Building Council Details:</h6>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Account Number</div>
+                                <div class="col">@Model.BuildingCouncilDetail.CouncilElecAccNo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="DeviceType" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("DeviceType", Model.DeviceType, new { @class = "form-control" })
+                                            <span asp-validation-for="DeviceType" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilSerial" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="CouncilSerial" />
+                                            <span asp-validation-for="CouncilSerial" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="MyVoltageSerial" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input id="DeviceSearch_Serial" onchange="AutoFillMeterDetails();" class="form-control" asp-for="MyVoltageSerial" placeholder="Type to search" />
+                                            <span asp-validation-for="MyVoltageSerial" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="Name" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input id="DeviceName" class="form-control" asp-for="Name" />
+                                            <span asp-validation-for="Name" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="Description" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="Description" />
+                                            <span asp-validation-for="Description" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-6 text-left">
+                                        <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetails" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <button class="btn btn-outline-primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                    </div>
+                                </div>
+                            }
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $("#DeviceSearch_Serial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A07_CreditControlAndNotifierProcess/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+        function AutoFillMeterDetails() {
+            if ($("#DeviceSearch_Serial").val() != "") {
+                $.get("/operational/A07_CreditControlAndNotifierProcess/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter_AutoFill/" + $("#DeviceSearch_Serial").val())
+                .done(function( data ) {
+                    $("#DeviceName").val(data);
+                });
+            }
+        }
+
+        @*$(document).ready(function () {
+            $("#DeviceSearch_Serial").val('@Model.MyVoltageSerial');
+        });*@
+
+    </script>
+}

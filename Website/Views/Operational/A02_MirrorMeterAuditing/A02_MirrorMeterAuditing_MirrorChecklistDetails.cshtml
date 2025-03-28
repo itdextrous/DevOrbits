@@ -1,0 +1,122 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorChecklistDetailsModel
+@{
+    ViewData["Title"] = "Mirror Meter Auditing - Mirror Checklist Details";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+
+                @if (operationalProvider.CompanyID > 0)
+                {
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <div class="row">
+                                @if (Model.LeftToday == 0)
+                                {
+                                    <div class="col font-weight-bold text-success">Completed Today: @Model.CompletedToday</div>
+                                }
+                                else
+                                {
+                                    <div class="col font-weight-bold text-red">Completed Today: @Model.CompletedToday</div>
+                                }
+                                @if (Model.LeftToday == 0)
+                                {
+                                    <div class="col font-weight-bold text-success">Left Today: @Model.LeftToday</div>
+                                }
+                                else
+                                {
+                                    <div class="col font-weight-bold text-red">Left Today: @Model.LeftToday</div>
+                                }
+                                <div class="col font-weight-bold">Total: @Model.Total</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID > 0)
+                {
+                    <div class="row col-12">
+                        <table class="table table-bordered table-striped table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Serial</th>
+                                    <th>Device Status</th>
+                                    <th>Name</th>
+                                    <th>Meter No</th>
+                                    <th>Latest Audit Reading</th>
+                                    <th>Latest Audit Reading Time</th>
+                                    <th>Latest Audit Reading Created</th>
+                                    <th>Status</th>
+                                    <th>Capture Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.A02_MirrorMeterAuditing_MirrorChecklistDetailsItems)
+                                {
+                                    string rowclass = "";
+                                    string cellClass = "";
+                                    //if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Unverified)
+                                    //{
+                                    //    rowclass = " class=\"table-danger\"";
+                                    //    cellClass = " class=\"text-red font-weight-bold\"";
+                                    //}
+                                    //else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Deleted)
+                                    //{
+                                    //    rowclass = " class=\"table-warning\"";
+                                    //    cellClass = " class=\"text-orange font-weight-bold\"";
+                                    //}
+                                    //else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Verified)
+                                    //{
+                                    //    rowclass = " class=\"table-success\"";
+                                    //    cellClass = " class=\"text-green font-weight-bold\"";
+                                    //}
+                                    <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @item.Serial" onclick="RedirectToVerification('@item.Serial');">
+                                        <td style="text-align:left;">@item.Serial</td>
+                                        <td style="text-align:left;" class="@item.DeviceStatus.ToUpper()">@item.DeviceStatus</td>
+                                        <td style="text-align:left;">@item.DeviceName</td>
+                                        <td style="text-align:left;">@item.SkybillCustomer.No</td>
+                                        <td class="text-right">
+                                            @if (item.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                                            {
+                                                <span>@item.LatestAuditReading.ToString("N3")</span>
+
+                                            }
+                                            else
+                                            {
+                                                <span>@item.LatestAuditReading.ToString("N0")</span>
+                                            }
+                                        </td>
+                                        <td style="text-align:left;">@item.LatestAuditReadingTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td style="text-align:left;">@item.LatestAuditReadingCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td style="text-align:left;" @Html.Raw(cellClass)>@item.Status</td>
+                                        <td style="text-align:left;">@item.LatestEntryStatus</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div>Select a company to start...</div>
+                }
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingUpdate';
+        }
+    </script>
+}

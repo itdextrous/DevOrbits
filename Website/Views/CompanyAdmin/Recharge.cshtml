@@ -1,0 +1,83 @@
+﻿@inject MyVoltage.Services.CustomerProvider customerProvider
+
+@{
+    ViewData["Title"] = "Recharge";
+}
+
+<section class="pt-4">
+    <div class="row">
+        <div class="col">
+            <h3 class="text-uppercase">@ViewBag.Title</h3>
+        </div>
+    </div>
+    <div class="row mt-5 dash-stats recharge">
+        <div class="col">
+            <div class="card mx-auto">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col dash-details">
+                            <div class="row">
+                                <div class="col">
+                                    <form action="/payment?isCompanyAdminRecharge=isCompanyAdminRecharge" method="post">
+                                        <div class="form-group">
+                                            <label for="">Amount to Add</label>
+                                            <input class="form-control" type="number" required name="amount" min="0" value="0" id="inpAmount" onkeypress="return isNumberKey(event)">
+                                            <span>R</span>
+                                            <span class="field-validation-error d-none" id="spnAmount">Please enter a valid amount.</span>
+                                        </div>
+                                        <p class="text-muted">Current Balance <span class="text-dark pl-4"><b>@customerProvider.GetBalance(true)</b></span></p>
+                                        <p class="small text-muted">EFT Payment will have no additional charges. Non-EFT payment such as Credit card and Unipin transactions will have a 10% convenience fee.</p>
+                                        <div class="form-group mt-4">
+                                            <button type="submit" onclick="return CheckValidation()" class="btn btn-primary d-block w-100">PAY NOW</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recharge Modal -->
+<div class="modal fade px-5" id="recharge" tabindex="-1" role="dialog" aria-labelledby="recharge" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content text-center px-5">
+            <div class="modal-body">
+                <p class="font-weight-bold"><span class="text-orange">R200 </span><span>has been added to your account</span></p>
+                <p class="text-muted">Total Balance <span class="text-dark pl-4"><b>R321.00</b></span></p>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-primary btn-block" data-dismiss="modal"><b>DONE</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts 
+    {
+<script>
+    function CheckValidation()
+    {
+        if ($('#inpAmount').val() > 0)
+            return true;
+        else
+        {
+            $('#spnAmount').removeClass('d-none');
+            return false;
+        }
+
+    }
+
+    function isNumberKey(evt)
+    {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+
+</script>
+        }

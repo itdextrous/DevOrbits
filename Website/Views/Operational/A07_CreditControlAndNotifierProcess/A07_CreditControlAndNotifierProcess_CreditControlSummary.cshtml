@@ -1,0 +1,75 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_CreditControlSummary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div id="latestSync" class="card-header text-left">
+            <div class="text-orange">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Sync Status...
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Company Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Customer Count</th>
+                    @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                    {
+                        <th scope="col">@accountType - Count</th>
+                        <th scope="col">@accountType - Amount</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var uC in operationalProvider.UserCompanies)
+                {
+                    var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                    <tr id="CreditControlSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                        <td scope="col">
+                            <div class="text-orange">
+                                @company.Name
+                            </div>
+                        </td>
+                        <td scope="col" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Count() + 3)">
+                            <div class="text-orange">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $("#latestSync").load('@Url.Content("/operational/shared/meter/DeviceSyncStatus")');
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function() {
+            $("#CreditControlSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_CreditControlSummaryItem/"))' + this.CompanyID + '/' + "CreditControlSummaryItem_" + this.CompanyID, function() {
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_CreditControlDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

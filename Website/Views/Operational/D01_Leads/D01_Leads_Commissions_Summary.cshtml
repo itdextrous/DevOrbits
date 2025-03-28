@@ -1,0 +1,237 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_Commissions_SummaryModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Commissions_Summary.GetDescription()}";
+    DateTime current = Model.FromDate;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-2"> Between</div>
+            <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+            <div class="col-1">And</div>
+            <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+            <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                <h5>Targets</h5>
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                <table class="table table-sm table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            @{
+                                current = Model.FromDate;
+                            }
+                            @while (current <= Model.ToDate)
+                            {
+                                <th scope="col">@current.ToMonth()</th>
+                                current = current.AddMonths(1);
+                            }
+                            <th scope="col" class="font-weight-bold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.D01_Leads_Commissions_Summary_Target_Items)
+                        {
+                            <tr>
+                                <td scope="col" class="text-nowrap">
+                                    @item.UserName
+                                </td>
+                                @{
+                                    current = Model.FromDate;
+                                }
+                                @while (current <= Model.ToDate)
+                                {
+                                    <td scope="col" class="text-nowrap">@item.MonthlyValues[current].ToMoney()</td>
+                                    current = current.AddMonths(1);
+                                }
+                                <td scope="col" class="font-weight-bold">@item.MonthlyValues.Select(p => p.Value).Sum().ToMoney()</td>
+                            </tr>
+                        }
+                        <tr class="border-table-total">
+                            <td scope="col" class="text-nowrap">
+                                Total
+                            </td>
+                            @{
+                                current = Model.FromDate;
+                            }
+                            @while (current <= Model.ToDate)
+                            {
+                                <td scope="col" class="text-nowrap">@Model.D01_Leads_Commissions_Summary_Target_Items.Select(p => p.MonthlyValues.Where(c => c.Key == current).Select(c => c.Value).Sum()).Sum().ToMoney()</td>
+                                current = current.AddMonths(1);
+                            }
+                            <td scope="col" class="font-weight-bold">@Model.D01_Leads_Commissions_Summary_Target_Items.Select(p => p.MonthlyValues.Select(c => c.Value).Sum()).Sum().ToMoney()</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                <h5>Actuals</h5>
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                <table class="table table-sm table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            @{
+                                current = Model.FromDate;
+                            }
+                            @while (current <= Model.ToDate)
+                            {
+                                <th scope="col">@current.ToMonth()</th>
+                                current = current.AddMonths(1);
+                            }
+                            <th scope="col" class="font-weight-bold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.D01_Leads_Commissions_Summary_Actual_Items)
+                        {
+                            <tr>
+                                <td scope="col" class="text-nowrap">
+                                    @item.UserName
+                                </td>
+                                @{
+                                    current = Model.FromDate;
+                                }
+                                @while (current <= Model.ToDate)
+                                {
+                                    <td scope="col" class="text-nowrap">@item.MonthlyValues[current].ToMoney()</td>
+                                    current = current.AddMonths(1);
+                                }
+                                <td scope="col" class="font-weight-bold">@item.MonthlyValues.Select(p => p.Value).Sum().ToMoney()</td>
+                            </tr>
+                        }
+                        <tr class="border-table-total">
+                            <td scope="col" class="text-nowrap">
+                                Total
+                            </td>
+                            @{
+                                current = Model.FromDate;
+                            }
+                            @while (current <= Model.ToDate)
+                            {
+                                <td scope="col" class="text-nowrap">@Model.D01_Leads_Commissions_Summary_Actual_Items.Select(p => p.MonthlyValues.Where(c => c.Key == current).Select(c => c.Value).Sum()).Sum().ToMoney()</td>
+                                current = current.AddMonths(1);
+                            }
+                            <td scope="col" class="font-weight-bold">@Model.D01_Leads_Commissions_Summary_Actual_Items.Select(p => p.MonthlyValues.Select(c => c.Value).Sum()).Sum().ToMoney()</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                <h5>Property Actuals</h5>
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                <table class="table table-sm table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            @{
+                                current = Model.FromDate;
+                            }
+                            @while (current <= Model.ToDate)
+                            {
+                                <th scope="col">@current.ToMonth()</th>
+                                current = current.AddMonths(1);
+                            }
+                            <th scope="col" class="font-weight-bold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.D01_Leads_Commissions_Summary_Property_Actual_Items)
+                        {
+                            <tr>
+                                <td scope="col" class="text-nowrap">
+                                    @item.PropertyName
+                                </td>
+                                @{
+                                    current = Model.FromDate;
+                                }
+                                @while (current <= Model.ToDate)
+                                {
+                                    <td scope="col" class="text-nowrap">@item.MonthlyValues[current].ToMoney()</td>
+                                    current = current.AddMonths(1);
+                                }
+                                <td scope="col" class="font-weight-bold">@item.MonthlyValues.Select(p => p.Value).Sum().ToMoney()</td>
+                            </tr>
+                        }
+                        <tr class="border-table-total">
+                            <td scope="col" class="text-nowrap">
+                                Total
+                            </td>
+                            @{
+                                current = Model.FromDate;
+                            }
+                            @while (current <= Model.ToDate)
+                            {
+                                <td scope="col" class="text-nowrap">@Model.D01_Leads_Commissions_Summary_Property_Actual_Items.Select(p => p.MonthlyValues.Where(c => c.Key == current).Select(c => c.Value).Sum()).Sum().ToMoney()</td>
+                                current = current.AddMonths(1);
+                            }
+                            <td scope="col" class="font-weight-bold">@Model.D01_Leads_Commissions_Summary_Property_Actual_Items.Select(p => p.MonthlyValues.Select(c => c.Value).Sum()).Sum().ToMoney()</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = window.location.href.split('?')[0] + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

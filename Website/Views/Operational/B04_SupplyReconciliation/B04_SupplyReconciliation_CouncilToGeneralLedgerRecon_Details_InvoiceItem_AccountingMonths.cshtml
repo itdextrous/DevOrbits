@@ -1,0 +1,148 @@
+@model MyVoltage.Models.OperationalModels.B04_SupplyReconciliationModels.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonthsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths.GetDescription();
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            Month:
+                            <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            @Html.DropDownList("AccountNo", Model.AccountNo, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            @Html.DropDownList("ResourceType", Model.ResourceType, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12 text-left">
+                            <a href="/operational/B04_SupplyReconciliation/B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+                            &nbsp;
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Account No</th>
+                                <th scope="col">Tax Invoice No</th>
+                                <th scope="col">Tax Invoice Date</th>
+                                <th scope="col">Resource Type</th>
+                                <th scope="col">Council Statement No</th>
+                                <th scope="col">Invoice Item</th>
+                                <th scope="col">Charge Type</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Month</th>
+                                <th scope="col" class="text-right">Days</th>
+                                <th scope="col" class="text-right">Units</th>
+                                <th scope="col" class="text-right">Rate</th>
+                                <th scope="col" class="text-right">Amount<br />(Excl. VAT)</th>
+                                <th scope="col" class="text-right">VAT</th>
+                                <th scope="col" class="text-right">Amount<br />(Incl. VAT)</th>
+                                <th>Payable By Service Provider</th>
+                                <th>Payable By Client</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.BuildingCouncilDetails_InvoiceItem_Months)
+                            {
+                                <tr style="cursor:pointer;" onclick="RedirectToDetails('@item.InvoiceItem.BuildingCouncilDetails_InvoiceID', '@item.InvoiceItem.ID')">
+                                    <td scope="col">@item.AccountNo</td>
+                                    <td scope="col">@item.TaxInvoiceNo</td>
+                                    <td scope="col">@item.TaxInvoiceDate.ToDateShort()</td>
+                                    <td scope="col">@item.InvoiceItem.ResourceType</td>
+                                    <td scope="col">@item.InvoiceItem.BuildingCouncilDetails_InvoiceID</td>
+                                    <td scope="col">@item.InvoiceItem.ID</td>
+                                    <td scope="col">@item.InvoiceItem.ChargeType</td>
+                                    <td scope="col">@item.InvoiceItem.ProductName</td>
+                                    <td scope="col">@item.Month.ToMonth()</td>
+                                    <td scope="col" class="text-right">@item.NoOfDays</td>
+                                    <td scope="col" class="text-right">@item.Units.ToMoney()</td>
+                                    <td scope="col" class="text-right">@item.Rate.ToString("N4")</td>
+                                    <td scope="col" class="text-right">@item.AmountExclVAT.ToMoney()</td>
+                                    <td scope="col" class="text-right">@item.VAT.ToMoney()</td>
+                                    <td scope="col" class="text-right">@item.AmountInclVAT.ToMoney()</td>
+                                    <td class="text-nowrap text-right">@(((item.InvoiceItem.PayableByServiceProviderPerc.HasValue ? item.InvoiceItem.PayableByServiceProviderPerc.Value : 0) * item.AmountInclVAT).ToMoneyNoDecimal("R"))</td>
+                                    <td class="text-nowrap text-right">@(((item.InvoiceItem.PayableByClientPerc.HasValue ? item.InvoiceItem.PayableByClientPerc.Value : 0) * item.AmountInclVAT).ToMoneyNoDecimal("R"))</td>
+                                </tr>
+                            }
+                            <tr class="border-table-total">
+                                <td scope="col">Total</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col">-</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => p.NoOfDays).Sum()</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => p.Units).Sum().ToMoney()</td>
+                                <td scope="col" class="text-right">-</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => p.AmountExclVAT).Sum().ToMoney()</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => p.VAT).Sum().ToMoney()</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => p.AmountInclVAT).Sum().ToMoney()</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => (p.InvoiceItem.PayableByServiceProviderPerc.HasValue ? p.InvoiceItem.PayableByServiceProviderPerc.Value : 0) * p.AmountInclVAT).Sum().ToMoney()</td>
+                                <td scope="col" class="text-right">@Model.BuildingCouncilDetails_InvoiceItem_Months.Select(p => (p.InvoiceItem.PayableByClientPerc.HasValue ? p.InvoiceItem.PayableByClientPerc.Value : 0) * p.AmountInclVAT).Sum().ToMoney()</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+
+            document.location.href = '/operational/B04_SupplyReconciliation/B04_SupplyReconciliation_CouncilToGeneralLedgerRecon_Details_InvoiceItem_AccountingMonths?from=' + $("#fromDate").val() + '&AccountNo=' + $("#AccountNo").val() + '&ResourceType=' + $("#ResourceType").val();
+        }
+        function RedirectToDetails(invID, itemID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItem/' + invID + '/' + itemID;
+        }
+    </script>
+}

@@ -1,0 +1,257 @@
+@model MyVoltage.Models.ClientzoneModels.ConsumptionInsightsModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@inject UserManager<ApplicationUser> userMan;
+@{
+    ViewData["Title"] = "Consumption Insights";
+    Layout = "LayoutClientzone";
+}
+<div class="container invoices">
+    <div class="mb-m25 pt_m_45">
+        <h3 class="text-center page_heading">Consumption insights</h3>
+        <h4 class="text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">Consumption history</h4>
+    </div>
+    <div class="mt-85 max-w-415">
+        <div class="mb-30">
+            <input onkeydown="return false" data-date-end-date="0d" type="text" name="date" class="form-control-trim invoiceDataDate datePicker_input" id="invoiceDate" placeholder="yyyy-mm" value="@(Model.SelectedMonth.ToString("yyyy-MM"))" autocomplete="off">
+        </div>
+        <div id="ssLoader" class="select-holder">
+            @*@Html.DropDownList("Products", Model.Products, new { @class = "browser-default custom-select form-control-trim js-select", onchange="enableDownloadBtn();"})*@
+            <select onchange="enableDownloadBtn();" class="browser-default custom-select form-control-trim js-select" id="Products" name="Products">
+                @foreach (var prod in Model.Products)
+                {
+                    <option class="drpdwnOptTxt" value="@prod.Value">@prod.Text</option>
+                }
+                @*                <option selected="selected" value="">Select Utility Type</option>
+                <option value="1">Electricity</option>
+                <option value="2">Water and Sanitation</option>
+                *@                @*<option value="3">Gas</option>
+                <option value="15">Electricity Prepaid Tokens</option>*@
+            </select>
+            <input type="text" class="js-static-input form-control-trim">
+        </div>
+
+        <div class="consumption-switch align-items-center justify-content-center mt-15 d-flex">
+            <label class="form-check-label text-nowrap me-3">
+                <input name="consumption" id="monthlyConsumption" type="radio" checked>Monthly consumption
+            </label>
+            <label class="form-check-label text-nowrap">
+                <input name="consumption" id="dailyConsumption" type="radio">Daily consumption
+            </label>
+        </div>
+
+        <div class="mt-45 text-center PDFButtons" id="PDFButton">
+            <a href="#" class="btn btn-islandsunrise" id="diaplayPdf" onclick="DisplayInsights();">Display PDF</a>
+            <a class="btn btn-islandsunrise PDF_default_btn pdfDisable" id="dwnldPdf" onclick="DownloadInvoice();">Download PDF</a>
+        </div>
+    </div>
+
+    <div id="divResult" class="mt-85 pt-85" style="display:none;">
+        <div id="consumptionInsightsDiv" class="pdf_preview_box show_pdf_preview"></div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(() => {
+            $(".invoiceDataDate").datepicker({
+                format: "yyyy-mm",
+                startView: "months",
+                minViewMode: "months",
+                autoclose: "true",
+                startDate: '-12M'
+            });
+
+            if ($('#Products').val() == "") {
+                $('#dwnldPdf').removeClass('pdfDisable');
+            }
+        })
+        //select box js start
+        const inputs = document.getElementsByClassName('js-static-input');
+        const selects = document.getElementsByClassName('js-select');
+
+        for (let i = 0; i < inputs.length; i++) {
+            getSelected(i);
+            selects[i].addEventListener("change", function () {
+                getSelected(i);
+            });
+        }
+        function getSelected(i) {
+            inputs[i].value = selects[i].options[selects[i].selectedIndex].text;
+        }
+        //select box js end
+
+        $('#consumptionInsightsLI').addClass("active");
+        $('#consumptionInsights_collapse').addClass("show");
+
+
+        function DisplayInsights() {
+            //$("#loaderContent").css("display", "block");
+            addLoaderToDisplayBtn();
+
+            if ($("#invoiceDate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                toastr.warning('Please select a month.');
+                //alert('Please select a month');
+                $('#invoiceDate').focus();
+                return;
+            }
+
+            if ($("#Products").val() == '') {
+                $("#loaderContent").css("display", "none");
+                toastr.warning('Please select utility type.');
+                //alert('Please select a Product');
+                $('#Products').focus();
+                return;
+            }
+
+            let url = '@Url.Content("/clientzone/consumptioninsightsdiv")?d=' + $("#invoiceDate").val() + '&p=' + $("#Products").val() +
+                ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@clientzoneProvider.ShowCostInclVAT&consumptionBy=monthly');
+
+            if ($('#dailyConsumption').is(':checked'))
+                url += '&isDaily=t';
+
+            $("#consumptionInsightsDiv").load(url, function () {
+                    $("#divResult").fadeIn();
+                    $("#PDFButton").addClass('PDFButtonDiv');
+                    $("#loaderContent").css("display", "none");
+                    removeDisplayBtnLoader();
+                });
+        }
+
+        function saveByteArray(reportName, base64) {
+            var link = document.createElement('a');
+            link.href = "data:application/pdf;base64," + base64;
+            link.download = reportName;
+            link.click();
+        };
+
+        async function DownloadInvoice() {
+            $("#loaderContent").css("display", "block");
+            //downloadBtnLoader();
+            if ($("#invoiceDate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                toastr.warning('Please select a month.');
+                //alert('Please select a month');
+                $('#invoiceDate').focus();
+                return;
+            }
+            if ($("#Products").val() == '') {
+                $("#loaderContent").css("display", "none");
+                toastr.warning('Please select utility type.');
+                //alert('Please select a Product');
+                $('#Products').focus();
+                return;
+            }
+            var url = '/clientzone/consumptioninsights_downloadjson?d=' +
+                $("#invoiceDate").val() + '&p=' + $("#Products").val() +
+                ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@(clientzoneProvider.ShowCostInclVAT)&PV=t&U=@(userMan.GetUserId(User))');
+            //window.open(url);
+
+            if ($('#dailyConsumption').is(':checked'))
+                url += '&isDaily=t';
+                
+
+            try {
+                var result = await $.get(url);
+                if (result) {
+                    saveByteArray(result?.name, result?.data);
+                } else {
+                    toastr.error("Something went wrong. Please try again later.");
+                }
+            } catch (err) {
+                toastr.error("Something went wrong. Please try again later.");
+            }
+
+            $("#loaderContent").css("display", "none");
+
+            $("#dwnldPdf").removeClass('pdfDisable');
+            $('#dwnldPdf').html('Download PDF');
+
+            //window.location.href = url;
+        }
+
+        $("#invoiceDate").change((e) => {
+            $("#divResult").fadeOut();
+            if ($('#Products').val() != "") {
+                enableDownloadBtn();
+            }
+        })
+
+        async function enableDownloadBtn() {
+            downloadBtnLoader();
+
+            $("#divResult").fadeOut();
+            if ($('#Products').val() == "") {
+                if ($("#dwnldPdf").hasClass("pdfDisable")) {
+                    $("#dwnldPdf").removeClass('pdfDisable');
+                }
+                return;
+            }
+            //$("#loaderContent").css("display", "block");
+            $('#invoiceDate').attr('disabled', true);
+            $('#Products').attr('disabled', true);
+           
+            var url = '/clientzone/consumptioninsightscheckdata?d=' +
+                $("#invoiceDate").val() + '&p=' + $("#Products").val() +
+                ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&CheckPV=t&U=@(userMan.GetUserId(User))');
+
+            if ($('#dailyConsumption').is(':checked'))
+                url += '&isDaily=t';
+
+            $.get(url)
+                .done(function (response) {
+
+                    $('#invoiceDate').removeAttr('disabled');
+                    $('#Products').removeAttr('disabled');
+
+                    if (response == false) {
+                        $("#dwnldPdf").addClass('pdfDisable');
+                    }
+                    else {
+                        $("#dwnldPdf").removeClass('pdfDisable');
+                    }
+                })
+                .fail(function () {
+                })
+                .always(function () {
+                    $("#divResult").fadeOut();
+                    //$("#loaderContent").css("display", "none");
+                    $('#dwnldPdf').html('Download PDF');
+                });
+
+        }
+
+        $("#invoiceDate").click(() => {
+            $("#invoiceDate").datepicker("update");
+        })
+
+        function downloadBtnLoader() {
+            if ($('#Products').val() != "") {
+                $('#dwnldPdf').text('')
+                $('#dwnldPdf').html('<i class="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>');
+                $('#dwnldPdf').addClass('pdfDisable');
+            }
+        }
+
+        function addLoaderToDisplayBtn(){
+            if ($('#Products').val() != "") {
+                $('#diaplayPdf').text('')
+                $('#diaplayPdf').html('<i class="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>');
+                $('#diaplayPdf').addClass('pdfDisable');
+            }
+        }
+
+        function removeDisplayBtnLoader(){
+            $('#diaplayPdf').html('Display PDF');
+            $("#diaplayPdf").removeClass('pdfDisable');
+        }
+
+        $("[name=consumption]").change((e) => {
+            $("#divResult").fadeOut();
+            enableDownloadBtn();
+        })
+
+    </script>
+}

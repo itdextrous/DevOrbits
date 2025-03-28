@@ -1,0 +1,265 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_SupplyTransactionModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_SupplyTransaction.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div id="historyDiv" class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <div class="row col-12">
+                    <h5 class="text-orange">ACO Transaction No</h5>
+                </div>
+                <div class="row col-12">
+                    @Html.DropDownList("ACOTransactionNo", Model.ACOTransactionNo, new { @class = "form-control", @onChange = "RedirectToFilter();" })
+                </div>
+
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.AF_AfroxAdministration_Item != null)
+{
+    <div id="formDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <form asp-action="AF_AfroxAdministration_SupplyTransaction" enctype="multipart/form-data">
+                        <input type="hidden" name="ACOTransactionNo" value="@(Model.AF_AfroxAdministration_Item != null ? Model.AF_AfroxAdministration_Item.ACOSupplyTransactionNo : "")" />
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">ACO Supply Transaction No</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.ACOSupplyTransactionNo
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Created Date</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.CreatedDate.ToDateAndTimeShort()
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Status" class="control-label"></label>
+                                (@Model.AF_AfroxAdministration_Item.Status)
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                                <span asp-validation-for="Status" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplyStatus" class="control-label"></label>
+                                (@Model.AF_AfroxAdministration_Item.SupplyStatus)
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("SupplyStatus", Model.SupplyStatus, new { @class = "form-control" })
+                                <span asp-validation-for="SupplyStatus" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Company Name</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.CompanyName
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">ACO Service Cylinder Bank</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.ACOServiceCylinderBank
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ActivationDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="datetime-local" class="form-control" asp-for="ActivationDate" />
+                                <span asp-validation-for="ActivationDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">No Of Cylinders</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.NumberOfCylinders
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Capacity Per Cylinder</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.CapacityPerCylinder
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Total Supply Capacity</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.TotalSupplyCapacity
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">ACO Reserve Cylinder Bank</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.ACOReserveCylinderBank
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">ACO Reserve No</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.ACOReserveNumber
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Metering Point</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.MeteringPoint
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Meter Serial No</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.MeterSerialNo
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DepletionDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="datetime-local" class="form-control" asp-for="DepletionDate" />
+                                <span asp-validation-for="DepletionDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Tamper Detection</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.AF_AfroxAdministration_Item.TamperDetection.ToBoolean()
+                            </div>
+                        </div>
+
+
+
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Task History</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changes</th>
+                            </tr>
+
+                            @foreach (var item in Model.AF_AfroxAdministration_Item.AutoSupplyInsights_LogsItems)
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>
+                                        @(
+                                            Html.Raw(string.IsNullOrEmpty(item.SystemDescription) ? "Added Comment" : item.SystemDescription)
+                                            )
+                                    </td>
+                                </tr>
+                            }
+
+                            <tr>
+                                <td>@Model.AF_AfroxAdministration_Item.CreatedDate.ToDateAndTimeShort()</td>
+                                <td>[System]</td>
+                                <td>Task Created</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_SupplyTransaction?ACOTransactionNo=' + $('#ACOTransactionNo').val();
+        }
+
+
+    </script>
+}

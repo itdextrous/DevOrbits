@@ -1,0 +1,114 @@
+@model MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Accounting_Cost_Summary.GetDescription();
+}
+
+@*<div class="row mt-md-2 col-12">
+        <div class="col-2">Show Between</div>
+        <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+        <div class="col-1">And</div>
+        <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+        <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+    </div>*@
+<div class="row mt-md-2 col-12">
+
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col" rowspan="2" class="text-center">Company Name</th>
+                <th scope="col" colspan="5" class="text-center" style="border-left: 3px solid black;border-right:3px solid black;border-top:3px solid black;">Gateways</th>
+                <th scope="col" colspan="15" class="text-center" style="border-left: 3px solid black;border-right:3px solid black;border-top:3px solid black;">Devices</th>
+                <th scope="col" rowspan="2" class="text-center" style="border-left: 3px solid black;border-right:3px solid black;border-top:3px solid black;">Total Cost (Excl. VAT)</th>
+            </tr>
+            <tr>
+                <th scope="col" class="text-center" style="border-left: 3px solid black;">Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Labour And Consumables Cost  (Excl. VAT)</th>
+                <th scope="col" class="text-center">Preparation Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Antenna Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Sundy Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center" style="border-left: 3px solid black;">Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Installation Cost - Labour And Consumables (Excl. VAT)</th>
+                <th scope="col" class="text-center">Preparation Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Antenna Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">CTs Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">RTU Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">RTU Probe Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">RTU Installation Cost - Labour And Consumables (Excl. VAT)</th>
+                <th scope="col" class="text-center">RTU Preparation Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">RTU Antenna Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Control Unit Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Control Unit Installation Cost - Labour And Consumables (Excl. VAT)</th>
+                <th scope="col" class="text-center">Control Unit Preparation Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Antenna Cost (Excl. VAT)</th>
+                <th scope="col" class="text-center">Sundy Cost (Excl. VAT)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.L_MeterRentals_Accounting_Cost_SummaryItems)
+            {
+                <tr id="L_MeterRentals_Accounting_SummaryItem_@item.CompanyID" style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID');">
+                    <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                    <td scope="col" style="border-left: 3px solid black;" class="text-nowrap text-right" title="@item.CompanyName - Gateway Cost (Excl. VAT)">R @item.GatewayCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Gateway Labour and consumables cost  (Excl. VAT)">R @item.GatewayLabourAndConsumablesCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Gateway Preparation Cost (Excl. VAT)">R @item.GatewayPreparationCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Gateway Antenna cost  (Excl. VAT)">R @item.GatewayAntennaCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Gateway Sundy cost  (Excl. VAT)">R @item.GatewaySundyCost.ToString("N0")</td>
+                    <td scope="col" style="border-left: 3px solid black;" class="text-nowrap text-right" title="@item.CompanyName - Device cost  (Excl. VAT)">R @item.DeviceCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Device Installation cost - Labour and consumables (Excl. VAT)">R @item.DeviceInstallationCostLabourAndConsumables.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Device Preparation Cost (Excl. VAT)">R @item.DevicePreparationCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Device Antenna cost  (Excl. VAT)">R @item.DeviceAntennaCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Device CTs cost  (Excl. VAT)">R @item.DeviceCTsCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - RTU cost  (Excl. VAT)">R @item.RTUCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - RTU Probe Cost (Excl. VAT)">R @item.RTUProbeCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - RTU Installation cost - Labour and consumables (Excl. VAT)">R @item.RTUInstallationCostLabourAndConsumables.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - RTU Preparation Cost (Excl. VAT)">R @item.RTUPreparationCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - RTU Antenna cost  (Excl. VAT)">R @item.RTUAntennaCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Control Unit cost  (Excl. VAT)">R @item.ControlUnitCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Control Unit Installation cost - Labour and consumables (Excl. VAT)">R @item.ControlUnitInstallationCostLabourAndConsumables.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Control Unit Preparation Cost (Excl. VAT)">R @item.ControlUnitPreparationCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Antenna cost  (Excl. VAT)">R @item.AntennaCost.ToString("N0")</td>
+                    <td scope="col" class="text-nowrap text-right" title="@item.CompanyName - Sundy cost  (Excl. VAT)">R @item.SundyCost.ToString("N0")</td>
+                    <td scope="col" style="border-left: 3px solid black;border-right: 3px solid black;" class="text-nowrap text-right" title="@item.CompanyName - Total cost  (Excl. VAT)">R @item.TotalCost.ToString("N0")</td>
+                </tr>
+            }
+            <tr style="border-top:3px double black;border-bottom:3px double black;">
+                <td scope="col" class="text-nowrap">Total</td>
+                <td scope="col" style="border-left: 3px solid black;" class="text-nowrap text-right" title="Total - Gateway Cost (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.GatewayCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Gateway Labour and consumables cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.GatewayLabourAndConsumablesCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Gateway Preparation Cost (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.GatewayPreparationCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Gateway Antenna cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.GatewayAntennaCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Gateway Sundy cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.GatewaySundyCost).Sum().ToString("N0")</td>
+                <td scope="col" style="border-left: 3px solid black;" class="text-nowrap text-right" title="Total - Device cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.DeviceCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Device Installation cost - Labour and consumables (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.DeviceInstallationCostLabourAndConsumables).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Device Preparation Cost (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.DevicePreparationCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Device Antenna cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.DeviceAntennaCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Device CTs cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.DeviceCTsCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - RTU cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.RTUCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - RTU Probe Cost (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.RTUProbeCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - RTU Installation cost - Labour and consumables (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.RTUInstallationCostLabourAndConsumables).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - RTU Preparation Cost (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.RTUPreparationCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - RTU Antenna cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.RTUAntennaCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Control Unit cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.ControlUnitCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Control Unit Installation cost - Labour and consumables (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.ControlUnitInstallationCostLabourAndConsumables).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Control Unit Preparation Cost (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.ControlUnitPreparationCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Antenna cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.AntennaCost).Sum().ToString("N0")</td>
+                <td scope="col" class="text-nowrap text-right" title="Total - Sundy cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.SundyCost).Sum().ToString("N0")</td>
+                <td scope="col" style="border-left: 3px solid black;border-right: 3px solid black;" class="text-nowrap text-right" title="Total - Total cost  (Excl. VAT)">R @Model.L_MeterRentals_Accounting_Cost_SummaryItems.Select(p => p.TotalCost).Sum().ToString("N0")</td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/L_MeterRentals/L_MeterRentals_Accounting_Cost_Details';
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/L_MeterRentals/L_MeterRentals_Accounting_Summary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

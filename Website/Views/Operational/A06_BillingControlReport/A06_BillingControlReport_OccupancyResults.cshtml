@@ -1,0 +1,100 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_OccupancyDetailModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_OccupancyResults.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancySummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.TotalCount == 0)
+                    {
+                        <span>There are no outstanding entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {                        
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Company Name</th>
+                                    <th scope="col">Customer Number</th>
+                                    <th scope="col">Occupancy</th>
+                                    <th scope="col">Date Last Checked</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Verify</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.A06_BillingControlReport_OccupancyDetailItems)
+                                {
+                                    @foreach (var itemC in item.A06_BillingControlReport_OccupancyDetailItems)
+                                    {
+                                        string rowclass = "";
+                                        string cellclass = "";
+                                        if (itemC.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_OccupancyDetailItem.A06_BillingControlReport_OccupancyDetailItemCustomer.StatusType.Outstanding)
+                                        {
+                                            rowclass = " class=\"table-danger\"";
+                                            cellclass = " class=\"text-red font-weight-bold\"";
+                                        }
+                                        else if (itemC.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_OccupancyDetailItem.A06_BillingControlReport_OccupancyDetailItemCustomer.StatusType.TooLongAgo)
+                                        {
+                                            rowclass = " class=\"table-warning\"";
+                                            cellclass = " class=\"text-orange font-weight-bold\"";
+                                        }
+                                        else if (itemC.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_OccupancyDetailItem.A06_BillingControlReport_OccupancyDetailItemCustomer.StatusType.Reviewed)
+                                        {
+                                            rowclass = " class=\"table-success\"";
+                                            cellclass = " class=\"text-green font-weight-bold\"";
+                                        }
+                                        <tr style="cursor:pointer;" title="View @itemC.CustomerNo" onclick="RedirectToVerification('@itemC.CustomerMeterSerial');" @Html.Raw(rowclass)>
+                                            <td scope="col">@item.CompanyName</td>
+                                            <td scope="col">@itemC.CustomerNo</td>
+                                            <td scope="col">@itemC.Occupancy</td>
+                                            <td scope="col">@(itemC.DateLastChecked.HasValue ? itemC.DateLastChecked.Value.ToString("yyyy/MM/dd HH:mm") : "None")</td>
+                                            <td  @Html.Raw(cellclass) scope="col">@MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_OccupancyDetailItem.A06_BillingControlReport_OccupancyDetailItemCustomer.GetStatusString(itemC.Status)</td>
+                                            <td scope="col">
+                                                @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_OccupancyDetails, MyVoltage.Data.SecureAreaActionEnum.View))
+                                                {
+                                                    <a onclick="RedirectToVerification('@itemC.CustomerMeterSerial');" href="#" title="View @itemC.CustomerNo">View | Update</a>
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification';
+        }
+    </script>
+}

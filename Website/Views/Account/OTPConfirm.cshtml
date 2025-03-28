@@ -1,0 +1,76 @@
+﻿@model MyVoltage.Models.AccountViewModels.OTPConfirmViewModel
+@{
+    ViewData["Title"] = "Confirm Email and Cell Number?";
+    Layout = "~/Views/Shared/LayoutEmpty.cshtml";
+}
+@*
+<div class="diagonal">
+    <img src="/images/diagonal-line.png" alt="">
+</div>
+
+<div class="row mt-5 mb-5">
+    <div class="col-md-6 col-lg-8 col-12 mx-auto">
+        <section>
+            <form asp-action="OTPConfirm" asp-route-id="@ViewData["id"]" method="post">
+                <!--                <div asp-validation-summary="All" class="text-danger"></div>-->
+                <img src="/logo/white" alt="" class="my-5 d-block mx-auto login-logo logo-width">
+                <h4 class="text-white text-uppercase font-weight-bold mb-8">@ViewData["Title"]</h4>
+                <p class="text-white">Confirmation SMS and E-mail have been sent to the details completed. Please enter the confirmation code in the space below to complete the registration process.</p>
+
+                <div class="row mt-5">
+                    <div class="col-5 d-none d-md-block text-white font-weight-bold text-uppercase mb-2">Address Used</div>
+                    <div class="col-7 d-none d-md-block text-white font-weight-bold text-uppercase mb-2">Code</div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticEmail" class="col-sm-5 col-form-label text-white">SMS: @Model.PhoneNumber</label>
+                    <div class="col-sm-7">
+                        <input asp-for="OTP" class="form-control" placeholder="0000" />
+                        <span asp-validation-for="OTP" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputPassword" class="col-sm-5 col-form-label text-white">Email: @Model.Email</label>
+                    <div class="col-sm-7">
+                        <input asp-for="EmailCode" class="form-control" placeholder="CODE" />
+                        <span asp-validation-for="EmailCode" class="text-danger"></span>
+                    </div>
+                </div>
+                <p class="text-white">If you did not receive the email, please check your spam or bulk email folder.</p>
+                <button type="submit" class="btn btn-outline-default d-block mx-auto fw-250 mt-5" onclick="CheckInvalidValues()">Submit</button>
+            </form>
+
+            <form asp-action="OTPResend" asp-route-id="@ViewData["id"]" method="post">
+                <button type="submit" class="btn btn-outline-default d-block mx-auto fw-250 mt-5">Resend OTP</button>
+                <div class="form-group text-center">
+                    <a onclick="goBack()" class="btn btn-link text-white">BACK</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var currentUrl = window.location.href;
+            var url = new URL(currentUrl);
+            var emailCode = url.searchParams.get("Code");
+            $('#EmailCode').val(emailCode);
+        })
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function CheckInvalidValues()
+        {
+            var otp = $("#OTP").val();
+            var emailCode = $("#EmailCode").val();
+
+            if (otp == null || otp == "") { $("#OTP").val("0000"); }
+            if (emailCode == null || emailCode == "") { $("#EmailCode").val("000000"); }
+        }
+    </script>
+}
+
+*@

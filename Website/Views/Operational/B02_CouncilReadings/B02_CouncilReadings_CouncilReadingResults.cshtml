@@ -1,0 +1,100 @@
+@model MyVoltage.Models.OperationalModels.B02_CouncilReadingsModels.B02_CouncilReadings_CouncilReadingDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B02_CouncilReadings_CouncilReadingResults.GetDescription() + " - " + operationalProvider.CompanyName;
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+
+
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID > 0)
+                {
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col">Completed Today: @Model.CompletedToday</div>
+                                <div class="col">Left Today: @Model.LeftToday</div>
+                                <div class="col">Total: @Model.Total</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover table-sm">
+                            <tbody style="height:auto;">
+                            <thead>
+                                <tr>
+                                    <td>Mirror Serial</td>
+                                    <td>My Voltage Serial</td>
+                                    <td>Council Serial</td>
+                                    <td>Name</td>
+                                    <td>Latest Audit Reading</td>
+                                    <td>Latest Audit Reading Time</td>
+                                    <td>Latest Audit Reading Created</td>
+                                    <td>Status</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.B02_CouncilReadings_CouncilReadingDetailsItems)
+                                {
+                                    string rowclass = "";
+                                    string cellClass = "";
+                                    if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.Unverified)
+                                    {
+                                        rowclass = " class=\"table-danger\"";
+                                        cellClass = " class=\"text-red font-weight-bold\"";
+                                    }
+                                    else if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.Verified)
+                                    {
+                                        rowclass = " class=\"table-warning\"";
+                                        cellClass = " class=\"text-orange font-weight-bold\"";
+                                    }
+                                    else if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.Submitted)
+                                    {
+                                        rowclass = " class=\"table-success\"";
+                                        cellClass = " class=\"text-green font-weight-bold\"";
+                                    }
+                                    else if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.NoAccess)
+                                    {
+                                        rowclass = " class=\"table-info\"";
+                                        cellClass = " class=\"text-red font-weight-bold\"";
+                                    }
+                                    <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @item.Serial" onclick="RedirectToVerification('@item.BuildingCouncilMeter.ID');">
+                                        <td style="text-align:left;">@item.Serial</td>
+                                        <td style="text-align:left;">@item.BuildingCouncilMeter.MyVoltageSerial</td>
+                                        <td style="text-align:left;">@item.BuildingCouncilMeter.CouncilSerial</td>
+                                        <td style="text-align:left;">@item.DeviceName</td>
+                                        <td style="text-align:left;">@item.LatestAuditReading.ToReading()</td>
+                                        <td style="text-align:left;">@item.LatestAuditReadingTime.ToDateAndTimeShort()</td>
+                                        <td style="text-align:left;">@item.LatestAuditReadingCreated.ToDateAndTimeShort()</td>
+                                        <td style="text-align:left;" @Html.Raw(cellClass)>@item.Status.GetDescription()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div>Select a company to start...</div>
+                }
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/B02_CouncilReadings/B02_CouncilReadings_CouncilReadingVerification/' + serial;
+        }
+    </script>
+}

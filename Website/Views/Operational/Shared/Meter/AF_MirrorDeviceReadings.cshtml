@@ -1,0 +1,37 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.MirrorDeviceReadingsModel
+@using MyVoltage.Extensions;
+<table class="table table-responsive-xl table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Time Logged</th>
+            <th scope="col" class="text-right">Counter</th>
+            <th scope="col" class="text-right">Consumption</th>
+            <th scope="col" class="text-right">Actual Odometer Reading <span style="cursor:help;" title="If there is any manual reading captures they will show in this column." href="#"><i class="fas fa-question-circle"></i></span></th>
+            <th scope="col" class="text-right">Virtual Odometer Reading</th>
+            @if (Model.ConvFactor.HasValue)
+            {
+                <th scope="col" class="text-right">Conv Rate</th>
+                <th scope="col" class="text-right">Kg Reading</th>
+                <th scope="col" class="text-right">Kg Consumption</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.DeviceReadings)
+        {
+            <tr>
+                <td scope="col">@item.TimeLogged.ToDateAndTimeShort()</td>
+                <td scope="col" class="text-right" title="@item.PulseCounter.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Counter">@item.PulseCounter.ToReading()</td>
+                <td scope="col" class="text-right" title="@item.Difference.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Consumption">@item.Difference.ToReading()</td>
+                <td scope="col" class="text-right" title="@(item.OdoReading != null ? item.OdoReading.OdometerReading.ToReading() : "") - @item.TimeLogged.ToDateAndTimeShort() Actual Odometer Reading">@(item.OdoReading != null ? item.OdoReading.OdometerReading.ToReading() : "")</td>
+                <td scope="col" class="text-right" title="@item.VirtualOdometerReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Virtual Odometer Reading">@item.VirtualOdometerReading.ToReading()</td>
+                @if (Model.ConvFactor.HasValue)
+                {
+                    <td scope="col" class="text-right" title="@item.ConvFactor.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Conv Rate">@item.ConvFactor.ToMoney()</td>
+                    <td scope="col" class="text-right" title="@item.KgReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.KgReading.ToReading()</td>
+                    <td scope="col" class="text-right" title="@item.KgConsuption.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Kg Consuption">@item.KgConsuption.ToReading()</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

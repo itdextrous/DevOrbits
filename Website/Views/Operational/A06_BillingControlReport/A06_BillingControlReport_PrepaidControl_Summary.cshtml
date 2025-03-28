@@ -1,0 +1,103 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_PrepaidControl_Summary.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">No Customers with Prepaid mode</th>
+                            <th scope="col">No Customers = Wallet / Post paid mode</th>
+                            <th scope="col">No Customers with Wallet balance = 0</th>
+                            <th scope="col">No Customers with Wallet balance <> 0</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var uC in operationalProvider.UserCompanies)
+                        {
+                            var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                            if (!company.ExistsInSkybill.HasValue || !company.ExistsInSkybill.Value)
+                            {
+                                continue;
+                            }
+                           <tr id="MeterOnManualSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        @company.Name
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function() {
+            $("#MeterOnManualSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A06_BillingControlReport/A06_BillingControlReport_PrepaidControl_SummaryItem/"))' + this.CompanyID + '/' + "MeterOnManualSummaryItem_" + this.CompanyID, function() {
+                });
+        });
+        function RedirectToDetails(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_PrepaidControl_Details';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

@@ -1,0 +1,83 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.MirrorDeviceReadingsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+<table class="table table-bordered table-sm table-striped table-hover">
+    <thead>
+        <tr>
+            <th rowspan="2" scope="col">Time Logged</th>
+            <th rowspan="2" scope="col" class="text-right">Counter</th>
+            <th rowspan="2" scope="col" class="text-right">Difference</th>
+            <th rowspan="2" scope="col" class="text-right">Correcting Difference</th>
+            @if (Model.PQMeter.HasValue && Model.PQMeter.Value)
+            {
+                <th rowspan="2" scope="col" class="text-right">Correcting Factor Used</th>
+            }
+            <th rowspan="2" scope="col" class="text-right">Actual Odometer Reading <span style="cursor:help;" title="If there is any manual reading captures they will show in this column." href="#"><i class="fas fa-question-circle"></i></span></th>
+            <th rowspan="2" scope="col" class="text-right">Virtual Odometer Reading</th>
+            @if (Model.ConvFactor.HasValue)
+            {
+                <th rowspan="2" scope="col" class="text-right">Conv Rate</th>
+                <th rowspan="2" scope="col" class="text-right">Kg Reading</th>
+            }
+            <th colspan="3" scope="col" class="text-center">Consumption</th>
+            <th colspan="3" scope="col" class="text-center">Converted Consumption</th>
+        </tr>
+        <tr>
+            <th scope="col" class="text-center">Consumption</th>
+            <th scope="col" class="text-center">Tariff</th>
+            <th scope="col" class="text-center">Cost</th>
+            <th scope="col" class="text-center">Consumption</th>
+            <th scope="col" class="text-center">Tariff</th>
+            <th scope="col" class="text-center">Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.DeviceReadings)
+        {
+            <tr>
+                <td scope="col">@item.TimeLogged.ToDateAndTimeShort()</td>
+                <td scope="col" class="text-right" title="@item.PulseCounter.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Counter">@item.PulseCounter.ToReading()</td>
+                <td scope="col" class="text-right" title="@item.Difference.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Difference">@item.Difference.ToReading()</td>
+                <td scope="col" class="text-right" title="@item.CorrectingDifference.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Correcting Difference">@item.CorrectingDifference.ToReading()</td>
+                @if (Model.PQMeter.HasValue && Model.PQMeter.Value)
+                {
+                    <td scope="col" class="text-right" title="@item.CorrectingFactorUsed.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Conv Rate">@(item.CorrectingFactorUsed.HasValue ? (item.CorrectingFactorUsed.Value / 100.0m).ToString("0.0000") : "Unknown")</td>
+                }
+                <td scope="col" class="text-right" title="@(item.OdoReading != null ? item.OdoReading.OdometerReading.ToReading() : "") - @item.TimeLogged.ToDateAndTimeShort() Actual Odometer Reading">
+                    @if (item.OdoReading != null)
+                    {
+                        @if (opProv.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                        {
+                            <span>@item.OdoReading.OdometerReading.ToDecimal(3)</span>
+                        }
+                        else
+                        {
+                            <span>@item.OdoReading.OdometerReading.ToReading()</span>
+                        }
+                    }
+                </td>
+                <td scope="col" class="text-right" title="@item.VirtualOdometerReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Virtual Odometer Reading">
+                    @if (opProv.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                    {
+                        <span>@item.VirtualOdometerReading.ToDecimal(3)</span>
+                    }
+                    else
+                    {
+                        <span>@item.VirtualOdometerReading.ToReading()</span>
+                    }
+                </td>
+                @if (Model.ConvFactor.HasValue)
+                {
+                    <td scope="col" class="text-right" title="@item.ConvFactor.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Conv Rate">@item.ConvFactor.ToMoney()</td>
+                    <td scope="col" class="text-right" title="@item.KgReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.KgReading.ToReading()</td>
+                }
+                <td scope="col" class="text-right" title="@item.Consumption.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.Consumption.ToMoney()</td>
+                <td scope="col" class="text-right" title="@item.ConsumptionTariff.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.ConsumptionTariff.ToMoney()</td>
+                <td scope="col" class="text-right" title="@item.ConsumptionCost.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.ConsumptionCost.ToMoney()</td>
+                <td scope="col" class="text-right" title="@item.ConvertedConsumption.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.ConvertedConsumption.ToMoney()</td>
+                <td scope="col" class="text-right" title="@item.ConvertedConsumptionTariff.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.ConvertedConsumptionTariff.ToMoney()</td>
+                <td scope="col" class="text-right" title="@item.ConvertedConsumptionCost.ToMoney() - @item.TimeLogged.ToDateAndTimeShort() Kg Reading">@item.ConvertedConsumptionCost.ToMoney()</td>
+            </tr>
+        }
+    </tbody>
+</table>

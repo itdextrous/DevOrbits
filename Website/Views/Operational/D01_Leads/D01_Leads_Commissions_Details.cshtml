@@ -1,0 +1,623 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_Commissions_DetailsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Commissions_Details.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Actual Commissions <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="min-width:200px;">User</th>
+                                    <th scope="col" style="min-width:200px;">Property</th>
+                                    <th scope="col" style="min-width:200px;">Remuneration Type</th>
+                                    <th scope="col" style="min-width:50px;">Type</th>
+                                    <th scope="col" style="min-width:50px;">Interval</th>
+                                    <th scope="col" style="min-width:50px;">Price</th>
+                                    <th scope="col" style="min-width:50px;">Units</th>
+                                    <th scope="col" style="min-width:50px;">Total</th>
+                                    <th scope="col" style="min-width:50px;">Month Payable</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Approved By</th>
+                                    <th scope="col">Paid By</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="actual_UserID" class="form-control" onchange="FillInUserName('');">
+                                            @foreach (var bCT in Model.LocalUsers)
+                                            {
+                                                <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input type="hidden" id="hidden-actual_PropertyID" name="hidden-actual_PropertyID" value="">
+                                        <input type="text" id="actual_PropertyID" class="form-control" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="actual_CommissionID" class="form-control" onchange="FillInUserName('');">
+                                            @foreach (var bCT in Model.D01_Leads_Commissions)
+                                            {
+                                                <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        Actual
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="actual_Interval" type="text" readonly="readonly" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="actual_Price" type="text" readonly="readonly" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="actual_Units" type="text" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="actual_Total" type="text" readonly="readonly" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="actual_Month" type="month" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddCommissionActual();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_Commissions_Details_Actual_Items)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="actual_UserID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.LocalUsers)
+                                                {
+                                                    if (item.UserID == bCT.Value)
+                                                    {
+                                                        <option value="@(bCT.Value)" selected="selected">@(bCT.Text)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input type="hidden" id="hidden-actual_PropertyID@(item.ID)" name="hidden-actual_PropertyID@(item.ID)" value="@(item.PropertyID.HasValue ? item.PropertyID.ToString() : "")">
+                                            <input type="text" id="actual_PropertyID@(item.ID)" class="form-control" value="@item.PropertyName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="actual_CommissionID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.D01_Leads_Commissions)
+                                                {
+                                                    if (item.D01_Leads_CommissionsID == bCT.ID)
+                                                    {
+                                                        <option value="@(bCT.ID)" selected="selected">@(bCT.Description)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            Actual
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            @item.D01_Leads_Commission.Interval.GetDescription()
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            @item.D01_Leads_Commission.Price.ToMoney()
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Units@(item.ID)" type="text" value="@item.Units.ToMoneyNoDecimal()" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            @item.Total.ToMoney()
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Month@(item.ID)" type="month" value="@item.MonthPayable.ToString("yyyy-MM")" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername - @item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.ApprovedByUsername - @item.ApprovedByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                        <td scope="col" class="text-nowrap">@item.PaidByUsername - @item.PaidByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateCommissionActual('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            <a onclick="DoDeleteCommissionActual('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                            Targets <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="min-width:200px;">User</th>
+                                    <th scope="col" style="min-width:200px;">Property</th>
+                                    <th scope="col" style="min-width:200px;">Remuneration Type</th>
+                                    <th scope="col" style="min-width:50px;">Type</th>
+                                    <th scope="col" style="min-width:50px;">Interval</th>
+                                    <th scope="col" style="min-width:50px;">Price</th>
+                                    <th scope="col" style="min-width:50px;">Units</th>
+                                    <th scope="col" style="min-width:50px;">Total</th>
+                                    <th scope="col" style="min-width:50px;">Month Target</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Approved By</th>
+                                    <th scope="col">Paid By</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="target_UserID" class="form-control" onchange="FillInUserName('');">
+                                            @foreach (var bCT in Model.LocalUsers)
+                                            {
+                                                <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input type="hidden" id="hidden-target_PropertyID" name="hidden-target_PropertyID" value="">
+                                        <input type="text" id="target_PropertyID" class="form-control" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="target_CommissionID" class="form-control" onchange="FillInUserName('');">
+                                            @foreach (var bCT in Model.D01_Leads_Commissions)
+                                            {
+                                                <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        Target
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="target_Interval" type="text" readonly="readonly" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="target_Price" type="text" readonly="readonly" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="target_Units" type="text" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="target_Total" type="text" readonly="readonly" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="target_Month" type="month" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddCommissionTarget();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_Commissions_Details_Target_Items)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="target_UserID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.LocalUsers)
+                                                {
+                                                    if (item.UserID == bCT.Value)
+                                                    {
+                                                        <option value="@(bCT.Value)" selected="selected">@(bCT.Text)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input type="hidden" id="hidden-target_PropertyID@(item.ID)" name="hidden-target_PropertyID@(item.ID)" value="@(item.PropertyID.HasValue ? item.PropertyID.ToString() : "")">
+                                            <input type="text" id="target_PropertyID@(item.ID)" class="form-control" value="@item.PropertyName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="target_CommissionID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.D01_Leads_Commissions)
+                                                {
+                                                    if (item.D01_Leads_CommissionsID == bCT.ID)
+                                                    {
+                                                        <option value="@(bCT.ID)" selected="selected">@(bCT.Description)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            Target
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            @item.D01_Leads_Commission.Interval.GetDescription()
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            @item.D01_Leads_Commission.Price.ToMoney()
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Units@(item.ID)" type="text" value="@item.Units.ToMoneyNoDecimal()" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            @item.Total.ToMoney()
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Month@(item.ID)" type="month" value="@item.MonthTarget.ToString("yyyy-MM")" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername - @item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.ApprovedByUsername - @item.ApprovedByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                        <td scope="col" class="text-nowrap">@item.PaidByUsername - @item.PaidByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateCommissionTarget('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            <a onclick="DoDeleteCommissionTarget('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var hiddenFieldPAN = $("#hidden-actual_PropertyID");
+            $("#actual_PropertyID").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/operational/D01_Leads/D01_Leads_Commissions_Details_SearchPropertys',
+                        type: 'POST',
+                        data: {
+                            Prefix: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    // Set the selected value in the hidden field
+                    hiddenFieldPAN.val(ui.item.value);
+                    // Display the selected text in the text box
+                    $(this).val(ui.item.label);
+                    return false;
+                }
+            });
+
+            var hiddenFieldPTN = $("#hidden-target_PropertyID");
+            $("#target_PropertyID").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/operational/D01_Leads/D01_Leads_Commissions_Details_SearchPropertys',
+                        type: 'POST',
+                        data: {
+                            Prefix: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    // Set the selected value in the hidden field
+                    hiddenFieldPTN.val(ui.item.value);
+                    // Display the selected text in the text box
+                    $(this).val(ui.item.label);
+                    return false;
+                }
+            });
+
+            var items = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.D01_Leads_Commissions_Details_Actual_Items)));
+            $(items).each(function() {
+                var hiddenFieldPAU = $("#hidden-actual_PropertyID" + this.ID);
+
+                $("#actual_PropertyID" + this.ID).autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/operational/D01_Leads/D01_Leads_Commissions_Details_SearchPropertys',
+                            type: 'POST',
+                            data: {
+                                Prefix: request.term
+                            },
+                            success: function (data) {
+                                response(data);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(error);
+                            }
+                        });
+                    },
+                    select: function (event, ui) {
+                        // Set the selected value in the hidden field
+                        hiddenFieldPAU.val(ui.item.value);
+                        // Display the selected text in the text box
+                        $(this).val(ui.item.label);
+                        return false;
+                    }
+                });
+            });
+
+            var items = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.D01_Leads_Commissions_Details_Target_Items)));
+            $(items).each(function() {
+                var hiddenFieldPTU = $("#hidden-target_PropertyID" + this.ID);
+
+                $("#target_PropertyID" + this.ID).autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/operational/D01_Leads/D01_Leads_Commissions_Details_SearchPropertys',
+                            type: 'POST',
+                            data: {
+                                Prefix: request.term
+                            },
+                            success: function (data) {
+                                response(data);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(error);
+                            }
+                        });
+                    },
+                    select: function (event, ui) {
+                        // Set the selected value in the hidden field
+                        hiddenFieldPTU.val(ui.item.value);
+                        // Display the selected text in the text box
+                        $(this).val(ui.item.label);
+                        return false;
+                    }
+                });
+            });
+
+        });
+        function DoAddCommissionActual() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#actual_Units").val() == "") {
+                alert("Units required");
+                $("#actual_Units").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#actual_Month").val() == "") {
+                alert("Month required");
+                $("#actual_Month").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Add_Actual",
+                {
+                    actual_UserID: $("#actual_UserID").val(),
+                    actual_PropertyID: $("#hidden-actual_PropertyID").val(),
+                    actual_CommissionID: $("#actual_CommissionID").val(),
+                    actual_Units: $("#actual_Units").val(),
+                    actual_Month: $("#actual_Month").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateCommissionActual(ID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#actual_Units" + ID).val() == "") {
+                alert("Units required");
+                $("#actual_Units" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#actual_Month" + ID).val() == "") {
+                alert("Month required");
+                $("#actual_Month" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Update_Actual/" + ID,
+                {
+                    actual_UserID: $("#actual_UserID" + ID).val(),
+                    actual_PropertyID: $("#hidden-actual_PropertyID" + ID).val(),
+                    actual_CommissionID: $("#actual_CommissionID" + ID).val(),
+                    actual_Units: $("#actual_Units" + ID).val(),
+                    actual_Month: $("#actual_Month" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteCommissionActual(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Delete_Actual/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddCommissionTarget() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#target_Units").val() == "") {
+                alert("Units required");
+                $("#target_Units").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#target_Month").val() == "") {
+                alert("Month required");
+                $("#target_Month").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Add_Target",
+                {
+                    target_UserID: $("#target_UserID").val(),
+                    target_PropertyID: $("#hidden-target_PropertyID").val(),
+                    target_CommissionID: $("#target_CommissionID").val(),
+                    target_Units: $("#target_Units").val(),
+                    target_Month: $("#target_Month").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateCommissionTarget(ID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#target_Units" + ID).val() == "") {
+                alert("Units required");
+                $("#target_Units" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#target_Month" + ID).val() == "") {
+                alert("Month required");
+                $("#target_Month" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Update_Target/" + ID,
+                {
+                    target_UserID: $("#target_UserID" + ID).val(),
+                    target_PropertyID: $("#hidden-target_PropertyID" + ID).val(),
+                    target_CommissionID: $("#target_CommissionID" + ID).val(),
+                    target_Units: $("#target_Units" + ID).val(),
+                    target_Month: $("#target_Month" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteCommissionTarget(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Delete_Target/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

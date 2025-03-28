@@ -1,0 +1,193 @@
+@model MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_ResultsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Details.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body text-left" style="overflow-x:scroll;">
+                <div class="row">
+                    <div class="col-2"> Between</div>
+                    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                    <div class="col-1">And</div>
+                    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                    @*<div class="col-2">
+                            <select id="devicetype" name="devicetype">
+                                @if (!Model.DeviceType.HasValue)
+                                {
+                                    <option selected="selected" value="">Show All</option>
+                                }
+                                else
+                                {
+                                    <option value="">Show All</option>
+                                }
+                                @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                                {
+                                    @if (Model.DeviceType.HasValue && Model.DeviceType.Value == dt)
+                                    {
+                                        <option selected="selected" value="@((int)dt)">@dt</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@((int)dt)">@dt</option>
+                                    }
+                                }
+                            </select>
+                        </div>*@
+                    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+                (Tip: Use Ctrl + F to search)
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select company to view report</span>
+        }
+        else
+        {
+            <table class="table table-responsive-xl table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap text-center">Active Status</th>
+                        <th scope="col" class="text-nowrap text-center">Meter ID</th>
+                        <th scope="col" class="text-nowrap text-center">Type Name</th>
+                        <th scope="col" class="text-nowrap text-center">Meter Serial</th>
+                        <th scope="col" class="text-nowrap text-center">Meter Name</th>
+                        <th scope="col" class="text-nowrap text-center">Photo</th>
+                        <th scope="col" class="text-nowrap text-center">Customer No</th>
+                        <th scope="col" class="text-nowrap text-center">Status</th>
+                        <th scope="col" class="text-nowrap text-center">Last Communicated</th>
+                        <th scope="col" class="text-nowrap text-center">Owner</th>
+                        <th scope="col" class="text-nowrap text-center">Manufacturer</th>
+                        <th scope="col" class="text-nowrap text-center">Installation Date</th>
+                        <th scope="col" class="text-nowrap text-center">Billing Commencement Date</th>
+                        @{ DateTime currentDate = Model.FromDate;}
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            <th class="text-nowrap text-center" scope="col">@Html.Raw(currentDate.ToString("yyyy<br />MMM"))</th>
+                            currentDate = currentDate.AddMonths(1);
+                        }
+                        <th scope="col" class="text-nowrap text-center">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.L_MeterRentals_ResultsItems)
+                    {
+                        <tr onclick="RedirectToCustomer('@item.Device.Serial');" style="cursor:pointer;">
+                            <td scope="col" class="text-nowrap @(item.Device.ActiveStatusID.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@((item.Device.ActiveStatusID.HasValue ? ((MyVoltage.Data.ActiveStatus)item.Device.ActiveStatusID.Value).ToString() : "!UNKNOWN!"))</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.DeviceIDLinked > 0 ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.DeviceIDLinked</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.TypeID.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@((item.Device.TypeID.HasValue ? ((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.Device.TypeID.Value).ToString() : "!UNKNOWN!"))</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.Device.Serial) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.Serial</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.Device.Name) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.Name</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.PhotoURL) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">
+                                @if (!string.IsNullOrEmpty(item.PhotoURL))
+                                {
+                                    <a rel="popover" href="@item.PhotoURL" data-img="@item.PhotoURL" target="_blank">Show Photo</a>
+                                }
+                            </td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.SkybillCustomer.Customer_No) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.SkybillCustomer.Customer_No</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.IsOnline.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.IsOnline.ToIsOnlineStatus()</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.LastCommunicated.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.LastCommunicated.ToDateAndTimeShort()</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.SkybillCustomer.Owner) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.SkybillCustomer.Owner</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.SkybillCustomer.Manufacturer) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.SkybillCustomer.Manufacturer</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.Installation_Date.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.Installation_Date.ToDateAndTimeShort()</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.BillingCommencementDate.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.BillingCommencementDate.ToDateAndTimeShort()</td>
+
+                            @{ currentDate = Model.FromDate;}
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                var billingItem = item.MonthlyRentalFigures.Where(p => p.Key == currentDate).SingleOrDefault();
+                                <td title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - @currentDate.ToString("yyyy MMM")" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_ResultsModel.GetCellClass(billingItem.Value))>@billingItem.Value.ToString("N0")</td>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <td scope="col" style="border-left:3px solid black;border-right:3px solid black;" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Total" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_ResultsModel.GetCellClass(item.MonthlyRentalFigures.Select(p => p.Value).Sum()))>@item.MonthlyRentalFigures.Select(p => p.Value).Sum().ToString("N0")</td>
+
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col" colspan="13" class="text-nowrap text-left" title="">Total</td>
+
+                        @{ currentDate = Model.FromDate;}
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            var items = Model.L_MeterRentals_ResultsItems.Select(p => p.MonthlyRentalFigures).ToList();
+                            decimal total = 0;
+                            foreach (var mItem in items)
+                            {
+                                foreach (var item in mItem.Where(p => p.Key == currentDate).ToList())
+                                {
+                                    total += item.Value;
+                                }
+                            }
+                            <td style="border-top:3px double black;border-bottom:3px double black;" title="@operationalProvider.CompanyName Total - @currentDate.ToString("yyyy MMM")" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_BillingAnalysis_Amount_MonthlyModel.GetCellClass(total, true))>@total.ToString("N0")</td>
+                            currentDate = currentDate.AddMonths(1);
+                        }
+                        @{
+                            currentDate = Model.FromDate;
+                            decimal monthlyTotal = 0;
+                        }
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            var items = Model.L_MeterRentals_ResultsItems.Select(p => p.MonthlyRentalFigures).ToList();
+                            decimal total = 0;
+                            foreach (var mItem in items)
+                            {
+                                foreach (var item in mItem.Where(p => p.Key == currentDate).ToList())
+                                {
+                                    total += item.Value;
+                                }
+                            }
+                            monthlyTotal += total;
+                            currentDate = currentDate.AddMonths(1);
+                        }
+                        <td style="border-top:3px double black;border-bottom:3px double black;border-left:3px solid black;border-right:3px solid black;" title="@operationalProvider.CompanyName Total (@Model.FromDate.ToString("yyyy MMM") - @Model.ToDate.ToString("yyyy MMM"))" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_ResultsModel.GetCellClass(monthlyTotal, true))>@monthlyTotal.ToString("N0")</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+$('a[rel=popover]').popover({
+html: true,
+trigger: 'hover',
+placement: 'bottom',
+content: function(){return '<img height="100px;" src="'+$(this).data('img') + '" />';}
+});
+        function RedirectToCustomer(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/L_MeterRentals/L_MeterRentals_Details%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/L_MeterRentals/L_MeterRentals_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

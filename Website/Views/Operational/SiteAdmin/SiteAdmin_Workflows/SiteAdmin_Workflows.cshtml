@@ -1,0 +1,689 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_WorkflowsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_Workflows.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingFive">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
+                            Workflow Group Grand Parents <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Workflow Group Grand Parent Name</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input id="WorkflowGroupGrandParentName_" type="text" class="form-control" value="" placeholder="Workflow Group Name" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddWorkflowGroupGrandParent();" href="#WorkflowGroupGrandParentName_" class="btn btn-sm btn-outline-primary-sm" title="Add Workflow Group"><i class="fas fa-plus-circle"></i></a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.WorkflowGroupGrandParents.OrderBy(p => p.WorkflowGroupGrandParentName))
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.WorkflowGroupGrandParentName}";
+                                    <tr class="@Html.Raw(rowClass)" title="@title">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="WorkflowGroupGrandParentName_@item.ID" type="text" class="form-control" value="@item.WorkflowGroupGrandParentName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateWorkflowGroupGrandParent('@item.ID');" href="#WorkflowGroupGrandParentName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update @item.WorkflowGroupGrandParentName"><i class="fas fa-save"></i></a>
+                                            &nbsp;
+                                            @if (Model.WorkflowGroupParents.Where(p => p.WorkflowGroupGrandParentID.HasValue && p.WorkflowGroupGrandParentID.Value == item.ID).Count() == 0)
+                                            {
+                                                <a onclick="DoDeleteWorkflowGroupGrandParent('@item.ID');" href="#WorkflowGroupGrandParentName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete @item.WorkflowGroupGrandParentName"><i class="fas fa-trash-alt"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingFour">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+                            Workflow Group Parents <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Workflow Group Name</th>
+                                    <th scope="col">Workflow Group Grand Parent</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input id="WorkflowGroupParentName_" type="text" class="form-control" value="" placeholder="Workflow Group Name" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="WorkflowGroupGrandParentID_" class="form-control">
+                                            @foreach (var bCT in Model.WorkflowGroupGrandParents.OrderBy(p => p.WorkflowGroupGrandParentName))
+                                            {
+                                                <option value="@(bCT.ID)">@(bCT.WorkflowGroupGrandParentName)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddWorkflowGroupParent();" href="#WorkflowGroupParentName_" class="btn btn-sm btn-outline-primary-sm" title="Add Workflow Group"><i class="fas fa-plus-circle"></i></a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.WorkflowGroupParents.OrderBy(p => p.WorkflowGroupParentName))
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.WorkflowGroupParentName}";
+                                    <tr class="@Html.Raw(rowClass)" title="@title">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="WorkflowGroupParentName_@item.ID" type="text" class="form-control" value="@item.WorkflowGroupParentName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="WorkflowGroupGrandParentID_@item.ID" class="form-control">
+                                                @if (!item.WorkflowGroupGrandParentID.HasValue)
+                                                {
+                                                    <option value="">-</option>
+                                                }
+                                                @foreach (var bCT in Model.WorkflowGroupGrandParents.OrderBy(p => p.WorkflowGroupGrandParentName))
+                                                {
+                                                    if (item.WorkflowGroupGrandParentID.HasValue && item.WorkflowGroupGrandParentID.Value == bCT.ID)
+                                                    {
+                                                        <option selected="selected" value="@(bCT.ID)">@(bCT.WorkflowGroupGrandParentName)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.ID)">@(bCT.WorkflowGroupGrandParentName)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateWorkflowGroupParent('@item.ID');" href="#WorkflowGroupParentName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update @item.WorkflowGroupParentName"><i class="fas fa-save"></i></a>
+                                            &nbsp;
+                                            @if (Model.WorkflowGroups.Where(p => p.WorkflowGroupParentID.HasValue && p.WorkflowGroupParentID.Value == item.ID).Count() == 0)
+                                            {
+                                                <a onclick="DoDeleteWorkflowGroupParent('@item.ID');" href="#WorkflowGroupParentName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete @item.WorkflowGroupParentName"><i class="fas fa-trash-alt"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Workflow Groups <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Workflow Group Name</th>
+                                    <th scope="col">Business Department</th>
+                                    <th scope="col">Workflow Group Parent</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input id="workflowGroupName_" type="text" class="form-control" value="" placeholder="Workflow Group Name" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="workflowGroupBusinessDepartmentID_" class="form-control">
+                                            @foreach (var pillar in Model.BusinessPillars.OrderBy(p => p.BusinessPillarName))
+                                            {
+                                                @foreach (var bCT in Model.BusinessDepartments.Where(p => p.BusinessPillarID == pillar.ID).OrderBy(p => p.BusinessDepartmentName))
+                                                {
+                                                    <option value="@(bCT.ID)">@(Model.BusinessPillars.Where(p => p.ID == bCT.BusinessPillarID).SingleOrDefault().BusinessPillarName) - @(bCT.BusinessDepartmentName)</option>
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="workflowGroupParentID_" class="form-control">
+                                            @foreach (var bCT in Model.WorkflowGroupParents.OrderBy(p => p.WorkflowGroupParentName))
+                                            {
+                                                <option value="@(bCT.ID)">@(bCT.WorkflowGroupParentName)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddWorkflowGroup();" href="#workflowGroupName_" class="btn btn-sm btn-outline-primary-sm" title="Add Workflow Group"><i class="fas fa-plus-circle"></i></a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.WorkflowGroups.OrderBy(p => p.WorkflowGroupName))
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.WorkflowGroupName}";
+                                    <tr class="@Html.Raw(rowClass)" title="@title">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="workflowGroupName_@item.ID" type="text" class="form-control" value="@item.WorkflowGroupName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="workflowGroupBusinessDepartmentID_@item.ID" class="form-control">
+                                                @foreach (var pillar in Model.BusinessPillars.OrderBy(p => p.BusinessPillarName))
+                                                {
+                                                    @foreach (var bCT in Model.BusinessDepartments.Where(p => p.BusinessPillarID == pillar.ID).OrderBy(p => p.BusinessDepartmentName))
+                                                    {
+                                                        if (item.BusinessDepartmentID.HasValue && item.BusinessDepartmentID == bCT.ID)
+                                                        {
+                                                            <option selected="selected" value="@(bCT.ID)">@(Model.BusinessPillars.Where(p => p.ID == bCT.BusinessPillarID).SingleOrDefault().BusinessPillarName) - @(bCT.BusinessDepartmentName)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(bCT.ID)">@(Model.BusinessPillars.Where(p => p.ID == bCT.BusinessPillarID).SingleOrDefault().BusinessPillarName) - @(bCT.BusinessDepartmentName)</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="workflowGroupParentID_@item.ID" class="form-control">
+                                                @if (!item.WorkflowGroupParentID.HasValue)
+                                                {
+                                                    <option value="">-</option>
+                                                }
+                                                @foreach (var bCT in Model.WorkflowGroupParents.OrderBy(p => p.WorkflowGroupParentName))
+                                                {
+                                                    if (item.WorkflowGroupParentID.HasValue && item.WorkflowGroupParentID.Value == bCT.ID)
+                                                    {
+                                                        <option selected="selected" value="@(bCT.ID)">@(bCT.WorkflowGroupParentName)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.ID)">@(bCT.WorkflowGroupParentName)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateWorkflowGroup('@item.ID');" href="#workflowGroupName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update @item.WorkflowGroupName"><i class="fas fa-save"></i></a>
+                                            &nbsp;
+                                            @if (Model.SecureAreas.Where(p => p.GroupID.HasValue && p.GroupID.Value == item.ID).Count() == 0)
+                                            {
+                                                <a onclick="DoDeleteWorkflowGroup('@item.ID');" href="#workflowGroupName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete @item.WorkflowGroupName"><i class="fas fa-trash-alt"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Business Pillars <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Business Pillar Name</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input id="businessPillarName_" type="text" class="form-control" value="" placeholder="Business Pillar Name" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddBusinessPillar();" href="#businessPillarName_" class="btn btn-sm btn-outline-primary-sm" title="Add Business Pillar"><i class="fas fa-plus-circle"></i></a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.BusinessPillars.OrderBy(p => p.BusinessPillarName))
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.BusinessPillarName}";
+                                    <tr class="@Html.Raw(rowClass)" title="@title">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="businessPillarName_@item.ID" type="text" class="form-control" value="@item.BusinessPillarName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateBusinessPillar('@item.ID');" href="#businessPillarName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update @item.BusinessPillarName"><i class="fas fa-save"></i></a>
+                                            &nbsp;
+                                            @if (Model.BusinessDepartments.Where(p => p.BusinessPillarID == item.ID).Count() == 0)
+                                            {
+                                                <a onclick="DoDeleteBusinessPillar('@item.ID');" href="#businessPillarName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete @item.BusinessPillarName"><i class="fas fa-trash-alt"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingThree">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Business Departments <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Business Department Name</th>
+                                    <th scope="col">Business Pillar</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input id="businessDepartmentName_" type="text" class="form-control" value="" placeholder="Business Department Name" />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="businessPillarID_" class="form-control">
+                                            @foreach (var bCT in Model.BusinessPillars.OrderBy(p => p.BusinessPillarName))
+                                            {
+                                                <option value="@(bCT.ID)">@(bCT.BusinessPillarName)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddBusinessDepartment();" href="#businessDepartmentName_" class="btn btn-sm btn-outline-primary-sm" title="Add Business Department"><i class="fas fa-plus-circle"></i></a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.BusinessDepartments.OrderBy(p => p.BusinessPillarID))
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.BusinessDepartmentName}";
+                                    <tr class="@Html.Raw(rowClass)" title="@title">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="businessDepartmentName_@item.ID" type="text" class="form-control" value="@item.BusinessDepartmentName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="businessPillarID_@item.ID" class="form-control">
+                                                @foreach (var bCT in Model.BusinessPillars.OrderBy(p => p.BusinessPillarName))
+                                                {
+                                                    if (item.BusinessPillarID == bCT.ID)
+                                                    {
+                                                        <option selected="selected" value="@(bCT.ID)">@(bCT.BusinessPillarName)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.ID)">@(bCT.BusinessPillarName)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateBusinessDepartment('@item.ID');" href="#businessDepartmentName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update @item.BusinessDepartmentName"><i class="fas fa-save"></i></a>
+                                            &nbsp;
+                                            <a onclick="DoDeleteBusinessDepartment('@item.ID');" href="#businessDepartmentName_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete @item.BusinessDepartmentName"><i class="fas fa-trash-alt"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        function DoAddWorkflowGroupGrandParent() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroupGrandParents_Add",
+                {
+                    WorkflowGroupGrandParentName: $("#WorkflowGroupGrandParentName_").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateWorkflowGroupGrandParent(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroupGrandParents_Update/" + ItemID,
+                {
+                    WorkflowGroupGrandParentName: $("#WorkflowGroupGrandParentName_" + ItemID).val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteWorkflowGroupGrandParent(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroupGrandParents_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddWorkflowGroupParent() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroupParents_Add",
+                {
+                    WorkflowGroupParentName: $("#WorkflowGroupParentName_").val(),
+                    WorkflowGroupGrandParentID: $("#WorkflowGroupGrandParentID_").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateWorkflowGroupParent(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroupParents_Update/" + ItemID,
+                {
+                    WorkflowGroupParentName: $("#WorkflowGroupParentName_" + ItemID).val(),
+                    WorkflowGroupGrandParentID: $("#WorkflowGroupGrandParentID_" + ItemID).val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteWorkflowGroupParent(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroupParents_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddWorkflowGroup() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroups_Add",
+                {
+                    workflowGroupName: $("#workflowGroupName_").val(),
+                    workflowGroupBusinessDepartmentID: $("#workflowGroupBusinessDepartmentID_").val(),
+                    workflowGroupParentID: $("#workflowGroupParentID_").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateWorkflowGroup(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroups_Update/" + ItemID,
+                {
+                    workflowGroupName: $("#workflowGroupName_" + ItemID).val(),
+                    workflowGroupBusinessDepartmentID: $("#workflowGroupBusinessDepartmentID_" + ItemID).val(),
+                    workflowGroupParentID: $("#workflowGroupParentID_" + ItemID).val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteWorkflowGroup(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_WorkflowGroups_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddBusinessPillar() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_BusinessPillars_Add",
+                {
+                    businessPillarName: $("#businessPillarName_").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateBusinessPillar(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_BusinessPillars_Update/" + ItemID,
+                {
+                    businessPillarName: $("#businessPillarName_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteBusinessPillar(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_BusinessPillars_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddBusinessDepartment() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_BusinessDepartments_Add",
+                {
+                    businessDepartmentName: $("#businessDepartmentName_").val(),
+                    businessPillarID: $("#businessPillarID_").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateBusinessDepartment(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_BusinessDepartments_Update/" + ItemID,
+                {
+                    businessDepartmentName: $("#businessDepartmentName_" + ItemID).val(),
+                    businessPillarID: $("#businessPillarID_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteBusinessDepartment(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Workflows_BusinessDepartments_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

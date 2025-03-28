@@ -1,0 +1,207 @@
+@model MyVoltage.Models.OperationalModels.A09_Flags.A09_FlagsModels.A09_Flags_CreateModel
+
+@{
+    ViewData["Title"] = "Flag Create";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row mb-2 mt-2 col-12">
+                    <h5 class="text-orange">Flag Details</h5>
+                </div>
+
+                <div class="row mb-2 mt-2 col-12 ui-state-error">
+                    <div class="ui-state-error-text">Note: Once saved the below details cannot be changed. Please ensure all fields are filled in correctly.</div>
+                </div>
+            </div>
+
+
+            <div class="card-body">
+                <form asp-action="A09_Flags_Create" enctype="multipart/form-data">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="FlagType" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            @Html.DropDownList("FlagType", Model.FlagType, new { @class = "form-control" })
+                            <span asp-validation-for="FlagType" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="AssignTo" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            @Html.DropDownList("AssignTo", Model.AssignTo, new { @class = "form-control" })
+                            <span asp-validation-for="AssignTo" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="GatewayID" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <input id="gatewayID" name="gatewayID" onchange="AutoFillGatewayDetails();" class="form-control" asp-for="GatewayID" />
+                            <span asp-validation-for="GatewayID" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="DeviceSerial" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <input id="DeviceSearch_Serial" name="DeviceSearch_Serial" onchange="AutoFillMeterDetails();" class="form-control" asp-for="DeviceSerial" />
+                            <span asp-validation-for="DeviceSerial" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="CustomerNumber" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <input id="customerNo" name="customerNo" onchange="AutoFillCustomerDetails();" class="form-control" asp-for="CustomerNumber" />
+                            <span asp-validation-for="CustomerNumber" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="Company" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            @Html.DropDownList("Company", Model.Company, new { @class = "form-control" })
+                            <span asp-validation-for="Company" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="ReasonForFlag" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <textarea class="form-control" asp-for="ReasonForFlag"></textarea>
+                            <span asp-validation-for="ReasonForFlag" class="text-red"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-12 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Create Flag</button>
+                        </div>
+                    </div>
+
+
+                </form>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function AutoFillMeterDetails() {
+            if ($("#DeviceSearch_Serial").val() != "") {
+                $("#loaderContent").css("display", "block");
+                $("#gatewayID").val("");
+
+                $.get('/operational/A09_Flags/A09_Flags_Create_Search_Details/' + $("#DeviceSearch_Serial").val(), function (data, status) {
+                    if (data.result) {
+                        $("#Company").val(data.companyID);
+                        $("#customerNo").val(data.customerNumber);
+                    }
+                }).done(function () {
+                    $("#loaderContent").css("display", "none");
+                });
+            }
+        }
+
+        function AutoFillCustomerDetails() {
+            if ($("#customerNo").val() != "") {
+                $("#loaderContent").css("display", "block");
+                $("#gatewayID").val("");
+
+                $.get('/operational/A09_Flags/A09_Flags_Create_Search_Details/' + $("#customerNo").val(), function (data, status) {
+                    if (data.result) {
+                        $("#Company").val(data.companyID);
+                        $("#DeviceSearch_Serial").val(data.meterSerial);
+                    }
+                }).done(function () {
+                    $("#loaderContent").css("display", "none");
+                });
+            }
+        }
+
+        function AutoFillGatewayDetails() {
+            if ($("#gatewayID").val() != "") {
+
+                $("#loaderContent").css("display", "block");
+
+                $.get('/operational/A09_Flags/A09_Flags_Create_Search_Details_GW/' + $("#gatewayID").val(), function (data, status) {
+                    if (data.result) {
+                        $("#Company").val(data.companyID);
+                    }
+                }).done(function () {
+                    $("#loaderContent").css("display", "none");
+                });
+            }
+        }
+
+        $("#DeviceSearch_Serial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A09_Flags/A09_Flags_Create_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+        $("#customerNo").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A09_Flags/A09_Flags_Create_Search_Customer_No",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+
+    </script>
+}

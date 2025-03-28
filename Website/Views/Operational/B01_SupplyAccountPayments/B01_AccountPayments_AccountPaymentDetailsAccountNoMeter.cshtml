@@ -1,0 +1,232 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_AccountPaymentDetailsAccountNoMeterModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails.GetDescription() + " - " + operationalProvider.CompanyName + " - Account No / Meter";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetails" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+
+                }
+                else
+                {
+
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="B01_AccountPayments_AccountPaymentDetailsAccountNoMeter" enctype="multipart/form-data">
+                            <input asp-for="BCDID" type="hidden" />
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CompanyName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="CompanyName" disabled="disabled" />
+                                            <span asp-validation-for="CompanyName" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilElecAccNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="CouncilElecAccNo" />
+                                            <span asp-validation-for="CouncilElecAccNo" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="PaymentTypes" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("PaymentType", Model.PaymentTypes, new { @class = "form-control" })
+                                            <span asp-validation-for="PaymentTypes" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilTypes" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("CouncilType", Model.CouncilTypes, new { @class = "form-control", @onChange = "GetCouncilCycles();" })
+                                            <span asp-validation-for="CouncilTypes" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilCycles" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("CouncilCycle", Model.CouncilCycles, new { @class = "form-control" })
+                                            <span asp-validation-for="CouncilCycles" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilURL" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="CouncilURL" />
+                                            <span asp-validation-for="CouncilURL" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="OpeningBalance" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="OpeningBalance" />
+                                            <span asp-validation-for="OpeningBalance" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="OpeningBalanceClient" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="OpeningBalanceClient" />
+                                            <span asp-validation-for="OpeningBalanceClient" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilUsername" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                            {
+                                                <input class="form-control" asp-for="CouncilUsername" />
+                                                <span asp-validation-for="CouncilUsername" class="text-red"></span>
+                                            }
+                                            else
+                                            {
+                                                <span>Hidden</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilPassword" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                            {
+                                                <input class="form-control" asp-for="CouncilPassword" />
+                                                <span asp-validation-for="CouncilPassword" class="text-red"></span>
+                                            }
+                                            else
+                                            {
+                                                <span>Hidden</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilLoginAccNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                            {
+                                                <input class="form-control" asp-for="CouncilLoginAccNo" />
+                                                <span asp-validation-for="CouncilLoginAccNo" class="text-red"></span>
+                                            }
+                                            else
+                                            {
+                                                <span>Hidden</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilOnlinePin" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                            {
+                                                <input class="form-control" asp-for="CouncilOnlinePin" />
+                                                <span asp-validation-for="CouncilOnlinePin" class="text-red"></span>
+                                            }
+                                            else
+                                            {
+                                                <span>Hidden</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-6 text-left">
+                                        <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                    </div>
+                                </div>
+                            }
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        GetCouncilCycles();
+        function GetCouncilCycles() {
+            const months = ["JAN", "FEB", "MAR","APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            $("#CouncilCycle").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.AllCouncilCycles)));
+            $(companies).each(function() {
+                if (this.BuildingCouncilTypeID ==  $("#CouncilType").val()) {
+                    if (this.ID.toString() ==  '@Model.SelectedCycleID') {
+                        $("#CouncilCycle").append(`<option selected="selected" value="${this.ID}">${this.BuildingCycleCode}</option>`);
+                    }
+                    else {
+                        $("#CouncilCycle").append(`<option value="${this.ID}">${this.BuildingCycleCode}</option>`);
+                    }
+                }
+            });
+
+        }
+    </script>
+}

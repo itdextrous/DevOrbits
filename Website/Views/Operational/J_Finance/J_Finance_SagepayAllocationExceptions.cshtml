@@ -1,0 +1,206 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_SagepayAllocationExceptionsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_SagepayAllocationExceptions.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-body">
+                <div>
+                    <form asp-action="J_Finance_SagepayAllocationExceptions" enctype="multipart/form-data">
+                        <div class="row col-12">Created Between</div>
+                        <div class="row col-12"><input type="date" name="fromDate" id="fromDate" asp-for="FromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                        <div class="row col-12">And</div>
+                        <div class="row col-12"><input type="date" name="toDate" id="toDate" asp-for="ToDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                        <div class="row col-12">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</button>
+                            &nbsp;
+                            <a href="/operational/J_Finance/J_Finance_SagepayAllocationExceptions" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Create Date</th>
+                    <th scope="col">Reference</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Reason</th>
+                    <th scope="col">Customer Number</th>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Payment Status</th>
+                    <th scope="col">Fee Status</th>
+                    <th scope="col">Vending 1 Status</th>
+                    <th scope="col">Vending 2 Status</th>
+                    <th scope="col">Vending 3 Status</th>
+                    <th scope="col">Vending 4 Status</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.J_Finance_SagepayAllocationExceptionsItems)
+                {
+                    string sbStatus = "Not Found";
+                    string sbStatusFee = "Not Found";
+                    string sbStatusVending1 = "Not Required";
+                    string sbStatusVending2 = "Not Required";
+                    string sbStatusVending3 = "Not Required";
+                    string sbStatusVending4 = "Not Required";
+                    string rowClass = "";
+                    string cellClass = "";
+                    string cellClassFee = "";
+                    string cellClassVending1 = "";
+                    string cellClassVending2 = "";
+                    string cellClassVending3 = "";
+                    string cellClassVending4 = "";
+
+                    if (!string.IsNullOrEmpty(entry.SkybillCompanyName) && !string.IsNullOrEmpty(entry.SkybillCustomerNo))
+                    {
+                        sbStatus = $"Found - {entry.SkybillCompanyName}:{entry.SkybillCustomerNo}";
+                        cellClass = "font-weight-bold text-green";
+                    }
+                    else
+                    {
+                        cellClass = "font-weight-bold text-red";
+                    }
+
+                    if (entry.RequiresConvFee)
+                    {
+                        if (entry.SkybillFeeAmount.HasValue)
+                        {
+                            sbStatusFee = $"Found - {entry.SkybillFeeAmount.ToMoney("R")}";
+                            cellClassFee = "font-weight-bold text-green";
+                        }
+                        else
+                        {
+                            cellClassFee = "font-weight-bold text-red";
+                        }
+                    }
+                    else
+                    {
+                        sbStatusFee = "Not Required";
+                    }
+
+                    if (entry.Vending1Required.HasValue && entry.Vending1Required.Value)
+                    {
+                        if (entry.Vending1LogID.HasValue)
+                        {
+                            sbStatusFee = $"Found - {((entry.Vending1Amount5621.HasValue ? entry.Vending1Amount5621.Value : 0) + (entry.Vending1Amount7191.HasValue ? entry.Vending1Amount7191.Value : 0) + (entry.Vending1Amount8640.HasValue ? entry.Vending1Amount8640.Value : 0)).ToMoney()}";
+                            cellClassFee = "font-weight-bold text-green";
+                        }
+                        else
+                        {
+                            sbStatusFee = $"Not Found";
+                            cellClassFee = "font-weight-bold text-red";
+                        }
+                    }
+
+                    if (entry.Vending2Required.HasValue && entry.Vending2Required.Value)
+                    {
+                        if (entry.Vending2LogID.HasValue)
+                        {
+                            sbStatusFee = $"Found - {((entry.Vending2Amount5621.HasValue ? entry.Vending2Amount5621.Value : 0) + (entry.Vending2Amount7191.HasValue ? entry.Vending2Amount7191.Value : 0) + (entry.Vending2Amount8640.HasValue ? entry.Vending2Amount8640.Value : 0)).ToMoney()}";
+                            cellClassFee = "font-weight-bold text-green";
+                        }
+                        else
+                        {
+                            sbStatusFee = $"Not Found";
+                            cellClassFee = "font-weight-bold text-red";
+                        }
+                    }
+
+                    if (entry.Vending3Required.HasValue && entry.Vending3Required.Value)
+                    {
+                        if (entry.Vending3LogID.HasValue)
+                        {
+                            sbStatusFee = $"Found - {((entry.Vending3Amount5621.HasValue ? entry.Vending3Amount5621.Value : 0) + (entry.Vending3Amount7191.HasValue ? entry.Vending3Amount7191.Value : 0) + (entry.Vending3Amount8640.HasValue ? entry.Vending3Amount8640.Value : 0)).ToMoney()}";
+                            cellClassFee = "font-weight-bold text-green";
+                        }
+                        else
+                        {
+                            sbStatusFee = $"Not Found";
+                            cellClassFee = "font-weight-bold text-red";
+                        }
+                    }
+
+                    if (entry.Vending4Required.HasValue && entry.Vending4Required.Value)
+                    {
+                        if (entry.Vending4LogID.HasValue)
+                        {
+                            sbStatusFee = $"Found - {((entry.Vending4Amount5621.HasValue ? entry.Vending4Amount5621.Value : 0) + (entry.Vending4Amount7191.HasValue ? entry.Vending4Amount7191.Value : 0) + (entry.Vending4Amount8640.HasValue ? entry.Vending4Amount8640.Value : 0)).ToMoney()}";
+                            cellClassFee = "font-weight-bold text-green";
+                        }
+                        else
+                        {
+                            sbStatusFee = $"Not Found";
+                            cellClassFee = "font-weight-bold text-red";
+                        }
+                    }
+
+                    <tr class="@Html.Raw(rowClass)">
+                        <td scope="row">@entry.CreateDate.ToDateAndTimeShort()</td>
+                        <td scope="row">@entry.Reference</td>
+                        <td scope="row">@(entry.PaymentMethodID.HasValue ? ((MyVoltage.Data.PaymentMethodEnum)entry.PaymentMethodID.Value).GetDescription() : "")</td>
+                        <td scope="row">@entry.Amount.ToMoney("R")</td>
+                        <td scope="row">@entry.Reason</td>
+                        <td scope="row">@entry.CustomerNumber</td>
+                        <td scope="row">@entry.FullName</td>
+                        <td scope="row" class="@Html.Raw(cellClass)">@sbStatus</td>
+                        <td scope="row" class="@Html.Raw(cellClassFee)">@sbStatusFee</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending1)">@sbStatusVending1</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending2)">@sbStatusVending2</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending3)">@sbStatusVending3</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending4)">@sbStatusVending4</td>
+                        <td scope="row">
+                            @if (!string.IsNullOrEmpty(entry.SerialNumber))
+                            {
+                                <a href="/operational/changeActiveMeter/@entry.SerialNumber?R=/operational/customer/Customer_Billing" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-alt"></i>&nbsp;Billing</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CustomerNumber_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/J_Finance/J_Finance_SagepayAllocationExceptions/Search",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

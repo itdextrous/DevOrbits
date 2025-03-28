@@ -1,0 +1,298 @@
+@using MyVoltage.Extensions;
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.CalibrationDetailsModel;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    string rowclass = "";
+
+}
+<table class="table table-responsive-xl table-striped table-hover">
+    <tr>
+        <th>Calibration Details</th>
+        <th>Live</th>
+        <th>Calibration</th>
+        <th>Is it the same?</th>
+    </tr>
+
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_LatestOdoReading)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Audit Reading</td>
+        @if (operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+        {
+            <td>@Model.LiveDetails.LatestOdoReading.ToDecimal(3)</td>
+            <td>@Model.PreviousCalibrationDetails.LatestOdoReading.ToDecimal(3)</td>
+        }
+        else
+        {
+            <td>@Model.LiveDetails.LatestOdoReading.ToReading()</td>
+            <td>@Model.PreviousCalibrationDetails.LatestOdoReading.ToReading()</td>
+        }
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_LatestOdoReading.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_LatestOdoTimeLogged)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Audit Time Logged</td>
+        <td>@Model.LiveDetails.LatestOdoTimeLogged.ToDateAndTimeShort()</td>
+        <td>@Model.PreviousCalibrationDetails.LatestOdoTimeLogged.ToDateAndTimeShort()</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_LatestOdoTimeLogged.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (Model.PreviousCalibrationDetails.CalculatedDifferenceReading > 1000)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>System Reading</td>
+        @if (operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+        {
+            <td>@Model.LiveDetails.VerificationReading.ToDecimal(3)</td>
+            <td>@Model.PreviousCalibrationDetails.VerificationReading.ToDecimal(3)</td>
+        }
+        else
+        {
+            <td>@Model.LiveDetails.VerificationReading.ToReading()</td>
+            <td>@Model.PreviousCalibrationDetails.VerificationReading.ToReading()</td>
+        }
+        <td>-</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (Model.LiveDetails.CalculatedDifferenceReading > 1000)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>System Reading Date Time</td>
+        <td>@Model.LiveDetails.VerificationReadingDateTime.ToDateAndTimeShort()</td>
+        <td>@Model.PreviousCalibrationDetails.VerificationReadingDateTime.ToDateAndTimeShort()</td>
+        <td>-</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (Model.LiveDetails.CalculatedDifferenceReading > 1000)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Calibration Difference</td>
+        @if (operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+        {
+            <td>@Model.LiveDetails.CalculatedDifferenceReading.ToDecimal(3)</td>
+            <td>@Model.PreviousCalibrationDetails.CalculatedDifferenceReading.ToDecimal(3)</td>
+        }
+        else
+        {
+            <td>@Model.LiveDetails.CalculatedDifferenceReading.ToReading()</td>
+            <td>@Model.PreviousCalibrationDetails.CalculatedDifferenceReading.ToReading()</td>
+        }
+        <td>-</td>
+    </tr>
+    <tr><td colspan="4">&nbsp;</td></tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_GatewayID)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Gateway ID</td>
+        <td>@Model.LiveDetails.GatewayID</td>
+        <td>@Model.PreviousCalibrationDetails.GatewayID</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_GatewayID.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_CompanyID)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Company</td>
+        <td>@(Model.LiveDetails.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == Model.LiveDetails.CompanyID.Value).SingleOrDefault().Name : "")</td>
+        <td>@(Model.PreviousCalibrationDetails.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == Model.PreviousCalibrationDetails.CompanyID.Value).SingleOrDefault().Name : "")</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_CompanyID.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_MeterID)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Meter ID</td>
+        <td>@Model.LiveDetails.MeterID</td>
+        <td>@Model.PreviousCalibrationDetails.MeterID</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_MeterID.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_TypeName)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Type Name</td>
+        <td>@Model.LiveDetails.TypeName</td>
+        <td>@Model.PreviousCalibrationDetails.TypeName</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_TypeName.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_Port)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Port</td>
+        <td>@Model.LiveDetails.Port</td>
+        <td>@Model.PreviousCalibrationDetails.Port</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_Port.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_RemoteAddress)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Remote Address</td>
+        <td>@Model.LiveDetails.RemoteAddress</td>
+        <td>@Model.PreviousCalibrationDetails.RemoteAddress</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_RemoteAddress.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_RemoteIndex)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Remote Index</td>
+        <td>@Model.LiveDetails.RemoteIndex</td>
+        <td>@Model.PreviousCalibrationDetails.RemoteIndex</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_RemoteIndex.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @*     @if (!Model.PreviousCalibrationDetails.IsTheSame_Config6Value)
+    {
+    rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+    <td>Config 6 Value</td>
+    <td>@Model.LiveDetails.Config6Value</td>
+    <td>@Model.PreviousCalibrationDetails.Config6Value</td>
+    <td>@Model.PreviousCalibrationDetails.IsTheSame_Config6Value.ToBoolean()</td>
+    </tr>
+    *@    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_DeviceIDLinked)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Device ID Linked</td>
+        <td>@Model.LiveDetails.DeviceIDLinked</td>
+        <td>@Model.PreviousCalibrationDetails.DeviceIDLinked</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_DeviceIDLinked.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_DeviceSerialLinked)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Device Serial Linked</td>
+        <td>@Model.LiveDetails.DeviceSerialLinked</td>
+        <td>@Model.PreviousCalibrationDetails.DeviceSerialLinked</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_DeviceSerialLinked.ToBoolean()</td>
+    </tr>
+    @{
+        rowclass = "";
+    }
+    @if (!Model.PreviousCalibrationDetails.IsTheSame_DeviceNameLinked)
+    {
+        rowclass = " class=\"table-danger\"";
+    }
+    <tr @Html.Raw(rowclass)>
+        <td>Device Name Linked</td>
+        <td>@Model.LiveDetails.DeviceNameLinked</td>
+        <td>@Model.PreviousCalibrationDetails.DeviceNameLinked</td>
+        <td>@Model.PreviousCalibrationDetails.IsTheSame_DeviceNameLinked.ToBoolean()</td>
+    </tr>
+    <tr>
+        <td>Calibration Date</td>
+        <td>@DateTime.Now.ToDateAndTimeShort()</td>
+        <td>@Model.PreviousCalibrationDetails.CalibrationVerificationDate.ToDateAndTimeShort()</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Calibration User</td>
+        <td>[System]</td>
+        <td>@Model.PreviousCalibrationDetails.CalibrationVerificationName</td>
+        <td></td>
+    </tr>
+    @if (Model.PreviousCalibrationDetails.StatusID != (int)MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.Calibrated)
+    {
+        <tr>
+            <td>Changed Reason</td>
+            <td>[System]</td>
+            <td>@Model.PreviousCalibrationDetails.ChangedReason</td>
+            <td></td>
+        </tr>
+    }
+    <tr>
+        <td>Expiry Date</td>
+        <td>[System]</td>
+        <td>@Model.PreviousCalibrationDetails.ExpireDate.ToDateAndTimeShort(true)</td>
+        <td></td>
+    </tr>
+    @if (!string.IsNullOrEmpty(Model.PreviousCalibrationDetails.ReasonForOverride))
+    {
+        <tr>
+            <td>Override Reason</td>
+            <td>@Model.PreviousCalibrationDetails.OverridedByUsername</td>
+            <td>@Model.PreviousCalibrationDetails.ReasonForOverride</td>
+            <td></td>
+        </tr>
+    }
+</table>
+
+<script>
+    $(document).ready(function () {
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(new MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MeterCalibrationVerificationModel().A02_MirrorMeterAuditing_MeterCalibrationVerificationActions)));
+        $(companies).each(function () {
+            if ('@(Model.ShowActionBtn.ToString().ToUpper())' == "TRUE") {
+                // Only the Calibrate button
+                $("#actionBtn_1").css("display", "inline-block");
+            }
+        })
+    });
+
+</script>

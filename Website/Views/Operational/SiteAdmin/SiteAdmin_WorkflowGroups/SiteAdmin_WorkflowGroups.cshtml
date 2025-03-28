@@ -1,0 +1,89 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_WorkflowGroupsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_WorkflowGroups.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Parent Name</th>
+                    <th scope="col">Secure Area Name</th>
+                    <th scope="col">Workflow Group Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.WorkflowGroupsItems)
+                {
+                    string rowClass = "";
+                    string title = $"{item.SecureAreaEnum.GetDescription()}";
+                    if (!item.GroupID.HasValue || item.GroupID.Value == 1)
+                    {
+                        rowClass = "table-danger";
+                        title = $"{item.SecureAreaEnum.GetDescription()} - Missing Group";
+                    }
+                    <tr class="@Html.Raw(rowClass)" title="@title">
+                        <td scope="col" class="text-nowrap">
+                            @item.ParentSecureAreaEnum.GetDescription()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.SecureAreaEnum.GetDescription()
+                        </td>
+                        <td scope="col">
+                            <select id="group_@item.SecureAreaID" onchange="DoUpdatePartner('@item.SecureAreaID');" class="form-control">
+                                @foreach (var wg in Model.WorkflowGroups)
+                                {
+                                    @if (item.GroupID == wg.ID)
+                                    {
+                                        <option value="@(wg.ID)" selected="selected">@wg.WorkflowGroupName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@(wg.ID)">@wg.WorkflowGroupName</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        function DoUpdatePartner(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_WorkflowGroups_UpdateGroup/" + ItemID,
+                {
+                    group: $("#group_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

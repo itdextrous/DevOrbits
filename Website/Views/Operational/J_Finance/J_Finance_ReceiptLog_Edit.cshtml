@@ -1,0 +1,118 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLog_EditModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_NetcashMissingSkybillJournals.GetDescription()} - {operationalProvider.CompanyName} - Create Entry";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Payment successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="@Model.RetURL" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-12">
+                            <h4>Payment Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Payment ID
+                        </div>
+                        <div class="col">
+                            @Model.Payment.PaymentID
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Date
+                        </div>
+                        <div class="col">
+                            @Model.Payment.CreateDate.ToDateShort()
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Payment Method
+                        </div>
+                        <div class="col">
+                            @(Model.Payment.PaymentMethodID.HasValue ? ((MyVoltage.Data.PaymentMethodEnum)Model.Payment.PaymentMethodID.Value).GetDescription() : "Unknown")
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Customer
+                        </div>
+                        <div class="col">
+                            @Model.CurrentCustomer.CustomerNumber - @Model.CurrentCustomer.FullName
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Amount
+                        </div>
+                        <div class="col">
+                            @Model.Payment.Amount.ToMoney("R")
+                        </div>
+                    </div>
+							
+                </div>
+
+                <div class="card-body">
+                    <div>
+                        <form asp-action="J_Finance_ReceiptLog_Edit" enctype="multipart/form-data">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="Customer" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    @Html.DropDownList("Customer", Model.Customer, new { @class = "form-control" })
+                                    <span asp-validation-for="Customer" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-6 text-left">
+                                    <a href="@Model.RetURL" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update Customer</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

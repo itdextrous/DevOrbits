@@ -1,0 +1,113 @@
+@model MyVoltage.Models.LeaduserModels.ContactsModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"Contacts";
+    Layout = "LayoutLeaduser";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <a href="/leaduser/D01_Leads_Contacts_Add" class="btn btn-grape"><i class="fas fa-plus-circle"></i>&nbsp;Add New Contact</a>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+
+            @if(Model.ContactsItems.Count == 0)
+            {
+                <thead class="text-center">
+                    <tr>
+                        <th>No Data to display</th>
+                    </tr>
+                </thead>
+            }
+            else
+            {
+                <thead>
+                    <tr>
+                        <th rowspan="2" scope="col">Full Name</th>
+                        <th rowspan="2" scope="col">Phone Number</th>
+                        <th rowspan="2" scope="col">Alt Phone Number</th>
+                        <th rowspan="2" scope="col">Complex Name</th>
+                        <th rowspan="2" scope="col">Position</th>
+                        <th rowspan="2" scope="col">Email</th>
+                        <th rowspan="2" scope="col">Responsible</th>
+                        <th colspan="1" scope="col" class="text-center">Linked Properties</th>
+                        <th rowspan="2" scope="col"></th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ContactsItems)
+                    {
+                        string rowClass = "";
+                        string title = $"{item.FullName}";
+                        int rowSpan = item.PropertiesItems.Count;
+                        bool isFirst = true;
+                        foreach (var itemP in item.PropertiesItems)
+                        {
+                            @if (isFirst)
+                            {
+                                isFirst = false;
+                                <tr class="@Html.Raw(rowClass)" title="@title">
+                                    <td scope="col" class="text-nowrap">
+                                        @item.FullName
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        @item.PhoneNumber
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        @item.AltPhoneNumber
+                                    </td>
+                                    <td scope="col" class="text-nowrap text-right">
+                                        @item.ComplexName
+                                    </td>
+                                    <td scope="col" class="text-nowrap text-right">
+                                        @item.Position
+                                    </td>
+                                    <td scope="col" class="text-nowrap text-right">
+                                        @item.Email
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        @item.ResponsibleUsername
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        @itemP.Name
+                                    </td>
+                                    <td scope="col">
+                                        <a href="/leaduser/D01_Leads_Contacts_Edit/@item.ID" class="btn btn-sm btn-grape"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr class="@Html.Raw(rowClass)" title="@title">
+                                    <td scope="col" class="text-nowrap">
+                                        @itemP.Name
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            }
+
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

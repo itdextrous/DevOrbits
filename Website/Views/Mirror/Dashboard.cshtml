@@ -1,0 +1,111 @@
+﻿@model MyVoltage.Models.MirrorViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Mirror Dashboard";
+}
+@using (Html.BeginForm())
+{
+    <div class="dash-block">
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-4">
+                    <div class="card-content">
+                        <div>
+                            <h4>Quick Links</h4>
+                        </div>
+                        <div class="row">
+                            <a href="https://myvoltageapi.azurewebsites.net/devices" target="_blank"><i class="fas fa-desktop"></i>&nbsp;All Mirror Devices (Takes long to load)</a><br />
+                        </div>
+                        <div class="row">
+                            <a href="https://myvoltageapi.azurewebsites.net/odoreadings/create" target="_blank"><i class="fas fa-tachometer-alt"></i>&nbsp;Create odometer</a><br />
+                        </div>
+                        <div class="row">
+                            <a href="https://myvoltageapi.azurewebsites.net/devices/create" target="_blank"><i class="fas fa-file-alt"></i>&nbsp;Create new device</a><br />
+                        </div>
+                        <div class="row">
+                            <a href="/mirror/mirrorauditcompleteness"><i class="fas fa-chart-bar"></i>&nbsp;Mirror Audit Completeness</a><br />
+                        </div>
+                        <div class="row">
+                            <a href="/mirror/mirrordeviceoverviewperbuilding"><i class="fas fa-chart-bar"></i>&nbsp;Mirror Device Overview per building</a><br />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-md-4">
+                    <div class="card-content">
+                        <div>
+                            <h4>Device Search</h4>
+                        </div>
+                        <div class="row">
+                            <label asp-for="DeviceSearch_Serial" class="control-label"></label>
+                        </div>
+                        <div class="row">
+                            <input id="DeviceSearch_Serial" asp-for="DeviceSearch_Serial" class="form-control" />
+                            <span asp-validation-for="DeviceSearch_Serial" class="text-red"></span>
+                        </div>
+                        <div class="row">
+                            <button type="submit" asp-action="Dashboard" class="btn btn-link">Show Device Detail</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                @if (Model != null && Model.MeterSearchProperties != null && Model.MeterSearchProperties.Count > 0)
+                {
+                    <div class="card p-md-4">
+                        <div class="card-content">
+                            <div>
+                                <h4>Search Results</h4>
+                            </div>
+                            @foreach (var meter in Model.MeterSearchProperties)
+                            {
+                                @foreach (var meterSearchProperty in meter.Value)
+                                {
+                                    <div class="row">
+                                        <div class="col">
+                                            <label class="control-label">@meterSearchProperty.Name</label>
+                                        </div>
+                                        <div class="col">
+                                            <span>@meterSearchProperty.Value</span>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="row">
+                                    <a target="_blank" href="https://myvoltageapi.azurewebsites.net/devices/edit/@meter.Key"><img src="/images/edit-icon.png" alt="Edit" title="Edit" class="mr-1"></a>
+                                    <a target="_blank" href="https://myvoltageapi.azurewebsites.net/devicereadings/@meter.Key"><img src="/images/reading-icon.png" alt="Readings" title="Readings" class="mr-1"></a>
+                                    <a target="_blank" href="https://myvoltageapi.azurewebsites.net/odoreadings/@meter.Key" title="ODO Readings"><img src="/images/odo-icon.png" alt="ODO Readings"></a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#DeviceSearch_Serial").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/mirror/deviceserials",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

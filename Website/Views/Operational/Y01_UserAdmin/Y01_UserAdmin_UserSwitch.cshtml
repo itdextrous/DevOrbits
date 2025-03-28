@@ -1,0 +1,86 @@
+@model MyVoltage.Models.OperationalModels.Y01_UserAdmin.Y01_UserAdmin_UserSwitchModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Y01_UserAdmin_UserSwitch.GetDescription()}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        Choose a company and customer below:
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetCustomers();" })
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        @Html.DropDownList("Customer", Model.Customer, new { @class = "browser-default custom-select form-control-trim js-select" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+
+                <div class="row mb-md-2">
+                    <div class="col-12 text-left">
+                        <a onclick="RedirectToSignIn();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-sign-in-alt"></i>&nbsp;Go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        GetCustomers();
+        function GetCustomers() {
+            $("#Customer").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CustomerItems)));
+            $(companies).each(function() {
+                if (this.CompanyID ==  $("#Company").val()) {
+                    $("#Customer").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+        }
+
+        function RedirectToSignIn() {
+            $.post("/operational/Y01_UserAdmin/Y01_UserAdmin_UserSwitchSignIn",
+                {
+                    Company: $("#Company").val(),
+                    Customer: $("#Customer").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        $("#loaderContent").css("display", "block");
+                        document.location.href = '/';
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

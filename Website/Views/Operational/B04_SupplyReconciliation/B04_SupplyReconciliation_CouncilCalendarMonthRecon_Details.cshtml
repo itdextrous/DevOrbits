@@ -1,0 +1,210 @@
+@model MyVoltage.Models.OperationalModels.B04_SupplyReconciliationModels.B04_SupplyReconciliation_CouncilCalendarMonthRecon_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B04_SupplyReconciliation_CouncilCalendarMonthRecon_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    bool isFirst = true;
+}
+@using MyVoltage.Extensions;
+@using System.Linq;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <span>Please select a company from the sidebar to see results.</span>
+}
+else if (Model.InvalidBuildingCouncilDetails)
+{
+    <span>Building Council Details incorrect or not found. Please check the <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_AccountPaymentCapture">Account Payments - Account Payment Details</a>.</span>
+}
+else
+{
+    <div class="row">
+        <div class="col-12 text-left">
+            <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture" class="btn btn-outline-success"><i class="fas fa-plus-circle"></i>&nbsp;New Invoice</a>
+            @if (Model.B04_SupplyReconciliation_CouncilCalendarMonthRecon_DetailsItems.Count > 0)
+            {
+                <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_CloneInvoice/@(Model.B04_SupplyReconciliation_CouncilCalendarMonthRecon_DetailsItems[0].InvoiceID)" class="btn btn-outline-primary-sm"><i class="fas fa-copy"></i>&nbsp;Clone Latest Invoice</a>
+
+            }
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col text-left">
+            <select class="form-control" id="buildingCouncilID" onchange="RedirectToFilter();">
+                <option value="">[All Account Numbers]</option>
+                @foreach (SelectListItem item in Model.AccountNo)
+                {
+                    @if (item.Selected)
+                    {
+                        <option value="@item.Value" selected="selected">@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 table-success">
+            Legend: Invoices approved.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 table-warning">
+            Legend: Invoices pending approval.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            @if (Model.B04_SupplyReconciliation_CouncilCalendarMonthRecon_DetailsItems.Count == 0)
+            {
+                <span>There are no outstanding entries for @operationalProvider.CompanyName</span>
+            }
+            else
+            {
+                <table class="table table-responsive-xl table-striped table-hover table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Account No</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">TAX Invoice No</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">TAX Invoice Date</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Count + 1)" scope="col" class="text-nowrap text-center border-table-spanned">Transactions</th>
+                            <th rowspan="2" class="text-nowrap text-center border-table">&nbsp;</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Count + 1)" scope="col" class="text-nowrap text-center border-table-spanned">Transaction details split per calendar month</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Diff</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Cumulative Diff</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">&nbsp;</th>
+                        </tr>
+                        <tr>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-nowrap text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                            <th scope="col" class="text-nowrap text-center border-table">Total</th>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-nowrap text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                            <th scope="col" class="text-nowrap text-center border-table">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.B04_SupplyReconciliation_CouncilCalendarMonthRecon_DetailsItems)
+                        {
+                            var previousItem = (from p in Model.B04_SupplyReconciliation_CouncilCalendarMonthRecon_DetailsItems
+                                                where p.AccountNo == item.AccountNo
+                                                && p.TAXInvoiceDate < item.TAXInvoiceDate
+                                                orderby p.TAXInvoiceDate descending
+                                                select p).FirstOrDefault();
+
+                            string cellClass = "";
+                            string pickedUpPrevious = "";
+                            string pickedUpDiff = "";
+                            if (previousItem != null)
+                            {
+                                if (Convert.ToInt32(item.OpeningBalance) != Convert.ToInt32(previousItem.ClosingBalance))
+                                {
+                                    cellClass = "text-red font-weight-bold";
+                                    pickedUpPrevious = previousItem.ClosingBalance.ToMoneyNoDecimal("R");
+                                    pickedUpDiff = (item.OpeningBalance - previousItem.ClosingBalance).ToMoneyNoDecimal("R");
+                                }
+                            }
+                            string rowClass = "";
+                            @if (item.Status == MyVoltage.Data.BuildingCouncilDetails_Invoice.StatusEnum.New)
+                            {
+                                rowClass = "table-warning";
+                            }
+                            else if (item.Status == MyVoltage.Data.BuildingCouncilDetails_Invoice.StatusEnum.Approved)
+                            {
+                                rowClass = "table-success";
+                            }
+                            <tr class="@Html.Raw(rowClass)">
+                                <td scope="col" class="text-nowrap text-left border-table">@item.AccountNo</td>
+                                <td scope="col" class="text-nowrap text-left border-table">
+                                    <a title="Edit" href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.InvoiceID" class="btn btn-sm">@item.TAXInvoiceNo</a>
+                                </td>
+                                <td scope="col" class="text-nowrap text-left border-table">@item.TAXInvoiceDate.ToDateShort()</td>
+                                @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                {
+                                    if (resourceType.SortOrder == 1)
+                                    {
+                                        continue;
+                                    }
+                                    if (item.Resourcees.ContainsKey(resourceType.ResourceTypeName))
+                                    {
+                                        <td scope="col" title="@item.TAXInvoiceNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@item.Resourcees[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                    }
+                                    else
+                                    {
+                                        <td scope="col" class="text-nowrap text-center border-table">-</td>
+                                    }
+                                }
+                                <td scope="col" title="@item.TAXInvoiceNo - Total Charges" class="text-right text-nowrap border-table-left">@item.TotalCharges.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" class="text-nowrap text-left border-table"></td>
+                                @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                {
+                                    if (resourceType.SortOrder == 1)
+                                    {
+                                        continue;
+                                    }
+                                    if (item.Resourcees.ContainsKey(resourceType.ResourceTypeName))
+                                    {
+                                        <td scope="col" title="@item.TAXInvoiceNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@item.MonthlyResourcees[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                    }
+                                    else
+                                    {
+                                        <td scope="col" class="text-nowrap text-center border-table">-</td>
+                                    }
+                                }
+                                <td scope="col" title="@item.TAXInvoiceNo - Total Charges" class="text-right text-nowrap border-table-left">@item.MonthlyTotalCharges.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Diff" class="text-right text-nowrap border-table-left @((Convert.ToInt32(item.MonthlyDiff) != 0 ? "text-red" : "text-success"))">@item.MonthlyDiff.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Cumulative Diff" class="text-right text-nowrap border-table-left @((Convert.ToInt32(item.CumDiff) != 0 ? "text-red" : "text-success"))">@item.CumDiff.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo" class="text-right text-nowrap border-table">
+                                    <a title="Edit @item.TAXInvoiceNo" href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.InvoiceID" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+                                    |
+                                    <a title="Delete @item.TAXInvoiceNo" href="#" onclick="ConfirmDelete('@item.InvoiceID');" class="btn btn-sm text-red"><i class="fas fa-trash-alt"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    function RedirectToVerification(serial, companyID) {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/' + serial;
+    }
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = window.location.href.split('?')[0] + '?AccountNo=' + $("#buildingCouncilID").val();
+    }
+    function ConfirmDelete(itemID) {
+        if (confirm('Are you use you want to delete this item?')) {
+        $("#loaderContent").css("display", "block");
+            document.location.href = "/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_Delete/" + itemID;
+        }
+    }
+</script>
+}

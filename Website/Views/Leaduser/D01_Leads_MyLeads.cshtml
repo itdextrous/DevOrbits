@@ -1,0 +1,153 @@
+@model MyVoltage.Models.LeaduserModels.D01_Leads_MyLeadsModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_MyLeads.GetDescription()}";
+    Layout = "LayoutLeaduser";
+}
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="row col-12 mt-2 mb-2">
+    <a href="/leaduser/D01_Leads_LogLead" class="btn btn-grape"><i class="fas fa-plus-circle"></i>&nbsp;Add New Lead</a>
+</div>
+
+<div class="row col-12 mt-2 mb-2">
+
+    <table class="table table-sm table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th rowspan="2" scope="col">Created By</th>
+                <th rowspan="2" scope="col">Created</th>
+                <th rowspan="2" scope="col">Lead Generator Name</th>
+                <th rowspan="2" scope="col">Assigned To</th>
+                <th rowspan="2" scope="col">Status</th>
+
+                <th colspan="1" scope="col" class="text-center">Property Details</th>
+                <th colspan="1" scope="col" class="text-center">Contact Details</th>
+
+                <th rowspan="2" scope="col">Product Name</th>
+            </tr>
+            <tr>
+                <th scope="col">
+                    <div class="row">
+                        <div class="col-2">
+                            Name
+                        </div>
+                        <div class="col-2">
+                            Description
+                        </div>
+                        <div class="col-2">
+                            Type
+                        </div>
+                        <div class="col-2">
+                            No Of Registered Units
+                        </div>
+                        <div class="col-2">
+                            No Of Metering Points
+                        </div>
+                        <div class="col-2">
+                            Partner
+                        </div>
+                    </div>
+                </th>
+
+                <th scope="col">
+                    <div class="row">
+                        <div class="col-3">
+                            Full Name
+                        </div>
+                        <div class="col-3">
+                            Phone Number
+                        </div>
+                        <div class="col-2">
+                            Alt Phone Number
+                        </div>
+                        <div class="col-2">
+                            Complex Name
+                        </div>
+                        <div class="col-2">
+                            ID Number Or Company Reg
+                        </div>
+                    </div>
+                </th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.D01_Leads_MyLeadsItems)
+            {
+                <tr style="cursor:pointer;" title="View / Edit" onclick="RedirectToEditLead('@item.ID');">
+                    <td scope="col" class="text-nowrap">@item.Username</td>
+                    <td scope="col" class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                    <td scope="col" class="text-nowrap">@item.LeadGeneratorName</td>
+                    <td scope="col" class="text-nowrap">@item.ResponsibleUserUsername</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+
+                    <td scope="col">
+                        @foreach (var itemP in item.PropertiesItems)
+                        {
+                            <div class="row">
+                                <div class="col-2">
+                                    @itemP.Name
+                                </div>
+                                <div class="col-2">
+                                    @itemP.Description
+                                </div>
+                                <div class="col-2">
+                                    @itemP.CompanyTypeName
+                                </div>
+                                <div class="col-2">
+                                    @itemP.NoOfRegisteredUnits
+                                </div>
+                                <div class="col-2">
+                                    @itemP.NoOfMeteringPoints
+                                </div>
+                                <div class="col-2">
+                                    @itemP.PartnerName
+                                </div>
+                            </div>
+                        }
+                    </td>
+
+                    <td scope="col">
+                        @foreach (var itemC in item.ContactsItems)
+                        {
+                            <div class="row">
+                                <div class="col-3">
+                                    @itemC.FullName
+                                </div>
+                                <div class="col-3">
+                                    @itemC.PhoneNumber
+                                </div>
+                                <div class="col-2">
+                                    @itemC.AltPhoneNumber
+                                </div>
+                                <div class="col-2">
+                                    @itemC.ComplexName
+                                </div>
+                                <div class="col-2">
+                                    @itemC.IDNumberOrCompanyReg
+                                </div>
+                            </div>
+                        }
+                    </td>
+
+                    <td scope="col">@(item.D01_Product != null ? item.D01_Product.Name : "")</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditLead(leadID) {
+            document.location.href = '/leaduser/D01_Leads_ViewLead/' + leadID;
+        }
+        function RedirectToUserFilter() {
+            document.location.href = '/operational/changeLeadUserID/' + $('#User').val() + '?R=' + encodeURIComponent('/leaduser/D01_Leads_MyLeads');
+        }
+    </script>
+}

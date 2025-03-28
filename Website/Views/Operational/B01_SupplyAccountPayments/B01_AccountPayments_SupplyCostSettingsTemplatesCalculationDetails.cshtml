@@ -1,0 +1,345 @@
+﻿@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_SupplyCostSettingsTemplatesCalculationDetailsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsTemplatesCalculationDetails.GetDescription()}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+            </div>
+            <div class="card-body">
+                @if (Model.Company_CostSettings_Template != null)
+                {
+                    <div class="row">
+                        <div class="col border border-primary rounded p-2 m-2">
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Company Name:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.CompanyName
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Device Type:
+                                </div>
+                                <div class="col-6">
+                                    @switch (Model.Company_CostSettings_Template.DeviceType)
+                                    {
+                                        case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                            <img src="~/images/elec-icon-s.png" />
+                                            break;
+                                        case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                            <img src="~/images/water-icon-s.png" />
+                                            break;
+                                        case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                            <img src="~/images/gas-icon-s.png" />
+                                            break;
+                                    }
+                                    @Model.Company_CostSettings_Template.DeviceType.GetDescription()
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Product:
+                                </div>
+                                <div class="col-6">
+                                    @if (Model.Company_CostSettings_Template.SiteAdmin_Product != null)
+                                    {
+                                        @Model.Company_CostSettings_Template.SiteAdmin_Product.ProductName
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Current Tarrif:
+                                </div>
+                                <div class="col-6">
+                                    @if (Model.Company_CostSettings_Template.Tarrif != null)
+                                    {
+                                        @Model.Company_CostSettings_Template.Tarrif.Resource_Name
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Linked Current Tarrif:
+                                </div>
+                                <div class="col-6">
+                                    @if (Model.Company_CostSettings_Template.LinkedTarrif != null)
+                                    {
+                                        @Model.Company_CostSettings_Template.LinkedTarrif.Resource_Name
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Start Date:
+                                </div>
+                                <div class="col-6">
+                                    @if (Model.Company_CostSettings_Template.Tarrif != null)
+                                    {
+                                        @Model.Company_CostSettings_Template.Tarrif.Starting_Date.ToDateShort()
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    End Date:
+                                </div>
+                                <div class="col-6">
+                                    @if (Model.Company_CostSettings_Template.Tarrif != null)
+                                    {
+                                        @Model.Company_CostSettings_Template.Tarrif.End_Date.ToDateShort()
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Month:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.Month.ToMonth()
+                                </div>
+                            </div>
+
+                            @if (Model.Company_CostSettings_Template.CalculationType == MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Metered)
+                            {
+
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-6">
+                                        Based on meter no:
+                                    </div>
+                                    <div class="col-6">
+                                        @Model.Company_CostSettings_Template.MeterSerial
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-6">
+                                        Opening Reading:
+                                    </div>
+                                    <div class="col-6">
+                                        @Model.Company_CostSettings_Template.B01_GetCalculation.OpeningReading
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-6">
+                                        Closing Reading:
+                                    </div>
+                                    <div class="col-6">
+                                        @Model.Company_CostSettings_Template.B01_GetCalculation.ClosingReading
+                                    </div>
+                                </div>
+
+                            }
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Units:
+                                </div>
+                                <div class="col-6">
+                                    <a href="/operational/C01_ProductReport/C01_ProductReport_Details_Details_Units?from=@(Model.Company_CostSettings_Template.Month.ToDateShort())&to=@(Model.Company_CostSettings_Template.Month.ToDateShort())&ServiceAddress=&hideNoData=true&Tariffs=@(Model.Company_CostSettings_Template.Tarrif_Resource_No)">
+                                        @Model.Company_CostSettings_Template.B01_GetCalculation.TotalNumberOfUnitsUsedDuringMonth
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Total Number Of Units In Building:
+                                </div>
+                                <div class="col-6">
+                                    <a href="/operational/SiteAdmin/SiteAdmin_Companies_Edit/@(Model.Company_CostSettings_Template.CompanyID)">
+                                        @Model.Company_CostSettings_Template.B01_GetCalculation.NumberOfUnitsinBuilding
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Average Number Of Units Used per Unit:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.AverageUnitsUsedPerUnit
+                                </div>
+                            </div>
+
+                            @if (Model.Company_CostSettings_Template.B01_GetCalculation.Tarrifs.Count > 0)
+                            {
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-12">
+                                        <hr />
+                                    </div>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-12">
+                                        <h6 class="text-orange">Current Tariff Steps:</h6>
+                                    </div>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-12">
+                                        <table class="table table-sm table-responsive table-hover table-bordered">
+                                            <tr>
+                                                <th>Sliding Scale of blocks</th>
+                                                <th>Units Billed</th>
+                                                <th>Tariff (Excl. VAT)</th>
+                                                <th>Billed (Excl. VAT)</th>
+                                            </tr>
+                                            @{
+                                                decimal totalUnitsBilled = 0;
+                                                decimal totalAmountBilled = 0;
+                                            }
+                                            @foreach (var tItem in Model.Company_CostSettings_Template.B01_GetCalculation.Tarrifs)
+                                            {
+                                                string rowClass = "";
+                                                if (tItem.UnitsBilled > 0)
+                                                {
+                                                    rowClass = "table-success";
+                                                }
+                                                <tr class="@Html.Raw(rowClass)">
+                                                    <td class="text-left">@tItem.Quantity_From - @tItem.QuantityTo</td>
+                                                    <td class="text-right">@Convert.ToDecimal(tItem.UnitsBilled).ToMoney()</td>
+                                                    <td class="text-right">@Convert.ToDecimal(tItem.Unit_Price).ToMoney()</td>
+                                                    <td class="text-right">@Convert.ToDecimal(tItem.UnitsBilled * Convert.ToDecimal(tItem.Unit_Price)).ToMoney()</td>
+                                                </tr>
+                                                totalUnitsBilled += tItem.UnitsBilled;
+                                                totalAmountBilled += Convert.ToDecimal(tItem.UnitsBilled * Convert.ToDecimal(tItem.Unit_Price));
+                                            }
+                                            <tr class="table-secondary">
+                                                <td class="text-left">Total</td>
+                                                <td class="text-right">@Convert.ToDecimal(totalUnitsBilled).ToMoney()</td>
+                                                <td class="text-left"></td>
+                                                <td class="text-right">@Convert.ToDecimal(totalAmountBilled).ToMoney()</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-12">
+                                    <h4>Cost Calculation</h4>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Average Rate Per Unit:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.AverageRatePerUnit
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Average Cost Per Unit:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.AverageCostPerUnit
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Total Number Of Units In Building:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.NumberOfUnitsinBuilding
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Amount Ex VAT:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.AmountExcl
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-12">
+                                    <h4>Billing Details</h4>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Total Billed:
+                                </div>
+                                <div class="col-6">
+                                    <a href="/operational/C01_ProductReport/C01_ProductReport_Details_Details?from=@(Model.Company_CostSettings_Template.Month.ToDateShort())&to=@(Model.Company_CostSettings_Template.Month.ToDateShort())&ServiceAddress=&hideNoData=true&Tariffs=@(Model.Company_CostSettings_Template.Tarrif_Resource_No)">
+                                        @Model.Company_CostSettings_Template.B01_GetCalculation.AmountBilled.ToMoney()
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-12">
+                                    <h4>Gross Profit</h4>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Gross Profit:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.GrossProfit.ToMoney()
+                                </div>
+                            </div>
+
+                            <div class="row mt-2 mb-2">
+                                <div class="col-6">
+                                    Total Billed:
+                                </div>
+                                <div class="col-6">
+                                    @Model.Company_CostSettings_Template.B01_GetCalculation.GrossProfitPerc.ToMoney() %
+                                </div>
+                            </div>
+
+                            @if (Model.Company_CostSettings_Template.B01_GetCalculation.GrossProfit < 0)
+                            {
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-12 text-red">
+                                        <h4>Please review billing for completeness as Gross Profit should be positive.</h4>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <hr />
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function Filter() {
+        }
+    </script>
+}

@@ -1,0 +1,259 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_ProductsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Products.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Products <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_ProductName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddProduct();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_ProductsItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_ProductName@(item.ID)" type="text" value="@item.Name" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateProduct('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            <a onclick="DoDeleteProduct('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                            Services <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Service Name</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_ServiceName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddService();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_ServicesItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_ServiceName@(item.ID)" type="text" value="@item.Name" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateService('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            <a onclick="DoDeleteService('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function DoAddProduct() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Products_Add",
+                {
+                    add_ProductName: $("#add_ProductName").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateProduct(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Products_Update/" + ID,
+                {
+                    add_ProductName: $("#add_ProductName" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteProduct(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Products_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function FillInUserName(leadID) {
+            if (leadID == '') {
+                var text = $("#add_ProductUserLocalUserID" + leadID + " option:selected").text();
+                $("#add_ProductUserUserName" + leadID).val(text);
+
+            }
+            if ($("#add_ProductUserUserName" + leadID).val() == '') {
+                var text = $("#add_ProductUserLocalUserID" + leadID + " option:selected").text();
+                $("#add_ProductUserUserName" + leadID).val(text);
+            }
+        }
+
+        function DoAddService() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Services_Add",
+                {
+                    add_ServiceName: $("#add_ServiceName").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateService(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Services_Update/" + ID,
+                {
+                    add_ServiceName: $("#add_ServiceName" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteService(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Services_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

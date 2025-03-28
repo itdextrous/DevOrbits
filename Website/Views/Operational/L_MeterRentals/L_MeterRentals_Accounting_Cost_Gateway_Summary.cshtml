@@ -1,0 +1,87 @@
+@model MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Accounting_Cost_Gateway_Summary.GetDescription();
+}
+@{ DateTime currentDate = new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1); }
+
+<div class="row mt-md-2 col-12">
+    <div class="col-2">Show Between</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+    <div class="col-1">And</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+<div class="row mt-md-2 col-12">
+
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                @{ currentDate = new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1); }
+                @while (currentDate <= Model.ToDate)
+                {
+                    <th scope="col" class="text-center">@currentDate.ToString("yyyy MMMM")</th>
+                    currentDate = currentDate.AddMonths(1);
+                }
+                <th scope="col" class="text-center">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.L_MeterRentals_Accounting_Cost_Gateway_SummaryItems)
+            {
+                <tr style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID');">
+                    @{string title = $"{item.CompanyName}"; }
+                    <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                    @{ currentDate = new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1); }
+                    @while (currentDate <= Model.ToDate)
+                    {
+                        if (item.MonthlyRentalFigures.ContainsKey(currentDate) && item.MonthlyRentalFigures[currentDate] > 0)
+                        {
+                            <td title="@item.CompanyName - @currentDate.ToString("yyyy MMMM")" scope="col" class="text-nowrap text-right">R @item.MonthlyRentalFigures[currentDate].ToString("N0")</td>
+                        }
+                        else
+                        {
+                            <td title="@item.CompanyName - @currentDate.ToString("yyyy MMMM")" scope="col"></td>
+                        }
+                        currentDate = currentDate.AddMonths(1);
+                    }
+                    <td style="border-left:2px solid black;border-right:2px solid black;" title="@item.CompanyName - Total (@Model.FromDate.ToString("yyyy MMMM") - @Model.ToDate.ToString("yyyy MMMM"))" scope="col" class="text-nowrap text-right">R @item.MonthlyRentalFigures.Select(p => p.Value).Sum().ToString("N0")</td>
+                </tr>
+            }
+            <tr style="border-top:3px solid black;border-bottom:3px double black;">
+                <td scope="col" class="text-nowrap">Total</td>
+                @{ currentDate = new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1);
+                    decimal total = 0;}
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal currentItem = 0;
+                    foreach (var item in Model.L_MeterRentals_Accounting_Cost_Gateway_SummaryItems)
+                    {
+                        foreach (var subItem in item.MonthlyRentalFigures.Where(p => p.Key == currentDate))
+                        {
+                            currentItem += subItem.Value;
+                        }
+                    }
+                    total += currentItem;
+                    <td title="Total - @currentDate.ToString("yyyy MMMM")" scope="col" class="text-nowrap text-right">R @currentItem.ToString("N0")</td>
+                    currentDate = currentDate.AddMonths(1);
+                }
+                <td style="border-left:2px solid black;border-right:2px solid black;" title="Total (@Model.FromDate.ToString("yyyy MMMM") - @Model.ToDate.ToString("yyyy MMMM"))" scope="col" class="text-nowrap text-right">R @total.ToString("N0")</td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/L_MeterRentals/L_MeterRentals_Accounting_Cost_Gateway_Details';
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/L_MeterRentals/L_MeterRentals_Accounting_Summary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

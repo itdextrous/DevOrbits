@@ -1,0 +1,143 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_JournalCigicellRecon_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.J_Finance_JournalCigicellRecon_Summary.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.J_Finance_JournalCigicellRecon_Summary.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+@using MyVoltage.Extensions;
+@{
+    DateTime currentDate = Model.FromDate;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        Latest Sync Ended: @(operationalProvider.LatestGenLedgerSync.HasValue ? operationalProvider.LatestGenLedgerSync.Value.ToDateAndTimeShort() : "In Progress")
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        From:
+        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+        &nbsp;
+        To:
+        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("MovementReport", Model.MovementReport, new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <a href="/operational/C01_ProductReport/J_Finance_JournalCigicellRecon_Summary" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        &nbsp;
+        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+    </div>
+</div>
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2" scope="col">Company Name</th>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                <th colspan="3" scope="col" class="text-center border-table-spanned">@currentDate.ToMonth()</th>
+                <th>&nbsp;</th>
+                currentDate = currentDate.AddMonths(1);
+            }
+        </tr>
+        <tr>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                <th scope="col" class="text-center border-table-left">Skybill 2910</th>
+                <th scope="col" class="text-center border-table">Vending</th>
+                <th scope="col" class="text-center border-table-right">Difference</th>
+                <th>&nbsp;</th>
+                currentDate = currentDate.AddMonths(1);
+            }
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var uC in operationalProvider.UserCompanies)
+        {
+            string rowClass = "";
+            //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+            //{
+            //    rowClass = "table-danger";
+            //}
+            var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+            <tr id="MeterOnManualSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                    <td scope="col">
+                        <div class="text-orange">
+                            @company.Name
+                        </div>
+                    </td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                @while (currentDate <= Model.ToDate)
+                {
+                    <td scope="col" class="text-center border-table-left">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col" class="text-center border-table">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col" class="text-center border-table-right">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                     </td>
+                   currentDate = currentDate.AddMonths(1);
+                }
+            </tr>
+        }
+
+    </tbody>
+</table>
+<br />
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/J_Finance/J_Finance_JournalCigicellRecon_Summary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&MovementReport=' + $("#MovementReport").val();
+        }
+        $(document).ready(function () {
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+            $(companies).each(function() {
+                $("#MeterOnManualSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/J_Finance/J_Finance_JournalCigicellRecon_SummaryItem/"))' + this.CompanyID + '/' + "MeterOnManualSummaryItem_" + this.CompanyID + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&MovementReport=' + $("#MovementReport").val(), function() {
+                    });
+            });
+        });
+        function RedirectToDetails(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=' + encodeURIComponent('/operational/J_Finance/J_Finance_JournalCigicellRecon_Daily');
+        }
+    </script>
+}

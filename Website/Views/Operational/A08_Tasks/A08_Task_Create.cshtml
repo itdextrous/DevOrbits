@@ -1,0 +1,330 @@
+@model MyVoltage.Models.OperationalModels.A08_Tasks.A08_TasksModels.A08_Task_CreateModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A08_Task_Create.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <form asp-action="A08_Task_Create" enctype="multipart/form-data">
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="TaskType" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @Html.DropDownList("TaskType", Model.TaskType, new { @class = "form-control", @onChange = "GetStatuses();" })
+                            <span asp-validation-for="TaskType" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div id="entireForm" style="display:none;">
+
+                        <div id="companyDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Company" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Company", Model.Company, new { @class = "form-control" })
+                                <span asp-validation-for="Company" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div id="taskTypeDescriptionDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Task Type Description</label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" id="taskTypeDescription" readonly="readonly" disabled="disabled"></textarea>
+                            </div>
+                        </div>
+
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="WorkflowGroupID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("WorkflowGroupID", Model.WorkflowGroupID, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetWorkflow();" })
+                                <span asp-validation-for="WorkflowGroupID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessPillar" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessPillar", Model.BusinessPillar, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                <span asp-validation-for="BusinessPillar" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessDepartment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessDepartment", Model.BusinessDepartment, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="BusinessDepartment" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div id="statusDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Status" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                                <span asp-validation-for="Status" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div id="commentsDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Comments" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="Comments"></textarea>
+                                <span asp-validation-for="Comments" class="text-red"></span>
+                            </div>
+                        </div>
+                        
+                        @*<div class="row mb-md-2">
+                        <div class="col-6">
+                        <label asp-for="Status" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                        @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                        <span asp-validation-for="Status" class="text-red"></span>
+                        </div>
+                        </div>*@
+
+                        <div id="responsibleUserDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div id="reportingToUserDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ReportingToUser" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "form-control" })
+                                <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        @*<div class="row mb-md-2">
+                        <div class="col-6">
+                        <label asp-for="KmTravelRequired" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                        <input type="text" class="form-control" asp-for="KmTravelRequired" />
+                        <span asp-validation-for="KmTravelRequired" class="text-red"></span>
+                        </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                        <div class="col-6">
+                        <label asp-for="StockUsed" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                        <textarea class="form-control" asp-for="StockUsed"></textarea>
+                        <span asp-validation-for="StockUsed" class="text-red"></span>
+                        </div>
+                        </div>*@
+
+                        <div id="dueDateDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DueDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" asp-for="DueDate" />
+                                <span asp-validation-for="DueDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div id="customerNoDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomerNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CustomerNo" />
+                                <span asp-validation-for="CustomerNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div id="meterSerialNumberDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MeterSerialNumber" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="MeterSerialNumber" />
+                                <span asp-validation-for="MeterSerialNumber" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div id="notificationsActiveDiv" class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NotificationsActive" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("NotificationsActive", Model.NotificationsActive, new { @class = "form-control" })
+                                <span asp-validation-for="NotificationsActive" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Task</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        GetWorkflow();
+        function GetWorkflow() {
+            $("#BusinessPillar").val('');
+            var departmentID = 0;
+            var workflowGroupItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.WorkflowGroupItems)));
+            $(workflowGroupItems).each(function () {
+                if (this.ID == $("#WorkflowGroupID").val()) {
+                    departmentID = this.BusinessDepartmentID;
+                }
+            });
+
+            $("#BusinessDepartment").empty();
+            $("#BusinessDepartment").append(`<option value="0">00 - NONE</option>`);
+            var businessDepartmentItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BusinessDepartmentItems)));
+            $(businessDepartmentItems).each(function () {
+                if (this.ID == departmentID) {
+                    $("#BusinessDepartment").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    $("#BusinessPillar").val(this.BusinessPillarID);
+                }
+                else {
+                    $("#BusinessDepartment").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+        }
+        GetStatuses();
+        function GetStatuses() {
+            $("#Status").empty();
+            var StatusItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.StatusItems)));
+            $(StatusItems).each(function () {
+                if (this.TaskTypeID == $("#TaskType").val()) {
+                    $("#Status").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+            var A08_Task_Types = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.A08_Task_Types)));
+            $(A08_Task_Types).each(function () {
+                if (this.ID == $("#TaskType").val()) {
+                    $("#taskTypeDescription").html(this.Description);
+                    $("#WorkflowGroupID").val(this.SecureAreaGroupID);
+                    GetWorkflow();
+                    if (this.TaskClassificationID == '@((int)MyVoltage.Data.TaskClassificationEnum.Internal)') {
+                        $("#entireForm").fadeIn();
+
+                        // Show
+                        $("#entireForm").fadeIn();
+                        // Hide
+                        $("#companyDiv").fadeOut();
+                        $("#statusDiv").fadeOut();
+                        $("#customerNoDiv").fadeOut();
+                        $("#meterSerialNumberDiv").fadeOut();
+                    }
+                    else {
+                        $("#entireForm").fadeIn();
+
+                        // Show
+                        $("#companyDiv").fadeIn();
+                        $("#statusDiv").fadeIn();
+                        $("#customerNoDiv").fadeIn();
+                        $("#meterSerialNumberDiv").fadeIn();
+                        // Hide
+                    }
+                    //else {
+                    //    $("#entireForm").fadeOut();
+                    //    alert('Oops. The task you have selected does not have a Task Classification. Please ask your manager for assistance.');
+                    //}
+                }
+            });
+
+        }
+
+        $("#CustomerNo").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A08_Tasks/A08_Task_Create_CustomerNo_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { serialOrName: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+
+        $("#MeterSerialNumber").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A08_Tasks/A08_Task_Create_MeterSerialNumber_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { serialOrName: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+    </script>
+}

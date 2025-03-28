@@ -1,0 +1,62 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_PrioritiesModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_Priorities.GetDescription();
+}
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_Priorities_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New</a>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Priority Name</th>
+                    <th scope="col">Created By</th>
+                    <th scope="col">Updated By</th>
+                    <th scope="col">Deleted</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.SiteAdmin_PriorityItems)
+                {
+                    <tr>
+                        <td scope="row">
+                            @if (entry.IsDeleted)
+                            {
+                                <del>@entry.PriorityName</del>
+                            }
+                            else
+                            {
+                                <text>@entry.PriorityName</text>
+                            }
+                        </td>
+                        <td scope="row" title="@entry.DateCreated.ToDateAndTimeShort()">@entry.CreatedByUsername</td>
+                        <td scope="row" title="@entry.DateUpdated.ToDateAndTimeShort(true)">@entry.UpdatedByUsername</td>
+                        <td scope="row">@entry.IsDeleted.ToBoolean()</td>
+                        <td scope="row">
+                            @if (entry.ID != 3)
+                            {
+                                <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_Priorities_Edit/@entry.ID" title="Edit @entry.PriorityName"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                <text>&nbsp;</text>
+                                @if (entry.IsDeleted)
+                                {
+                                    <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_Priorities_Restore/@entry.ID" title="Restore @entry.PriorityName"><i class="fas fa-undo"></i>&nbsp;Restore</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_Priorities_Delete/@entry.ID" title="Delete @entry.PriorityName"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>

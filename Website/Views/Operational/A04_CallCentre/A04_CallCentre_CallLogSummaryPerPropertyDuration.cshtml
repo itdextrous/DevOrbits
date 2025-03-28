@@ -1,0 +1,275 @@
+﻿@model MyVoltage.Models.OperationalModels.A04_CallCentre.A04_CallCentre_CallLogSummaryPerPropertyDurationModel
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A04_CallCentre_CallLogSummaryPerPropertyDuration.GetDescription()}";
+    DateTime current = Model.FromDate.Value;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <h5>Page Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-auto">From Date</div>
+                    <div class="col-md-auto">
+                        <input type="date" class="form-control" asp-for="FromDate" />
+                    </div>
+                    <div class="col-md-auto">To Date</div>
+                    <div class="col-md-auto">
+                        <input type="date" class="form-control" asp-for="ToDate" />
+                    </div>
+                    <div class="col-md-auto">
+                        <a onclick="RedirectToFilter(1);" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Calls Duration Per Day<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Total<span></span></th>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        <th style="cursor:pointer;" scope="col" class="text-center">@Html.Raw(current.ToString("yyyy<br />MMM<br />dd"))<span></span></th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CallsDurationPerDay)
+                {
+                    string rowclass = "";
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col">@item.CompanyName</td>
+                        <td scope="col" class="text-right font-weight-bold">@($"{TimeSpan.FromSeconds(item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum()).Hours:00}:{TimeSpan.FromSeconds(item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum()).Minutes:00}:{TimeSpan.FromSeconds(item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum()).Seconds:00}")</td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            <td scope="col" class="text-right" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/A04_CallCentre/A04_CallCentre_Search?Company=@(item.CompanyID)&DueDateFrom=@current.ToDateShort()&DueDateTo=@current.ToDateShort()');">@(item.Values[current.Date].HasValue ? $"{TimeSpan.FromSeconds(item.Values[current.Date].Value).Hours:00}:{TimeSpan.FromSeconds(item.Values[current.Date].Value).Minutes:00}:{TimeSpan.FromSeconds(item.Values[current.Date].Value).Seconds:00}" : "")</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+                <tr class="border-table-total">
+                    <td scope="col">Total</td>
+                    @{
+                        current = Model.FromDate.Value;
+                        int totalCallsDurationPerDay = 0;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        var callsForDate = Model.CallsDurationPerDay.Select(p => p.Values[current.Date].HasValue ? p.Values[current.Date].Value : 0).Sum();
+                        totalCallsDurationPerDay += callsForDate;
+                        current = current.AddDays(1);
+                    }
+                    <td scope="col" class="text-right">@($"{TimeSpan.FromSeconds(totalCallsDurationPerDay).Hours:00}:{TimeSpan.FromSeconds(totalCallsDurationPerDay).Minutes:00}:{TimeSpan.FromSeconds(totalCallsDurationPerDay).Seconds:00}")</td>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        var callsForDate = Model.CallsDurationPerDay.Select(p => p.Values[current.Date].HasValue ? p.Values[current.Date].Value : 0).Sum();
+                        <td scope="col" class="text-right">@($"{TimeSpan.FromSeconds(callsForDate).Hours:00}:{TimeSpan.FromSeconds(callsForDate).Minutes:00}:{TimeSpan.FromSeconds(callsForDate).Seconds:00}")</td>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Calls Cost Per Day<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Total<span></span></th>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        <th style="cursor:pointer;" scope="col" class="text-center">@Html.Raw(current.ToString("yyyy<br />MMM<br />dd"))<span></span></th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CallsCostPerDay)
+                {
+                    string rowclass = "";
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col">@item.CompanyName</td>
+                        <td scope="col" class="text-right font-weight-bold">@item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum().ToDecimal(2)</td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            <td scope="col" class="text-right" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/A04_CallCentre/A04_CallCentre_Search?Company=@(item.CompanyID)&DueDateFrom=@current.ToDateShort()&DueDateTo=@current.ToDateShort()');">@item.Values[current.Date].ToDecimal(2)</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+                <tr class="border-table-total">
+                    <td scope="col">Total</td>
+                    @{
+                        current = Model.FromDate.Value;
+                        decimal totalCallsCostPerDay = 0;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        var callsForDate = Model.CallsCostPerDay.Select(p => p.Values[current.Date].HasValue ? p.Values[current.Date].Value : 0).Sum();
+                        totalCallsCostPerDay += callsForDate;
+                        current = current.AddDays(1);
+                    }
+                    <td scope="col" class="text-right">@totalCallsCostPerDay.ToDecimal(2)</td>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        var callsForDate = Model.CallsCostPerDay.Select(p => p.Values[current.Date].HasValue ? p.Values[current.Date].Value : 0).Sum();
+                        <td scope="col" class="text-right">@callsForDate.ToDecimal(2)</td>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Calls Duration Per Agent<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Total<span></span></th>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        <th style="cursor:pointer;" scope="col" class="text-center">@Html.Raw(current.ToString("yyyy<br />MMM<br />dd"))<span></span></th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CallsDurationPerAgent)
+                {
+                    string rowclass = "";
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col">@item.CompanyName</td>
+                        <td scope="col" class="text-right font-weight-bold">@($"{TimeSpan.FromSeconds(item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum()).Hours:00}:{TimeSpan.FromSeconds(item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum()).Minutes:00}:{TimeSpan.FromSeconds(item.Values.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum()).Seconds:00}")</td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            <td scope="col" class="text-right">@(item.Values[current.Date].HasValue ? $"{TimeSpan.FromSeconds(item.Values[current.Date].Value).Hours:00}:{TimeSpan.FromSeconds(item.Values[current.Date].Value).Minutes:00}:{TimeSpan.FromSeconds(item.Values[current.Date].Value).Seconds:00}" : "")</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+                <tr class="border-table-total">
+                    <td scope="col">Total</td>
+                    @{
+                        current = Model.FromDate.Value;
+                        int totalCallsDurationPerAgent = 0;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        var callsForDate = Model.CallsDurationPerAgent.Select(p => p.Values[current.Date].HasValue ? p.Values[current.Date].Value : 0).Sum();
+                        totalCallsDurationPerAgent += callsForDate;
+                        current = current.AddDays(1);
+                    }
+                    <td scope="col" class="text-right">@($"{TimeSpan.FromSeconds(totalCallsDurationPerAgent).Hours:00}:{TimeSpan.FromSeconds(totalCallsDurationPerAgent).Minutes:00}:{TimeSpan.FromSeconds(totalCallsDurationPerAgent).Seconds:00}")</td>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        var callsForDate = Model.CallsDurationPerAgent.Select(p => p.Values[current.Date].HasValue ? p.Values[current.Date].Value : 0).Sum();
+                        <td scope="col" class="text-right">@($"{TimeSpan.FromSeconds(callsForDate).Hours:00}:{TimeSpan.FromSeconds(callsForDate).Minutes:00}:{TimeSpan.FromSeconds(callsForDate).Seconds:00}")</td>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function OpenWindowToUrl(url) {
+            window.open(url);
+        }
+
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?EntriesPerPage=' + $("#EntriesPerPage").val()
+                + '&pageIndex=' + pageIndex
+                + '&FromDate=' + $("#FromDate").val()
+                + '&ToDate=' + $("#ToDate").val()
+                ;
+        }
+        $(document).ready(function () {
+            $("th").click(function () {
+                var table = $(this).parents('table').eq(0)
+                var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+                this.asc = !this.asc
+                if (!this.asc) { rows = rows.reverse() }
+                for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
+                resetArrows($(this));
+            })
+            function resetArrows(clickedTh) {
+                $("th").not(clickedTh).find('span').html('');
+                if (clickedTh.find('span').html() === " ▲") {
+                    clickedTh.find('span').html(" ▼");
+                } else {
+                    clickedTh.find('span').html(" ▲");
+                }
+            }
+            function comparer(index) {
+                return function (a, b) {
+                    var valA = getCellValue(a, index), valB = getCellValue(b, index)
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+                }
+            }
+            function getCellValue(row, index) { return $(row).children('td').eq(index).text() }
+        });
+    </script>
+}

@@ -1,0 +1,117 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> _userManager;
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MeterCalibrationVerificationModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MeterCalibrationVerification.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerNumber} - {operationalProvider.CustomerMeterSerial}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-1 text-left">
+                        <a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MeterCalibrationVerification, MyVoltage.Data.SecureAreaActionEnum.Add) && !string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                    {
+                        @if (Model.A02_MirrorMeterAuditing_MeterCalibrationUpdateID == 0)
+                        {
+                            <span class="font-weight-bold text-red">No calibration entry created yet. Cannot calibrate. Calibration creation scheduled for 21:00 SAST.</span>
+                        }
+                        else
+                        {
+                            <div class="col-2 text-right text-red font-weight-bold">
+                                Classify @operationalProvider.CustomerMeterSerial As:
+                            </div>
+                            <div class="col-9 text-right">
+                                @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MeterCalibrationVerification, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                {
+                                    <textarea id="reasonForOverride" name="reasonForOverride" class="form-control"></textarea>
+                                    <br />
+                                    @foreach (var action in Model.A02_MirrorMeterAuditing_MeterCalibrationVerificationActions)
+                                    {
+                                        <a onclick="DoActionOverride('/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification_Action/@action.ActionID/@Model.A02_MirrorMeterAuditing_MeterCalibrationUpdateID')" href="#" class="btn btn-outline-primary-sm-nocolor @action.ActionColor" title="@action.ActionDescription"><i class="fas fa-@action.ActionIcon"></i>&nbsp;@action.ActionDisplayName</a>
+                                    }
+                                }
+                                else
+                                {
+                                    @foreach (var action in Model.A02_MirrorMeterAuditing_MeterCalibrationVerificationActions)
+                                    {
+                                        if (action.ActionID == 1)
+                                        {
+                                            <a id="actionBtn_@action.ActionID" style="display:none;" href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification_Action/@action.ActionID/@Model.A02_MirrorMeterAuditing_MeterCalibrationUpdateID" class="btn btn-outline-primary-sm-nocolor @action.ActionColor" title="@action.ActionDescription"><i class="fas fa-@action.ActionIcon"></i>&nbsp;@action.ActionDisplayName</a>
+                                        }
+                                        else
+                                        {
+                                            <a id="actionBtn_@action.ActionID" href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification_Action/@action.ActionID/@Model.A02_MirrorMeterAuditing_MeterCalibrationUpdateID" class="btn btn-outline-primary-sm-nocolor @action.ActionColor" title="@action.ActionDescription"><i class="fas fa-@action.ActionIcon"></i>&nbsp;@action.ActionDisplayName</a>
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">Company Name</div>
+                        <div class="col">@operationalProvider.CompanyName</div>
+                    </div>
+                    <div class="row">
+                        <div class="col">Device Name</div>
+                        <div class="col">@operationalProvider.CustomerMeterName</div>
+                    </div>
+                    <div class="row">
+                        <div class="col">Device Serial</div>
+                        <div class="col">@operationalProvider.CustomerMeterSerial</div>
+                    </div>
+                    <div class="row">
+                        <div class="col">Type Name</div>
+                        <div class="col">@operationalProvider.CustomerMeterDeviceType</div>
+                    </div>
+                </div>
+                <div id="calibrationDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Calibration Details...
+                    </div>
+                </div>
+
+            }
+
+            <div class="card-footer align-middle">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#calibrationDetails").load('@Url.Content("/operational/shared/meter/calibrationdetails")');
+
+        $(document).ready(function () {
+        });
+
+        function DoActionOverride(url) {
+            if ($("#reasonForOverride").val() == "") {
+                alert('Please supply a reason');
+                return;
+                }
+            url = url + "/" + encodeURIComponent($("#reasonForOverride").val());
+            document.location.href = url;
+        }
+
+    </script>
+}

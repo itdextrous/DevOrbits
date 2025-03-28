@@ -1,0 +1,200 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Dashboards_A.GetDescription()} - {(operationalProvider.CompanyID == 0 ? "All Companies" : operationalProvider.CompanyName)}";
+}
+@if (operationalProvider.CompanyID == 0)
+{
+    <text>Select Company to begin...</text>
+}
+else
+{
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a1_011_gateway_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A1.011 Gateway Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a1_021_device_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A1.021 Device Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a2_011_meter_calibration_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A2.011 Meter Calibration Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a2_022_mirror_reading_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A2.022 Mirror Reading Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a3_011_network_balancing_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A3.011 Network Balancing Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a4_031_zendesk_ticket_category_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A4.031 Zendesk Ticket Category Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a5_011_midnight_sync_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A5.011 Midnight Sync Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a6_011_occupancy_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A6.011 Occupancy Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a6_031_not_billed_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A6.031 Not Billed Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a6_041_billing_blocked_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A6.041 Billing Blocked Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a7_021_credit_control_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A7.021 Credit Control Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a7_031_meter_mode_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A7.031 Meter Mode Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a7_041_meter_on_manual_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A7.041 Meter On Manual Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a7_043_meter_on_manual_request_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A7.043 Meter On Manual Request Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a7_051_connector_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A7.051 Connector Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a8_011_tasks_company_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A8.011 Tasks Company Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a9_011_flags_company_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A9.011 Flags Company Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="a10_021_virtualmeters_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading A10.021 Virtual Meters Summary Details...
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ('@operationalProvider.CompanyID' != '0') {
+                $("#a1_011_gateway_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A1_011_Gateway_Summary")');
+                $("#a1_021_device_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A1_021_Device_Summary")');
+                $("#a2_011_meter_calibration_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A2_011_Meter_Calibration_Summary")');
+                $("#a2_022_mirror_reading_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A2_022_Mirror_Reading_Summary")');
+                $("#a3_011_network_balancing_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A3_011_Network_Balancing_Summary")');
+                $("#a4_031_zendesk_ticket_category_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A4_031_Zendesk_Ticket_Category_Summary")');
+                $("#a5_011_midnight_sync_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A5_011_Midnight_Sync_Summary")');
+                $("#a6_011_occupancy_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A6_011_Occupancy_Summary")');
+                $("#a6_031_not_billed_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A6_031_Not_Billed_Summary")');
+                $("#a6_041_billing_blocked_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A6_041_Billing_Blocked_Summary")');
+                $("#a7_021_credit_control_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A7_021_Credit_Control_Summary")');
+                $("#a7_031_meter_mode_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A7_031_Meter_Mode_Summary")');
+                $("#a7_041_meter_on_manual_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A7_041_Meter_On_Manual_Summary")');
+                $("#a7_043_meter_on_manual_request_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A7_043_Meter_On_Manual_Request_Summary")');
+                $("#a7_051_connector_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A7_051_Connector_Summary")');
+                $("#a8_011_tasks_company_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A8_011_Tasks_Company_Summary")');
+                $("#a9_011_flags_company_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A9_011_Flags_Company_Summary")');
+                $("#a10_021_virtualmeters_summary").load('@Url.Content("/operational/Dashboards/Dashboards_A/A10_021_VirtualMeters_Summary")');
+            }
+        });
+    </script>
+}

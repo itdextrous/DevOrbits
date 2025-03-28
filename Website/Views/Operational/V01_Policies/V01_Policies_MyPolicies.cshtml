@@ -1,0 +1,57 @@
+@model MyVoltage.Models.OperationalModels.V01_Policies.V01_PoliciesModels.V01_Policies_MyPoliciesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V01_Policies_MyPolicies.GetDescription()}";
+}
+<div class="row col-12">
+
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Heading</th>
+                <th scope="col">Description</th>
+                <th scope="col">Linked Secure Area</th>
+                <th scope="col">Policy Type</th>
+                <th scope="col">Active From Date</th>
+                <th scope="col">Active To Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.V01_Policies_MyPoliciesItems)
+            {
+                string rowClass = "";
+                @foreach (var user in item.V01_Policies_ResponsibleUserItems)
+                {
+                    if (user.DateApproved.HasValue)
+                    {
+                        rowClass = "table-success";
+                    }
+                    else
+                    {
+                        rowClass = "table-danger";
+                    }
+                }
+                <tr class="@Html.Raw(rowClass)" style="cursor:pointer;" title="View" onclick="RedirectToEditFlag('@item.ID');">
+                    <td scope="col">@item.Heading</td>
+                    <td scope="col">@item.Description</td>
+                    <td scope="col">@item.SecureAreaName</td>
+                    <td scope="col">@item.PolicyType.GetDescription()</td>
+                    <td scope="col">@item.ActiveFromDate.ToDateShort(true)</td>
+                    <td scope="col">@item.ActiveToDate.ToDateShort(true)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/changePolicyID/' + flagID + '?R=@Html.UrlEncoder.Encode("/operational/V01_Policies/V01_Policies_View")';
+        }
+    </script>
+}

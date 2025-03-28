@@ -1,0 +1,80 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_JournalSagepayRecon_Summary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Skybill Sagepay Balance</th>
+                            <th scope="col">Skybill Vending Balance</th>
+                            <th scope="col">Diff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var uC in operationalProvider.UserCompanies)
+                        {
+                            var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                            <tr id="MeterOnManualSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        @company.Name
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function() {
+            $("#MeterOnManualSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/J_Finance/J_Finance_JournalSagepayRecon_SummaryItem/"))' + this.CompanyID + '/' + "MeterOnManualSummaryItem_" + this.CompanyID, function() {
+                });
+        });
+        function RedirectToDetails(companyID) {
+            return;
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/J_Finance/J_Finance_JournalSagepayRelease_Details';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

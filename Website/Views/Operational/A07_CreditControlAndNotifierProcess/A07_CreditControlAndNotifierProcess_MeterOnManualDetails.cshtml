@@ -1,0 +1,121 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_MeterOnManualDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_MeterOnManualDetails.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Please select a company from the sidebar to see results.</span>
+        }
+        else
+        {
+            if (Model.A07_CreditControlAndNotifierProcess_MeterOnManualDetailsItems.Count == 0)
+            {
+                <span>There are no entries for @operationalProvider.CompanyName</span>
+            }
+            else
+            {
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Customer No</th>
+                            <th scope="col">Meter Serial</th>
+                            <th scope="col">Account Type</th>
+                            <th scope="col">Account Balance</th>
+                            <th scope="col">Meter Mode</th>
+                            <th scope="col">Meter Status</th>
+                            <th scope="col">Contactor State</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var itemC in Model.A07_CreditControlAndNotifierProcess_MeterOnManualDetailsItems)
+                        {
+                            <tr style="cursor:pointer;" title="@itemC.CustomerNo" onclick="RedirectToReview('@itemC.MeterSerial');">
+                                <td scope="col">@itemC.CustomerNo</td>
+                                <td scope="col">@itemC.MeterSerial</td>
+                                <td scope="col">@(itemC.AccountType.HasValue ? itemC.AccountType.ToString() : "Unknown")</td>
+                                <td scope="col">@itemC.SkybillCustomer.Balance_LCY.ToMoney("R", "Unknown")</td>
+                                <td scope="col" class="@itemC.MeterMode.ToUpper()">@itemC.MeterMode</td>
+                                <td scope="col" class="@(itemC.M2MDevice != null ? itemC.M2MDevice.deviceStatus.ToUpper() : "Unknown")">@(itemC.M2MDevice != null ? itemC.M2MDevice.deviceStatus : "Unknown")</td>
+                                <td scope="col" class="@itemC.ContactorState.ToUpper()">@itemC.ContactorState</td>
+                                <td scope="col">
+                                    @if (itemC.ContactorState.ToUpper() == "DISCONNECTED" && itemC.M2MDevice != null)
+                                    {
+                                        <a onclick="DoConnect(1, '@itemC.M2MDevice.id', '2', '@itemC.M2MDevice.type.id', '@itemC.MeterSerial');" href="#" class="btn btn-outline-primary" title=""><i class="fas fa-plug"></i>&nbsp;Connect</a>
+                                    }
+                                    else if (itemC.ContactorState.ToUpper() == "DISCONNECTED" && itemC.MeterMode.ToUpper() == "MANUAL")
+                                    {
+                                        <a onclick="DoPrism('set-postpaid', '@itemC.MeterSerial', '@itemC.M2MDevice.id');" href="#" class="btn btn-outline-primary" title=""><i class="fas fa-plug"></i>&nbsp;Connect</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToReview(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualDetails';
+        }
+        function DoConnect(actionId, deviceId, portNum, typeID, serial) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualDetails/connect/" + actionId + "/" + deviceId + "/" + portNum + "/" + typeID + "/" + serial + "/",
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+        function DoPrism(type, serial, deviceId) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualDetails/meter/meterPrism/" + type + "/" + serial + "/" + deviceId + "/",
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+    </script>
+}

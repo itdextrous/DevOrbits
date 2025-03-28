@@ -1,0 +1,152 @@
+@model MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_UnbilledAnalysis_Units_MonthlyModel
+@{
+    ViewData["Title"] = "Combined Reports - Unbilled Analysis - Consumption Monthly";
+}
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body text-left" style="overflow-x:scroll;">
+                <div class="row">
+                    <div class="col-2"> Between</div>
+                    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                    <div class="col-1">And</div>
+                    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                    <div class="col-2">
+                        <select id="devicetype" name="devicetype">
+                            @if (!Model.DeviceType.HasValue)
+                            {
+                                <option selected="selected" value="">Show All</option>
+                            }
+                            else
+                            {
+                                <option value="">Show All</option>
+                            }
+                            @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                            {
+                                @if (Model.DeviceType.HasValue && Model.DeviceType.Value == dt)
+                                {
+                                    <option selected="selected" value="@((int)dt)">@dt</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int)dt)">@dt</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+                (Tip: Use Ctrl + F to search)
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select company to view report</span>
+        }
+        else
+        {
+            <table class="table table-xl table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Meter Serial</th>
+                        <th scope="col">Customer No</th>
+                        <th scope="col">Customer Name</th>
+                        <th scope="col">Device Type</th>
+                        <th scope="col">Occupancy</th>
+                        <th scope="col" class="text-nowrap text-center">Total</th>
+                        @{ DateTime currentDate = Model.FromDate;}
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            <th class="text-nowrap text-center" scope="col">@Html.Raw(currentDate.ToString("yyyy<br />MMM"))</th>
+                            currentDate = currentDate.AddMonths(1);
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.S_CombinedReports_UnbilledAnalysis_Units_MonthlyItems)
+                    {
+                        <tr onclick="RedirectToCustomer('@item.MeterSerial');" style="cursor:pointer;">
+                            <td scope="col" class="text-nowrap" title="">@item.MeterSerial</td>
+                            <td scope="col" class="text-nowrap" title="">@item.CustomerNo</td>
+                            <td scope="col" class="text-nowrap" title="">@item.CustomerName</td>
+                            <td scope="col" title="">@item.DeviceType</td>
+                            <td scope="col" title="">@item.Occupancy</td>
+                            <td title="@item.MeterSerial - @item.CustomerNo - @item.CustomerName - Total" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_UnbilledAnalysis_Units_MonthlyModel.GetCellClass(item.Total, true))>@item.Total.ToString("N0")</td>
+                            @{ currentDate = Model.FromDate;}
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                var billingItem = item.MonthlyBillingFigures.Where(p => p.Key == currentDate).SingleOrDefault();
+                                <td title="@item.MeterSerial - @item.CustomerNo - @item.CustomerName - @currentDate.ToString("yyyy MMM")" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_UnbilledAnalysis_Units_MonthlyModel.GetCellClass(billingItem.Value))>@billingItem.Value.ToString("N0")</td>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col" class="text-nowrap" title="">Total</td>
+                        <td scope="col" title=""></td>
+                        <td scope="col" title=""></td>
+                        <td scope="col" title=""></td>
+                        <td scope="col" title=""></td>
+                        @{
+                            currentDate = Model.FromDate;
+                            decimal monthlyTotal = 0;
+                        }
+
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            var items = Model.S_CombinedReports_UnbilledAnalysis_Units_MonthlyItems.Select(p => p.MonthlyBillingFigures).ToList();
+                            decimal total = 0;
+                            foreach (var mItem in items)
+                            {
+                                foreach (var item in mItem.Where(p => p.Key == currentDate).ToList())
+                                {
+                                    total += item.Value;
+                                }
+                            }
+                            monthlyTotal += total;
+                            currentDate = currentDate.AddMonths(1);
+                        }
+                        <td title="@operationalProvider.CompanyName Total (@Model.FromDate.ToString("yyyy MMM") - @Model.ToDate.ToString("yyyy MMM"))" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_UnbilledAnalysis_Units_MonthlyModel.GetCellClass(monthlyTotal, true))>@monthlyTotal.ToString("N0")</td>
+                        @{ currentDate = Model.FromDate;}
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            var items = Model.S_CombinedReports_UnbilledAnalysis_Units_MonthlyItems.Select(p => p.MonthlyBillingFigures).ToList();
+                            decimal total = 0;
+                            foreach (var mItem in items)
+                            {
+                                foreach (var item in mItem.Where(p => p.Key == currentDate).ToList())
+                                {
+                                    total += item.Value;
+                                }
+                            }
+                            <td title="@operationalProvider.CompanyName Total - @currentDate.ToString("yyyy MMM")" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_UnbilledAnalysis_Units_MonthlyModel.GetCellClass(total, true))>@total.ToString("N0")</td>
+                            currentDate = currentDate.AddMonths(1);
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToCustomer(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/S_CombinedReports/S_CombinedReports_UnbilledAnalysis_Units_Monthly%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val() + '%26devicetype=' + $("#devicetype").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/S_CombinedReports/S_CombinedReports_UnbilledAnalysis_Units_Monthly?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&devicetype=' + $("#devicetype").val();
+        }
+    </script>
+}

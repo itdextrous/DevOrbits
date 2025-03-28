@@ -1,0 +1,44 @@
+@model MyVoltage.Models.OperationalModels.E02_SafetyFileModels.E02_SafetyFile_LogsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E02_SafetyFile_Answers.GetDescription()} - {opProv.CompanyName} LOGS";
+}
+<div class="row col-12">
+    <a href="/operational/E01_BuildingOnboarding/E02_SafetyFile_Answers" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+</div>
+
+<div class="row col-12">
+
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Heading</th>
+                <th scope="col">Description</th>
+                <th scope="col">Changes</th>
+                <th scope="col">Date Created</th>
+                <th scope="col">Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.E02_SafetyFile_LogsItems.OrderByDescending(p => p.DateCreated))
+            {
+                <tr>
+                    <td scope="col">@item.SafetyFileQuestion.Heading</td>
+                    <td scope="col">@item.SafetyFileQuestion.Description</td>
+                    <td scope="col">@item.SystemDescription</td>
+                    <td scope="col">@item.DateCreated.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.Username</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

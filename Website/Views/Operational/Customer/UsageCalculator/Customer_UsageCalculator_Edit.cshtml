@@ -1,0 +1,185 @@
+@model MyVoltage.Models.OperationalModels.Customer.Customer_UsageCalculatorModels.UsageCalcEditModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Customer_UsageCalculator.GetDescription()} - Edit";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+        <form asp-action="Customer_UsageCalculator_Edit" enctype="multipart/form-data">
+
+            <div class="card p-md-4 mv-gradient">
+                <div class="card-header">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            You have selected to view
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Meter @(Model.Meter.Serial) (@operationalProvider.CustomerNumber)
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @switch (Model.Meter.Type)
+                            {
+                                case "Electricity":
+                                    <img src="~/images/elec-icon-s.png" />
+                                    <span>Electricity</span>
+                                    break;
+                                case "Water":
+                                    <img src="~/images/water-icon-s.png" />
+                                    <span>Water</span>
+                                    break;
+                                case "Gas":
+                                    <img src="~/images/gas-icon-s.png" />
+                                    <span>Gas</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @if (Model.Meter.Status.ToUpper().Contains("ON"))
+                            {
+                                <i class="fas fa-lightbulb text-green"></i> <span>Online</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-power-off text-red"></i> <span>Offline</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Click <a href="/operational/Customer/Customer_UsageCalculator">here</a> to go back.
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            [Instructions on how to use usage calculator]
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="text-center" colspan="2" rowspan="2" scope="col">Device Type</th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:80px;">Average Electricity Consumption Per Hour</th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:80px;">Number Of Devices In Unit</th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:80px;">Number Of Hours Used Per Day</th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:80px;">Total Per Day</th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:80px;">Total For Month</th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:5px;"></th>
+                                <th class="text-center" colspan="3" scope="col">Average cost per kWh in @(Model.MonthUsedForTariff.ToString("MMM yyyy"))&nbsp;<i class="fas fa-question-circle" title="Example tooltip to explain something"></i></th>
+                                <th class="text-center" rowspan="2" scope="col" style="width:5px;"></th>
+                                <th class="text-center" colspan="3" scope="col" title="Tooltip does not need to be in an icon. It can be on anything.">Calculated cost per day</th>
+                            </tr>
+                            <tr>
+                                <th class="text-center" scope="col">@(new DateTime(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month, 1).ToString("dd MMM yyyy"))</th>
+                                <th class="text-center" scope="col">@(new DateTime(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month, 15).ToString("dd MMM yyyy"))</th>
+                                <th class="text-center" scope="col">@(new DateTime(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month, DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)).ToString("dd MMM yyyy"))</th>
+                                <th class="text-center" scope="col">@(new DateTime(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month, 1).ToString("dd MMM yyyy"))</th>
+                                <th class="text-center" scope="col">@(new DateTime(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month, 15).ToString("dd MMM yyyy"))</th>
+                                <th class="text-center" scope="col">@(new DateTime(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month, DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)).ToString("dd MMM yyyy"))</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var asset in Model.UsageCalc_LinkedAssets)
+                            {
+                                <tr>
+                                    <td scope="col"><i class="fas fa-@asset.UsageCalc_Asset.AssetIcon"></i></td>
+                                    <td scope="col">@asset.UsageCalc_Asset.AssetName</td>
+                                    <td scope="col">@(asset.UsageCalc_Asset.AverageKWH.ToString("N")) kWh</td>
+                                    <td scope="col" title="This is how many (Enter 1 for 1 @(asset.UsageCalc_Asset.AssetName))"><input style="width: 50px;" title="This is how many (Enter 1 for 1 @(asset.UsageCalc_Asset.AssetName))" type="number" name="Asset_@(asset.UsageCalc_Asset.UsageCalc_AssetID)_Quantity" value="@asset.Quantity" /></td>
+                                    <td scope="col" title="This is how long (Enter 2 for 2 hours)"><input style="width: 50px;" title="This is how long (Enter 2 for 2 hours)" type="number" name="Asset_@(asset.UsageCalc_Asset.UsageCalc_AssetID)_Hours" value="@asset.HoursRunningPerDay" /></td>
+                                    <td scope="col" class="text-right">@(asset.TotalConsumption.ToString("N"))</td>
+                                    <td scope="col" class="text-right">@((asset.TotalConsumption * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)).ToString("N"))</td>
+                                    <td scope="col"></td>
+                                    <td scope="col" class="text-right text-nowrap">R @asset.UnitForFirstOfMonth.ToString("N")</td>
+                                    <td scope="col" class="text-right text-nowrap">R @asset.UnitForMiddleOfMonth.ToString("N")</td>
+                                    <td scope="col" class="text-right text-nowrap">R @asset.UnitForLastOfMonth.ToString("N")</td>
+                                    <td scope="col"></td>
+                                    <td scope="col" class="text-right text-nowrap">R @(asset.FirstOfTheMonth.ToString("N"))</td>
+                                    <td scope="col" class="text-right text-nowrap">R @(asset.MiddleOfTheMonth.ToString("N"))</td>
+                                    <td scope="col" class="text-right text-nowrap">R @(asset.LastOfTheMonth.ToString("N"))</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td colspan="5" scope="col">Total Consumption:</td>
+                                <td scope="col" class="text-right">@Model.TotalConsumptionPerDay.ToString("N") kWh</td>
+                                <td scope="col" class="text-right">@Model.TotalConsumptionPerMonth.ToString("N") kWh</td>
+                                <td colspan="5" scope="col"></td>
+                                <td scope="col" class="text-right">
+                                    <div class="text-nowrap">R @(Model.FirstOfTheMonth.ToString("N"))</div>
+                                    daily
+                                    <div class="text-nowrap">R @((Model.FirstOfTheMonth * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)).ToString("N"))</div>
+                                    monthly
+                                </td>
+                                <td scope="col" class="text-right">
+                                    <div class="text-nowrap">R @(Model.MiddleOfTheMonth.ToString("N"))</div>
+                                    daily
+                                    <div class="text-nowrap">R @((Model.MiddleOfTheMonth * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)).ToString("N"))</div>
+                                    monthly
+                                </td>
+                                <td scope="col" class="text-right">
+                                    <div class="text-nowrap">R @(Model.LastOfTheMonth.ToString("N"))</div>
+                                    daily
+                                    <div class="text-nowrap">R @((Model.LastOfTheMonth * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)).ToString("N"))</div>
+                                    monthly
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" scope="col">Actual Consumption:</td>
+                                <td scope="col" class="text-right">@Model.ActualTotalConsumptionPerDay.ToString("N") kWh</td>
+                                <td scope="col" class="text-right">@Model.ActualTotalConsumptionPerMonth.ToString("N") kWh</td>
+                                <td colspan="5" scope="col"></td>
+                                <td scope="col" class="text-right text-nowrap">R @((Model.ActualTotalConsumptionPerMonth * Model.UnitForFirstOfTheMonth).ToString("N"))</td>
+                                <td scope="col" class="text-right text-nowrap">R @((Model.ActualTotalConsumptionPerMonth * Model.UnitForMiddleOfTheMonth).ToString("N"))</td>
+                                <td scope="col" class="text-right text-nowrap">R @((Model.ActualTotalConsumptionPerMonth * Model.UnitForLastOfTheMonth).ToString("N"))</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" scope="col">Difference:</td>
+                                <td scope="col" class="text-right">@Model.ConsumptionDifferencePerDay.ToString("N") kWh</td>
+                                <td scope="col" class="text-right">@Model.ConsumptionDifferencePerMonth.ToString("N") kWh</td>
+                                <td colspan="5" scope="col"></td>
+                                <td scope="col" class="text-right text-nowrap">R @(((Model.FirstOfTheMonth * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)) - (Model.ActualTotalConsumptionPerMonth * Model.UnitForFirstOfTheMonth)).ToString("N"))</td>
+                                <td scope="col" class="text-right text-nowrap">R @(((Model.MiddleOfTheMonth * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)) - (Model.ActualTotalConsumptionPerMonth * Model.UnitForMiddleOfTheMonth)).ToString("N"))</td>
+                                <td scope="col" class="text-right text-nowrap">R @(((Model.LastOfTheMonth * DateTime.DaysInMonth(Model.MonthUsedForTariff.Year, Model.MonthUsedForTariff.Month)) - (Model.ActualTotalConsumptionPerMonth * Model.UnitForLastOfTheMonth)).ToString("N"))</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="/operational/Customer/Customer_UsageCalculator" class="btn btn-outline-primary-sm"><i class="fas fa-arrow-circle-left"></i>&nbsp;BACK</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;SAVE &amp; RECALCULATE</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToCreate(serial) {
+            document.location.href = '/usagecalccreate/' + serial;
+        }
+        function RedirectToEdit(id) {
+            document.location.href = '/usagecalcedit/' + id;
+        }
+    </script>
+}

@@ -1,0 +1,54 @@
+﻿@using MyVoltage.Api.SkyBill
+@model List<LedgerLineItem>
+@{
+    ViewData["Title"] = "Sales Invoice Lines";
+    var companyName = (string)ViewData["CompanyName"];
+    var customerNumber = (string)ViewData["CustomerNumber"];
+}
+
+<h4 class="mt-4">Company: @companyName</h4>
+<h4>Customer number: @customerNumber</h4>
+
+<div>
+    @if (Model != null && Model.Count != 0)
+    {
+        <table id="GatewayDetails" class="table table-repsonsive-sm table-bordered table-hover admin-table table-fixed mt-3">
+            <thead>
+                <tr>
+                    <td>Customer Number</td>
+                    <td>Meter Serial Number</td>
+                    <td>Description</td>
+                    <td>Posting Date</td>
+                    <td>Resource Group</td>
+                    <td>Amount (in Rands)</td>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>@customerNumber</td>
+                        <td>@m.Meter_Serial_No</td>
+                        <td>@(m.Description == null ? "-" : m.Description)</td>
+                        <td>@m.Posting_Date</td>
+                        <td>@(m.Resource_Group_No == "" ? "-" : m.Resource_Group_No)</td>
+                        <td>@m.Amount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        @if (ViewBag.ErrorMessage == null)
+        {
+            <span><b>No search results found...</b></span><br />
+        }
+        else
+        {
+            <span><b>@ViewBag.ErrorMessage</b></span><br />
+        }
+    }
+
+</div>

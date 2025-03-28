@@ -1,0 +1,255 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_AccountPaymentDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails.GetDescription() + " - " + operationalProvider.CompanyName;
+}<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (Model.BuildingDetail != null)
+        {
+            <div class="card p-md-1 mv-gradient">
+
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col border border-primary rounded p-2 m-2">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h6>Building Details:</h6>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-2">
+                                    Company Name:
+                                </div>
+                                <div class="col-2">
+                                    @operationalProvider.CompanyName
+                                </div>
+                                <div class="col-2">
+                                    Building Name:
+                                </div>
+                                <div class="col-2">
+                                    @Model.BuildingDetail.BuildingName
+                                </div>
+                                <div class="col-2">
+                                    Building No:
+                                </div>
+                                <div class="col-2">
+                                    @Model.BuildingDetail.BuildingNo
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h5 class="text-orange">Council Details Loaded:</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsAccountNoMeter" title="Add Account number / Meter Type" class="btn text-success"><i class="fas fa-plus-circle"></i>&nbsp;Add Account number / Meter Type</a>
+                        </div>
+                    </div>
+
+                    @foreach (var item in Model.B01_AccountPayments_AccountPaymentDetailsItems)
+                    {
+                        <div class="row">
+                            <div class="col border border-primary rounded p-2 m-2">
+                                <div class="row">
+                                    <div class="col-6 text-left">
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        @if (item.BuildingCouncilMeters.Count > 0)
+                                        {
+                                            <a href="#" onclick="alert('Linked meters needs to be removed first.')" title="Remove Account number / Meter Type" class="btn text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete @item.CouncilElecAccNo</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#" onclick="BuildingCouncilDetailRemoveConfirm('@item.ID');" title="Remove Account number / Meter Type" class="btn"><i class="fas fa-trash-alt"></i>&nbsp;Delete @item.CouncilElecAccNo</a>
+                                        }
+                                        <br />
+                                        <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsAccountNoMeter/@item.ID" title="Edit Account number / Meter Type" class="btn"><i class="fas fa-edit"></i>&nbsp;Edit @item.CouncilElecAccNo</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <table class="table table-responsive-xl table-striped table-hover table-sm">
+
+                                            <tr>
+                                                <td scope="col">Account Number</td>
+                                                <td scope="col">@item.CouncilElecAccNo</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">PaymentType</td>
+                                                <td scope="col">@(item.PaymentType.HasValue ? item.PaymentType.Value.GetDescription() : "")</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">CouncilType</td>
+                                                <td scope="col">@(item.CouncilType)</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">CouncilCycle</td>
+                                                <td scope="col">@(item.CouncilBillingCycle)</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">CouncilURL</td>
+                                                <td scope="col">@item.CouncilURL</td>
+                                            </tr>
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                            {
+                                                <tr>
+                                                    <td scope="col">CouncilUsername</td>
+                                                    <td scope="col">@item.CouncilUsername</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td scope="col">CouncilPassword</td>
+                                                    <td scope="col">@item.CouncilPassword</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td scope="col">CouncilLoginAccNo</td>
+                                                    <td scope="col">@item.CouncilLoginAccNo</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td scope="col">CouncilOnlinePin</td>
+                                                    <td scope="col">@item.CouncilOnlinePin</td>
+                                                </tr>
+                                            }
+
+                                            <tr>
+                                                <td scope="col">Log</td>
+                                                <td scope="col">
+                                                    <span title="@item.CreatedDate.ToDateAndTimeShort(true)">Created By: @item.CreatedByUsername</span>
+                                                    @if (!string.IsNullOrEmpty(item.UpdatedByUsername))
+                                                    {
+                                                        <span>&nbsp;|&nbsp;</span>
+                                                        <span title="@item.UpdatedDate.ToDateAndTimeShort(true)">Updated By: @item.UpdatedByUsername</span>
+                                                    }
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">Opening Balance Service Provider</td>
+                                                <td scope="col">@item.OpeningBalance.ToMoneyNoDecimal("R")</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">Opening Balance Client</td>
+                                                <td scope="col">@item.OpeningBalanceClient.ToMoneyNoDecimal("R")</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td scope="col">Linked Meters</td>
+                                                <td scope="col">
+                                                    @item.BuildingCouncilMeters.Count()
+                                                    <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter/@item.ID" title="Add Meter" class="btn text-success"><i class="fas fa-plus-circle"></i>&nbsp;Add Meter</a>
+                                                </td>
+                                            </tr>
+
+                                        </table>
+
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+
+                                        <table class="table table-responsive-xl table-striped table-hover table-sm border border-info rounded">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Council Serial</th>
+                                                    <th>MyVoltage Serial</th>
+                                                    <th>Name</th>
+                                                    <th>Description</th>
+                                                    <th>Created By</th>
+                                                    <th>Updated By</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var meter in item.BuildingCouncilMeters)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @switch (meter.DeviceType)
+                                                            {
+                                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                                    <img src="~/images/elec-icon-s.png" />
+                                                                    break;
+                                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                                    <img src="~/images/water-icon-s.png" />
+                                                                    break;
+                                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                                    <img src="~/images/gas-icon-s.png" />
+                                                                    break;
+                                                            }
+                                                            &nbsp;@meter.DeviceType.GetDescription()
+                                                        </td>
+                                                        <td>@meter.CouncilSerial</td>
+                                                        <td>@meter.MyVoltageSerial</td>
+                                                        <td>@meter.Name</td>
+                                                        <td>@meter.Description</td>
+                                                        <td title="@meter.CreatedDate.ToDateAndTimeShort(true)">@meter.CreatedByUsername</td>
+                                                        <td title="@meter.UpdatedDate.ToDateAndTimeShort(true)">@meter.UpdatedByUsername</td>
+                                                        <td class="text-nowrap text-right">
+                                                            <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter/@item.ID/@meter.ID" class="btn"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                                            &nbsp;|&nbsp;
+                                                            <a href="#" onclick="BuildingCouncilMeterRemoveConfirm('@meter.ID');" class="btn text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        }
+        else
+        {
+            <span>Building details missing for @operationalProvider.CompanyName</span>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function BuildingCouncilDetailRemoveConfirm(ID) {
+        if (confirm('Are you sure you want to delete account number and device type?')) {
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsAccountNoMeterRemove/' + ID;
+        }
+    }
+    function BuildingCouncilMeterRemoveConfirm(ID) {
+        if (confirm('Are you sure you want to delete this meter?')) {
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeterRemove/' + ID;
+        }
+    }
+    function RedirectToTemplate(fromDate, toDate, productID) {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates?from=' + fromDate + '&to=' + toDate + '&Products=' + productID;
+    }
+</script>
+}

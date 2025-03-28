@@ -1,0 +1,159 @@
+@model MyVoltage.Models.OperationalModels.Z_SystemLogs.Z_SystemLogsModels.Z_SystemLogs_SkybillJournalLogsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Z_SystemLogs_SkybillJournalLogs.GetDescription()} - {opProv.CompanyName}";
+}
+<div class="row">
+    <div class="col-2">Created From</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+    <div class="col-1">To</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+<table class="table table-sm table-responsive-xl table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2" scope="col">Company</th>
+            <th rowspan="2" scope="col">Customer No</th>
+            <th rowspan="2" scope="col">User</th>
+            <th rowspan="2" scope="col">Found In Skybill</th>
+
+            <th colspan="4" scope="col" class="text-center">Journal Entry</th>
+            <th colspan="4" scope="col" class="text-center">Get Rec ID</th>
+            <th colspan="4" scope="col" class="text-center">Receipt Journal</th>
+
+            <th rowspan="2" scope="col">ExceptionDetails</th>
+        </tr>
+        <tr>
+            <th scope="col" class="text-right">Started</th>
+            <th scope="col">Content Posted</th>
+            <th scope="col" class="text-right">Ended</th>
+            <th scope="col">Response Received</th>
+
+            <th scope="col" class="text-right">Started</th>
+            <th scope="col">Content Posted</th>
+            <th scope="col" class="text-right">Ended</th>
+            <th scope="col">Response Received</th>
+
+            <th scope="col" class="text-right">Started</th>
+            <th scope="col">Content Posted</th>
+            <th scope="col" class="text-right">Ended</th>
+            <th scope="col">Response Received</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Z_SystemLogs_SkybillJournalLogsItems)
+        {
+            string rowclass = "";
+            int maxLength = 100;
+            @if (!item.JournalEntryRequestEnd.HasValue || !item.GetRecIDRequestEnd.HasValue || !item.ReceiptJournalRequestEnd.HasValue)
+            {
+                rowclass = "table-danger";
+            }
+            if (item.ExistOnSkybill)
+            {
+                rowclass = "table-success";
+            }
+            <tr id="tr_@item.ID" class="@Html.Raw(rowclass)">
+                <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                <td scope="col" class="text-nowrap">@item.CustomerNo</td>
+                <td scope="col" class="text-nowrap">@item.Username</td>
+                <td scope="col" class="text-nowrap">@item.ExistOnSkybill.ToBoolean()</td>
+
+                <td scope="col" class="text-nowrap">@item.JournalEntryRequestStart.ToDateAndTimeShort()</td>
+                <td scope="col" class="">
+                    @if (item.JournalEntryRequestFriendly.Length > maxLength)
+                    {
+                        <a class="text-nowrap" href="#tr_@item.ID" onclick="ShowDiv('divJournalEntryRequestFriendly_@item.ID');">Show/Hide Detail...</a>
+                        <div style="white-space: pre-line;" class="text-hide" id="divJournalEntryRequestFriendly_@item.ID"> @(item.JournalEntryRequestFriendly)</div>
+                    }
+                    else
+                    {
+                        <text>@(item.JournalEntryRequestFriendly)</text>
+                    }
+                </td>
+                <td scope="col" class="text-nowrap">@item.JournalEntryRequestEnd.ToDateAndTimeShort()</td>
+                <td scope="col" class="">
+                    @if (item.JournalEntryResponseFriendly.Length > maxLength)
+                    {
+                        <a class="text-nowrap" href="#tr_@item.ID" onclick="ShowDiv('divJournalEntryResponseFriendly_@item.ID');">Show/Hide Detail...</a>
+                        <div style="white-space: pre-line;" class="text-hide" id="divJournalEntryResponseFriendly_@item.ID"> @(item.JournalEntryResponseFriendly)</div>
+                    }
+                    else
+                    {
+                        <text>@(item.JournalEntryResponseFriendly)</text>
+                    }
+                </td>
+
+                <td scope="col" class="text-nowrap">@item.GetRecIDRequestStart.ToDateAndTimeShort()</td>
+                <td scope="col" class="">
+                    @if (item.GetRecIDRequestFriendly.Length > maxLength)
+                    {
+                        <a class="text-nowrap" href="#tr_@item.ID" onclick="ShowDiv('divGetRecIDRequestFriendly_@item.ID');">Show/Hide Detail...</a>
+                        <div style="white-space: pre-line;" class="text-hide" id="divGetRecIDRequestFriendly_@item.ID"> @(item.GetRecIDRequestFriendly)</div>
+                    }
+                    else
+                    {
+                        <text>@(item.GetRecIDRequestFriendly)</text>
+                    }
+                </td>
+                <td scope="col" class="text-nowrap">@item.GetRecIDRequestEnd.ToDateAndTimeShort()</td>
+                <td scope="col" class="">
+                    @if (item.GetRecIDResponseFriendly.Length > maxLength)
+                    {
+                        <a class="text-nowrap" href="#tr_@item.ID" onclick="ShowDiv('divGetRecIDResponseFriendly_@item.ID');">Show/Hide Detail...</a>
+                        <div style="white-space: pre-line;" class="text-hide" id="divGetRecIDResponseFriendly_@item.ID"> @(item.GetRecIDResponseFriendly)</div>
+                    }
+                    else
+                    {
+                        <text>@(item.GetRecIDResponseFriendly)</text>
+                    }
+                </td>
+
+                <td scope="col" class="text-nowrap">@item.ReceiptJournalRequestStart.ToDateAndTimeShort()</td>
+                <td scope="col" class="">
+                    @if (item.ReceiptJournalRequestFriendly.Length > maxLength)
+                    {
+                        <a class="text-nowrap" href="#tr_@item.ID" onclick="ShowDiv('divReceiptJournalRequestFriendly_@item.ID');">Show/Hide Detail...</a>
+                        <div style="white-space: pre-line;" class="text-hide" id="divReceiptJournalRequestFriendly_@item.ID"> @(item.ReceiptJournalRequestFriendly)</div>
+                    }
+                    else
+                    {
+                        <text>@(item.ReceiptJournalRequestFriendly)</text>
+                    }
+                </td>
+                <td scope="col" class="text-nowrap">@item.ReceiptJournalRequestEnd.ToDateAndTimeShort()</td>
+                <td scope="col" class="">
+                    @if (item.ReceiptJournalResponseFriendly.Length > maxLength)
+                    {
+                        <a class="text-nowrap" href="#tr_@item.ID" onclick="ShowDiv('divReceiptJournalResponseFriendly_@item.ID');">Show/Hide Detail...</a>
+                        <div style="white-space: pre-line;" class="text-hide" id="divReceiptJournalResponseFriendly_@item.ID"> @(item.ReceiptJournalResponseFriendly)</div>
+                    }
+                    else
+                    {
+                        <text>@(item.ReceiptJournalResponseFriendly)</text>
+                    }
+                </td>
+
+                <td scope="col" class="text-nowrap">@item.ExceptionDetails</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function ShowDiv(divID) {
+            if ($('#' + divID).attr("class") == '') {
+                $('#' + divID).attr("class", 'text-hide');
+            }
+            else {
+                $('#' + divID).attr("class", '');
+            }
+        }
+
+    </script>
+}

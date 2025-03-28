@@ -1,0 +1,120 @@
+﻿@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_ActiveEnergyAnomalies_DetailsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_ActiveEnergyAnomalies_Details.GetDescription()} - {opProv.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+
+            </div>
+
+            <div class="card-body">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="FromDate"></label>
+                    </div>
+                    <div class="col">
+                        <input class="form-control" type="date" asp-for="FromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                        <span asp-validation-for="FromDate" class="text-red"></span>
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="ToDate"></label>
+                    </div>
+                    <div class="col">
+                        <input class="form-control" type="date" asp-for="ToDate" value="@(Model.ToDate.ToDateShort(true))" />
+                        <span asp-validation-for="ToDate" class="text-red"></span>
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="ShowOnlyErrors"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ShowOnlyErrors", Model.ShowOnlyErrors, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+
+                <div class="row">
+                    <div class="col-12 text-right">
+                        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+
+        <table class="table table-sm table-hover table-bordered">
+
+            <thead>
+                <tr>
+                    <th scope="col" class="text-left text-nowrap border-table">Meter ID</th>
+                    <th scope="col" class="text-left text-nowrap border-table">Serial</th>
+                    <th scope="col" class="text-left text-nowrap border-table">Name</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Time Logged</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Active Energy Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Diff</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Error %</th>
+                </tr>
+            </thead>
+            @{
+                string serial = "";
+                string rowClass = "";
+            }
+            @foreach (var entry in Model.H_Device_Administrator_ActiveEnergyAnomalies_DetailsItems)
+            {
+                if (!string.IsNullOrEmpty(serial) && serial != entry.ErrorID)
+                {
+                    if (string.IsNullOrEmpty(rowClass))
+                    {
+                        rowClass = "table-primary";
+                    }
+                    else
+                    {
+                        rowClass = "";
+                    }
+                    <tr><td colspan="7" class="text-left text-nowrap border-table">&nbsp;</td></tr>
+                }
+
+                <tr title="@entry.ErrorID" class="@Html.Raw(entry.IsTheProblemRow.HasValue && entry.IsTheProblemRow.Value ? "table-danger" : rowClass)">
+                    <td scope="col" class="text-left text-nowrap border-table">@entry.MeterID</td>
+                    <td scope="col" class="text-left text-nowrap border-table">@entry.Serial</td>
+                    <td scope="col" class="text-left text-nowrap border-table">@entry.Name</td>
+                    <td scope="col" class="text-center text-nowrap border-table">@entry.TimeLogged.ToDateAndTimeShort()</td>
+                    <td scope="col" class="text-center text-nowrap border-table">@entry.ActiveEnergyReading.ToReading()</td>
+                    <td scope="col" class="text-center text-nowrap border-table">@entry.Diff.ToReading()</td>
+                    <td scope="col" class="text-center text-nowrap border-table">@entry.ErrorPerc.ToMoney() %</td>
+                </tr>
+                serial = entry.ErrorID;
+            }
+
+
+        </table>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Details?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val() + '&ShowOnlyErrors=' + $("#ShowOnlyErrors").val();
+        }
+    </script>
+}

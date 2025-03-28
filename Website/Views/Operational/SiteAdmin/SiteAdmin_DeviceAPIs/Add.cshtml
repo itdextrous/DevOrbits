@@ -1,0 +1,124 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_DeviceAPIs_AddModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_DeviceAPIs.GetDescription()} - Add";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Device API successfully added. Click Ok to update Device API Details
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/SiteAdmin/SiteAdmin_DeviceAPIs_Edit/@Model.ResultDeviceAPIID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    The system will validate exact company name exist in Skybill and it has at least one customer.
+                </div>
+                <form asp-action="SiteAdmin_DeviceAPIs_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Description" />
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="URL" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="URL" />
+                                <span asp-validation-for="URL" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Username" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Username" />
+                                <span asp-validation-for="Username" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Password" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Password" />
+                                <span asp-validation-for="Password" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="UseSkybill" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("UseSkybill", Model.UseSkybill, new { @class = "form-control" })
+                                <span asp-validation-for="UseSkybill" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="IsSyncActive" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("IsSyncActive", Model.IsSyncActive, new { @class = "form-control" })
+                                <span asp-validation-for="IsSyncActive" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/SiteAdmin/SiteAdmin_DeviceAPIs" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Device APIs</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Add Device API</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

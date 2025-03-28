@@ -1,0 +1,63 @@
+@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_AddDeviceToGatewayModel_AddDeviceStep2ViewModel
+@{
+    ViewData["Title"] = "Technician Toolkit - Add Device Step 2";
+}
+
+<form asp-action="AddDeviceStep2" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+
+                    <div class="row">
+                        <div class="col"><label asp-for="GatewayID" class="control-label"></label>:</div>
+                        <div class="col">
+                            @Model.GatewayID
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><label asp-for="GatewayName" class="control-label"></label>:</div>
+                        <div class="col">
+                            @Model.GatewayName
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><label asp-for="GatewayHardwareType" class="control-label"></label>:</div>
+                        <div class="col">
+                            @Model.GatewayHardwareType
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><label asp-for="MeterTypes" class="control-label"></label>:</div>
+                        <div class="col">
+                            @if (Model.MeterTypes.Count > 0)
+                            {
+                                foreach (var item in Model.MeterTypes)
+                                {
+                                    @Html.RadioButton("MeterType", item.Value, isChecked: item.Selected)
+                                    <span>&nbsp;</span>
+                                    @item.Text
+                                    <br />
+                                }
+                            }
+                        </div>
+                    </div>
+                    @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="text-red font-weight-bold">@Model.ErrorMessage</span>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <input type="submit" value="Select Meter Type" class="btn btn-outline-primary-sm" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>

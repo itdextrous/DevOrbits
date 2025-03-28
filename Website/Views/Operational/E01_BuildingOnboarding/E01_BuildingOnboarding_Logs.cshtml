@@ -1,0 +1,47 @@
+@*@model MyVoltage.Models.OperationalModels.E01_BuildingOnboardingModels.E01_BuildingOnboarding_LogsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E01_BuildingOnboarding_Answers.GetDescription()} - {opProv.CompanyName} LOGS";
+}
+<div class="row col-12">
+    <a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Answers" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+</div>
+
+<div class="row col-12">
+
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Heading</th>
+                <th scope="col">Description</th>
+                <th scope="col">Changes</th>
+                <th scope="col">Date Created</th>
+                <th scope="col">Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.E01_BuildingOnboarding_LogsItems.OrderByDescending(p => p.DateCreated))
+            {
+                <tr>
+                    <td scope="col">@item.BuildingOnboardingQuestion.Heading</td>
+                    <td scope="col">@item.BuildingOnboardingQuestion.Description</td>
+                    <td scope="col">@item.SystemDescription</td>
+                    <td scope="col">@item.DateCreated.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.Username</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/SiteAdmin/E01_BuildingOnboarding_Logs/Edit/' + flagID;
+        }
+    </script>
+}*@

@@ -1,0 +1,80 @@
+@model MyVoltage.Models.OperationalModels.A05_Exceptions.A05_ExceptionsModels.A05_Exceptions_MidnightSyncHistory_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A05_Exceptions_MidnightSyncHistory_Summary.GetDescription()}";
+}
+
+<table class="table table-sm table-responsive-xl table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Company</th>
+            <th scope="col">Customer</th>
+            <th scope="col">M2M Device ID</th>
+            <th scope="col">Mirror Device ID</th>
+            <th scope="col">Serial</th>
+            <th scope="col">Device Name</th>
+            <th scope="col">Time Logged</th>
+            <th scope="col">Reading</th>
+            <th scope="col">Live Reading</th>
+            <th scope="col">Where Was Reading Found</th>
+            <th scope="col">Original Time</th>
+            <th scope="col">Reason For Old Reading</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last Communicated</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.A05_Exceptions_MidnightSyncHistory_SummaryItems)
+        {
+                string rowclass = "";
+                string cellClass = "";
+                //if (itemC.TodayAction == "None" && ((!itemC.Units.HasValue || itemC.Units.Value <= 0) && (!itemC.UnitsPastWeek.HasValue || itemC.UnitsPastWeek.Value <= 0)))
+                //{
+                //    rowclass = " class=\"table-danger\"";
+                //    cellClass = " class=\"text-red font-weight-bold\"";
+                //}
+                //else if (itemC.TodayAction != "None" && !itemC.TodayAction.Contains("Sorted"))
+                //{
+                //    rowclass = " class=\"table-warning\"";
+                //    cellClass = " class=\"text-orange font-weight-bold\"";
+                //}
+                //else if (itemC.TodayAction.Contains("Sorted"))
+                //{
+                //    rowclass = " class=\"table-success\"";
+                //    cellClass = " class=\"text-green font-weight-bold\"";
+                //}
+                //else if ((itemC.Units.HasValue && itemC.Units.Value > 0) || (itemC.UnitsPastWeek.HasValue && itemC.UnitsPastWeek.Value > 0))
+                //{
+                //    rowclass = " class=\"table-success\"";
+                //    cellClass = " class=\"text-green font-weight-bold\"";
+                //}
+                <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @item.m2mSerial" onclick="RedirectToVerification('@item.m2mSerial');">
+                    <td scope="col">@(item.SkybillCustomer != null ? $"{operationalProvider.Companies.Where(p => p.CompanyID == item.SkybillCustomer.CompanyID).FirstOrDefault().Name}" : "")</td>
+                    <td scope="col">@(item.SkybillCustomer != null ? $"{item.SkybillCustomer.Customer_No}" : "")</td>
+                    <td scope="col">@item.m2mDeviceID</td>
+                    <td scope="col">@item.mirrorDeviceID</td>
+                    <td scope="col">@item.m2mSerial</td>
+                    <td scope="col">@item.m2mDeviceName</td>
+                    <td scope="col">@item.TimeLogged.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.Reading.ToReading()</td>
+                    <td scope="col">@item.LiveReading.ToReading()</td>
+                    <td scope="col">@item.WhereDidIFindThis</td>
+                    <td scope="col">@item.OriginalTime.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.ReasonForOldReading</td>
+                    <td scope="col" class="@item.DeviceStatus">@item.DeviceStatus</td>
+                    <td scope="col">@item.DeviceLastCommunicated.ToDateAndTimeShort()</td>
+                </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A05_Exceptions/A05_Exceptions_MidnightSyncHistory_Details';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

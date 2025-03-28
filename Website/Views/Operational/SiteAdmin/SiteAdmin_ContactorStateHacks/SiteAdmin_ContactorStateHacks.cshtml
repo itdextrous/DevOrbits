@@ -1,0 +1,139 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_ContactorStateHacksModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_ContactorStateHacks.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th style="min-width:150px;" scope="col">Meter Serial</th>
+            <th style="min-width:150px;" scope="col">Change Over Is Online</th>
+            <th style="min-width:150px;" scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col" class="text-nowrap">
+                -
+            </td>
+            <td scope="col">
+                <input type="text" id="MeterSerial" class="form-control" />
+            </td>
+            <td scope="col">
+                <select id="ContactorIsOnline" class="form-control">
+                    <option value="true">Connected</option>
+                    <option value="false">Disconnected</option>
+                </select>
+            </td>
+            <td scope="col" class="text-nowrap">
+                <a href="#" onclick="DoAddStatus();" class="btn btn-sm btn-outline-primary-sm" title="Add"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+            </td>
+        </tr>
+        @foreach (var item in Model.SiteAdmin_ContactorStateHacksItems)
+        {
+            <tr>
+                <td scope="col" class="text-nowrap">
+                    @item.ID
+                </td>
+                <td scope="col">
+                    <input type="text" id="MeterSerial_@item.ID" class="form-control" value="@item.MeterSerial" />
+                </td>
+                <td scope="col">
+                    <select id="ContactorIsOnline_@item.ID" class="form-control">
+                        @if (item.ContactorIsOnline)
+                        {
+                            <option value="true" selected="selected">Connected</option>
+                            <option value="false">Disconnected</option>
+                        }
+                        else
+                        {
+                            <option value="true">Connected</option>
+                            <option value="false" selected="selected">Disconnected</option>
+                        }
+                    </select>
+                </td>
+                <td scope="col" class="text-nowrap">
+                    <a href="#" onclick="DoUpdateStatus('@item.ID');" class="btn btn-sm btn-outline-primary-sm" title="Update"><i class="fas fa-edit"></i>&nbsp;Update</a>
+                    &nbsp;
+                    <a href="#" onclick="DoDeleteStatus('@item.ID');" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function DoAddStatus() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_ContactorStateHacks_Add",
+                {
+                    meterserial: $("#MeterSerial").val(),
+                    contactorisonline: $("#ContactorIsOnline").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_ContactorStateHacks_Update/" + ItemID,
+                {
+                    meterserial: $("#MeterSerial_" + ItemID).val(),
+                    contactorisonline: $("#ContactorIsOnline_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_ContactorStateHacks_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

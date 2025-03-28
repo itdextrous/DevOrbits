@@ -1,0 +1,181 @@
+﻿@model MyVoltage.Models.DashboardViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+@using (Html.BeginForm())
+{
+    @*<div class="row mb-4">
+
+        <div class="card p-md-4">
+            <div class="card-content">
+                <div class="row">
+                    <h4>Gateways &amp; Devices</h4>
+                    <br />
+                </div>
+                <div class="row">
+                    <a href="/overview">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Overview
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/bulkReadings">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Bulk Readings
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/BulkDeviceUpdate">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Device Name Bulk Update
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/Bulk433TestingUpload">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Bulk 433 Testing Upload
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/DetectAndMove">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Auto Device Discovery
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/SignalOptimizer">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Wireless Signal Optimizer
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>*@
+    @*<div class="row mb-4">
+
+        <div class="card p-md-4">
+            <div class="card-content">
+                <div class="row">
+                    <h4>Mirror Devices</h4>
+                    <br />
+                </div>
+                <div class="row">
+                    <a href="/Mirror/Dashboard">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Mirror Dashboard
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/mirror/mirrorauditcompleteness">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Mirror Audit Completeness
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+
+        <div class="card p-md-4">
+            <div class="card-content">
+                <div class="row">
+                    <h4>Skybill Reports</h4>
+                    <br />
+                </div>
+                <div class="row">
+                    <a href="/KronikaMeterBilling">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Kronika Meter Billing
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/KronikaMeterBillingSummary">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Kronika Monthly Reports
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>*@
+    @*<div class="row mb-4">
+
+        <div class="card p-md-4">
+            <div class="card-content">
+                <div class="row">
+                    <h4>Website</h4>
+                    <br />
+                </div>
+                <div class="row">
+                    <a href="/userAccounts">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;User Accounts
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/billingUsage">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Billing and Usage
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/admin/technicians">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Technicians
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/admin/MeterTypes">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Meter Types
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>*@
+    <!--<div class="row mb-4">
+
+        <div class="card p-md-4">
+            <div class="card-content">
+                <div class="row">
+                    <h4>Other</h4>
+                    <br />
+                </div>
+                <div class="row">
+                    <a href="/RentalFeesUpload">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Rental Fees Upload
+                        </div>
+                    </a>-->
+                    @*&nbsp;
+                    <a href="/BuildingCouncilReconReport">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Building Council Recon Report
+                        </div>
+                    </a>*@
+                    <!--&nbsp;
+                    <a href="/reports/meterreconreport">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Meter Recon Report
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/admin/downloadtokenlog">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Token Log
+                        </div>
+                    </a>
+                    &nbsp;
+                    <a href="/admin/downloadskybillblocked">
+                        <div class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i>&nbsp;Skybill Blocked Customers
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>-->
+}

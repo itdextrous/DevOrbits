@@ -1,0 +1,125 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledDetailModel
+
+@{
+    ViewData["Title"] = "Billing Control Report - Not Billed Details";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                <div class="row col-12">
+                    <h5 class="text-orange">Billing Date: @DateTime.Now.AddDays(-1).Date.ToString("yyyy/MM/dd")</h5>
+                </div>
+            </div>
+            @if (operationalProvider.CompanyID != 0)
+            {
+                <div id="latestBillingSync" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Billing Sync Status...
+                    </div>
+                </div>
+            }
+
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.TotalCount == 0)
+                    {
+                        <span>There are no outstanding entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer Number</th>
+                                    <th scope="col">Meter Name</th>
+                                    <th scope="col">Meter Serial</th>
+                                    <th scope="col">Account Type</th>
+                                    <th scope="col">Occupancy</th>
+                                    <th scope="col">Billed Amount</th>
+                                    <th scope="col">Billed Units</th>
+                                    <th scope="col">Billed Rate</th>
+                                    <th scope="col">TodayAction</th>
+                                    <th scope="col">Amount Past Week</th>
+                                    <th scope="col">Units Past Week</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.A06_BillingControlReport_NotBilledDetailItems)
+                                {
+                                    @foreach (var itemC in item.A06_BillingControlReport_NotBilledDetailItems)
+                                    {
+                                        string rowclass = "";
+                                        string cellClass = "";
+                                        //if (itemC.TodayAction == "None" && ((!itemC.Units.HasValue || itemC.Units.Value <= 0) && (!itemC.UnitsPastWeek.HasValue || itemC.UnitsPastWeek.Value <= 0)))
+                                        //{
+                                        //    rowclass = " class=\"table-danger\"";
+                                        //    cellClass = " class=\"text-red font-weight-bold\"";
+                                        //}
+                                        //else if (itemC.TodayAction != "None" && !itemC.TodayAction.Contains("Sorted"))
+                                        //{
+                                        //    rowclass = " class=\"table-warning\"";
+                                        //    cellClass = " class=\"text-orange font-weight-bold\"";
+                                        //}
+                                        //else if (itemC.TodayAction.Contains("Sorted"))
+                                        //{
+                                        //    rowclass = " class=\"table-success\"";
+                                        //    cellClass = " class=\"text-green font-weight-bold\"";
+                                        //}
+                                        //else if ((itemC.Units.HasValue && itemC.Units.Value > 0) || (itemC.UnitsPastWeek.HasValue && itemC.UnitsPastWeek.Value > 0))
+                                        //{
+                                        //    rowclass = " class=\"table-success\"";
+                                        //    cellClass = " class=\"text-green font-weight-bold\"";
+                                        //}
+                                        <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @itemC.CustomerNo" onclick="RedirectToVerification('@itemC.CustomerMeterSerial');">
+                                            <td scope="col">@itemC.CustomerNo</td>
+                                            <td scope="col">@itemC.CustomerMeterName</td>
+                                            <td scope="col">@itemC.CustomerMeterSerial</td>
+                                            <td scope="col">@itemC.AccountType</td>
+                                            <td scope="col">@(itemC.Occupancy)</td>
+                                            <td title="Amount Billed:R @(itemC.Amount.HasValue ? itemC.Amount.Value.ToString("N") : "")" scope="col">@(itemC.Amount.HasValue ? "R " + itemC.Amount.Value.ToString("N") : "")</td>
+                                            <td title="Units Billed: @(itemC.Units.HasValue ? itemC.Units.Value.ToString("N") : "")" scope="col">@(itemC.Units.HasValue ? itemC.Units.Value.ToString("N") : "")</td>
+                                            <td title="Rate Billed: @(itemC.Rate.HasValue ? itemC.Rate.Value.ToString("N") : "")" scope="col">@(itemC.Rate.HasValue ? itemC.Rate.Value.ToString("N") : "")</td>
+                                            <td scope="col">@(itemC.TodayAction)</td>
+                                            <td title="Amount Billed in the past week:R @(itemC.AmountPastWeek.HasValue ? itemC.AmountPastWeek.Value.ToString("N") : "")" scope="col">@(itemC.AmountPastWeek.HasValue ? "R " + itemC.AmountPastWeek.Value.ToString("N") : "")</td>
+                                            <td title="Units Billed in the past week: @(itemC.UnitsPastWeek.HasValue ? itemC.UnitsPastWeek.Value.ToString("N") : "")" scope="col">@(itemC.UnitsPastWeek.HasValue ? itemC.UnitsPastWeek.Value.ToString("N") : "")</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledVerification';
+        }
+        $(document).ready(function () {
+            $("#latestBillingSync").load('@Url.Content("/operational/shared/billingsync/latestbillingsynccompany")');
+        });
+    </script>
+}

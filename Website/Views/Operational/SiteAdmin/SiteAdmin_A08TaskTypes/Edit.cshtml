@@ -1,0 +1,609 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_A08TaskTypesModels.SiteAdmin_A08_Task_TypesEditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.SiteAdmin_A08TaskTypes.GetDescription()} - Edit";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Task Type successfully updated.<br />
+                    Dont forget to add the companies and schedule this task applies to otherwise it will never run.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes/Edit/@Model.ResultFlagTypeID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    Task Details:
+                </div>
+                <form asp-action="SiteAdmin_A08TaskTypes_Edit" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="TemplateNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="TemplateNo" disabled />
+                                <span asp-validation-for="TemplateNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="TaskClassification" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("TaskClassification", Model.TaskClassification, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetTaskClassification();" })
+                                <span asp-validation-for="TaskClassification" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="WorkflowGroupID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("WorkflowGroupID", Model.WorkflowGroupID, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetWorkflow();" })
+                                <span asp-validation-for="WorkflowGroupID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessPillar" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessPillar", Model.BusinessPillar, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                <span asp-validation-for="BusinessPillar" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessDepartment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessDepartment", Model.BusinessDepartment, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="BusinessDepartment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Identifier" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Identifier" />
+                                <span asp-validation-for="Identifier" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Heading" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Heading" />
+                                <span asp-validation-for="Heading" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="Description"></textarea>
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                                @if (Model.A08_Task_Type.ResponsibleUserAccepted.HasValue)
+                                {
+                                    @if (Model.A08_Task_Type.ResponsibleUserAccepted.Value)
+                                    {
+                                        <span class="text-green text-nowrap"><i class="fas fa-check-circle"></i>&nbsp;Approved @Model.A08_Task_Type.ResponsibleUserAcceptedDate.ToDateAndTimeShort()</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red text-nowrap"><i class="fas fa-times-circle"></i>&nbsp;Rejectd @Model.A08_Task_Type.ResponsibleUserAcceptedDate.ToDateAndTimeShort()</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-orange"><i class="fas fa-hourglass-half"></i>&nbsp;Pending</span>
+                                }
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ReportingToUser" class="control-label"></label>
+                                @if (Model.A08_Task_Type.ReportingToUserAccepted.HasValue)
+                                {
+                                    @if (Model.A08_Task_Type.ReportingToUserAccepted.Value)
+                                    {
+                                        <span class="text-green text-nowrap"><i class="fas fa-check-circle"></i>&nbsp;Approved @Model.A08_Task_Type.ReportingToUserAcceptedDate.ToDateAndTimeShort()</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red text-nowrap"><i class="fas fa-times-circle"></i>&nbsp;Rejectd @Model.A08_Task_Type.ReportingToUserAcceptedDate.ToDateAndTimeShort()</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-orange"><i class="fas fa-hourglass-half"></i>&nbsp;Pending</span>
+                                }
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ReportingToUserRequiresCompletedState" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUserRequiresCompletedState", Model.ReportingToUserRequiresCompletedState, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ReportingToUserRequiresCompletedState" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Priority" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Priority", Model.Priority, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="Priority" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LinkedSecureArea" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LinkedSecureArea", Model.LinkedSecureArea, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="LinkedSecureArea" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CreateIndividualFlagsForCompaniesLinked" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("CreateIndividualFlagsForCompaniesLinked", Model.CreateIndividualFlagsForCompaniesLinked, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="CreateIndividualFlagsForCompaniesLinked" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MinRequiredToClear" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="MinRequiredToClear" />
+                                <span asp-validation-for="MinRequiredToClear" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefautlMinPlanned" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="DefautlMinPlanned" />
+                                <span asp-validation-for="DefautlMinPlanned" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="HowToDocument" class="control-label"></label>
+                                @if (!string.IsNullOrEmpty(Model.A08_Task_Type.HowToURL))
+                                {
+                                    <a href="/operational/A08_Tasks/A08_TaskTypeHowToDocument/@Model.A08_Task_Type.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download How To Document</a>
+                                }
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="HowToDocument" />
+                                <span asp-validation-for="HowToDocument" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StatusGroup" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("StatusGroup", Model.StatusGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetStatuses();" })
+                                <span asp-validation-for="StatusGroup" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultStatus" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultStatus", Model.DefaultStatus, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultStatus" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MeetingAgendaGroup" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("MeetingAgendaGroup", Model.MeetingAgendaGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetMeetingAgendaes();" })
+                                <span asp-validation-for="MeetingAgendaGroup" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultMeetingAgenda" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultMeetingAgenda", Model.DefaultMeetingAgenda, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultMeetingAgenda" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                Task Generation
+                            </div>
+                            <div class="col-6">
+                                @if (Model.A08_Task_Type_FrequencyItems.Count == 0)
+                                {
+                                    <input type="text" class="form-control" readonly="readonly" value="Manual" />
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" readonly="readonly" value="System" />
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                Is Deleted
+                            </div>
+                            <div class="col-6">
+                                @if (Model.A08_Task_Type.IsDeleted.HasValue && Model.A08_Task_Type.IsDeleted.Value)
+                                {
+                                    <input type="text" class="form-control" readonly="readonly" value="Yes" />
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" readonly="readonly" value="No" />
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="UpdateExistingTask" class="control-label"></label> (Linked to @(Model.LinkedTasks) tasks)
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("UpdateExistingTask", Model.UpdateExistingTask, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="UpdateExistingTask" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="HasComplianceCheck" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("HasComplianceCheck", Model.HasComplianceCheck, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="HasComplianceCheck" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Task Types</a>
+                            </div>
+                            <div class="col text-center">
+                                <a href="#" onclick="ConfirmDeleteTaskType('@Model.A08_Task_Type.ID');" class="btn btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete Task Type</a>
+                            </div>
+                            <div class="col text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <h4>Companies Linked</h4>
+                            </div>
+                        </div>
+                        @if (Model.A08_Task_Type.CreateIndividualFlagsForCompaniesLinked)
+                        {
+                            <div class="row col-12 mb-md-2">
+                                @foreach (var item in Model.A08_Task_Type_CompanyItems.OrderBy(p => p.CompanyName))
+                                {
+                                    <div class="border border-primary rounded p-2 m-1">
+                                        @item.CompanyName
+                                        @if (Model.A08_Task_Type_CompanyItems.Count > 1)
+                                        {
+                                            <text>&nbsp;</text>
+                                            <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes/DeleteCompany/@Model.A08_Task_Type.ID/@item.CompanyID" title="Remove @item.CompanyName"><i class="fas fa-trash-alt"></i></a>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col-3 text-right">
+                                    <select id="addCompanyDropDown" class="browser-default custom-select form-control-trim js-select">
+                                        @foreach (var company in operationalProvider.Companies)
+                                        {
+                                            if (Model.A08_Task_Type_CompanyItems.Where(p => p.CompanyID == company.CompanyID).Count() == 0)
+                                            {
+                                                <option value="@company.CompanyID">@company.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col"><a href="#" onclick="AddCompany('@Model.A08_Task_Type.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Company</a></div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row mb-md-2">
+                                <div class="col-12">
+                                    <span>Companies cannot be added to a task type linked to all companies.</span>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <h4>Frequencies (Schedules) Linked</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <table class="table table-responsive-xl table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Frequency Type</th>
+                                            <th scope="col">Previous Run Date</th>
+                                            <th scope="col">Next Run Date</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.A08_Task_Type_FrequencyItems)
+                                        {
+                                            <tr>
+                                                <td scope="col">@item.Frequency.GetDescription()</td>
+                                                <td scope="col">@item.PreviousRunDate.ToDateShort()</td>
+                                                <td scope="col">@item.NextRunDate.ToDateShort()</td>
+                                                <td scope="col">
+                                                    <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes/DeleteFrequency/@item.TaskTypeID/@item.ID" title="Remove @item.Frequency.GetDescription()"><i class="fas fa-trash-alt"></i></a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <h4>Add New Frequency</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <table class="table table-responsive-xl table-striped table-hover">
+                                    <tr>
+                                        <th>
+                                            Select frequency to add
+                                        </th>
+                                        <th>
+                                            Once Off Execution Date (Only used when Once Off is selected)
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">
+                                            <select id="addFrequencyDropDown" class="browser-default custom-select form-control-trim js-select">
+                                                @foreach (MyVoltage.Data.A08_Task_Type_Frequency.FrequencyEnum frequencyEnum in ((MyVoltage.Data.A08_Task_Type_Frequency.FrequencyEnum[])Enum.GetValues(typeof(MyVoltage.Data.A08_Task_Type_Frequency.FrequencyEnum))))
+                                                {
+                                                    <option value="@(((int)frequencyEnum).ToString())">@frequencyEnum.GetDescription()</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td class="">
+                                            <input type="date" id="addFrequencyDate" class="form-control" title="One Time Execution Date (Only used when Once Off is selected)" />
+                                        </td>
+                                        <td class=""><a href="#" onclick="AddFrequency('@Model.A08_Task_Type.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Frequency</a></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row col-12">
+                            <h5 class="text-orange">Edit History</h5>
+                        </div>
+                        <div class="row col-12">
+                            <table class="table table-responsive-xl table-striped table-hover">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Changes</th>
+                                </tr>
+
+                                @foreach (var item in Model.A08_Task_Type_LogItems)
+                                {
+                                    <tr>
+                                        <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                        <td>@item.Username</td>
+                                        <td>
+                                            @(Html.Raw(item.SystemDescription))
+                                        </td>
+                                    </tr>
+                                }
+
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        GetWorkflow();
+        function GetWorkflow() {
+            $("#BusinessPillar").val('');
+            var departmentID = 0;
+            var workflowGroupItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.WorkflowGroupItems)));
+            $(workflowGroupItems).each(function () {
+                if (this.ID == $("#WorkflowGroupID").val()) {
+                    departmentID = this.BusinessDepartmentID;
+                }
+            });
+
+            $("#BusinessDepartment").empty();
+            $("#BusinessDepartment").append(`<option value="0">00 - NONE</option>`);
+            var businessDepartmentItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BusinessDepartmentItems)));
+            $(businessDepartmentItems).each(function () {
+                if ('@Model.A08_Task_Type.BusinessDepartmentID' == this.ID) {
+                    $("#BusinessDepartment").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    $("#BusinessPillar").val(this.BusinessPillarID);
+                }
+                else {
+                    if (this.ID == departmentID) {
+                        $("#BusinessDepartment").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                        $("#BusinessPillar").val(this.BusinessPillarID);
+                    }
+                    else {
+                        $("#BusinessDepartment").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+
+        }
+
+        GetStatuses();
+        function GetStatuses() {
+            $("#DefaultStatus").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.StatusItems)));
+            $(companies).each(function () {
+                if (this.StatusGroupID == $("#StatusGroup").val()) {
+                    if (this.ID.toString() == '@Model.A08_Task_Type.DefaultStatusID') {
+                        $("#DefaultStatus").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                    else {
+                        $("#DefaultStatus").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+        }
+
+        GetMeetingAgendaes();
+        function GetMeetingAgendaes() {
+            $("#DefaultMeetingAgenda").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.MeetingAgendaItems)));
+            $(companies).each(function () {
+                if (this.MeetingAgendaGroupID == $("#MeetingAgendaGroup").val()) {
+                    if (this.ID.toString() == '@Model.A08_Task_Type.DefaultMeetingAgendaID') {
+                        $("#DefaultMeetingAgenda").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                    else {
+                        $("#DefaultMeetingAgenda").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+        }
+
+        GetTaskClassification();
+        function GetTaskClassification() {
+            if ($("#TaskClassification").val() == "1") {
+                // $("#ResponsibleUser").val('7ef8d494-ca75-4dce-a629-20687bd55071');
+                // $("#ReportingToUser").val('7ef8d494-ca75-4dce-a629-20687bd55071');
+                // $("#Priority").val('8');
+                // $("#StatusGroup").val('6');
+                GetStatuses();
+            }
+        }
+
+        function AddCompany(taskTypeID) {
+            var companyID = $("#addCompanyDropDown").val();
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_A08TaskTypes/AddCompany/' + taskTypeID + '/' + companyID;
+        }
+        function AddFrequency(taskTypeID) {
+            $("#loaderContent").css("display", "block");
+            $.post("/operational/SiteAdmin/SiteAdmin_A08TaskTypes/AddFrequency/" + taskTypeID,
+                {
+                    addFrequencyDropDown: $("#addFrequencyDropDown").val(),
+                    addFrequencyDate: $("#addFrequencyDate").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+        }
+        function ConfirmDeleteTaskType(taskTypeID) {
+            if (confirm('Are you sure you wish to delete this task Type?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/SiteAdmin/SiteAdmin_A08TaskTypes/Delete/' + taskTypeID;
+            }
+        }
+    </script>
+}

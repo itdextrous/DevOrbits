@@ -1,0 +1,819 @@
+@model MyVoltage.Models.MeterViewModels.MeterViewModel
+@inject MyVoltage.Services.CustomerProvider customerProvider
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Usage";
+
+    string[] months = System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames;
+    int[] years = Enumerable.Range(2016, (DateTime.Now.Year - 2016) + 1).ToArray();
+    int[] days = Enumerable.Range(1, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToArray();
+
+    int index = 0;
+}
+
+@{
+    await Html.RenderPartialAsync("customerRecharge");
+}
+
+<div class="row mt-0  mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+    <div class="col-12 col-md-6 text-md-right balance">
+        <h4>Balance: <span class="text-primary">@customerProvider.GetBalance()</span></h4>
+        @if (customerProvider.AccountType == 2)
+        {
+            <h4>Units: <span class="text-primary">@customerProvider.GetRemainingCredit()</span></h4>
+        }
+    </div>
+</div>
+
+<div class="dash-block usage @Model.MeterColor mt-4 mb-5">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="dropdown usage-dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="number">@Model.MeterNumber</span>
+                    <span class="address">@Model.Name</span>
+                    <span class="@Model.MeterType"></span>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    @foreach (var meter in @Model.AllMeters)
+                    {
+                        if (meter.Serial_No != @Model.MeterNumber)
+                        {
+                            <a class="dropdown-item" href="/usage/@meter.Serial_No">
+                                <span class="number">@meter.Serial_No</span>
+                                <span class="address">@meter.No</span>
+                                <img src="/images/@meter.deviceType-icon.png" alt="" height="24">
+                            </a>
+                        }
+
+                    }
+                </div>
+            </div>
+            <div class="card top-details">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <div class="row pt-4">
+                                <div class="col"><span class="cost" id="meterCost"></span></div>
+                                <div class="col"><span class="@Model.MeterType"><img src="/images/@Model.MeterType-icon.png" alt="" height="24" class="pr-1"><span id="meterKwh"></span></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-md-4">
+                <div class="card-content">
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle text-uppercase font-weight-bold" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="far fa-calendar mr-2"></i><span data-bind="text : Year"></span>
+                        </button>
+
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @foreach (var year in years)
+                            {
+                                <a class="dropdown-item" href="#" id="year-dropdown-menu-@year" onclick="model.ChangeYear(@year)">@year</a>
+                            }
+
+                        </div>
+                    </div>
+                    <div style="height:200px">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-md-4">
+                <div class="card-content">
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle text-uppercase font-weight-bold" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="far fa-calendar mr-2"></i><span data-bind="text : FullMonth"></span>
+                        </button>
+
+                        <div class="dropdown-menu" id="month-dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                        </div>
+                    </div>
+                    <div style="height:200px">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            @if (customerProvider.ShowHourlyUsage)
+            {
+                <div class="card p-md-4">
+                    <div class="card-content">
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle text-uppercase font-weight-bold" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="far fa-calendar mr-2"></i><span data-bind="text : FullDay"></span>
+                            </button>
+
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-bind="foreach: Days">
+                                <a class="dropdown-item" href="#" data-bind="click: $parent.ChangeDay, text: $data,  attr: {'id': 'day-dropdown-menu-' + $data.replace(/ /g,'-')}"></a>
+                            </div>
+                        </div>
+                        <div style="height:200px">
+                            <canvas id="hourlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<a href="/recharge">
+    <div class="top-up-mobile d-block d-md-none">
+        <span><i class="fas fa-plus-circle"></i> Recharge</span>
+    </div>
+</a>
+
+@section Scripts {
+    <script src="/js/Chart.bundle.min.js"></script>
+    <script src="~/js/chart.utils.js"></script>
+    <script src="~/js/knockout.js"></script>
+    <!--Temporary solution to remove the gradient bg after logged in. -->
+    <script>
+        var isElectricity = ('@Model.MeterType' == "elec")
+        var isWater = ('@Model.MeterType' == "water")
+        var isGas = ('@Model.MeterType' == "gas")
+        var isSolar = ('@Model.MeterType' == "solar")
+        var isDemand = ('@Model.MeterType' == "demand")
+        var meterType = '@Model.MeterType';
+
+        var unit = isWater ? "kL" : (isElectricity ? "kWh" : "m3")
+
+        $(function cleanBody()
+        {
+            var body = $('body');
+
+            if (body.is('.mv-gradient'))
+            {
+                body.removeClass('mv-gradient');
+            } else
+            {
+                setTimeout(cleanBody, 500);
+            }
+        });
+
+        function formatLabels(label, index, labels)
+        {
+            label = parseFloat(label)
+
+            if (Math.max.apply(Math, this.ticks) <= 5)
+            {
+                label = toFixed(label, 2)
+            }
+            else
+            {
+                label = toFixed(label, 0)
+            }
+
+            return numberWithCommas(label)
+        }
+
+        function formatToolTips(tooltipItem, data)
+        {
+            var label = parseFloat(tooltipItem.yLabel)
+
+            if (Math.max.apply(Math, this.ticks) <= 5)
+            {
+                label = toFixed(label, 2)
+            }
+            else
+            {
+                label = toFixed(label, 0)
+            }
+
+            return data.datasets[tooltipItem.datasetIndex].label + " " + numberWithCommas(label)
+        }
+
+        var config = {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: null,
+                    borderColor: 'rgb(247, 138, 31)',
+                    label: @customerProvider.AccountType == 2 ? 'kWh' : 'R',
+                    type: 'line',
+                    backgroundColor: 'rgb(247, 138, 31)',
+                    fill: false,
+                },
+                {
+                    data: null,
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'kWh'
+                }]
+                ,
+                labels: null
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    callbacks: {
+                        label: formatToolTips
+                        }
+                    },
+                title: {
+                    display: false,
+                    text: 'Main Colours'
+                },
+                onClick: function (e)
+                {
+                    var element = this.getElementAtEvent(e);
+
+                    // changes only the color of the active object
+                    //this.active[0]._chart.config.data.datasets[0].backgroundColor = "red";
+
+                    if (element.length > 0)
+                    {
+
+                        var dataset = this.active[0]._chart.config.data.datasets[1];
+
+                        if (typeof dataset.Years != 'undefined' && typeof dataset.Months != 'undefined')
+                        {
+
+                            model.Year(dataset.Years[element[0]._index])
+                            model.Month(monthNameToNum(dataset.Months[element[0]._index]))
+
+                            $('#year-dropdown-menu-' + dataset.Years[element[0]._index]).click();
+
+                           // var url = "/usage/" + dataset.MeterNumber + "/" + dataset.Name + "/" + dataset.Years[element[0]._index] + "/" + dataset.Months[element[0]._index]
+                          //  window.location.href = url;
+                        }
+
+                        if (typeof dataset.Days != 'undefined' && dataset.Days != "")
+                        {
+                            $('#day-dropdown-menu-' + dataset.Days[element[0]._index].replace(/ /g, '-')).click();
+                        }
+
+                    }
+                },
+                scales: {
+                    xAxes: [{
+
+                        //display: false,
+                        ticks: {
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            autoSkip: false,
+                        },
+
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 1,
+                            zeroLineWidth: 0
+                        },
+
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            callback: formatLabels,
+                            beginAtZero: false,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)'
+                        },
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    }]
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            },
+        };
+
+        var charts = {};
+
+        function DisplayChart(data, name, years, months, days)
+        {
+
+            var waterColor = 'rgb(65,105,225)'
+            var electrictyColor = 'rgb(255,221,120)'
+            var gasColor = 'rgb(128,128,128)'
+
+            var waterLastColor = 'rgb(0,0,255)'
+            var electrictyLastColor = 'rgb(255,192,1)'
+            var gasLastColor = 'rgb(105,105,105)'
+
+            if (charts[name] != undefined)
+                charts[name].destroy();
+
+            var ctx = document.getElementById(name).getContext("2d");
+            var newConfig = $.extend(true, {}, config);
+
+            newConfig.data.datasets[1].data = data.Data.Item1;
+            newConfig.data.labels = data.Labels;
+
+            //if (data.Data.Item3 != null)
+            //{
+            //    data.Data.Item2 = data.Data.Item3
+            //    newConfig.data.datasets[0].label = "kVA"
+            //}
+
+            //if (data.Data.Item4 != null) {
+            //    data.Data.Item2 = data.Data.Item4
+            //    newConfig.data.datasets[0].label = "kWh"
+            //}
+
+            newConfig.data.dataAvgs = data.Avgs;
+            newConfig.data.dataTotals = data.Totals;
+
+            if (years != '') {
+                newConfig.data.datasets[1].Years = years
+            }
+            if (months != '') {
+                newConfig.data.datasets[1].Months = months
+            }
+            if (days != '') {
+                newConfig.data.datasets[1].Days = days
+            }
+            // Tooltips
+            if (name == 'dailyChart' || name == 'monthlyChart') {
+
+                newConfig.options.tooltips = {
+                    callbacks: {
+                        title: function (tooltipItem, data) {
+                            return "";
+                        },
+                        afterLabel: function (tooltipItem, data) {
+                            if (tooltipItem.datasetIndex === 1 && name != 'hourlyChart') {
+                                var label = tooltipItem.yLabel
+                                var x = label + " " + data.datasets[tooltipItem.datasetIndex].label
+                                var y = data.dataAvgs[tooltipItem.index]
+                                var z = data.dataTotals[tooltipItem.index]
+
+                                var str = ["Cost: R " + toFixed(z, 2)]
+                                str.push("Cons: " + toFixed(x, 2))
+                                str.push("Avg Unit: R " + toFixed(y, 2))
+                                str.push("Click to go to details")
+                                return str;
+                            }
+                        }
+                    }
+                };
+            }
+
+            // Line graph
+            if (data.Data.Item4 != null/* && isSolar*/) {
+                // Solar
+                newConfig.data.datasets[0].yAxisID = "y-axis-0";
+                newConfig.data.datasets[1].yAxisID = "y-axis-1";
+                newConfig.data.datasets[0].data = data.Data.Item4;
+                newConfig.data.datasets[0].label = "kWh"
+                newConfig.options.scales.yAxes = [
+                    {
+                        id: "y-axis-0",
+                        position: 'right',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    },
+                    {
+                        ticks: {
+                            beginAtZero: false,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: formatLabels,
+                        },
+                        id: "y-axis-1",
+                        position: 'left',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0)'
+                        }
+                    }]
+            }
+            else if (data.Data.Item3 != null/* && isDemand*/) {
+                // Demand
+                newConfig.data.datasets[0].yAxisID = "y-axis-0";
+                newConfig.data.datasets[1].yAxisID = "y-axis-1";
+                newConfig.data.datasets[0].data = data.Data.Item3;
+                newConfig.data.datasets[0].label = "kVA"
+                newConfig.options.scales.yAxes = [
+                    {
+                        id: "y-axis-0",
+                        position: 'right',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    },
+                    {
+                        ticks: {
+                            beginAtZero: false,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: formatLabels,
+                        },
+                        id: "y-axis-1",
+                        position: 'left',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0)'
+                        }
+                    }]
+            }
+            else if (data.Data.Item2 != null && (name == 'dailyChart' || (name == 'hourlyChart' && @customerProvider.AccountType == 2))) {
+                // Balances - Only for Daily chart
+                newConfig.data.datasets[0].yAxisID = "y-axis-0";
+                newConfig.data.datasets[1].yAxisID = "y-axis-1";
+                newConfig.data.datasets[0].data = data.Data.Item2;
+                newConfig.options.scales.yAxes = [
+                    {
+                        id: "y-axis-0",
+                        position: 'right',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    },
+                    {
+                        ticks: {
+                            beginAtZero: false,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: formatLabels,
+                        },
+                        id: "y-axis-1",
+                        position: 'left',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0)'
+                        }
+                    }]
+            }
+
+            for (var itm in data.Labels)
+            {
+                if (isWater)
+                {
+                    newConfig.data.datasets[1].label = "kL"
+                    newConfig.data.datasets[1].backgroundColor.push(waterColor);
+                }
+                else if (isGas)
+                {
+                    newConfig.data.datasets[1].label = "m3"
+                    newConfig.data.datasets[1].backgroundColor.push(gasColor);
+                }
+                else
+                {
+                   newConfig.data.datasets[1].backgroundColor.push(electrictyColor);
+                }
+            }
+
+            if (isWater)
+            {
+                newConfig.data.datasets[1].backgroundColor[data.Labels.length - 1] = waterLastColor;
+            }
+            else if (isGas)
+            {
+                newConfig.data.datasets[1].backgroundColor[data.Labels.length - 1] = gasLastColor;
+                newConfig.data.datasets[0] = {
+                    data: null,
+                    hidden: true,
+                };
+            }
+            else
+            {
+                newConfig.data.datasets[1].backgroundColor[data.Labels.length - 1] = electrictyLastColor;
+            }
+
+            newConfig.data.datasets[1].MeterNumber = '@Model.MeterNumber'
+            newConfig.data.datasets[1].Name = '@Model.Name'
+
+            if ((days != '' || name == 'hourlyChart') && newConfig.data.datasets[0].data == null)
+            {
+                newConfig.data.datasets[0] = {
+                    hidden: true,
+                };
+                //newConfig.options.scales.yAxes[0].ticks.display = false
+            }
+
+            var chart = new Chart(ctx, newConfig);
+            charts[name] = chart;
+        }
+
+        function CalendarModel()
+        {
+            var self = this;
+
+            this.MonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            this.Months = ko.observableArray();
+            this.Years = ko.observableArray();
+
+            this.Day = ko.observable(@Model.ReadingDate.Day);
+            this.Month = ko.observable(@Model.ReadingDate.Month);
+            this.Year = ko.observable(@Model.ReadingDate.Year);
+
+            this.FullMonth = ko.computed(function ()
+            {
+                return this.MonthNames[this.Month() - 1] + " " + this.Year();
+            }, this);
+
+            this.FullDay = ko.computed(function ()
+            {
+                return this.Day() + " " + this.MonthNames[this.Month() - 1] + " " + this.Year();
+            }, this);
+
+            this.DaysInMonth = function (year, month)
+            {
+                return new Date(year, month, 0).getDate();
+            }
+
+            this.Days = ko.computed(function ()
+            {
+                var totalDays = self.DaysInMonth(self.Year(), self.Month());
+
+                var days = [];
+
+                for (i = 1; i < totalDays+1; i++)
+                {
+                    days.push(i + ' ' + self.FullMonth());
+                }
+
+                return days;
+            }, this);
+
+            this.ChangeYear = function(year)
+            {
+                self.Year(year);
+
+                $.get('/monthlyUsage/@Model.MeterNumber/@Model.MeterType/' + year,
+                    function (data)
+                    {
+                        var years = []
+                        var months = []
+
+                        for (var itm in data.Labels)
+                        {
+
+                            var labelAndYear = data.Labels[itm].split(' ');
+                            var month = self.MonthNames[parseInt(labelAndYear[0]) - 1];
+                            var year = labelAndYear[1];
+
+                            data.Labels[itm] = month.substring(0, 3) + ' ' + year;
+
+                            months.push(month);
+                            years.push(year);
+
+                        }
+
+                        DisplayChart(data, 'monthlyChart', years, months, '');
+
+                        $('#meterCost').html('@(Model.MonthlyTotal != 0 ? "R " + Model.MonthlyTotal.ToString("#.##").Replace(",",".") : "R 0.00")');
+                        $('#meterKwh').html(data.CurrentUsage.toFixed(2) + ' ' + unit);
+
+                        self.ChangeMonth(self.Month());
+                    });
+
+                var dropDownLinks = ""
+
+                for (x in this.MonthNames)
+                {
+                    var index = parseInt(x) + 1
+                    dropDownLinks = dropDownLinks + '<a class="dropdown-item" href="#" onclick="model.ChangeMonth(' + index + ')">' + this.MonthNames[x] + ' ' + self.Year() + '</a>'
+                }
+
+                $('#month-dropdown-menu').html(dropDownLinks)
+            }
+
+            this.ChangeMonth = function (month)
+            {
+                self.Month(month);
+                $.get('/dailyUsage/@Model.MeterNumber/@Model.MeterType/' + self.Year() + '/' + month,
+                    function (data)
+                    {
+                        var newData = []
+                        var newPaymentData = []
+                        var oldData = data.Data.Item1
+                        var oldPaymentData = data.Data.Item2
+
+                        if (data.Data.Item3 != null)
+                        {
+                            var a = new Date();
+                            var r = a.getDate();
+                            data.Data.Item1[r - 1] = data.Data.Item1[r - 2];
+                            oldData = data.Data.Item1
+
+                            for (i = r - 1; i < data.Data.Item3.length; i++)
+                            {
+                                data.Data.Item3[i] = data.Data.Item3[r - 1]
+                            }
+
+                            var newData3 = []
+                            for (i = 0; i < data.Data.Item3.length; i++)
+                            {
+                                newData3.push(data.Data.Item3[i] / 1000)
+                            }
+
+                            oldPaymentData = newData3
+                        }
+
+                        if (data.Data.Item4 != null) {
+                            var a = new Date();
+                            var r = a.getDate();
+                            data.Data.Item1[r - 1] = data.Data.Item1[r - 2];
+                            oldData = data.Data.Item1
+
+                            //for (i = r - 1; i < data.Data.Item4.length; i++) {
+                            //    data.Data.Item4[i] = data.Data.Item4[r - 1]
+                            //}
+
+                            var newData3 = []
+                            for (i = 0; i < data.Data.Item4.length; i++) {
+                                newData3.push(data.Data.Item4[i] / 1000)
+                            }
+
+                            oldPaymentData = newData3
+                        }
+
+                        for (var itm in oldData)
+                        {
+                            var value = oldData[itm]
+
+                            value = numberWithCommas(parseFloat(value) / 1000)
+                            newData.push(value)
+                        }
+
+                        for (var itm in oldPaymentData)
+                        {
+                            var paymentValue = oldPaymentData[itm]
+
+                            if (@customerProvider.AccountType == 2) {
+                                paymentValue = paymentValue / 1000
+                            }
+                            else if (@customerProvider.AccountType == 1 && data.Data.Item3 == null && data.Data.Item4 == null) {
+                                paymentValue = paymentValue * -1;
+                            }
+
+                            newPaymentData.push(paymentValue)
+                        }
+
+                         for (var itm in data.Labels)
+                         {
+                             var mydate = new Date(self.Year() + "-" + self.Month() + "-" + data.Labels[itm]);
+                             var dateArray = mydate.toDateString().split(" ")
+                             data.Labels[itm] = dateArray[0].slice(0, 2) + " " + dateArray[2];
+                         }
+
+                        data.Data.Item1 = newData
+
+                        if (data.Data.Item4 != null)
+                        {
+                            data.Data.Item4 = newPaymentData
+                        }
+                        else if (data.Data.Item3 != null) {
+                            data.Data.Item3 = newPaymentData
+                        }
+                        else
+                        {
+                            data.Data.Item2 = newPaymentData
+                        }
+
+
+                        DisplayChart(data, 'dailyChart', '', '', self.Days());
+
+                        self.ChangeDay(self.Day());
+                    });
+            }
+
+            this.ChangeDay = function(day)
+            {
+                day = day.toString().split(' ')[0];
+                self.Day(day);
+
+                $.get('/hourlyUsage/@Model.MeterNumber/@Model.MeterType/' + self.Year() + '/' + self.Month() + '/' + day,
+                    function (data)
+                    {
+
+                        var newData = []
+                        var newPaymentData = []
+                        var oldData = data.Data.Item1
+                        var oldPaymentData = data.Data.Item2
+
+                        if (data.Data.Item3 != null)
+                        {
+                            var a = new Date();
+                            var r = a.getHours();
+                            data.Data.Item1[r] = data.Data.Item1[r - 1];
+
+                            for (i = r + 1; i < data.Data.Item1.length; i ++)
+                            {
+                                data.Data.Item3[i] = data.Data.Item3[r]
+                            }
+
+                            oldData = data.Data.Item1
+
+                            var newData3 = []
+                            for (i = 0; i < data.Data.Item3.length; i++)
+                            {
+                                newData3.push(parseFloat(data.Data.Item3[i]) / 1000)
+                            }
+
+                            data.Data.Item3 = oldPaymentData = newData3
+                        }
+
+                        if (data.Data.Item4 != null) {
+                            var a = new Date();
+                            var r = a.getHours();
+                            data.Data.Item1[r] = data.Data.Item1[r - 1];
+
+                            //for (i = r + 1; i < data.Data.Item1.length; i++) {
+                            //    data.Data.Item4[i] = data.Data.Item4[r]
+                            //}
+
+                            oldData = data.Data.Item1
+
+                            var newData3 = []
+                            for (i = 0; i < data.Data.Item4.length; i++) {
+                                newData3.push(parseFloat(data.Data.Item4[i]) / 1000)
+                            }
+
+                            data.Data.Item4 = oldPaymentData = newData3
+                        }
+
+                        for (var itm in oldData)
+                        {
+                            var value = oldData[itm]
+
+                           value = numberWithCommas(value / 1000)
+                           newData.push(value)
+                        }
+
+                        for (var itm in oldPaymentData)
+                        {
+                            var paymentValue = oldPaymentData[itm]
+                            newPaymentData.push(paymentValue / 1000)
+                        }
+
+                        data.Data.Item2 = newPaymentData
+                        data.Data.Item1 = newData
+
+                        for (var itm in data.Labels)
+                        {
+                            if (data.Labels[itm] == 24)
+                            {
+                                data.Labels[itm] = '00:00'
+                            }
+                            else
+                            {
+                                data.Labels[itm] = data.Labels[itm] + ':00'
+                            }
+                        }
+
+
+                        DisplayChart(data, 'hourlyChart', '', '', '');
+                    });
+            }
+
+            this.ChangeYear(@Model.ReadingDate.Year);
+        }
+
+        var model = new CalendarModel();
+        ko.applyBindings(model);
+
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+        function monthNameToNum(monthname)
+        {
+            var month = months.indexOf(monthname);
+            return month + 1;
+        }
+
+        function numberWithCommas(number)
+        {
+            //if (number > 1)
+                //return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            //else
+           return Number.parseFloat(number).toFixed(2);
+        }
+
+        function toFixed(number, decimals)
+        {
+            //var x = Math.pow(10, Number(decimals) + 1);
+            //return (Number(number) + (1 / x)).toFixed(decimals)
+            return Number.parseFloat(number).toFixed(decimals);
+        }
+
+    </script>
+}

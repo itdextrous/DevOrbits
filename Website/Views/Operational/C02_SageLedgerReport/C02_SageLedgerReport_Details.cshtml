@@ -1,0 +1,97 @@
+@model MyVoltage.Models.OperationalModels.C02_SageLedgerReportModels.C02_SageLedgerReport_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.C02_SageLedgerReport_Details.GetDescription()} - {operationalProvider.CompanyName} - {Model.JournalNo} - {Model.JournalName}";
+}
+@using MyVoltage.Extensions;
+@{
+    DateTime currentDate = Model.FromDate;
+}
+<div class="row mb-md-2">
+    <div class="col-12">
+        Latest Sync Ended: @(operationalProvider.LatestGenLedgerSync.HasValue ? operationalProvider.LatestGenLedgerSync.Value.ToDateAndTimeShort() : "In Progress")
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        From:
+        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+        &nbsp;
+        To:
+        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("TransactionType", Model.TransactionType, new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <a href="/operational/C01_ProductReport/C02_SageLedgerReport_Details" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        &nbsp;
+        <a onclick="RedirectToDetails('@Model.JournalNo', '@Model.JournalName');" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        &nbsp;
+    </div>
+</div>
+@if (Model.C02_SageLedgerReport_DetailsItems.Count != 0)
+{
+    <div class="row mb-md-2">
+        <div class="col-12 text-left">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>SageID</th>
+                        <th>CompanyName</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>AccountId</th>
+                        <th>AccountDescription</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>ContraAccountId</th>
+                        <th>ContraAccountDescription</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model.C02_SageLedgerReport_DetailsItems)
+                    {
+                        string rowClass = "";
+                        //if (item.DetailsValues.Where(p => p.Value.HasValue).Count() == 0)
+                        //{
+                        //    rowClass = "table-danger";
+                        //}
+                        <tr>
+                            <td>@item.SageID</td>
+                            <td>@item.CompanyName</td>
+                            <td>@item.Date.ToDateShort()</td>
+                            <td>@item.Description</td>
+                            <td>@item.AccountId</td>
+                            <td>@item.AccountDescription</td>
+                            <td>@item.Debit.ToMoney()</td>
+                            <td>@item.Credit.ToMoney()</td>
+                            <td>@item.ContraAccountId</td>
+                            <td>@item.ContraAccountDescription</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        function RedirectToDetails(journalNo, journalName) {
+            document.location.href = '/operational/C02_SageLedgerReport/C02_SageLedgerReport_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&JNA=' + journalName + '&JNO=' + journalNo + '&TransactionType=' + $("#TransactionType").val();
+        }
+    </script>
+}

@@ -1,0 +1,69 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_MeterModeDetailsModel
+@{
+    ViewData["Title"] = "Credit Control And Notifier Process - Meter Mode Details";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterModeSummary" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.A07_CreditControlAndNotifierProcess_MeterModeDetailsItems.Count == 0)
+                    {
+                        <span>There are no entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer No</th>
+                                    <th scope="col">Meter Serial</th>
+                                    <th scope="col">Account Type</th>
+                                    <th scope="col">Error Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itemC in Model.A07_CreditControlAndNotifierProcess_MeterModeDetailsItems)
+                                {
+                                    <tr style="cursor:pointer;" title="@itemC.SkybillCustomer.Customer_No" onclick="RedirectToReview('@itemC.SkybillCustomer.Serial_No');">
+                                        <td scope="col">@itemC.SkybillCustomer.Customer_No</td>
+                                        <td scope="col">@itemC.SkybillCustomer.Serial_No</td>
+                                        <td scope="col">@(itemC.SkybillCustomer.AccountType.GetDescription())</td>
+                                        <td scope="col">@itemC.ErrorDescription</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToReview(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterModeReview';
+        }
+    </script>
+}

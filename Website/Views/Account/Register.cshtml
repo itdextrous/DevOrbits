@@ -1,0 +1,147 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/LayoutEmpty.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="diagonal">
+        <img src="/images/diagonal-line.png" alt="">
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-4 col-12 mx-auto">
+            <img src="/logo/white" alt="" class="login-logo my-5 d-block mx-auto logo-width">
+            <h4 class="text-white text-uppercase font-weight-bold mb-4">@ViewData["Title"]</h4>
+            <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-10">
+                            <input asp-for="MeterNumber" class="form-control" placeholder="Meter number" />
+                            <span asp-validation-for="MeterNumber"></span>
+                        </div>
+                        <div class="col-2">
+                            <a href="javascript:void(0)" data-toggle="modal" data-target="#meternumber"><i class="fas fa-question-circle fa-2x text-white"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @foreach (var radioitem in Model.CompanyOrIndividualList)
+                    {
+                        <label class="text-white">
+                            @Html.RadioButton("CompanyOrIndividualList", radioitem.Value, new { onclick = "changeCompanyOrIndividual(this)" })
+                            @radioitem.Text
+                        </label>
+                    }
+                    <span asp-validation-for="CompanyOrIndividual"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="FirstName" class="form-control" placeholder="Full name and Surname / Shop Name"/>
+                    <span asp-validation-for="FirstName"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Cell Number" />
+                    <span asp-validation-for="PhoneNumber"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="AltPhoneNumber" class="form-control" placeholder="Alternative contact number" />
+                    <span asp-validation-for="AltPhoneNumber"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="Email" class="form-control d-block" placeholder="Email Address" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="IDNumberOrCompanyReg" class="form-control" placeholder="ID Number / Passport number" />
+                    <span asp-validation-for="IDNumberOrCompanyReg"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="Password" class="form-control" placeholder="Create a Password" />
+                    <span asp-validation-for="Password"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm Password" />
+                    <span asp-validation-for="ConfirmPassword"></span>
+                </div>
+                <p class="font-weight-bold text-white text-uppercase">Physical address</p>
+                <div class="form-group">
+                    <input asp-for="StreetAddress" class="form-control d-block" placeholder="Street address e.g. 270 Main Road" />
+                    <span asp-validation-for="StreetAddress"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="Suburb" class="form-control d-block" placeholder="Suburb" />
+                    <span asp-validation-for="Suburb"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="TownOrCity" class="form-control d-block" placeholder="Town / City" />
+                    <span asp-validation-for="TownOrCity"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="Province" class="form-control d-block" placeholder="Province" />
+                    <span asp-validation-for="Province"></span>
+                </div>
+                <div class="form-group">
+                    <input asp-for="PostalCode" class="form-control d-block" pattern="[0-9]{4}" placeholder="0000" />
+                    <span asp-validation-for="PostalCode"></span>
+                </div>
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input class="custom-control-input" asp-for="TermsAndConditions" type="checkbox" data-val="true" value="true" />
+                        <label class="custom-control-label text-white" asp-for="TermsAndConditions">Accept the <a class="text-white" href="/termsandconditions" target="_blank"><u>Terms and Conditions</u></a></label>
+                        <span asp-validation-for="TermsAndConditions"></span>
+                    </div>
+                </div>
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-outline-default" value="Register">Next</button>
+                </div>
+                <input type="hidden" asp-for="CompanyOrIndividual" />
+                <div class="form-group text-center">
+                    <a asp-action="Login" class="btn btn-link text-white">BACK</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Metering Number Modal -->
+<div class="modal fade" id="meternumber" tabindex="-1" role="dialog" aria-labelledby="meternumberLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p class="font-weight-bold">Metering number</p>
+                <p>The meter number can be found on the metering device or underneath its cover.</p>
+                <p class="text-muted">The numbers look similar to this: </p>
+                <img src="/images/barcodes.jpg" alt="" class="img-fluid ">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal"><b>Close</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        function changeCompanyOrIndividual(z) {
+            var e = z.value;
+            $("#IDNumberOrCompanyReg").val("");
+            $("#FullName").val("");
+            if (e == 1) {
+                $("#IDNumberOrCompanyReg").attr("placeholder", "Registration Number");
+                $("#FullName").attr("placeholder", "Full Name of company");
+            }
+            else {
+                $("#IDNumberOrCompanyReg").attr("placeholder", "ID Number / Passport number");
+                $("#FullName").attr("placeholder", "Full name and Surname / Shop Name");
+            }
+        }
+
+
+        if ($("#CompanyOrIndividual").val() == "") {
+            $('input:radio[name=CompanyOrIndividualList]:nth(0)').attr('checked', true);
+            $("#CompanyOrIndividual").val("2");
+        }
+    </script>
+
+}

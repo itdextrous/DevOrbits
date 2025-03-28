@@ -1,0 +1,299 @@
+h1, h2, h3, h4,
+.btn,
+.nav-link {
+	text-transform: uppercase;
+}
+
+// FORMS
+.form-group {
+	position: relative;
+	.field-validation-error {
+		background: $danger;
+		color: $white !important;
+		font-size: 12px;
+		padding: 0.1rem 0.5rem;
+		font-weight: 700;
+		border-radius: 2px;
+	}
+}
+.form-control {
+	border: none;
+	background: rgba($white, 0.9);
+	border-radius: 0;
+}
+
+//BOX SHADOWS 
+.box-shadow {
+    box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.5);
+}
+
+//NAVIGATION 
+ @include media-breakpoint-down(sm) {
+        .navbar { 
+            margin: auto -15px;
+            padding:15px;
+        }
+    }
+
+//GRADIENTS
+.mv-gradient { 
+    background: #d43d2b;
+    background: linear-gradient(224.73deg, #F5741A 0%, #C92C30 100%);
+    background-attachment: fixed;  
+    overflow: inherit;
+    @media(min-height:700px) {
+        overflow-x: hidden;
+    }
+}
+
+//LAYOUT
+.content-section { 
+    margin-left:287px;
+    margin-right:15px;
+    @include media-breakpoint-down(sm) {
+        margin-left:0; 
+        margin-right:0;
+    }
+}
+.diagonal { 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+ 
+    img { 
+        transform: rotate(215deg);
+    }
+}
+
+//BUTTONS
+.btn-default { 
+    color:#ff8902;
+    font-size:1.2em;
+    font-weight: bold;
+    text-transform: uppercase;
+    border:4px solid $white;
+    &:hover { 
+        color:#d06f00;
+    }
+}
+.btn-action {
+	background: rgba(255, 255, 255, 0.6);
+    color: $body-color;
+    border: 1px solid $border-color;
+    padding-top: 0;
+    padding-bottom: 0;
+    box-shadow: none;
+    display: inline-block;
+    padding: 0.05rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+    transition: $transition-base;
+    cursor: pointer;
+    &:hover {
+	    box-shadow: none;
+		border-color: #aaa;
+		color: $body-color;
+    }
+}
+.btn {
+	text-transform: uppercase;
+	font-weight: 700;
+//	min-width: 150px;
+	border-radius: 2px;
+	
+	&.btn-white {
+		color: $primary;
+	}
+}
+.btn-cta {
+    position: absolute;
+    right: 30px;
+    top: 16px;
+	background: linear-gradient(90deg, $red 0%, $orange 100%) !important;
+	color:$white;
+    font-weight: bold;
+    font-size: 1.3em;
+    transition: $transition-base;
+    background-repeat: no-repeat;
+    border:none;
+    border-radius:3px;
+    @include media-breakpoint-only(md) {
+        top: 60px;
+    }
+    @include media-breakpoint-down(sm) {
+        display: none;
+    }
+    &:hover,
+    &:active,
+    &:focus {
+	    color: $white;
+	    transform: translateY(-3px);
+	    box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(247, 138, 31, 0.4);
+        
+    }
+    
+}
+.btn-primary { 
+    color:white;
+    font-size:1.4em;
+    font-weight: bold;
+    text-transform: uppercase;
+    border:0;
+    border-radius: 0;
+    padding:15px;
+    &:hover { 
+        color:white;
+        background:#d2751a;
+    }
+    &.btn-primary-sm { 
+        font-size:1.2em  
+    }
+}
+
+
+/*
+.btn-gradient { 
+    background: linear-gradient(90deg, #C92C30 0%, #F5741A 100%);
+    color:$white;
+    font-weight: bold;
+    font-size: 1.3em;
+    &:hover { }
+
+}
+*/
+.btn-outline-default { 
+    background:transparent;
+    color:#ffffff;
+    font-size:1.2em;
+    font-weight: bold;
+    text-transform: uppercase;
+    border:4px solid $white;
+    &:hover { 
+        color:white;
+        background:$orange;
+    }
+}
+.btn-outline-primary { 
+    background:transparent;
+    color:$orange;
+    font-size:1.2em;
+    font-weight: bold;
+    text-transform: uppercase;
+    border:4px solid $orange;
+    &:hover { 
+        color:$white;
+    }
+}
+
+//FORMS ++++++++++++++++++++
+.text-danger { 
+    color:$white!important;
+}
+
+// INPUTS 
+.input-group-append { 
+    .btn-outline-secondary { 
+        border:none;
+        color:$white;
+    }
+}
+
+.custom-search-input { 
+    min-width: 250px;
+    @include media-breakpoint-down(sm) { 
+        width:100%;
+        margin-bottom:5px;
+    }
+}
+
+// CARDS 
+.card-header { 
+    background: $white;
+    border-bottom:0;
+}
+.card-footer { background:$white;}
+
+//QUERIES
+.query {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+    z-index: 1000;
+	&:before {
+		height: 30px;
+		width: 30px;
+		background: $orange;
+		border-radius: 0 $border-radius 0 0;
+		text-align: center;
+		display: block;
+		color: white;
+		line-height: 30px;
+       
+		@include media-breakpoint-up(xs) {content: "xs";}
+		@include media-breakpoint-up(sm) {content: "sm";}
+		@include media-breakpoint-up(md) {content: "md";}
+		@include media-breakpoint-up(lg) {content: "lg";}
+		@include media-breakpoint-up(xl) {content: "xl";}
+	}
+}
+
+//NAV PILLS
+.nav-pills {  
+    .nav-link { 
+        color:$gray-500;
+        font-weight: bold;
+        &.active { 
+            background:transparent;
+            color:$orange;
+            border-radius:0;
+            & span {
+                display: inline-block; 
+                border-top:3px solid $orange;
+            }
+        }
+    }  
+}
+    
+//CHECKBOXES
+
+//LOGOS
+.login-logo { 
+    max-width: 175px;
+}
+.myvoltage-login {
+    
+    .powered-by-logo { display: none;}
+
+    .powered-by { 
+        display: block;
+        .powered-by-logo { 
+            display: block;
+        @include media-breakpoint-down(sm) {
+            right: 14px;
+            bottom: 22px;
+            width: 165px;
+        }
+            position: absolute;
+            right: 0;
+            bottom: 5px; 
+        }
+    }
+}
+
+
+//PAGINATION
+.custom-pagination { 
+    width:fit-content;
+    margin:auto;
+    
+    .btn-default { 
+        &.active { 
+            background:$primary!important;
+            color:$white;   
+        }
+    }
+    
+}
+

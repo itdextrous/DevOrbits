@@ -1,0 +1,99 @@
+@model MyVoltage.Models.Shared.SharedCustomerModels.CustomerMeterListModel
+
+<div class="row">
+    <div class="col text-left"><h5 class="text-orange">Meters</h5></div>
+    <div class="col text-right"><a class="btn btn-outline-primary-sm" href="/map">Details</a></div>
+</div>
+@if (Model.ShowVerticalLayout)
+{
+    @foreach (var item in Model.Devices)
+    {
+        <div class="row">
+            <div class="col-12">
+                <hr />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-6 text-left">
+                        @switch (item.MeterType)
+                        {
+                            case "elec":
+                                <text>Electricity&nbsp;</text>
+                                <img src="~/images/elec-icon-s.png" />
+                                break;
+                            case "water":
+                                <text>Water&nbsp;</text>
+                                <img src="~/images/water-icon-s.png" />
+                                break;
+                            case "gas":
+                                <text>Gas&nbsp;</text>
+                                <img src="~/images/gas-icon-s.png" />
+                                break;
+                        }
+                    </div>
+                    <div class="col-6 text-right">
+                        @item.LastComm.ToString("dd MMM yyyy HH:mm")
+                        <i class="fas fa-circle @(item.Status.ToUpper())" title="@(item.Status.ToUpper())"></i>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 text-left">
+                        @item.MeterNumber
+
+                    </div>
+                    <div class="col-6 text-right">
+                        @item.ContactorState
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <table class="table table-responsive-xl table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Meter Number</th>
+                <th scope="col">Meter Type</th>
+                <th scope="col">Meter Status</th>
+                <th scope="col">Last Communicated</th>
+                <th scope="col">Contactor State</th>
+                <th scope="col">Disconnection Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Devices)
+            {
+                <tr>
+                    <td scope="col">
+                        @item.MeterNumber
+                    </td>
+                    <td scope="col">
+                        @switch (item.MeterType)
+                        {
+                            case "elec":
+                                <img src="~/images/elec-icon-s.png" />
+                                <text>&nbsp;Electricity</text>
+                                break;
+                            case "water":
+                                <img src="~/images/water-icon-s.png" />
+                                <text>&nbsp;Water</text>
+                                break;
+                            case "gas":
+                                <img src="~/images/gas-icon-s.png" />
+                                <text>&nbsp;Gas</text>
+                                break;
+                        }
+                    </td>
+                    <td scope="col" class="@item.Status.ToUpper()">@item.Status</td>
+                    <td scope="col">@item.LastComm.ToString("dd MMM yyyy HH:mm")</td>
+                    <td scope="col" class="@item.ContactorState.ToUpper()">@item.ContactorState</td>
+                    <td scope="col" class="@item.DisconnectionType.ToUpper()">@item.DisconnectionType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

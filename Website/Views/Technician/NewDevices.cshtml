@@ -1,0 +1,74 @@
+﻿@model MyVoltage.Models.TechnicianViewModels.NewDevicesViewModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = $"Devices";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-12">
+        <h3>
+            @ViewData["Title"]
+            <text>&nbsp;-&nbsp;</text>
+            @if (Model.ShowAll)
+            {
+                <text>All for today&nbsp;<a href="/technician/newdevices">Show Offline Only</a></text>
+            }
+            else
+            {
+                <text>Offline Only&nbsp;<a href="/technician/newdevices?showAll=t">Show All for today</a></text>
+            }
+        </h3>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <th>Serial Number</th>
+                <th>Meter Description</th>
+                <th>Meter Type</th>
+                <th>Status</th>
+                <th>Last Communicated</th>
+                <th>Signal</th>
+                <th>Battery</th>
+                <th>GatewayID</th>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Devices.Count == 0)
+            {
+                <tr>
+                    <td colspan="7">Hooray! No offline devices</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var device in Model.Devices)
+                {
+                    <tr>
+                        <td>@device.SerialNumber</td>
+                        <td>@device.MeterDescription </td>
+                        <td>@device.MeterType </td>
+                        <td class="status font-weight-bold">@device.Status</td>
+                        <td>@device.LastCommunicated</td>
+                        <td>@device.Signal</td>
+                        <td>@device.Battery</td>
+                        <td>@device.GatewayID</td>
+                        <td><a href="#" onclick="alert('@device.FormXML');">Show</a></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+        });
+    </script>
+}

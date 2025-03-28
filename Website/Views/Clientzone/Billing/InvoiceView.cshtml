@@ -1,0 +1,204 @@
+@model MyVoltage.Models.ClientzoneModels.Invoice_ViewModel;
+@using MyVoltage.Extensions;
+@using System.Globalization;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@{
+    ViewData["Title"] = $"Billing - Invoice - {Model.SelectedMonth.ToMonth()}";
+    if (Model.ShowingPrintView)
+    {
+        Layout = "LayoutPrint";
+    }
+}
+@if (!string.IsNullOrEmpty(ViewData["myhead"].ToString()))
+{
+    <div class="row pdf_header align-items-center pdf_mb_28">
+        <div class="col">
+            <img src="~/images/Clientzone/logo_alt.png" height="71" />
+        </div>
+        <div class="col text-end">
+            <h3 class="text-plumber">@Model.TaxInvoiceTemplate.CustomerNo</h3>
+            <h2>Tax invoice</h2>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(ViewData["myFooter"].ToString()))
+{
+    <div class="row g-0 align-items-end pdf-footer pdf_footer pdf_pt_50">
+        <div class="col-9">
+            <img class="mb-25" src="~/images/Clientzone/InvoiceFooterR.svg" />
+            @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierName) || !string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierVATNumber))
+            {
+                <div class="heading">@Model.TaxInvoiceTemplate.SupplierName @Model.TaxInvoiceTemplate.SupplierVATNumber</div>
+            }
+            
+            @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierAddress))
+            {
+                <div class="sub_heading">
+                    <img src="/images/icons/address.png" height="20" />
+                    @Model.TaxInvoiceTemplate.SupplierAddress
+                </div>
+            }
+            
+            <div class="d-flex">
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierPostal))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/Postal.png" height="20" />
+                        @Model.TaxInvoiceTemplate.SupplierPostal
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierPhone))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/telephone.png" height="20">
+                        @Model.TaxInvoiceTemplate.SupplierPhone
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierURL))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/web.png" height="20">
+                        <a href="http://@Model.TaxInvoiceTemplate.SupplierURL">
+                            @Model.TaxInvoiceTemplate.SupplierURL
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-3 text-end">
+            <div class="banking_details">
+                <div class="h4 mb-10">Banking details</div>
+                <div><label>Bank name:</label>@Model.TaxInvoiceTemplate.NetcashBankName</div>
+                <div><label>Account type:</label>@Model.TaxInvoiceTemplate.NetcashBankAccountType</div>
+                <div><label>Account no:</label>@Model.TaxInvoiceTemplate.NetcashBankAccountNo</div>
+                <div><label>Branch code:</label>@Model.TaxInvoiceTemplate.NetcashBankBranchCode</div>
+                <div><label class="text-islandsunrise">Reference:</label>@Model.TaxInvoiceTemplate.CustomerNo</div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.TaxInvoiceTemplate == null)
+{
+    <h5 class="m-0 text-center py-1 bold">
+        No data to display.
+    </h5>
+    <script type="text/javascript">
+        $(function () {
+            $("#PDFButton").removeClass('PDFButtonDiv');
+        });
+    </script>
+
+}
+else
+{
+    <div class="text-londonsky pdf_views_style @(Model.ShowingPrintView?"pdf_preview":string.Empty)">
+        @if (!Model.ShowingPrintView)
+        {
+            <div class="row pdf_header align-items-center pdf_pb_28">
+                <div class="col">
+                    <img src="~/images/Clientzone/logo_alt.png" height="71" />
+                </div>
+                <div class="col text-end">
+                    <h3 class="text-plumber">@Model.TaxInvoiceTemplate.CustomerNo</h3>
+                    <h2>Tax invoice</h2>
+                </div>
+            </div>
+        }
+        <h4 class="text-uppercase customer_head m-0 pdf_pb_20 text-plumber">@ViewData["CustomerName"]</h4>
+        <div class="row pdf_pb_28">
+            <div class="col address">
+
+                @ViewData["BusinessName"] <br />
+                @if (ViewData["UnitNumber"] != null && !string.IsNullOrEmpty(ViewData["UnitNumber"].ToString()))
+                {
+                    @ViewData["UnitNumber"] <br />
+                }
+                else
+                {
+                    @ViewData["CompanyName"] <br />
+                }
+                <p class="pdf-address-text">@Model.TaxInvoiceTemplate.Address1</p>
+
+                @*@Model.TaxInvoiceTemplate.Address1<br />
+                @Model.TaxInvoiceTemplate.Address2 @Model.TaxInvoiceTemplate.Address3<br />
+                @Model.TaxInvoiceTemplate.Address4 @Model.TaxInvoiceTemplate.Address5<br />*@
+            </div>
+            <div class="col-md-auto text-end">
+                <div class="max_w_300">
+                    <table class="invoice_table">
+                        <tr>
+                            <td>Invoice date:</td>
+                            <td style="min-width:130px;">@Model.SelectedMonth.ToDateShort()</td>
+                        </tr>
+                        <tr>
+                            <td>Invoice #:</td>
+                            <td>@Model.TaxInvoiceTemplate.InvoiceNo</td>
+                        </tr>
+                        <tr>
+                            <td>Recipient VAT#:</td>
+                            <td>@Model.TaxInvoiceTemplate.RecipientVATNumber</td>
+                        </tr>
+                        <tr>
+                            <td>Recipient Ref #:</td>
+                            <td>@Model.TaxInvoiceTemplate.CustomerNo</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="text-plumber SemiBold m-0 pdf_pb_20"> Billing period: @Html.Raw(new DateTime(Model.SelectedMonth.Year, Model.SelectedMonth.Month, 1).ToString("dd MMM &#39;yy")) - @Html.Raw(new DateTime(Model.SelectedMonth.Year, Model.SelectedMonth.Month, DateTime.DaysInMonth(Model.SelectedMonth.Year, Model.SelectedMonth.Month)).ToString("dd MMM &#39;yy"))</h5>
+        <div class="overflow_auto_mobile">
+            <table class="table table-sm table-grape table-striped">
+                <tr>
+                    <th class="text-center">Item</th>
+                    <th class="text-center">Meter serial #</th>
+                    <th class="text-end">Initial reading</th>
+                    <th class="text-end">Final reading</th>
+                    <th class="text-end"># of units</th>
+                    <th class="text-center">Unit types</th>
+                    <th class="text-end">Unit price</th>
+                    <th class="text-end">Sub Total</th>
+                </tr>
+                @foreach (var item in Model.TaxInvoiceTemplate.Items)
+                {
+                    <tr>
+                        <td>@item.Description</td>
+                        <td class="text-strat">@item.MeterSerial</td>
+                        <td class="text-end">@(item.MeterSerial == "Other Charges" ? "" : item.OpeningReading.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                        <td class="text-end">@(item.MeterSerial == "Other Charges" ? "" : item.ClosingReading.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                        <td class="text-end">@(item.MeterSerial == "Other Charges" ? "" : item.Consumption.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                        <td class="text-center">
+                            @switch (item.ItemResourceType)
+                            {
+                                case MyVoltage.Api.SkyBill.TenantConsumptionStatementItem.ResourceType.ELECTRICITY:
+                                    <span>kWh</span>
+                                    break;
+                                case MyVoltage.Api.SkyBill.TenantConsumptionStatementItem.ResourceType.WATER:
+                                    <span>kL</span>
+                                    break;
+                            }
+                        </td>
+                        <td class="text-end">@item.Tariff.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                        <td class="text-end text-nowrap">R @item.TotalExVAT.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                }
+
+                <tr class="bg-white table-borderless bold font_14 text-nowrap">
+                    <td colspan="7" class="text-end text-grape">TOTAL (EXCL. VAT)</td>
+                    <td class="text-end text-nowrap text-grape">R @(Model.TaxInvoiceTemplate.Items.Select(p => p.TotalExVAT).Sum().ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                </tr>
+                <tr class="bg-white table-borderless bold font_14 text-nowrap">
+                    <td colspan="7" class="text-end text-grape">VAT</td>
+                    <td class="text-end text-nowrap text-grape">R @((Model.TaxInvoiceTemplate.Items.Select(p => p.TotalExVAT).Sum() * 0.15m).ToString("N2", new CultureInfo("en-US")).Replace(",", " ")) </td>
+                </tr>
+                <tr class="table-borderless text-nowrap">
+                    <th colspan="7" class="text-end">TOTAL (INCL. VAT)</th>
+                    <th class="text-end text-nowrap">R @((Model.TaxInvoiceTemplate.Items.Select(p => p.TotalExVAT).Sum() * 1.15m).ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+<script>
+</script>

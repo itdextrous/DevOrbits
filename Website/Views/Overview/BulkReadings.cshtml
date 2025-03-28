@@ -1,0 +1,73 @@
+﻿@model MyVoltage.Models.MeterViewModels.BulkReadingsModel
+@{
+    ViewData["Title"] = "Bulk Readings";
+}
+@using (Html.BeginForm())
+{
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>SerialNos <a href="#" title="Meter Serial Numbers">?</a></span>
+                <textarea asp-for="SerialNos" class="form-control" type="" title="Meter Serial Numbers"></textarea>
+            </div>
+            <div class="col">
+                <span asp-validation-for="StartDate">Start Date</span>
+                <input asp-for="StartDate" class="form-control" placeholder="yyyy/MM/dd" type="date" />
+                <span asp-validation-for="StartTime">Start Time</span>
+                <input asp-for="StartTime" class="form-control" placeholder="HH:mm:ss" type="time" />
+            </div>
+            <div class="col">
+                <span asp-validation-for="EndDate">End Date</span>
+                <input asp-for="EndDate" class="form-control" placeholder="yyyy/MM/dd" type="date" />
+                <span asp-validation-for="EndTime">End Time</span>
+                <input asp-for="EndTime" class="form-control" placeholder="HH:mm:ss" type="time" />
+            </div>
+            <div class="col">
+                <span asp-validation-for="Interval">Interval</span>
+                <select asp-for="Interval" class="form-control">
+                    <option value="900">15 min</option>
+                    <option value="1800">30 min</option>
+                    <option value="3600">Hourly</option>
+                    <option value="86400">Daily</option>
+                </select>
+            </div>
+            <div class="col">
+                <span asp-validation-for="SelectedType">Register Type</span>
+                <select asp-for="SelectedType" class="form-control">
+                    <option value="readings">readings</option>
+                    <option value="diff">diff</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <span>Registers</span>
+            <ul class="list-group flex-md-row">
+                @if (Model.Registers != null)
+                {
+                    for (int i = 0; i < Model.Registers.Count; i++)
+                    {
+                        <li class="list-group-item">
+                            @Html.HiddenFor(p => p.Registers[i].ID)
+                            @Html.DisplayFor(p => p.Registers[i].Name)
+                            @Html.CheckBoxFor(p => p.Registers[i].Selected)
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Get Results</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                <span class="text-red">@Model.ErrorMessage</span>
+            </div>
+        }
+    </div>
+}

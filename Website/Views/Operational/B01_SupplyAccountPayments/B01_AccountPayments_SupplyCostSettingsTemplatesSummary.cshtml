@@ -1,0 +1,228 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_SupplyCostSettingsTemplatesSummaryModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsTemplatesSummary.GetDescription() + " - " + opProv.CompanyName;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (opProv.CompanyID == 0)
+{
+    <div class="row col-12">
+        Select company to see results...
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body text-left">
+                    <div class="row mt-2 mb-2">
+                        <div class="col">
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col text-left">Between</div>
+                                        <div class="col"><input class="form-control" type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                                        <div class="col text-center">And</div>
+                                        <div class="col"><input class="form-control" type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    @Html.DropDownList("Products", Model.Products, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <table class="table table-bordered table-sm table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" class="border-table" rowspan="2">Company</th>
+                        <th scope="col" class="border-table" rowspan="2">Account No</th>
+                        <th scope="col" class="border-table" rowspan="2">Device Type</th>
+                        <th scope="col" class="border-table" rowspan="2">Product</th>
+                        <th scope="col" class="border-table" rowspan="2">Resource Type</th>
+                        <th scope="col" class="border-table" rowspan="2">Month</th>
+
+                        <th scope="col" class="border-table-left" rowspan="2">Billings<br />Amount Excl.</th>
+                        <th scope="col" class="border-table" rowspan="2">Cost Settings<br />Amount Excl.</th>
+                        <th scope="col" class="border-table" rowspan="2">Gross Profit<br />Amount Excl.</th>
+                        <th scope="col" class="border-table-right" rowspan="2">Gross Profit<br />%</th>
+
+                        <th scope="col" class="border-table-left" rowspan="2">Billings<br />Units</th>
+                        <th scope="col" class="border-table" rowspan="2">Cost Settings<br />Units</th>
+                        <th scope="col" class="border-table-right" rowspan="2">Difference<br />Units</th>
+
+                        <th scope="col" class="border-table-left" rowspan="2">Billings<br />Average Rate Per Unit</th>
+                        <th scope="col" class="border-table" rowspan="2">Cost Settings<br />Average Rate Per Unit</th>
+                        <th scope="col" class="border-table-right" rowspan="2">Difference<br />Average Rate Per Unit</th>
+
+                        <th scope="col" class="text-center border-table-spanned" colspan="4">@(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsDetails.GetDescription())</th>
+                        <th scope="col" class="border-table" rowspan="2"></th>
+                    </tr>
+                    <tr>
+                        <th scope="col" class="text-right border-table-left">Total Number Of Units Used During Month</th>
+                        <th scope="col" class="text-right border-table">Average Rate Per Unit</th>
+                        <th scope="col" class="text-right border-table">Amount Excl</th>
+                        <th scope="col" class="border-table-right"><a onclick="DoCostSettingsAll();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-chevron-right"></i>&nbsp;Add/Update All</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.B01_AccountPayments_SupplyCostSettingsTemplatesSummaries)
+                    {
+                        string rowClass = "";
+
+                        if (item.Company_CostSetting_Monthly == null)
+                        {
+                            rowClass = "table-danger";
+                        }
+                        else if (Math.Round((item.Company_CostSetting_Monthly.CostPerUnit * item.Company_CostSetting_Monthly.Units), 1) - Math.Round(item.Amount, 1) > 1 || Math.Round((item.Company_CostSetting_Monthly.CostPerUnit * item.Company_CostSetting_Monthly.Units), 1) - Math.Round(item.Amount, 1) < -1)
+                        {
+                            rowClass = "table-warning";
+                        }
+                        else
+                        {
+                            rowClass = "table-success";
+                        }
+
+                        <tr class="@Html.Raw(rowClass)">
+                            <td scope="col" class="text-nowrap border-table">@opProv.CompanyName</td>
+                            <td scope="col" class="text-nowrap border-table">@item.AccountNo</td>
+                            <td scope="col" class="text-nowrap border-table">
+                                @switch (item.DeviceType)
+                                {
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                        <img src="~/images/elec-icon-s.png" />
+                                        break;
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                        <img src="~/images/water-icon-s.png" />
+                                        break;
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                        <img src="~/images/gas-icon-s.png" />
+                                        break;
+                                }
+                                @item.DeviceType.GetDescription()
+                            </td>
+                            <td scope="col" class="text-nowrap border-table">@item.SiteAdmin_Product.ProductName</td>
+                            <td scope="col" class="text-nowrap border-table">@item.ResourceType</td>
+                            <td scope="col" class="text-nowrap border-table">@item.BillingMonth.ToMonth()</td>
+
+                            <td scope="col" class="text-nowrap border-table-left text-right">@item.AmountBilled.ToMoney()</td>
+                            <td scope="col" class="text-nowrap border-table text-right">@item.Amount.ToMoney()</td>
+                            <td scope="col" class="text-nowrap border-table text-right">@item.GrossProfit.ToMoney()</td>
+                            <td scope="col" class="text-nowrap border-table-right text-right">@item.GrossProfitPerc.ToMoney() %</td>
+
+                            <td scope="col" class="text-nowrap border-table-left text-right">@item.UnitsBilled.ToReading()</td>
+                            <td scope="col" class="text-nowrap border-table text-right">@item.Units.ToReading()</td>
+                            <td scope="col" class="text-nowrap border-table-right text-right">@item.GrossProfitUnits.ToReading()</td>
+
+                            <td scope="col" class="text-nowrap border-table-left text-right">@item.CostPerUnitBilled.ToMoney()</td>
+                            <td scope="col" class="text-nowrap border-table text-right">@item.CostPerUnit.ToString("N4")</td>
+                            <td scope="col" class="text-nowrap border-table-right text-right">@item.CostPerUnitDiff.ToString("N4")</td>
+
+
+
+                            <td scope="col" class="text-nowrap border-table-left text-right">@(item.Company_CostSetting_Monthly != null ? item.Company_CostSetting_Monthly.Units.ToReading() : "Missing")</td>
+                            <td scope="col" class="text-nowrap border-table text-right">@(item.Company_CostSetting_Monthly != null ? item.Company_CostSetting_Monthly.CostPerUnit.ToString("N4") : "Missing")</td>
+                            <td scope="col" class="text-nowrap border-table text-right">@(item.Company_CostSetting_Monthly != null ? (item.Company_CostSetting_Monthly.CostPerUnit * item.Company_CostSetting_Monthly.Units).ToMoney() : "Missing")</td>
+                            <td scope="col" class="text-nowrap border-table-right">
+                                @if (item.Company_CostSetting_Monthly == null)
+                                {
+                                    <a onclick="DoCostSettings('@item.ProductID', '@item.BillingMonth', '@((int)item.DeviceType)', '@opProv.CompanyID', '@item.CostPerUnit', '@item.Units', '@item.BuildingCouncilDetailID');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                }
+                                else if (Math.Round((item.Company_CostSetting_Monthly.CostPerUnit * item.Company_CostSetting_Monthly.Units), 1) - Math.Round(item.Amount, 1) > 1 || Math.Round((item.Company_CostSetting_Monthly.CostPerUnit * item.Company_CostSetting_Monthly.Units), 1) - Math.Round(item.Amount, 1) < -1 || Math.Round(item.Company_CostSetting_Monthly.CostPerUnit, 6) != Math.Round(item.CostPerUnit, 6))
+                                {
+                                    <a onclick="DoCostSettings('@item.ProductID', '@item.BillingMonth', '@((int)item.DeviceType)', '@opProv.CompanyID', '@item.CostPerUnit', '@item.Units', '@item.BuildingCouncilDetailID');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                }
+                            </td>
+                            <td scope="col" class="text-nowrap border-table-right text-right">
+                                <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates?from=@(item.BillingMonth.ToDateShort())&to=@(item.BillingMonth.ToDateShort())&Products=@(item.ProductID)" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplatesSummary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&Products=' + $("#Products").val();
+        }
+
+        function DoCostSettings(product, month, devicetype, companyID, costPerUnit, units, bcd) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplatesSummary_CostSettings",
+                {
+                    devicetype: devicetype,
+                    companyID: companyID,
+                    product: product,
+                    month: month,
+                    costPerUnit: costPerUnit,
+                    units: units,
+                    bcd: bcd,
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+        function DoCostSettingsAll() {
+            $("#loaderContent").css("display", "block");
+
+            $.post('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplatesSummary_CostSettings_All?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&Products=' + $("#Products").val(),
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+    </script>
+}

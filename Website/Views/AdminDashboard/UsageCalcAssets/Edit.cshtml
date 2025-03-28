@@ -1,0 +1,108 @@
+@model MyVoltage.Models.AdminViewModels.UsageCalcAssetViewModels.EditModel
+@{
+    ViewData["Title"] = "Edit Usage Calculator Asset";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <a href="/admin/usagecalcassets" class="btn btn-toolbar">Back to list</a>
+    </div>
+</div>
+
+<form asp-action="UsageCalcAssets_Edit" enctype="multipart/form-data">
+    <div class="row mt-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card p-md-4">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="col-md-12 form-group text-nowrap">
+                        <div class="row mb-2 mt-2">
+                            <div class="col text-uppercase font-weight-bold">
+                                <label asp-for="AssetIcon" class="control-label"></label> (<i class="fas fa-@Model.AssetIcon"></i>)
+                                <br />
+                                Search one on <a class="btn btn-secondary btn-sm" target="_blank" href="https://fontawesome.com/">fontawesome.com</a>
+                            </div>
+                            <div class="col">
+                                <input class="form-group" asp-for="AssetIcon" placeholder="lightbulb" />
+                                <span asp-validation-for="AssetIcon" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-2 mt-2">
+                            <div class="col text-uppercase font-weight-bold">
+                                <label asp-for="AssetName" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                <input class="form-group" asp-for="AssetName" />
+                                <span asp-validation-for="AssetName" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-2 mt-2">
+                            <div class="col text-uppercase font-weight-bold">
+                                <label asp-for="AverageKWH" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                <input class="form-group" asp-for="AverageKWH" />
+                                <span asp-validation-for="AverageKWH" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-2 mt-2">
+                            <div class="col text-uppercase font-weight-bold">
+                                <label asp-for="AssetType" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                @Html.DropDownList("AssetType", Model.AssetType)
+                                <span asp-validation-for="AssetType" class="text-red"></span>
+                            </div>
+                        </div>
+                        @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="row mb-2 mt-2">
+                                <div class="col-md-4">
+                                    @Model.ErrorMessage
+                                </div>
+                            </div>
+                        }
+                        <div class="row mb-2 mt-2">
+                            <div class="col-md-4">
+                                <input type="submit" value="Save Changes" class="btn btn-default" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/companyAdmin/pqallocation/serialsearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

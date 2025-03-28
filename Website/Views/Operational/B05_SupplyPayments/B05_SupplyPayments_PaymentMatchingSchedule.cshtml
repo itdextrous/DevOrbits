@@ -1,0 +1,445 @@
+@model MyVoltage.Models.OperationalModels.B05_SupplyPayments.B05_SupplyPaymentsModels.B05_SupplyPayments_PaymentMatchingScheduleModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B05_SupplyPayments_PaymentMatchingSchedule.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        Final Payment Date From
+                    </div>
+                    <div class="col">
+                        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        Final Payment Date To
+                    </div>
+                    <div class="col">
+                        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" />
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Partner" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Partner", Model.Partner, new { @class = "form-control", @onChange = "GetCompanies();" })
+                        <span asp-validation-for="Partner" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="CompanyID"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <h3>Service Provider</h3>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-nowrap">Company</th>
+                    <th scope="col" class="text-nowrap">Account No</th>
+                    <th scope="col" class="text-nowrap">Tax Invoice No</th>
+                    <th scope="col" class="text-nowrap">Tax Invoice Date</th>
+                    <th scope="col" class="text-nowrap">Final Date For Payment</th>
+                    <th scope="col" class="text-nowrap">Total</th>
+                    @{
+                        DateTime current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        string cellClass = $"";
+                        if (current.DayOfWeek == DayOfWeek.Saturday
+                        || current.DayOfWeek == DayOfWeek.Sunday)
+                        {
+                            cellClass = $"table-secondary";
+                        }
+                        <th scope="col" class="text-nowrap text-center @Html.Raw(cellClass)">@Html.Raw(current.ToString("dddd<br />dd<br />MMM<br />yyyy"))</th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP)
+                {
+                    <tr>
+                        <td scope="col" class="text-nowrap">@item.Company</td>
+                        <td scope="col" class="text-nowrap">@item.AccountNo</td>
+                        <td scope="col" class="text-nowrap">
+                            <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.TaxInvoiceID">
+                                @item.TaxInvoiceNo
+                            </a>
+                        </td>
+                        <td scope="col" class="text-nowrap">@item.TaxInvoiceDate.ToDateShort()</td>
+                        <td scope="col" class="text-nowrap">@item.FinalDateForPayment.ToDateShort()</td>
+                        <td scope="col" class="text-nowrap">
+                            <span style="color:red;" title="Invoice">@item.ClosingBalances.Select(p => p.Value).Sum().ToMoneyNoDecimal()</span>
+                            <br />
+                            <span style="color:green;" title="Payments">@item.Payments.Select(p => p.Value).Sum().ToMoneyNoDecimal()</span>
+                            <br />
+                            <span style="color:orange;" title="Netcash Payments">@item.NetcashPayments.Select(p => p.Value).Sum().ToMoneyNoDecimal()</span>
+                        </td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            string cellClass = $"";
+                            if (current.DayOfWeek == DayOfWeek.Saturday
+                            || current.DayOfWeek == DayOfWeek.Sunday)
+                            {
+                                cellClass = $"table-secondary";
+                            }
+                            var timeSpent = item.ClosingBalances.Where(p => p.Key == current).SingleOrDefault();
+                            string displayValue = $"<span style=\"color:red;\">{timeSpent.Value.ToMoneyNoDecimal()}</span>";
+                            if (Convert.ToInt32(timeSpent.Value) == 0)
+                            {
+                                displayValue = "";
+                            }
+
+                            var timeSpent2 = item.Payments.Where(p => p.Key == current).SingleOrDefault();
+                            if (Convert.ToInt32(timeSpent2.Value) != 0)
+                            {
+                                if (!string.IsNullOrEmpty(displayValue))
+                                {
+                                    displayValue = displayValue + $"<br />";
+                                }
+                                displayValue = displayValue + $"<span style=\"color:green;\">{timeSpent2.Value.ToMoneyNoDecimal()}</span>";
+                            }
+
+                            var timeSpent3 = item.NetcashPayments.Where(p => p.Key == current).SingleOrDefault();
+                            if (Convert.ToInt32(timeSpent3.Value) != 0)
+                            {
+                                if (!string.IsNullOrEmpty(displayValue))
+                                {
+                                    displayValue = displayValue + $"<br />";
+                                }
+                                displayValue = displayValue + $"<span style=\"color:orange;\">{timeSpent3.Value.ToMoneyNoDecimal()}</span>";
+                            }
+
+                            <td scope="col" class="text-nowrap text-right @Html.Raw(cellClass)" title="@current.ToDateShort()">@Html.Raw(displayValue)</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+                <tr>
+                    <td scope="col" class="text-nowrap border-table-total" colspan="5">Total</td>
+                    <td scope="col" class="text-nowrap border-table-total">
+                        <span style="color:red;" title="Invoice">@Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP.Select(p => p.ClosingBalances.Select(c => c.Value).Sum()).Sum().ToMoneyNoDecimal()</span>
+                        <br />
+                        <span style="color:green;" title="Payments">@Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP.Select(p => p.Payments.Select(c => c.Value).Sum()).Sum().ToMoneyNoDecimal()</span>
+                        <br />
+                        <span style="color:orange;" title="Netcash Payments">@Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP.Select(p => p.NetcashPayments.Select(c => c.Value).Sum()).Sum().ToMoneyNoDecimal()</span>
+                    </td>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        string cellClass = $"";
+                        if (current.DayOfWeek == DayOfWeek.Saturday
+                        || current.DayOfWeek == DayOfWeek.Sunday)
+                        {
+                            cellClass = $"table-secondary";
+                        }
+                        decimal total = 0;
+                        @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP)
+                        {
+                            var timeSpent = item.ClosingBalances.Where(p => p.Key == current).SingleOrDefault();
+                            total += timeSpent.Value;
+                        }
+                        string displayValue = $"<span style=\"color:red;\">{total.ToMoneyNoDecimal()}</span>";
+                        if (Convert.ToInt32(total) == 0)
+                        {
+                            displayValue = "";
+                        }
+
+                        decimal total2 = 0;
+                        @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP)
+                        {
+                            var timeSpent = item.Payments.Where(p => p.Key == current).SingleOrDefault();
+                            total2 += timeSpent.Value;
+                        }
+                        if (Convert.ToInt32(total2) != 0)
+                        {
+                            if (!string.IsNullOrEmpty(displayValue))
+                            {
+                                displayValue = displayValue + $"<br />";
+                            }
+                            displayValue = displayValue + $"<span style=\"color:green;\">{total2.ToMoneyNoDecimal()}</span>";
+                        }
+
+                        decimal total3 = 0;
+                        @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP)
+                        {
+                            var timeSpent = item.NetcashPayments.Where(p => p.Key == current).SingleOrDefault();
+                            total3 += timeSpent.Value;
+                        }
+                        if (Convert.ToInt32(total3) != 0)
+                        {
+                            if (!string.IsNullOrEmpty(displayValue))
+                            {
+                                displayValue = displayValue + $"<br />";
+                            }
+                            displayValue = displayValue + $"<span style=\"color:green;\">{total3.ToMoneyNoDecimal()}</span>";
+                        }
+
+                        <td scope="col" class="text-nowrap text-right border-table-total @Html.Raw(cellClass)" title="@current.ToDateShort()">@Html.Raw(displayValue)</td>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <h3>Client</h3>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-nowrap">Company</th>
+                    <th scope="col" class="text-nowrap">Account No</th>
+                    <th scope="col" class="text-nowrap">Tax Invoice No</th>
+                    <th scope="col" class="text-nowrap">Tax Invoice Date</th>
+                    <th scope="col" class="text-nowrap">Final Date For Payment</th>
+                    <th scope="col" class="text-nowrap">Total</th>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        string cellClass = $"";
+                        if (current.DayOfWeek == DayOfWeek.Saturday
+                        || current.DayOfWeek == DayOfWeek.Sunday)
+                        {
+                            cellClass = $"table-secondary";
+                        }
+                        <th scope="col" class="text-nowrap text-center @Html.Raw(cellClass)">@Html.Raw(current.ToString("dddd<br />dd<br />MMM<br />yyyy"))</th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsC)
+                {
+                    <tr>
+                        <td scope="col" class="text-nowrap">@item.Company</td>
+                        <td scope="col" class="text-nowrap">@item.AccountNo</td>
+                        <td scope="col" class="text-nowrap">
+                            <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.TaxInvoiceID">
+                                @item.TaxInvoiceNo
+                            </a>
+                        </td>
+                        <td scope="col" class="text-nowrap">@item.TaxInvoiceDate.ToDateShort()</td>
+                        <td scope="col" class="text-nowrap">@item.FinalDateForPayment.ToDateShort()</td>
+                        <td scope="col" class="text-nowrap">
+                            <span style="color:red;" title="Invoice">@item.ClosingBalances.Select(p => p.Value).Sum().ToMoneyNoDecimal()</span>
+                            <br />
+                            <span style="color:green;" title="Payments">@item.Payments.Select(p => p.Value).Sum().ToMoneyNoDecimal()</span>
+                            <br />
+                            <span style="color:orange;" title="Netcash Payments">@item.NetcashPayments.Select(p => p.Value).Sum().ToMoneyNoDecimal()</span>
+                        </td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            string cellClass = $"";
+                            if (current.DayOfWeek == DayOfWeek.Saturday
+                            || current.DayOfWeek == DayOfWeek.Sunday)
+                            {
+                                cellClass = $"table-secondary";
+                            }
+                            var timeSpent = item.ClosingBalances.Where(p => p.Key == current).SingleOrDefault();
+                            string displayValue = $"<span style=\"color:red;\">{timeSpent.Value.ToMoneyNoDecimal()}</span>";
+                            if (Convert.ToInt32(timeSpent.Value) == 0)
+                            {
+                                displayValue = "";
+                            }
+
+                            var timeSpent2 = item.Payments.Where(p => p.Key == current).SingleOrDefault();
+                            if (Convert.ToInt32(timeSpent2.Value) != 0)
+                            {
+                                if (!string.IsNullOrEmpty(displayValue))
+                                {
+                                    displayValue = displayValue + $"<br />";
+                                }
+                                displayValue = displayValue + $"<span style=\"color:green;\">{timeSpent2.Value.ToMoneyNoDecimal()}</span>";
+                            }
+
+                            var timeSpent3 = item.NetcashPayments.Where(p => p.Key == current).SingleOrDefault();
+                            if (Convert.ToInt32(timeSpent3.Value) != 0)
+                            {
+                                if (!string.IsNullOrEmpty(displayValue))
+                                {
+                                    displayValue = displayValue + $"<br />";
+                                }
+                                displayValue = displayValue + $"<span style=\"color:orange;\">{timeSpent3.Value.ToMoneyNoDecimal()}</span>";
+                            }
+
+                            <td scope="col" class="text-nowrap text-right @Html.Raw(cellClass)" title="@current.ToDateShort()">@Html.Raw(displayValue)</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+                <tr>
+                    <td scope="col" class="text-nowrap border-table-total" colspan="5">Total</td>
+                    <td scope="col" class="text-nowrap border-table-total">
+                        <span style="color:red;" title="Invoice">@Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP.Select(p => p.ClosingBalances.Select(c => c.Value).Sum()).Sum().ToMoneyNoDecimal()</span>
+                        <br />
+                        <span style="color:green;" title="Payments">@Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP.Select(p => p.Payments.Select(c => c.Value).Sum()).Sum().ToMoneyNoDecimal()</span>
+                        <br />
+                        <span style="color:orange;" title="Netcash Payments">@Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP.Select(p => p.NetcashPayments.Select(c => c.Value).Sum()).Sum().ToMoneyNoDecimal()</span>
+                    </td>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        string cellClass = $"";
+                        if (current.DayOfWeek == DayOfWeek.Saturday
+                        || current.DayOfWeek == DayOfWeek.Sunday)
+                        {
+                            cellClass = $"table-secondary";
+                        }
+                        decimal total = 0;
+                        @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsC)
+                        {
+                            var timeSpent = item.ClosingBalances.Where(p => p.Key == current).SingleOrDefault();
+                            total += timeSpent.Value;
+                        }
+                        string displayValue = $"<span style=\"color:red;\">{total.ToMoneyNoDecimal()}</span>";
+                        if (Convert.ToInt32(total) == 0)
+                        {
+                            displayValue = "";
+                        }
+
+                        decimal total2 = 0;
+                        @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsC)
+                        {
+                            var timeSpent = item.Payments.Where(p => p.Key == current).SingleOrDefault();
+                            total2 += timeSpent.Value;
+                        }
+                        if (Convert.ToInt32(total2) != 0)
+                        {
+                            if (!string.IsNullOrEmpty(displayValue))
+                            {
+                                displayValue = displayValue + $"<br />";
+                            }
+                            displayValue = displayValue + $"<span style=\"color:green;\">{total2.ToMoneyNoDecimal()}</span>";
+                        }
+
+                        decimal total3 = 0;
+                        @foreach (var item in Model.B05_SupplyPayments_PaymentMatchingSchedulePivotItemsSP)
+                        {
+                            var timeSpent = item.NetcashPayments.Where(p => p.Key == current).SingleOrDefault();
+                            total3 += timeSpent.Value;
+                        }
+                        if (Convert.ToInt32(total3) != 0)
+                        {
+                            if (!string.IsNullOrEmpty(displayValue))
+                            {
+                                displayValue = displayValue + $"<br />";
+                            }
+                            displayValue = displayValue + $"<span style=\"color:green;\">{total3.ToMoneyNoDecimal()}</span>";
+                        }
+
+                        <td scope="col" class="text-nowrap text-right border-table-total @Html.Raw(cellClass)" title="@current.ToDateShort()">@Html.Raw(displayValue)</td>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script>
+        GetCompanies();
+        function GetCompanies() {
+            $("#CompanyID").empty();
+            $("#CompanyID").append(`<option value="0">All Companies</option>`);
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CompanyItems)));
+            $(companies).each(function () {
+                if (this.PartnerID == $("#Partner").val()) {
+                    if (this.ID == @(operationalProvider.CompanyID)) {
+                        $("#CompanyID").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                    else {
+                        $("#CompanyID").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+
+        }
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            if ($("#CompanyID").val() == '0') {
+                document.location.href = '/operational/changeActivePartner/' + $("#Partner").val() + '?R=' + encodeURIComponent('/operational/B05_SupplyPayments/B05_SupplyPayments_PaymentMatchingSchedule?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val());
+            }
+            else {
+                document.location.href = '/operational/changeActiveCompany/' + $("#CompanyID").val() + '?R=' + encodeURIComponent('/operational/B05_SupplyPayments/B05_SupplyPayments_PaymentMatchingSchedule?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val());
+            }
+        }
+        function RedirectToDetails(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/B02_CouncilReadings/B02_CouncilDevice_CouncilMetersDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

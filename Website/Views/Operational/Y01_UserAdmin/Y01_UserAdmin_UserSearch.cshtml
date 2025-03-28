@@ -1,0 +1,97 @@
+@model MyVoltage.Models.OperationalModels.Y01_UserAdmin.Y01_UserAdmin_UserSearchModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Y01_UserAdmin_UserSearch.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.UserAdmin, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                {
+                    <a href="/operational/SiteAdmin/UserAdmin/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New User</a>
+                }
+            </div>
+            <div class="card-body">
+                <table id="myTable" class="display compact table table-sm" style="width:100%">
+                    <thead>
+                        <tr>
+                            @foreach (System.Data.DataColumn col in Model.SearchResultsTable.Columns)
+                            {
+                                if (col.ColumnName == "Id")
+                                {
+                                    continue;
+                                }
+                                <th scope="col">@col.ColumnName</th>
+                            }
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (System.Data.DataRow dr in Model.SearchResultsTable.Rows)
+                        {
+                            <tr>
+                                @foreach (System.Data.DataColumn col in Model.SearchResultsTable.Columns)
+                                {
+                                    if (col.ColumnName == "Id")
+                                    {
+                                        continue;
+                                    }
+                                    <td scope="col">@dr[col.ColumnName]</td>
+                                }
+                                <td scope="col" class="text-nowrap text-right">
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.UserAdmin, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                    {
+                                        if (dr["RoleName"].ToString() == "Customer")
+                                        {
+                                            if (dr["MeterNumber"] != DBNull.Value && !string.IsNullOrEmpty(dr["MeterNumber"].ToString()))
+                                            {
+                                                <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="RedirectToProfile('@dr["MeterNumber"]');" title="Edit @dr["Email"]"><i class="fas fa-edit"></i></a>
+                                            }
+                                        }
+                                        else if (dr["RoleName"].ToString() == "Operational")
+                                        {
+                                            <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="RedirectToEdit('@dr["Id"]');" title="Edit @dr["Email"]"><i class="fas fa-edit"></i></a>
+                                        }
+                                    }
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.UserAdmin, MyVoltage.Data.SecureAreaActionEnum.Delete))
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="ConfirmDelete('@dr["Id"]','@dr["Email"]');" title="Delete @dr["Email"]"><i class="fas fa-trash-alt"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.js"></script>
+    <script>
+        new DataTable('#myTable', {
+            lengthMenu: [
+                [50, 100, 250, -1],
+                [50, 100, 250, 'All']
+            ]
+        });
+        function RedirectToEdit(userID) {
+            document.location.href = '/operational/changeY01_USERADMIN_USEREDITID/' + userID + '?R=' + encodeURIComponent('/operational/Y01_UserAdmin/Y01_UserAdmin_UserEdit');
+        }
+        function RedirectToProfile(userID) {
+            window.open('/operational/changeActiveMeter/' + userID + '?R=' + encodeURIComponent('/operational/Customer/Customer_Profile'));
+        }
+    </script>
+}

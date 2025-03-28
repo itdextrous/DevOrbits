@@ -1,0 +1,203 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_Metering_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_Metering_Summary.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div id="latestSync" class="col text-left">
+        <div class="text-orange">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Sync Status...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-body">
+                <div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @Html.DropDownList("ResponsiblePerson", Model.ResponsiblePerson, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    @*<div class="row mt-2 mb-2">
+                    <div class="col-12">
+                    @Html.DropDownList("ActionRequired", Model.ActionRequired, new { @class = "form-control" })
+                    </div>
+                    </div>*@
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @Html.DropDownList("Partners", Model.Partners, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    @*<div class="row mt-2 mb-2">
+                    <div class="col-12">
+                    Target Date Between
+                    </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                    <input class="form-control" type="date" name="FromDate" id="FromDate" asp-for="FromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                    </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                    And
+                    </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                    <input class="form-control" type="date" name="ToDate" id="ToDate" asp-for="ToDate" value="@(Model.ToDate.ToDateShort(true))" />
+                    </div>
+                    </div>*@
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                            &nbsp;
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                            &nbsp;
+                            <a onclick="ExportModelExcel();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-file-excel"></i>&nbsp;Export Results</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-hover table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th scope="col" rowspan="2" class="text-nowrap border-table">Company</th>
+                    <th scope="col" rowspan="2" class="text-nowrap border-table">Region</th>
+                    <th scope="col" rowspan="2" class="text-nowrap border-table">Site Responsible Person</th>
+                    <th scope="col" rowspan="2" class="text-nowrap border-table">Next Task</th>
+                    <th scope="col" rowspan="2" class="text-nowrap border-table">Due Date</th>
+                    <th scope="col" rowspan="2" class="text-nowrap border-table">Responsible for Task</th>
+                    <th scope="col" colspan="2" class="text-center text-nowrap border-table-spanned">Gateway Status</th>
+                    <th scope="col" colspan="4" class="text-center text-nowrap border-table-spanned">Meter Status</th>
+                    <th scope="col" colspan="6" class="text-center text-nowrap border-table-spanned">Information</th>
+                    <th scope="col" colspan="@(Model.Manufacturers.Count + 1)" class="text-center text-nowrap border-table-spanned">Meter Information</th>
+                </tr>
+                <tr>
+                    <th scope="col" class="text-center text-nowrap border-table-left">Online</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Offline</th>
+                    <th scope="col" class="text-center text-nowrap border-table-left">Online</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Offline</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Unknown</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Not Installed</th>
+                    <th scope="col" class="text-center text-nowrap border-table-left">Information Complete</th>
+                    <th scope="col" class="text-center text-nowrap border-table">System Setup Sign Off</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Customer Setup Sign Off</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Meter Serial No Check</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Verification</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Verification Attachment Reviewed</th>
+                    @{
+                        bool isFirst = true;
+                    }
+                    @foreach (var man in Model.Manufacturers)
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                            <th scope="col" class="text-center text-nowrap border-table-left">@man Meters</th>
+                        }
+                        else
+                        {
+                            <th scope="col" class="text-center text-nowrap border-table">@man Meters</th>
+                        }
+                    }
+                    <th scope="col" class="text-center text-nowrap border-table-right">Metrix Meter %</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.AF_AfroxAdministration_Metering_SummaryItems)
+                {
+                    string rowClass = "";
+
+                    <tr id="AF_AfroxAdministration_Metering_SummaryItem_@entry.CompanyID" class="@Html.Raw(rowClass)" title="View @entry.Name">
+                        <td scope="col">
+                            <div class="text-orange">
+                                @entry.Name
+                            </div>
+                        </td>
+                        <td colspan="22" class="text-center">
+                            <div class="text-orange">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#latestSync").load('@Url.Content("/operational/shared/meter/DeviceSyncStatus")');
+
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.AF_AfroxAdministration_Metering_SummaryItems)));
+        $(companies).each(function () {
+            $("#AF_AfroxAdministration_Metering_SummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_SummaryItem/"))' + this.CompanyID + '/' + "AF_AfroxAdministration_Metering_SummaryItem_" + this.CompanyID, function (response, status, xhr) {
+                var col = $("#" + this.id + "_col");
+                if (col.length > 0) {
+                    var text = col[0].innerHTML;
+                    //    if (text == 'Reviewed') {
+                    //        $("#" + this.id).addClass("table-success");
+                    //    }
+                    //    else if (text == 'Outstanding') {
+                    //        $("#" + this.id).addClass("table-danger");
+                    //    }
+                }
+            });
+        });
+
+        function CompanyChange(value) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + value + '?R=' + encodeURIComponent('/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details');
+        }
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            var value = $('#Partners').val();
+            document.location.href = '/operational/changeActivePartner/' + value + '?R=' + encodeURIComponent('/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary?ResponsiblePerson=' + $("#ResponsiblePerson").val() + '&ActionRequired=' + $("#ActionRequired").val());
+        }
+
+        function UpdateResponsibleUser(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary_UpdateResponsibleUser/' + companyID + '/@userManager.GetUserId(User)' + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function UpdateActionID(controlID, companyID) {
+            if ($("#" + controlID).val() != '') {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary_UpdateActionID/' + companyID + '/' + $("#" + controlID).val() + '?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+        function UpdateTargetDate(controlID, companyID) {
+            if ($("#" + controlID).val() != '') {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary_UpdateTargetDate/' + companyID + '/' + $("#" + controlID).val() + '?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+
+        function ExportModelExcel() {
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary_Export?ResponsiblePerson=' + $("#ResponsiblePerson").val() + '&ActionRequired=' + $("#ActionRequired").val() + '&FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val();
+        }
+    </script>
+}

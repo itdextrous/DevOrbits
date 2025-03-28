@@ -1,0 +1,38 @@
+<p class=MsoNormal><b><span style='font-size:10.0pt;font-family:"Calibri Light",sans-serif;
+mso-ascii-theme-font:major-latin;mso-fareast-font-family:"Times New Roman";
+mso-hansi-theme-font:major-latin;mso-bidi-theme-font:major-latin;color:black;
+mso-fareast-language:EN-GB'>Hello {name},<o:p></o:p></span></b></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Calibri Light",sans-serif;
+mso-ascii-theme-font:major-latin;mso-fareast-font-family:"Times New Roman";
+mso-hansi-theme-font:major-latin;mso-bidi-theme-font:major-latin;color:black;
+mso-fareast-language:EN-GB'><br>
+</span><span style='font-size:16.0pt;font-family:"Calibri Light",sans-serif;
+mso-ascii-theme-font:major-latin;mso-fareast-font-family:"Times New Roman";
+mso-hansi-theme-font:major-latin;mso-bidi-theme-font:major-latin;color:black;
+mso-fareast-language:EN-GB'>Your <span class=SpellE>MyVoltage</span> confirmation code is {code}.<br>
+&nbsp;</span><span style='font-size:10.0pt;font-family:"Calibri Light",sans-serif;
+mso-ascii-theme-font:major-latin;mso-fareast-font-family:"Times New Roman";
+mso-hansi-theme-font:major-latin;mso-bidi-theme-font:major-latin;color:black;
+mso-fareast-language:EN-GB'><br>
+Enter this code to verify your notification email.</span>
+<span style='font-size:10.0pt;font-family:"Calibri Light",sans-serif;
+mso-ascii-theme-font:major-latin;mso-fareast-font-family:"Times New Roman";
+mso-hansi-theme-font:major-latin;mso-bidi-theme-font:major-latin;color:#7030A0;
+mso-fareast-language:EN-GB'>&nbsp;</span><span style='font-size:10.0pt;
+font-family:"Calibri Light",sans-serif;mso-ascii-theme-font:major-latin;
+mso-fareast-font-family:"Times New Roman";mso-hansi-theme-font:major-latin;
+mso-bidi-theme-font:major-latin;color:black;mso-fareast-language:EN-GB'><br>
+<br>
+
+  Kind Regards,
+  <br/>
+ <strong style="color: #ff8a02;">The My Voltage Team</strong><br></span>
+  <span style="font-size:15px">
+  office +27 (0)87 057 2561<br>
+  mobile +27 (0)79 492 5036<br>
+  email info@myvoltage.co.za<br>
+ website <a href="http://www.myvoltage.co.za">www.myvoltage.co.za</span><br>
+  <br>
+  <img src="{url}/lib/email/logo.png"><br>
+  <br>

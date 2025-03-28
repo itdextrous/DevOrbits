@@ -1,0 +1,185 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> _userManager;
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_MeterReadingVerificationModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_MeterReadingVerification.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerMeterSerial}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-1 text-left">
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_MeterReadingSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-12">
+                            Note:<br />
+                            To convert this view into a PDF document, select "Ctrl + P".<br />
+                            Select the "Print to PDF" option.
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col">Time Of Report</div>
+                                <div class="col">@DateTime.Now.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Site Name</div>
+                                <div class="col">@operationalProvider.CompanyName</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Meter Point</div>
+                                <div class="col">@operationalProvider.CustomerMeterName</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Device Serial No</div>
+                                <div class="col">@operationalProvider.CustomerMeterSerial</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Utility Type</div>
+                                <div class="col">@operationalProvider.CustomerMeterDeviceType</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Customer Trading Name</div>
+                                <div class="col">@Model.CustomerTradingName</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">SAP Customer Acc No</div>
+                                <div class="col">@Model.SAPCustomerAccNo</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Latest Live Reading</div>
+                                <div class="col">@Model.LatestReading.ToString("N0")</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Latest Live Reading Time</div>
+                                <div class="col">@Model.LatestReadingDateTime.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Status</div>
+                                <div class="col">@Model.Status.GetDescription()</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Audit Reading</div>
+                                <div class="col">@Model.LatestReadingOdo.ToString("N0")</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Audit Reading Time</div>
+                                <div class="col">@Model.LatestReadingDateTimeOdo.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Audit Reading Created</div>
+                                <div class="col">@Model.LatestReadingOdoCreatedDateTime.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Audit Reading Created By</div>
+                                <div class="col">@Model.LatestReadingOdoCreatedBy</div>
+                            </div>
+                            @*<div class="row mt-3">
+                                    <div class="col">Verification Reading</div>
+                                    <div class="col">@Model.VerificationReading.ToString("N0")</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Verification Reading Time</div>
+                                    <div class="col">@Model.VerificationReadingDateTime.ToDateAndTimeShort()</div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col">Calculated Difference Reading</div>
+                                    <div class="col">@Model.CalculatedDifferenceReading.ToString("N0")</div>
+                                </div>*@
+                            <div class="row">
+                                <div class="col">Audit Reading Verified Time</div>
+                                <div class="col">@Model.ChangedDate.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Audit Reading Verified By</div>
+                                <div class="col">@Model.ChangedByUserName</div>
+                            </div>
+                            <div class="row mt-5">
+                                <div class="col-12">
+                                    <h6>Meter Reading History</h6>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <table class="table table-sm table-hover table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col"></th>
+                                                <th scope="col" class="text-right">Opening Reading</th>
+                                                <th scope="col" class="text-right">Closing Reading</th>
+                                                <th scope="col" class="text-right">Usage In M3</th>
+                                                <th scope="col" class="text-right">Conversion Factor</th>
+                                                <th scope="col" class="text-right">Usage in Kg</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.ReadingHistoryItems)
+                                            {
+                                                <tr>
+                                                    <td scope="col">@item.DisplayName</td>
+                                                    <td scope="col" class="text-right">@item.OpeningReadingOriginal.ToReading()</td>
+                                                    <td scope="col" class="text-right">@item.ClosingReadingOriginal.ToReading()</td>
+                                                    <td scope="col" class="text-right">@item.UsageInM3.ToReading()</td>
+                                                    <td scope="col" class="text-right">@item.ConvFactor.ToMoney()</td>
+                                                    <td scope="col" class="text-right">@item.KgInvoiced.ToReading()</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="row">
+                                <div class="col">
+                                    <img src="@Model.LatestReadingOdoPhotoURL" style="max-width:400px;" />
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col">
+                                    <a href="@Model.LatestReadingOdoPhotoURL" target="_blank" class="btn btn-sm btn-outline-primary-sm">Download</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        });
+    </script>
+}

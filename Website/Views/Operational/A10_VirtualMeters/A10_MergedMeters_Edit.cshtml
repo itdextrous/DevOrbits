@@ -1,0 +1,366 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_MergedMeters_EditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_MergedMeters_Create.GetDescription()} - {Model.A10_MergedMeter.SerialNumber} - Edit";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <h4>
+                    @if (Model.A10_MergedMeter.Device != null)
+                    {
+                        @switch ((MyVoltage.Data.DeviceType.DeviceTypeEnum)Model.A10_MergedMeter.Device.type.id)
+                        {
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                <img src="~/images/elec-icon-s.png" />
+                                break;
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                <img src="~/images/water-icon-s.png" />
+                                break;
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                <img src="~/images/gas-icon-s.png" />
+                                break;
+                        }
+                    }
+                    @Model.A10_MergedMeter.SkybillCustomer.Serial_No - Summary
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col border border-primary rounded p-2 m-2">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <h6>Skybill Customer Details:</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Company Name:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_MergedMeter.Company.Name
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Customer No:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_MergedMeter.SkybillCustomer.Customer_No
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Customer Name:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_MergedMeter.SkybillCustomer.Customer_Name
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Account Type:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_MergedMeter.SkybillCustomer.AccountType.GetDescription()
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col border border-primary rounded p-2 m-2">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <h6 title="Gateways and Devices Sync">Metering Database Details:</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Device ID Linked:
+                            </div>
+                            @if (Model.A10_MergedMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @Model.A10_MergedMeter.Device.id
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Serial:
+                            </div>
+                            @if (Model.A10_MergedMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @Model.A10_MergedMeter.Device.serial
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Name:
+                            </div>
+                            @if (Model.A10_MergedMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @Model.A10_MergedMeter.Device.name
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Type:
+                            </div>
+                            @if (Model.A10_MergedMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @(((MyVoltage.Data.DeviceType.DeviceTypeEnum)Model.A10_MergedMeter.Device.type.id).GetDescription())
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @*<div class="col border border-primary rounded p-2 m-2" title="Odo and Latest Capture should be the same.">
+                        <div class="row">
+                        <div class="col-12 text-center">
+                        <h6>Latest Mirror Reading Summary:</h6>
+                        </div>
+                        </div>
+                        <div class="row mb-4">
+                        <div class="col-6">
+                        Latest Reading:
+                        </div>
+                        <div class="col-6 text-right">
+                        @if (Model.LatestReading != null)
+                        {
+                        <span>@Model.LatestReading.VirtualOdoReading.ToReading()<br />@Model.LatestReading.TimeLogged.ToDateAndTimeShort()</span>
+                        }
+                        else
+                        {
+                        <span>Unknown</span>
+                        }
+                        </div>
+                        </div>
+                        <div class="row mb-4">
+                        <div class="col-6">
+                        Latest Odo:
+                        </div>
+                        <div class="col-6 text-right">
+                        @if (Model.OdoReading != null)
+                        {
+                        string spanClass = "";
+                        if (Model.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                        {
+                        if (Model.OdoReading.OdometerReading != Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                        {
+                        spanClass = "text-red font-weight-bold";
+                        }
+                        }
+                        <span class="@Html.Raw(spanClass)">@Model.OdoReading.OdometerReading.ToReading()<br />@Model.OdoReading.TimeLogged.ToDateAndTimeShort()</span>
+                        }
+                        else
+                        {
+                        <span>Unknown</span>
+                        }
+                        </div>
+                        </div>
+                        <div class="row mb-4">
+                        <div class="col-6">
+                        Latest Capture:
+                        </div>
+                        <div class="col-6 text-right">
+                        @if (Model.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                        {
+                        string spanClass = "";
+                        if (Model.OdoReading != null)
+                        {
+                        if (Model.OdoReading.OdometerReading != Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                        {
+                        spanClass = "text-red font-weight-bold";
+                        }
+                        }
+
+                        <span class="@Html.Raw(spanClass)">
+                        @Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading.ToReading()
+                        <br />
+                        @Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.TimeLogged.ToDateAndTimeShort()
+                        <br />
+                        @(((MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes)Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusID).GetDescription())
+                        </span>
+                        }
+                        else
+                        {
+                        <span>Unknown</span>
+                        }
+                        </div>
+                        </div>
+                        </div>*@
+
+
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center border-table-spanned" colspan="3">Skybill Customer</th>
+                            <th scope="col" class="text-center border-table-spanned" colspan="2">Skybill Device Setup</th>
+                            <th scope="col" class="text-center border-table" rowspan="2"></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="text-center border-table-left">Customer No</th>
+                            <th scope="col" class="text-center border-table">Customer Name</th>
+                            <th scope="col" class="text-center border-table-right">Serial</th>
+                            <th scope="col" class="text-center border-table-left">Serial</th>
+                            <th scope="col" class="text-center border-table-right">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td scope="col" class="text-center border-table-left text-nowrap"></td>
+                            <td scope="col" class="text-center border-table text-nowrap"></td>
+                            <td scope="col" class="text-center border-table-right text-nowrap"><input type="text" id="serialToAdd" class="form-control" placeholder="Create new item.." /></td>
+                            <td scope="col" class="text-center border-table-left"></td>
+                            <td scope="col" class="text-center border-table-right"></td>
+                            <td scope="col" class="text-center border-table flex-nowrap text-nowrap">
+                                <a onclick="DoAddMeter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                            </td>
+                        </tr>
+                        @foreach (var item in Model.A10_MergedMeter.A10_MergedMeters_LinkedMeters)
+                        {
+                            string rowClass = "";
+                            <tr class="@Html.Raw(rowClass)">
+                                <td scope="col" class="text-center border-table-left text-nowrap">@(item.SkybillCustomer != null ? item.SkybillCustomer.Customer_No : "-")</td>
+                                <td scope="col" class="text-center border-table text-nowrap">@(item.SkybillCustomer != null ? item.SkybillCustomer.Customer_Name : "-")</td>
+                                <td scope="col" class="text-center border-table-right text-nowrap">@(item.SkybillCustomer != null ? item.SkybillCustomer.Serial_No : "-")</td>
+                                <td scope="col" class="text-center border-table-left">@(item.SkybillCustomer != null ? item.SkybillCustomer.Serial_No : "-")</td>
+                                <td scope="col" class="text-center border-table-right">@(item.SkybillCustomer != null ? item.SkybillCustomer.Customer_Name : "-")</td>
+                                <td scope="col" class="text-center border-table flex-nowrap text-nowrap">
+                                    <a href="/operational/A10_VirtualMeters/A10_MergedMeters_Delete/@item.ID" onclick="return confirm('Are you sure? This will delete the Virtual meter and all its readings.');" title="Delete @($"{Model.A10_MergedMeter.SerialNumber}")" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card-footer">
+
+                <div class="row mb-2 mt-2">
+                    <div class="col">
+                        <a href="/operational/A10_VirtualMeters/A10_MergedMeters_Details" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to list</a>
+                    </div>
+                    <div class="col text-right">
+                        <a href="#" onclick="DoSync();" class="btn btn-outline-primary-sm"><i class="fas fa-sync"></i>&nbsp;Sync</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+        $(document).ready(function () {
+            $("#serialToAdd").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/A10_VirtualMeters/A10_MergedMeters_Create/serialsearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+
+    function DoAddMeter() {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/A10_VirtualMeters/A10_MergedMeters_LinkedMeter_Add",
+            {
+                serialToAdd: $("#serialToAdd").val(),
+                mergedMeterID: '@Model.A10_MergedMeter.ID'
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoSync() {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/A10_VirtualMeters/A10_MergedMeters_Sync/@Model.A10_MergedMeter.ID",
+            {
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+</script>
+}

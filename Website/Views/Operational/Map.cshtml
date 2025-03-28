@@ -1,0 +1,133 @@
+﻿@model MyVoltage.Models.OperationalModels.MapModel;
+@using MyVoltage.Extensions;
+@{ 
+    ViewData["Title"] = $"Map";
+}
+<style>
+    /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+    #map {
+        height: 100%;
+        background-color: lightblue;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        @Html.DropDownList("Partners", Model.Partners, new { @class = "form-control", @onChange = "ChangePartner();" })
+    </div>
+</div>
+
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        @Html.DropDownList("Companies", Model.Companies, new { @class = "form-control", @onChange = "ChangeCompany();" })
+    </div>
+</div>
+
+
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        <div id="map" class="mt-4" style="height:600px"></div>
+        <div style="clear:both; height:50px"></div>
+    </div>
+</div>
+
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        <table class="table table-bordered admin-table-detail mt-3 table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Longitude</th>
+                    <th>Latitude</th>
+                    <th>Partner Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.MapItems)
+                {
+                    <tr>
+                        <td>@item.BuildingDetail.BuildingNo</td>
+                        <td>@item.Name</td>
+                        <td>@item.BuildingDetail.BuildingAddress</td>
+                        <td>@item.BuildingDetail.BuildingLong.ToMoney("", "MISSING")</td>
+                        <td>@item.BuildingDetail.BuildingLat.ToMoney("", "MISSING")</td>
+                        <td>@item.PartnerName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ChangePartner() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActivePartner/' + $('#Partners').val() + '?R=' + encodeURIComponent('/operational/map');
+        }
+        function ChangeCompany() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + $('#Companies').val() + '?R=' + encodeURIComponent('/operational/map');
+        }
+        function initMap() {
+            var mapOptions = {
+                zoom: 12,
+                center: new google.maps.LatLng(@Model.OpenLat, @Model.OpenLong),
+                mapTypeId: 'roadmap'
+            };
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            $.ajax({
+                type: "GET",
+                async: true,
+                url: "/operational/getmapmarkers",
+                dataType: "xml",
+                success:
+                    function (xml) {
+                        var markers = xml.documentElement.getElementsByTagName("Marker");
+
+                        for (var i = 0; i < markers.length; i++) {
+                            var lat = markers[i].getElementsByTagName('Lat')[0].innerHTML;
+                            var long = markers[i].getElementsByTagName('Long')[0].innerHTML
+                            var name = markers[i].getElementsByTagName('Name')[0].innerHTML;
+                            var latLng = new google.maps.LatLng(lat, long);
+                            var marker = new google.maps.Marker({
+                                position: latLng,
+                                map: map,
+                                label: name
+                            });
+                            //var infowindow = new google.maps.InfoWindow({
+                            //    content: name
+                            //});
+
+                            //marker.addListener("click", function () {
+                            //    infowindow.open(map, marker);
+                            //});
+
+                        }
+                    }
+            });
+
+        }
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk&callback=initMap">
+    </script>
+}

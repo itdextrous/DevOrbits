@@ -1,0 +1,126 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_Supply_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_Supply_Details.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccessful)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Odo Reading successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Supply_Details" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+
+                <div class="card-header">
+
+                </div>
+                <div class="card-body">
+                    @if (operationalProvider.CompanyID != 0)
+                    {
+                        <form asp-action="AF_AfroxAdministration_Supply_Details" enctype="multipart/form-data">
+
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="CustomerName" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="CustomerName" />
+                                    <span asp-validation-for="CustomerName" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="AccountCode" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="AccountCode" />
+                                    <span asp-validation-for="AccountCode" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="Address1" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="Address1" />
+                                    <span asp-validation-for="Address1" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="Address2" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="Address2" />
+                                    <span asp-validation-for="Address2" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="Address3" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="Address3" />
+                                    <span asp-validation-for="Address3" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="PostalCode" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="PostalCode" />
+                                    <span asp-validation-for="PostalCode" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    }
+                    else
+                    {
+                        <div>Select Company to begin...</div>
+                    }
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

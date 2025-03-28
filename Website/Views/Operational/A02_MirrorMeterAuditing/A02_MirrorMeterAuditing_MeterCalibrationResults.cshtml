@@ -1,0 +1,188 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MeterCalibrationDetailModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MeterCalibrationResults.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.TotalEntries == 0)
+                    {
+                        <span>There are no outstanding entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer Number</th>
+                                    <th scope="col">Meter Name</th>
+                                    <th scope="col">Meter Serial</th>
+                                    <th scope="col">Audit Reading</th>
+                                    <th scope="col">Audit Time</th>
+                                    <th scope="col">System Reading</th>
+                                    <th scope="col">Calculated Difference</th>
+                                    <th scope="col">Calibration Date</th>
+                                    <th scope="col">Calibration Status</th>
+                                    <th scope="col">Expiry Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itemC in Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems)
+                                {
+                                    string rowclass = "";
+                                    string cellClass = "";
+                                    if (itemC.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.Calibrated
+                                    || itemC.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.InProgress)
+                                    {
+                                        rowclass = " class=\"table-success\"";
+                                        cellClass = " class=\"text-green font-weight-bold\"";
+                                    }
+                                    else if (itemC.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.UnCalibrated)
+                                    {
+                                        rowclass = " class=\"table-danger\"";
+                                        cellClass = " class=\"text-red font-weight-bold\"";
+                                    }
+                                    else
+                                    {
+                                        rowclass = " class=\"table-warning\"";
+                                        cellClass = " class=\"text-orange font-weight-bold\"";
+                                    }
+                                    <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @itemC.CustomerMeterSerial" onclick="RedirectToVerification('@itemC.CustomerMeterSerial');">
+                                        <td scope="col">@itemC.CustomerNo</td>
+                                        <td scope="col">@itemC.CustomerMeterName</td>
+                                        <td scope="col">@itemC.CustomerMeterSerial</td>
+                                        <td scope="col" class="text-right"><div id="latestReadingOdo_@itemC.MirrorDeviceID"><i class="fas fa-spinner"></i></div></td>
+                                        <td scope="col" class="text-right"><div id="latestReadingOdoTime_@itemC.MirrorDeviceID"><i class="fas fa-spinner"></i></div></td>
+                                        <td scope="col" class="text-right"><div id="verificationReading_@itemC.MirrorDeviceID"><i class="fas fa-spinner"></i></div></td>
+                                        <td scope="col" class="text-right"><div id="calculatedDifferenceReading_@itemC.MirrorDeviceID"><i class="fas fa-spinner"></i></div></td>
+                                        <td scope="col">@(itemC.CalibrationDate.ToDateAndTimeShort())</td>
+                                        <td scope="col">@itemC.Status</td>
+                                        <td scope="col">@itemC.ExpiryDate.ToDateAndTimeShort(true)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+                @if (true@* Model.TotalEntries > Model.EntriesPerPage *@)
+                {
+                    var prevDisabled = !Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.HasNextPage ? "disabled" : "";
+                    <div class="row mt-2">
+                        <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                            <div class="col-md-auto text-left">
+                                <a href="#" onclick="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.PageIndex - 1));"
+                                   class="btn btn-outline-primary-sm @prevDisabled">
+                                    <i class="fas fa-step-backward"></i>&nbsp;Previous Page
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            @for (int pageNumber = 1; pageNumber <= Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.TotalPages; pageNumber++)
+                            {
+                                var numberDisabled = Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.PageIndex == pageNumber ? "btn-outline-warning disabled" : "btn-outline-primary-sm";
+                                <a href="#" onclick="RedirectToFilter(@(pageNumber));"
+                                   class="btn btn-sm @numberDisabled">
+                                    @pageNumber
+                                </a>
+                            }
+                        </div>
+                        <div class="col-md-auto">
+                            <select id="EntriesPerPage" class="form-control" onchange="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.PageIndex));">
+                                @if (Model.EntriesPerPage == 100)
+                                {
+                                    <option value="100" selected="selected">100</option>
+                                }
+                                else
+                                {
+                                    <option value="100">100</option>
+                                }
+                                @if (Model.EntriesPerPage == 500)
+                                {
+                                    <option value="500" selected="selected">500</option>
+                                }
+                                else
+                                {
+                                    <option value="500">500</option>
+                                }
+                                @if (Model.EntriesPerPage == 1000)
+                                {
+                                    <option value="1000" selected="selected">1000</option>
+                                }
+                                else
+                                {
+                                    <option value="1000">1000</option>
+                                }
+                                @if (Model.EntriesPerPage == Model.TotalEntries)
+                                {
+                                    <option value="@Model.TotalEntries" selected="selected">All (@(Model.TotalEntries))</option>
+                                }
+                                else
+                                {
+                                    <option value="@Model.TotalEntries">All (@(Model.TotalEntries))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-auto text-right">
+                            <a align="left" href="#" onchange="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.PageIndex + 1));"
+                               class="btn btn-outline-primary-sm @nextDisabled">
+                                <i class="fas fa-step-forward"></i>&nbsp;Next Page
+                            </a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?EntriesPerPage=' + $("#EntriesPerPage").val() + '&pageIndex=' + pageIndex;
+        }
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification';
+        }
+        $(document).ready(function () {
+            $("#latestBillingSync").load('@Url.Content("/operational/shared/billingsync/latestbillingsynccompany")');
+        });
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.A02_MirrorMeterAuditing_MeterCalibrationDetailItems.Select(p => p.MirrorDeviceID).ToList())));
+        $(companies).each(function () {
+            PopulateLabelsForUpdate(this);
+        });
+        function PopulateLabelsForUpdate(itemID) {
+            $.post('/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibration_GetMirrorReading',
+                {
+                    deviceid: itemID,
+                })
+                .done(function (data) {
+                    $("#latestReadingOdo_" + itemID).html(data.latestReadingOdo);
+                    $("#latestReadingOdoTime_" + itemID).html(data.latestReadingOdoTime);
+                    $("#verificationReading_" + itemID).html(data.verificationReading);
+                    $("#calculatedDifferenceReading_" + itemID).html(data.calculatedDifferenceReading);
+                });
+        }
+    </script>
+}

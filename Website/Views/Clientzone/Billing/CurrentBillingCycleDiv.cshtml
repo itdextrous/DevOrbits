@@ -1,0 +1,380 @@
+@model MyVoltage.Models.ClientzoneModels.CurrentBillingCycleModel;
+@using MyVoltage.Extensions;
+@using MyVoltage.Models.ClientzoneModels;
+@using System.Globalization;
+@{
+    ViewData["Title"] = "Billing - Current billing cycle";
+    if (Model.ShowingPrintView)
+    {
+        Layout = "LayoutPrint";
+    }
+}
+
+@if (!string.IsNullOrEmpty(ViewData["myhead"].ToString()))
+{
+    <div class="row pdf_header align-items-center pdf_mb_28">
+        <div class="col">
+            <img src="~/images/Clientzone/logo_alt.png" height="71" />
+        </div>
+        <div class="col text-end">
+            <h3 class="text-plumber">@Model.CustomerNumber</h3>
+            <h2>Billing cycle</h2>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(ViewData["myFooter"].ToString()))
+{
+    <div class="row g-0 align-items-end pdf-footer pdf_pt_50">
+        <div class="col-9">
+            <div class="heading">@Model.SupplierName @Model.SupplierVATNumber</div>
+            <div class="sub_heading">
+                @if (!string.IsNullOrEmpty(Model.SupplierAddress))
+                {
+                    <img src="/images/icons/address.png" height="20" />
+                    @Model.SupplierAddress
+                }
+            </div>
+            <div class="d-flex">
+                @if (!string.IsNullOrEmpty(Model.SupplierPostal))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/Postal.png" height="20" />
+                        @Model.SupplierPostal
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.SupplierPhone))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/telephone.png" height="20">
+                        @Model.SupplierPhone
+                    </div>
+                }                
+                @if (!string.IsNullOrEmpty(Model.SupplierURL))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/web.png" height="20">
+                        <a href="http://@Model.SupplierURL">
+                            @Model.SupplierURL
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-3 text-end">
+            <img src="~/images/Clientzone/InvoiceFooterR.svg" />
+        </div>
+    </div>
+}
+else if (Model.SummaryBlocks.Count == 0)
+{
+    <div class="show_pdf_preview">
+        <h5 class="m-0 text-center py-1 bold">
+            No data to display.
+        </h5>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $("#PDFButton").removeClass('PDFButtonDiv');
+        });
+    </script>
+}
+else
+{
+    <div class='pdf_views_style @(Model.ShowingPrintView?"pdf_preview":string.Empty)'>
+        @if (Model.ShowingPrintView)
+        {
+            <style>
+                .summaryBlockRow > .col-xl-3 {
+                    flex: 1 0 0%;
+                    padding-bottom: 5px !important;
+                }
+            </style>
+            <h4 class="text-uppercase customer_head m-0 pdf_pb_20 text-plumber">@Model.CustomerName</h4>
+            <div class="row pdf_pb_28">
+                <div class="col address">
+
+                    @Model.RecipientName <br />
+                    @if (!string.IsNullOrEmpty(Model.UnitNumber))
+                    {
+                        @Model.UnitNumber <br />
+                    }
+                    else
+                    {
+                        @Model.CompanyName <br />
+                    }
+                    <p class="pdf-address-text">@Model.Address</p>
+
+                   @* @Model.Address1<br />
+                    @Model.Address2 @Model.Address3<br />
+                    @Model.Address4 @Model.Address5<br />*@
+                </div>
+                <div class="col-md-auto text-end">
+                    <div class="days_months">@Model.SelectedMonth.ToString("MMMM yyyy")</div>
+                </div>
+            </div>
+            <hr class="pdf_mb_25" />
+
+        }
+        <div class="PDFBlockSection">
+            <div class="row gap_15 summaryBlockRow p-0 justify-content-center">
+                @{
+                    string blockClass = "londonsky";
+                    string icon = "Consumption-Data-Fixed-Charges-Icon.png";
+                }
+                @foreach (var m in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption))
+                {
+                    @if (m.DeviceTypeID.HasValue)
+                    {
+                        switch (m.DeviceTypeID.Value)
+                        {
+                            case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                icon = "Consumption-Data-Electricity-Icon.png";
+                                blockClass = "greenapple";
+                                break;
+                            case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                icon = "Consumption-Data-Water-Icon.png";
+                                blockClass = "tropicalwave";
+                                break;
+                            case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                icon = "Consumption-Data-Gas-Icon.png";
+                                blockClass = "tequilasunrise";
+                                break;
+                        }
+                    }
+
+                    if (m.ProductName.Trim().ToLower() == ClientzoneSD.Sanitation_Consumption)
+                    {
+                        icon = "Sanitation_consumption_icon.png";
+                        blockClass = "darkblue";
+                    }
+                    if (m.ProductName.Trim().ToLower() == ClientzoneSD.Water_Consumption)
+                    {
+                        icon = "Consumption-Data-Water-Icon.png";
+                        blockClass = "tropicalwave";
+                    }
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="summaryblock border text-center text-@blockClass">
+                            <div class="card_header bg-@blockClass">
+                                <div class="header">
+                                    @m.ProductName
+                                </div>
+                                <div class="subheader">
+                                    @Model.SelectedMonth.ToString("MMMM yyyy")
+                                </div>
+                            </div>
+
+                            <div class="icon">
+                                <div class="text-center bg-white">
+                                    <img src="~/images/Clientzone/@icon" />
+                                </div>
+                            </div>
+
+                            <div class="spacer"></div>
+                            <div class="totalusage">
+                                <div class="totalusageinner bg-@blockClass">
+                                    <div class="head text-white">
+                                        Total usage:
+                                    </div>
+                                    <div class="value text-white">
+                                        @if (Model.ShowIncVAT)
+                                        {
+                                            <span> R @m.TotalInVat.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") incl.VAT</span>
+                                        }
+                                        else
+                                        {
+                                            <span> R @m.Total.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") excl.VAT</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="data_value">
+                                <div class="head">
+                                    Number of units:
+                                </div>
+                                <div class="value">
+                                    @m.Units.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")
+                                    <span class="units_type1"> kWH</span>
+                                    <span class="units_type2"> kL</span>
+                                    <span class="units_type3"> m<sup>3</sup></span>
+                                </div>
+                            </div>
+
+                            <div class="data_value">
+                                <div class="head">
+                                    Current tarrif:
+                                </div>
+                                <div class="value">
+                                    R @m.PricePerUnit.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")/unit
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @{
+                    blockClass = "londonsky";
+                    icon = "Consumption-Data-Fixed-Charges-Icon.png";
+                }
+                @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Count() > 0)
+                {
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="summaryblock border text-center text-@blockClass">
+                            <div class="card_header bg-@blockClass">
+                                <div class="header">
+                                    Fixed charges
+                                </div>
+
+                                <div class="subheader">
+                                    @Model.SelectedMonth.ToString("MMMM yyyy")
+                                </div>
+                            </div>
+
+
+                            <div class="icon">
+                                <div class="text-center bg-white">
+                                    <img src="~/images/Clientzone/@icon" />
+                                </div>
+                            </div>
+
+                            <div class="spacer"></div>
+
+                            <div class="totalusage">
+                                <div class="totalusageinner bg-@blockClass">
+                                    <div class="head text-white">
+                                        Total Charges:
+                                    </div>
+                                    <div class="value text-white">
+                                        @if (Model.ShowIncVAT)
+                                        {
+                                            <span>R @(Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Select(p => Math.Round(p.TotalInVat)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")) incl.VAT</span>
+                                        }
+                                        else
+                                        {
+                                            <span>R @(Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Select(p => Math.Round(p.Total)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")) excl.VAT</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            @foreach (var m in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed))
+                            {
+                                <div class="data_value">
+                                    <div class="head">
+                                        @m.ProductName:
+                                    </div>
+                                    <div class="value">
+                                        @if (Model.ShowIncVAT)
+                                        {
+                                            <span>R @m.TotalInVat.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") incl.VAT</span>
+                                        }
+                                        else
+                                        {
+                                            <span>R @m.Total.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") excl.VAT</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+
+
+                }
+            </div>
+        </div>
+        <hr class="pdf_mt_28" />
+
+        <h5 class="m-0 pdf_pb_20 pdf_pt_20">
+            Previous months' billing detail
+        </h5>
+        <div class="overflow_auto_mobile">
+            <table class="table table-hover table-bordered table-striped table-design mb-0">
+                <thead>
+                    <tr class="tr_head">
+                        <th rowspan="2" class="month_th text-center align-middle bg-light">Month</th>
+                        @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Count() > 0)
+                        {
+                            <th class="text-center align-middle bg-light" colspan="@Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Count()">Consumption charges</th>
+                        }
+                        @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Count() > 0)
+                        {
+                            <th class="text-center align-middle bg-light" colspan="@Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Count()">Fixed charges</th>
+                        }
+
+                        @if (Model.ShowIncVAT)
+                        {
+                            <th class="w_100 text-center align-middle bg-light" rowspan="2">Total<br />(Inc. Vat)</th>
+                        }
+                        else
+                        {
+                            <th class="w_100 text-center align-middle bg-light" rowspan="2">Total<br />(Excl. Vat)</th>
+                        }
+
+                    </tr>
+                    <tr class="tr_head">
+                        @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Count() > 0)
+                        {
+                            foreach (var item in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption))
+                            {
+                                <th class="text-center align-middle text-white bg-dt-@item.ProductName.Split(' ')[0].ToString()">@item.ProductName</th>
+                            }
+                        }
+                        @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Count() > 0)
+                        {
+                            foreach (var item in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed))
+                            {
+                                <th class="text-center align-middle text-white bg-dt-@item.DeviceType.ToString()">@item.ProductName</th>
+                            }
+                        }
+                    </tr>
+                </thead>
+                
+                @{
+                    DateTime current = Model.SelectedMonth;
+                }
+                @while (current >= Model.SelectedMonth.AddMonths(-4))
+                {
+                    decimal total = 0;
+                    <tr>
+                        <td class="text-center align-middle text-nowrap">@current.ToMonth()</td>
+                        @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Count() > 0)
+                        {
+                            foreach (var item in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption))
+                            {
+                                var monthlyItem = item.MonthlyFigures.Where(p => p.Key == current).SingleOrDefault();
+                                total += monthlyItem.Value.HasValue ? Math.Round(monthlyItem.Value.Value) : 0;
+                                <td class="text-center align-middle text-nowrap">@monthlyItem.Value.ToMoneyNoDecimal("R", "-").Replace(",", " ")</td>
+                            }
+                        }
+                        @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Count() > 0)
+                        {
+                            foreach (var item in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed))
+                            {
+                                var monthlyItem = item.MonthlyFigures.Where(p => p.Key == current).SingleOrDefault();
+                                total += monthlyItem.Value.HasValue ? Math.Round(monthlyItem.Value.Value) : 0;
+                                <td class="text-center align-middle text-nowrap">@monthlyItem.Value.ToMoneyNoDecimal("R", "-").Replace(",", " ")</td>
+                            }
+                        }
+                        <td class="text-center align-middle text-nowrap">R @total.ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                    current = current.AddMonths(-1);
+                }
+            </table>
+        </div>
+       @* @if (model.showingprintview)
+        {
+            <div class="row pdf_pt_28 g-0 align-items-end mt-1">
+                <div class="col-9">
+                    <img src="~/images/clientzone/invoicefooterl.svg" />
+                </div>
+                <div class="col-3 text-end">
+                    <img src="~/images/clientzone/invoicefooterr.svg" />
+                </div>
+            </div>
+        }*@
+    </div>
+}
+<script>
+</script>

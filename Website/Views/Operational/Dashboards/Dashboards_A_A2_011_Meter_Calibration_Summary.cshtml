@@ -1,0 +1,41 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A2_011_Meter_Calibration_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MeterCalibrationSummary.GetDescription() Details</h5>
+</div>
+@if (Model.A2_011_Meter_Calibration_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Meters Not Calibrated</th>
+                <th scope="col">% Calibrated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A2_011_Meter_Calibration_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationDetails")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.Name</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+                    <td scope="col">@item.MetersNotCalibratedCount</td>
+                    <td scope="col">@(item.MetersCount - item.MetersThatCannotBeCalibratedCount > 0 ? ((Convert.ToDecimal(item.MetersCalibratedCount) / Convert.ToDecimal(item.MetersCount - item.MetersThatCannotBeCalibratedCount)) * 100.0m).ToString("N2") : "")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

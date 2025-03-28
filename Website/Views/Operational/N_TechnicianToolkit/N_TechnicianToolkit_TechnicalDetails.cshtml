@@ -1,0 +1,312 @@
+@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_TechnicalDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.N_TechnicianToolkit_TechnicalDetails.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Select a company to start...</span>
+                }
+                else
+                {
+                    <form asp-action="N_TechnicianToolkit_TechnicalDetails" enctype="multipart/form-data">
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-12">
+                                <div class="border border-primary rounded p-2 m-2">
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col-12 text-orange">
+                                            <h4>Sales</h4>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col-12">
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col-12">
+                                                    <div class="border border-primary rounded p-2 m-2">
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12 text-orange">
+                                                                <h6>Electricity</h6>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12">
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Electricity_EndUsers" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Electricity_EndUsers" placeholder="Sales Electricity End Users" title="Sales Electricity End Users"></textarea>
+                                                                        <span asp-validation-for="Sales_Electricity_EndUsers" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Electricity_CommonArea" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Electricity_CommonArea" placeholder="Sales Electricity Common Area" title="Sales Electricity Common Area"></textarea>
+                                                                        <span asp-validation-for="Sales_Electricity_CommonArea" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Electricity_Other" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Electricity_Other" placeholder="Sales Electricity Other" title="Sales Electricity Other"></textarea>
+                                                                        <span asp-validation-for="Sales_Electricity_Other" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col-12">
+                                                    <div class="border border-primary rounded p-2 m-2">
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12 text-orange">
+                                                                <h6>Water</h6>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12">
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Water_EndUsers" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Water_EndUsers" placeholder="Sales Water End Users" title="Sales Water End Users"></textarea>
+                                                                        <span asp-validation-for="Sales_Water_EndUsers" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Water_CommonArea" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Water_CommonArea" placeholder="Sales Water Common Area" title="Sales Water Common Area"></textarea>
+                                                                        <span asp-validation-for="Sales_Water_CommonArea" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Water_Other" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Water_Other" placeholder="Sales Water Other" title="Sales Water Other"></textarea>
+                                                                        <span asp-validation-for="Sales_Water_Other" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col-12">
+                                                    <div class="border border-primary rounded p-2 m-2">
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12 text-orange">
+                                                                <h6>Gas</h6>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12">
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Gas_EndUsers" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Gas_EndUsers" placeholder="Sales Gas End Users" title="Sales Gas End Users"></textarea>
+                                                                        <span asp-validation-for="Sales_Gas_EndUsers" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Gas_CommonArea" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Gas_CommonArea" placeholder="Sales Gas Common Area" title="Sales Gas Common Area"></textarea>
+                                                                        <span asp-validation-for="Sales_Gas_CommonArea" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Gas_Other" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Gas_Other" placeholder="Sales Gas Other" title="Sales Gas Other"></textarea>
+                                                                        <span asp-validation-for="Sales_Gas_Other" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col-12">
+                                                    <div class="border border-primary rounded p-2 m-2">
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12 text-orange">
+                                                                <h6>Other</h6>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-2 mt-2">
+                                                            <div class="col-12">
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Other_EndUsers" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Other_EndUsers" placeholder="Sales Other End Users" title="Sales Other End Users"></textarea>
+                                                                        <span asp-validation-for="Sales_Other_EndUsers" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Other_CommonArea" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Other_CommonArea" placeholder="Sales Other Common Area" title="Sales Other Common Area"></textarea>
+                                                                        <span asp-validation-for="Sales_Other_CommonArea" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-2 mt-2">
+                                                                    <div class="col text-uppercase font-weight-bold">
+                                                                        <label asp-for="Sales_Other_Other" class="control-label"></label>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <textarea class="form-control" asp-for="Sales_Other_Other" placeholder="Sales Other Other" title="Sales Other Other"></textarea>
+                                                                        <span asp-validation-for="Sales_Other_Other" class="text-red"></span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-12">
+                                <div class="border border-primary rounded p-2 m-2">
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col-12 text-orange">
+                                            <h4>Supply</h4>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col-12">
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col text-uppercase font-weight-bold">
+                                                    <label asp-for="Supply_Electricity" class="control-label"></label>
+                                                </div>
+                                                <div class="col">
+                                                    <textarea class="form-control" asp-for="Supply_Electricity" placeholder="Supply Electricity" title="Supply Electricity"></textarea>
+                                                    <span asp-validation-for="Supply_Electricity" class="text-red"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col text-uppercase font-weight-bold">
+                                                    <label asp-for="Supply_Water" class="control-label"></label>
+                                                </div>
+                                                <div class="col">
+                                                    <textarea class="form-control" asp-for="Supply_Water" placeholder="Supply Water" title="Supply Water"></textarea>
+                                                    <span asp-validation-for="Supply_Water" class="text-red"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col text-uppercase font-weight-bold">
+                                                    <label asp-for="Supply_Gas" class="control-label"></label>
+                                                </div>
+                                                <div class="col">
+                                                    <textarea class="form-control" asp-for="Supply_Gas" placeholder="Supply Gas" title="Supply Gas"></textarea>
+                                                    <span asp-validation-for="Supply_Gas" class="text-red"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-2 mt-2">
+                                                <div class="col text-uppercase font-weight-bold">
+                                                    <label asp-for="Supply_Other" class="control-label"></label>
+                                                </div>
+                                                <div class="col">
+                                                    <textarea class="form-control" asp-for="Supply_Other" placeholder="Supply Other" title="Supply Other"></textarea>
+                                                    <span asp-validation-for="Supply_Other" class="text-red"></span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 form-group text-nowrap text-right">
+
+                                @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.N_TechnicianToolkit_TechnicalDetails, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                {
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                }
+
+                            </div>
+                        </div>
+                    </form>
+                }
+
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+}

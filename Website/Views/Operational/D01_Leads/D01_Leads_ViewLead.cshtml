@@ -1,0 +1,544 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_ViewLeadModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_ViewLead.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-body rounded">
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <a href="/operational/D01_Leads/D01_Leads_MyLeads" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to My Leads</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" asp-action="D01_Leads_ViewLead_TrackingInformation" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <h4>0 Tracking information</h4>
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Property Lead ID</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.D01_Leads_ViewLeadItem.ID
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ResponsibleUser" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                            <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="Status" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                            <span asp-validation-for="Status" class="text-red"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-right">
+                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row col-12">
+                    <h4>Lead details</h4>
+                </div>
+                <div class="row col-12">
+                    <p class="alert alert-dark font-italic">
+                        [Description]
+                    </p>
+                </div>
+            </div>
+            <div class="card-body rounded-bottom">
+                <div class="row col-12">
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <tr>
+                            <td>ID</td>
+                            <td>@Model.D01_Leads_ViewLeadItem.ID</td>
+                        </tr>
+                        <tr>
+                            <td>Lead Generator Name</td>
+                            <td>@Model.D01_Leads_ViewLeadItem.LeadGeneratorName</td>
+                        </tr>
+                        <tr>
+                            <td>Created By</td>
+                            <td>@Model.D01_Leads_ViewLeadItem.Username</td>
+                        </tr>
+                        <tr>
+                            <td>Created</td>
+                            <td>@Model.D01_Leads_ViewLeadItem.DateCreated.ToDateAndTimeShort()</td>
+                        </tr>
+                        <tr>
+                            <td>Responsible</td>
+                            <td>@Model.D01_Leads_ViewLeadItem.ResponsibleUserUsername</td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td>@(Model.D01_Leads_ViewLeadItem.Status.GetDescription())</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row col-12">
+                    <h4>Property details</h4>
+                </div>
+                <div class="row col-12">
+                    <p class="alert alert-dark font-italic">
+                        Obtain the contact lead's full name, job title, email address, phone number, and any other relevant contact information. Link it to the Contact that is the ultimate goal of making a sale.
+                    </p>
+                </div>
+            </div>
+            <div class="card-body rounded-bottom">
+
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <h5>Linked To Properties</h5>
+                    </div>
+                </div>
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <a href="/operational/D01_Leads/D01_Leads_ViewLead_AddProperty" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Link Property to Lead</a>
+                    </div>
+                </div>
+                <div class="row mb-md-2">
+                    <div class="row col-12">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" scope="col">Responsible</th>
+                                    <th rowspan="2" scope="col">Name</th>
+                                    <th rowspan="2" scope="col">Description</th>
+                                    <th rowspan="2" scope="col">Type</th>
+                                    <th rowspan="2" scope="col">No Of Registered Units</th>
+                                    <th rowspan="2" scope="col">No Of Metering Points</th>
+                                    <th rowspan="2" scope="col">Partner</th>
+                                    <th rowspan="2" scope="col">Overall Status</th>
+                                    <th rowspan="2" scope="col">Total calculated expected monthly gross profit</th>
+                                    <th rowspan="2" scope="col">Total calculated expected average capital cost</th>
+                                    <th colspan="3" scope="col" class="text-center">Linked Contacts</th>
+                                    <th rowspan="2" scope="col"></th>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Full Name</th>
+                                    <th scope="col">Number</th>
+                                    <th scope="col">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.D01_Leads_ViewLeadItem.PropertiesItems)
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.Name}";
+                                    int rowSpan = item.ContactsItems.Count;
+                                    bool isFirst = true;
+                                    foreach (var itemC in item.ContactsItems)
+                                    {
+                                        @if (isFirst)
+                                        {
+                                            isFirst = false;
+                                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.ResponsibleUsername
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.Name
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.Description
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.CompanyTypeName
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @item.NoOfRegisteredUnits
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @item.NoOfMeteringPoints
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col">
+                                                    @item.PartnerName
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @item.OverallStatus
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @if (item.NoOfRegisteredUnits.HasValue && item.ExpectedMonthlyGrossProfitPerRegisteredUnit.HasValue)
+                                                    {
+                                                        <span>@((item.NoOfRegisteredUnits.Value * item.ExpectedMonthlyGrossProfitPerRegisteredUnit.Value).ToMoney())</span>
+                                                    }
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @if (item.NoOfMeteringPoints.HasValue && item.ExpectedAverageCapitalCostPerMeteringPoint.HasValue)
+                                                    {
+                                                        <span>@((item.NoOfMeteringPoints.Value * item.ExpectedAverageCapitalCostPerMeteringPoint.Value).ToMoney())</span>
+                                                    }
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemC.FullName
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemC.PhoneNumber
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemC.Email
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col">
+                                                    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.D01_Leads_Properties, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                                    {
+                                                        <a href="/operational/D01_Leads/D01_Leads_Properties_Edit/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemC.FullName
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemC.PhoneNumber
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemC.Email
+                                                </td>
+                                            </tr>
+
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row col-12">
+                    <h4>Contact details</h4>
+                </div>
+                <div class="row col-12">
+                    <p class="alert alert-dark font-italic">
+                        Obtain the contact lead's full name, job title, email address, phone number, and any other relevant contact information. Link it to the Contact that is the ultimate goal of making a sale.
+                    </p>
+                </div>
+            </div>
+            <div class="card-body rounded-bottom">
+
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <h5>Linked To Contacts</h5>
+                    </div>
+                </div>
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <a href="/operational/D01_Leads/D01_Leads_ViewLead_AddContact" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Link Contact to Lead</a>
+                    </div>
+                </div>
+                <div class="row mb-md-2">
+                    <div class="row col-12">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" scope="col">Full Name</th>
+                                    <th rowspan="2" scope="col">Phone Number</th>
+                                    <th rowspan="2" scope="col">Alt Phone Number</th>
+                                    <th rowspan="2" scope="col">Complex Name</th>
+                                    <th rowspan="2" scope="col">Position</th>
+                                    <th rowspan="2" scope="col">Email</th>
+                                    <th rowspan="2" scope="col">Responsible</th>
+                                    <th colspan="1" scope="col" class="text-center">Linked Properties</th>
+                                    <th rowspan="2" scope="col"></th>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.D01_Leads_ViewLeadItem.ContactsItems)
+                                {
+                                    string rowClass = "";
+                                    string title = $"{item.FullName}";
+                                    int rowSpan = item.PropertiesItems.Count;
+                                    bool isFirst = true;
+                                    foreach (var itemP in item.PropertiesItems)
+                                    {
+                                        @if (isFirst)
+                                        {
+                                            isFirst = false;
+                                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.FullName
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.PhoneNumber
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.AltPhoneNumber
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @item.ComplexName
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @item.Position
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                                    @item.Email
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                                    @item.ResponsibleUsername
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemP.Name
+                                                </td>
+                                                <td rowspan="@rowSpan" scope="col">
+                                                    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.D01_Leads_Contacts, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                                    {
+                                                        <a href="/operational/D01_Leads/D01_Leads_Contacts_Edit/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                                <td scope="col" class="text-nowrap">
+                                                    @itemP.Name
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<form method="post" asp-action="D01_Leads_ViewLead_Product" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <div class="row col-12">
+                        <h4>Product details</h4>
+                    </div>
+                    <div class="row col-12">
+                        <p class="alert alert-dark font-italic">
+                            [Description]
+                        </p>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ProductID" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @Html.DropDownList("ProductID", Model.ProductID, new { @class = "form-control" })
+                            <span asp-validation-for="ProductID" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row col-12">
+                    <h4>Lead Attachments</h4>
+                </div>
+                <div class="row col-12">
+                    <p class="alert alert-dark font-italic">
+                        [Description]
+                    </p>
+                </div>
+            </div>
+            <div class="card-body rounded-bottom">
+
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <a href="/operational/D01_Leads/D01_Leads_ViewLead_AddAttachment" class="btn btn-outline-primary-sm"><i class="fas fa-upload"></i>&nbsp;Add Attachment</a>
+                    </div>
+                </div>
+                <div class="row col-12">
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>File Type</th>
+                                <th>User</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.D01_Leads_ViewLeadItem.D01_Leads_ViewLead_Attachments)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Description</td>
+                                    <td>@item.AttachmentType.GetDescription()</td>
+                                    <td>@item.Username</td>
+                                    <td class="text-right">
+                                        <a href="/operational/D01_Leads/D01_Leads_ViewLead_GetAttachment/@item.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                        &nbsp;
+                                        @if (!item.IsDeleted)
+                                        {
+                                            <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteAttachment('@item.ID', '@item.Description (@item.AttachmentType.GetDescription()) - Added by @item.Username on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        }
+                                        else
+                                        {
+                                            <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row col-12">
+                    <h4>Lead History</h4>
+                </div>
+                <div class="row col-12">
+                    <p class="alert alert-dark font-italic">
+                        [Description]
+                    </p>
+                </div>
+            </div>
+            <div class="card-body rounded-bottom">
+
+                <div class="row col-12">
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.D01_Leads_ViewLeadItem.D01_Leads_ViewLead_Logs.OrderByDescending(p => p.DateCreated))
+                            {
+                                <tr>
+                                    <td class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td class="text-nowrap">@item.Username</td>
+                                    <td>
+                                        @(Html.Raw(string.IsNullOrEmpty(item.SystemDescription) ? "Added Comment" : item.SystemDescription))
+                                    </td>
+                                </tr>
+                            }
+                            <tr>
+                                <td>@Model.D01_Leads_ViewLeadItem.DateCreated.ToDateAndTimeShort()</td>
+                                <td>[System]</td>
+                                <td>Lead Created</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function ConfirmDeleteAttachment(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/D01_Leads/D01_Leads_ViewLead_DeleteAttachment/' + id;
+            }
+        }
+    </script>
+}

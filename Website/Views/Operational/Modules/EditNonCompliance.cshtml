@@ -1,0 +1,102 @@
+@model MyVoltage.Models.OperationalModels.ModulesModels.EditNonComplianceModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{Model.ActivityType.GetDescription()} - Edit Time Of Work Planned";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Time Of Work Planned successfully Edited
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col">
+                            @switch (Model.ActivityType)
+                            {
+                                case MyVoltage.Data.ActivityTypeEnum.A08_Task:
+                                    <a href="/operational/A08_Tasks/A08_Task_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.A09_Flag:
+                                    <a href="/operational/A09_Flags/A09_Flags_CompanyReview" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Flag</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.E01_BuildingOnboardingTask:
+                                    <a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.D02_SaleTask:
+                                    <a href="/operational/D02_Sale/D02_SaleTask_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <form asp-action="EditNonCompliance" enctype="multipart/form-data">
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="UserComment" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <textarea class="form-control" asp-for="UserComment"></textarea>
+                                <span asp-validation-for="UserComment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="EnforcerComment" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <textarea class="form-control" asp-for="EnforcerComment"></textarea>
+                                <span asp-validation-for="EnforcerComment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="HasBeenResolved" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("HasBeenResolved", Model.HasBeenResolved, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="HasBeenResolved" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+

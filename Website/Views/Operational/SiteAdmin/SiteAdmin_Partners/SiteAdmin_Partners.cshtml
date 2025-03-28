@@ -1,0 +1,330 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_PartnersModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_Partners.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Partners <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col"><input id="add_name" type="text" class="form-control" /></td>
+                                    <td scope="col"><a onclick="DoAdd();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a></td>
+                                </tr>
+                                <tr><td colspan="5">&nbsp;</td></tr>
+                                @foreach (var item in Model.SiteAdmin_PartnersItems)
+                                {
+                                    <tr title="@item.PartnerName Created: @item.CreatedByUsername - @item.CreatedDate.ToDateAndTimeShort(). Updated: @item.UpdatedByUsername - @item.UpdatedDate.ToDateAndTimeShort(true).">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="productNameUpdate_@item.ID" type="text" value="@item.PartnerName" class="form-control" />
+                                        </td>
+                                        <td scope="col">
+                                            <a onclick="DoUpdate('@item.ID');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            @if (item.LinkedItems == 0)
+                                            {
+                                                <a onclick="DoDelete('@item.ID', '@item.PartnerName');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <span>Used by @item.LinkedItems linked items</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Legal Entities <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col"><input id="add_nameLegalEntity" type="text" class="form-control" /></td>
+                                    <td scope="col"><a onclick="DoAddLegalEntity();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a></td>
+                                </tr>
+                                <tr><td colspan="5">&nbsp;</td></tr>
+                                @foreach (var item in Model.SiteAdmin_LegalEntitiesItems)
+                                {
+                                    <tr title="@item.LegalEntityName Created: @item.CreatedByUsername - @item.CreatedDate.ToDateAndTimeShort(). Updated: @item.UpdatedByUsername - @item.UpdatedDate.ToDateAndTimeShort(true).">
+                                        <td scope="col" class="text-nowrap">
+                                            <input id="productNameUpdate_LegalEntity@(item.ID)" type="text" value="@item.LegalEntityName" class="form-control" />
+                                        </td>
+                                        <td scope="col">
+                                            <a onclick="DoUpdateLegalEntity('@item.ID');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            @if (item.LinkedItems == 0)
+                                            {
+                                                <a onclick="DoDeleteLegalEntity('@item.ID', '@item.LegalEntityName');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <span>Used by @item.LinkedItems linked items</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function AutoFillEditValues(add_name) {
+            $("#add_name").val(add_name);
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_name").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter name');
+                $("#add_name").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Partners_ItemAdd",
+                {
+                    add_name: $("#add_name").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/SiteAdmin/SiteAdmin_Partners_ItemDelete/" + ItemID,
+                    {
+                        add_name: $("#add_name").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+        function DoUpdate(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Partners_ItemUpdate/" + ItemID,
+                {
+                    add_name: $("#productNameUpdate_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddLegalEntity() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_nameLegalEntity").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter name');
+                $("#add_nameLegalEntity").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_LegalEntities_ItemAdd",
+                {
+                    add_name: $("#add_nameLegalEntity").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDeleteLegalEntity(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/SiteAdmin/SiteAdmin_LegalEntities_ItemDelete/" + ItemID,
+                    {
+                        add_name: $("#add_nameLegalEntity").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+        function DoUpdateLegalEntity(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_LegalEntities_ItemUpdate/" + ItemID,
+                {
+                    add_name: $("#productNameUpdate_LegalEntity" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateCOS(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Partners_ItemUpdateCOS/" + ItemID,
+                {
+                    cosLink: $("#cosLink_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateS(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Partners_ItemUpdateS/" + ItemID,
+                {
+                    sLink: $("#sLink_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateIncludeInC602x(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Partners_ItemUpdateIncludeInC602x/" + ItemID,
+                {
+                    includeInC602x: $("#includeInC602x_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

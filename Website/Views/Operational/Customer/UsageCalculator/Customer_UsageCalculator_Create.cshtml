@@ -1,0 +1,121 @@
+@model MyVoltage.Models.OperationalModels.Customer.Customer_UsageCalculatorModels.UsageCalcCreateModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Customer_UsageCalculator.GetDescription()} - Create";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+        <form asp-action="Customer_UsageCalculator_Create" enctype="multipart/form-data">
+
+            <div class="card p-md-4 mv-gradient">
+                <div class="card-header">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            You have selected to view
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Meter @(Model.Meter.Serial) (@operationalProvider.CustomerNumber)
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @switch (Model.Meter.Type)
+                            {
+                                case "Electricity":
+                                    <img src="~/images/elec-icon-s.png" />
+                                    <span>Electricity</span>
+                                    break;
+                                case "Water":
+                                    <img src="~/images/water-icon-s.png" />
+                                    <span>Water</span>
+                                    break;
+                                case "Gas":
+                                    <img src="~/images/gas-icon-s.png" />
+                                    <span>Gas</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @if (Model.Meter.Status.ToUpper().Contains("ON"))
+                            {
+                                <i class="fas fa-lightbulb text-green"></i> <span>Online</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-power-off text-red"></i> <span>Offline</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Click <a href="/operational/Customer/Customer_UsageCalculator">here</a> to go back.
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            [Instructions on how to use usage calculator]
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Average kWh</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Hours Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var asset in Model.UsageCalc_Assets)
+                            {
+                                <tr>
+                                    <td scope="col"><i class="fas fa-@asset.AssetIcon"></i></td>
+                                    <td scope="col">@asset.AssetName</td>
+                                    <td scope="col">@(asset.AverageKWH.ToString("N"))</td>
+                                    <td scope="col" title="This is how many (Enter 1 for 1 @(asset.AssetName))"><input title="This is how many (Enter 1 for 1 @(asset.AssetName))" type="number" name="Asset_@(asset.UsageCalc_AssetID)_Quantity" /></td>
+                                    <td scope="col" title="This is how long (Enter 2 for 2 hours)"><input title="This is how long (Enter 2 for 2 hours)" type="number" name="Asset_@(asset.UsageCalc_AssetID)_Hours" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="/operational/Customer/Customer_UsageCalculator" class="btn btn-outline-primary-sm"><i class="fas fa-arrow-circle-left"></i>&nbsp;BACK</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;SAVE &amp; CALCULATE</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToCreate(serial) {
+            document.location.href = '/usagecalccreate/' + serial;
+        }
+        function RedirectToEdit(id) {
+            document.location.href = '/usagecalcedit/' + id;
+        }
+    </script>
+}

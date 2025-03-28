@@ -1,0 +1,31 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedCustomerModels.CustomerOccupancyStatusModel
+@inject UserManager<ApplicationUser> userManager;
+
+<div class="row col-12">
+    <h5 class="text-orange">Occupancy status</h5>
+</div>
+<div class="row">
+    <div class="col">Current occupancy status</div>
+    <div class="col">@Model.Occupancy</div>
+</div>
+<div class="row">
+    <div class="col">Occupany status change date</div>
+    <div class="col">@(Model.CreateDate.ToString("dd MMM yyyy HH:mm"))</div>
+</div>
+<div class="row">
+    <div class="col">Occupany verification name</div>
+    <div class="col">@(Model.FullName)</div>
+</div>
+<div class="row">
+    <div class="col">Occupany status still valid?</div>
+    <div class="col font-weight-bold">
+        @if ((DateTime.Now - Model.CreateDate).TotalDays > 60)
+        {
+            <span class="text-red">No</span>
+        }
+        else
+        {
+            <span class="text-green">Yes</span>
+        }
+    </div>
+</div>

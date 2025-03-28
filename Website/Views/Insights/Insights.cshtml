@@ -1,0 +1,142 @@
+@inject MyVoltage.Services.CustomerProvider customerProvider;
+@model MyVoltage.Models.OperationalModels.InsightsModels.InsightsModel;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = "Insights";
+}
+
+@*<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>*@
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h5 class="text-orange">Details for: @customerProvider.CustomerNumber (@customerProvider.CompanyName)</h5>
+            </div>
+            <div class="card-body bg-white">
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Date and Time
+                    </div>
+                    <div class="col">
+                        @DateTime.Now.ToDateAndTimeShort()
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Customer Details
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Property
+                    </div>
+                    <div class="col">
+                        @customerProvider.CompanyName
+                    </div>
+                </div>
+
+                @*<div class="row mb-2">
+                    <div class="col">
+                        Customer Name
+                    </div>
+                    <div class="col">
+                        @customerProvider.CustomerName
+                    </div>
+                </div>*@
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Customer No
+                    </div>
+                    <div class="col">
+                        @customerProvider.CustomerNumber
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Amount Display
+                    </div>
+                    <div class="col">
+                        @if (customerProvider.ShowCostInclVAT)
+                        {
+                            <span class="text-green font-weight-bold">Incl Vat</span>
+                        }
+                        else
+                        {
+                            <span class="text-red font-weight-bold">Excl Vat</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Insight Year
+                    </div>
+                    <div class="col">
+                        @Model.Month.Year
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col">
+                        Insight Month
+                    </div>
+                    <div class="col">
+                        <input type="month" id="insightsMonth" value="@Model.Month.ToString("yyyy-MM")" />
+                        &nbsp;
+                        <a onclick="ChangeInsightsMonth();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+<div id="annualCostTotal">
+    <div class="text-orange">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Annual Cost Total for @Model.Month.ToMonth()
+    </div>
+</div>
+<div id="productsDailyCost">
+    <div class="text-orange">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Products Daily Cost for @Model.Month.ToMonth()
+    </div>
+</div>
+<div id="customerBilling">
+    <div class="text-orange">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Billing for @Model.Month.ToMonth()
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ChangeInsightsMonth() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/Customer_Insights?d=' + $("#insightsMonth").val();
+        }
+        $(document).ready(function () {
+            $("#annualCostTotal").load('@Url.Content("/Customer_Insights/AnnualCostTotal")?d=@Model.Month.ToDateShort()');
+            $("#productsDailyCost").load('@Url.Content("/Customer_Insights/ProductsDailyCost")?d=@Model.Month.ToDateShort()');
+            $("#customerBilling").load('@Url.Content("/Customer_Insights/CustomerBilling")?d=@Model.Month.ToDateShort()');
+        });
+    </script>
+}

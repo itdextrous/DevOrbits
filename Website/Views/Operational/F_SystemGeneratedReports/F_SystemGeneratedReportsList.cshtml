@@ -1,0 +1,107 @@
+@model MyVoltage.Models.OperationalModels.F_SystemGeneratedReports.F_SystemGeneratedReportsListModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row">
+                    <div class="col-md-auto">@Html.DropDownList("SecureAreas", Model.SecureAreas, new { @class = "browser-default custom-select form-control-trim js-select", onchange = "RedirectToFilter();" })</div>
+                    <div class="col-md-auto">Created Between</div>
+                    <div class="col-md-auto"><input class="form-control" type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                    <div class="col-md-auto">And</div>
+                    <div class="col-md-auto"><input class="form-control" type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                    <div class="col-md-auto"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Report ID</th>
+                            <th scope="col">Report Started</th>
+                            <th scope="col">Report Ended</th>
+                            <th scope="col">Progress</th>
+                            <th scope="col">Companies</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Retry Count</th>
+                            <th scope="col">Report Param</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var itemC in Model.F_SystemGeneratedReportsListItems)
+                        {
+                            string rowClass = "";
+                            if (itemC.DateEnded.HasValue && (!itemC.Progress.HasValue || itemC.Progress.Value != 100))
+                            {
+                                rowClass = "table-danger";
+                            }
+                            else if (itemC.Progress.HasValue && itemC.Progress.Value == 100 && itemC.DateEnded.HasValue)
+                            {
+                                rowClass = "table-success";
+                            }
+                            <tr class="@rowClass">
+                                <td scope="col">@itemC.ID</td>
+                                <td scope="col">@itemC.DateStarted.ToDateAndTimeShort()</td>
+                                <td scope="col">@itemC.DateEnded.ToDateAndTimeShort() @((itemC.DateEnded.HasValue) ? $" ({(itemC.DateEnded.Value - itemC.DateStarted).Hours:00}:{(itemC.DateEnded.Value - itemC.DateStarted).Minutes:00}:{(itemC.DateEnded.Value - itemC.DateStarted).Seconds:00})" : "")</td>
+                                <td scope="col">
+                                    @itemC.Progress.ToMoney()
+                                    @if (itemC.Progress.HasValue)
+                                    {
+                                        double totalMSSinceStart = (DateTime.Now - itemC.DateStarted).TotalMilliseconds;
+                                        double progressLeft = Convert.ToDouble(100) - Convert.ToDouble(itemC.Progress.Value);
+                                        double partsLeft = progressLeft / Convert.ToDouble(itemC.Progress.Value);
+                                        double msLeft = partsLeft * totalMSSinceStart;
+                                        <span> %</span>
+                                        @if (!itemC.DateEnded.HasValue && itemC.Progress != 0)
+                                        {
+                                            <span>(ETA: @(DateTime.Now.AddMilliseconds(msLeft).ToDateAndTimeShort()))</span>
+                                        }
+                                    }
+                                </td>
+                                <td scope="col">@itemC.F_SystemGeneratedReportsListItemCompanies.Count (<a href="#" onclick="alert('@(itemC.F_SystemGeneratedReportsListItemCompanies.Count > 0 ? string.Join(", ", itemC.F_SystemGeneratedReportsListItemCompanies.OrderBy(p => p.CompanyName).Select(p => p.CompanyName).ToList()) : "None")')">Show Names</a>)</td>
+                                <td scope="col">@itemC.ReportLocation.GetDescription()</td>
+                                <td scope="col">@itemC.RetryCount</td>
+                                <td scope="col">@Html.Raw(itemC.ReportParam)</td>
+                                <td scope="col">
+                                    @if (!string.IsNullOrEmpty(itemC.ReportURL))
+                                    {
+                                        <a href="/operational/F_SystemGeneratedReportsDownload/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                    }
+                                    else if (itemC.SecureAreaID == (int)MyVoltage.Data.SecureAreaEnum.F_SystemGeneratedReports_SOCSnapshot)
+                                    {
+                                        <a href="/operational/F_SystemGeneratedReports_SOC_Download/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/F_SystemGeneratedReports/' + $("#SecureAreas").val() + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

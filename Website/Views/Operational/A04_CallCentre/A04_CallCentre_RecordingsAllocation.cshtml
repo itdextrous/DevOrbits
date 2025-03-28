@@ -1,0 +1,201 @@
+@model MyVoltage.Models.OperationalModels.A04_CallCentre.A04_CallCentre_RecordingsAllocationModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A04_CallCentre_RecordingsAllocation.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+
+            <div class="card-header">
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Extensions" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("Extensions", Model.Extensions, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Extensions" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DueDateFrom" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" asp-for="DueDateFrom" value="@(Model.DueDateFrom.ToDateShort(true))" />
+                        <span asp-validation-for="DueDateFrom" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DueDateTo" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" asp-for="DueDateTo" value="@(Model.DueDateTo.ToDateShort(true))" />
+                        <span asp-validation-for="DueDateTo" class="text-red"></span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-12 text-right">
+                        <a href="#" onclick="Search('', '');" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<audio class="w-100" id="audioPlayer" controls hidden></audio>
+@if (Model.A04_CallCentre_RecordingsAllocationItems != null)
+{
+    @if (Model.A04_CallCentre_RecordingsAllocationItems.Count > 0)
+    {
+        <div class="row mb-4">
+            <div class="col">
+                <table id="myTable" class="display compact table table-sm table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-left">Recording Last Modified</th>
+                            <th scope="col" class="text-left">Recording File Name</th>
+                            <th scope="col" class="text-left"></th>
+                            <th scope="col" class="text-left"></th>
+                            <th scope="col" class="text-left">FlagID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A04_CallCentre_RecordingsAllocationItems)
+                        {
+                            string rowclass = "";
+                            <tr class="@Html.Raw(rowclass)">
+                                <td scope="col" class="text-left">
+                                    @item.RecordingLastModified.ToDateAndTimeShort()
+                                </td>
+                                <td scope="col">
+                                    @(item.RecordingFileName.Contains("/var/lib/3cxpbx/Instance1/Data/Recordings/") ? item.RecordingFileName.Replace("/var/lib/3cxpbx/Instance1/Data/Recordings/", string.Empty) : item.RecordingFileName)
+                                </td>
+                                <td scope="col">
+                                    <button onclick="playRecording('@item.ID');" class="btn btn-outline-primary-sm"><i class="fas fa-play"></i></button>
+                                </td>
+                                <td scope="col">
+                                    <a href="/operational/A04_CallCentre/A04_CallCentre_RecordingsAllocation_Download/@item.ID" target="_blank" class="btn btn-outline-primary-sm"><i class="fas fa-download"></i></a>
+                                </td>
+                                <td scope="col">
+                                    <select style="min-width:250px;" id="zLink_@item.ID" onchange="DoUpdateZ('@item.ID');" class="browser-default custom-select form-control-trim js-select">
+                                        @if (!item.FlagID.HasValue)
+                                        {
+                                            <option value="" selected="selected">[--None--]</option>
+                                        }
+                                        @foreach (var selectListItem in Model.A09_Flags@* .Where(c => c.TimeEnd.Date == item.RecordingLastModified.Date) *@)
+                                        {
+                                            if (item.FlagID.HasValue && item.FlagID.Value == Convert.ToInt32(selectListItem.Value))
+                                            {
+                                                <option value="@selectListItem.Value" selected="selected">@selectListItem.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@selectListItem.Value">@selectListItem.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <span>No results...</span>
+    }
+}
+
+@section Scripts {
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.js"></script>
+    <script>
+        async function playRecording(recordingId) {
+            $("#loaderContent").css("display", "block");
+            try {
+                const response = await fetch(`/operational/A04_CallCentre/A04_CallCentre_RecordingsAllocation_Download/${recordingId}`);
+
+                const blob = await response.blob();
+                const audioPlayer = document.getElementById('audioPlayer');
+                const url = URL.createObjectURL(blob);
+
+                // Debug: log the blob type
+                console.log('Blob type:', blob.type);
+
+                // Debug: check if the browser can play this type
+                if (!audioPlayer.canPlayType(blob.type)) {
+                    console.error(`Cannot play type: ${blob.type}`);
+                }
+
+                audioPlayer.src = url;
+                audioPlayer.hidden = false;
+                audioPlayer.play();
+            } catch (error) {
+                console.error('Error playing recording:', error);
+            }
+            $("#loaderContent").css("display", "none");
+        }
+        new DataTable('#myTable', {
+            lengthMenu: [
+                [50, 100, 250, -1],
+                [50, 100, 250, 'All']
+            ]
+        });
+        function ChangeActiveMeterFromSearch(value) {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + value + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function Search() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = "/operational/A04_CallCentre/A04_CallCentre_RecordingsAllocation?DueDateFrom=" + $("#DueDateFrom").val()
+                + "&DueDateTo=" + $("#DueDateTo").val()
+                + "&Extensions=" + $("#Extensions").val()
+                ;
+        }
+        function DoUpdateZ(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/A04_CallCentre/A04_CallCentre_RecordingsAllocation_UpdateFlagID/" + ItemID,
+                {
+                    zLink: $("#zLink_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    </script>
+}

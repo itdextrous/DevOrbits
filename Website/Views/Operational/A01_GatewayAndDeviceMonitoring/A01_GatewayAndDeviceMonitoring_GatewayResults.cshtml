@@ -1,0 +1,143 @@
+@model MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_GatewayResultsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A01_GatewayAndDeviceMonitoring_GatewayResults.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_GatewaySummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (Model.A01_GatewayAndDeviceMonitoring_GatewayResultsItems.Count == 0)
+                {
+                    <span>There are no offline gateways for @operationalProvider.CompanyName</span>
+                }
+                else
+                {
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Gateway ID</th>
+                                <th scope="col">Gateway Name</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Since</th>
+                                <th scope="col">Sim</th>
+                                <th scope="col">Network</th>
+                                <th scope="col">GIS Location</th>
+                                <th scope="col">Signal</th>
+                                <th scope="col">Offline Duration</th>
+                                <th scope="col">Devices Linked</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemC in Model.A01_GatewayAndDeviceMonitoring_GatewayResultsItems)
+                            {
+                                string rowclass = "";
+                                string cellClass = "";
+                                if (itemC.status.id == 1)
+                                {
+                                    rowclass = " class=\"table-success\"";
+                                    cellClass = " class=\"text-green font-weight-bold\"";
+                                }
+                                else
+                                {
+                                    rowclass = " class=\"table-danger\"";
+                                    cellClass = " class=\"text-red font-weight-bold\"";
+                                }
+                                <tr @Html.Raw(rowclass) @*style="cursor:pointer;" title="View @itemC.CustomerMeterSerial" onclick="RedirectToVerification('@itemC.CustomerMeterSerial');"*@>
+                                    <td scope="col">@itemC.id</td>
+                                    <td scope="col">@itemC.name</td>
+                                    <td scope="col" @Html.Raw(cellClass)>@itemC.deviceStatus.ToUpper()</td>
+                                    <td scope="col">@Convert.ToDateTime(itemC.status.time).ToDateAndTimeShort()</td>
+                                    <td scope="col">
+                                        <input type="text" id="simCardNumber_@itemC.id" class="form-control" value="@itemC.SimCardNumber" />
+                                    </td>
+                                    <td scope="col">@(itemC.network != null ? itemC.network.network : "")</td>
+                                    <td scope="col">@(itemC.GISLocation)</td>
+                                    <td scope="col">@(itemC.network != null ? itemC.network.csq : "")</td>
+                                    <td scope="col">@itemC.OfflineDuration</td>
+                                    <td scope="col"><div id="devicesLinked_@itemC.id"></div></td>
+                                    <td scope="col">
+                                        <a onclick="DoUpdateSimCardNumber('@itemC.id');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</a>
+                                        @if (!string.IsNullOrEmpty(itemC.SimCardNumber) && itemC.SimCardNumber.StartsWith('+'))
+                                        {
+                                            <a onclick="SendGatewaySMS('@itemC.id', '@itemC.SimCardNumber.Replace("+", string.Empty)');" href="#" class="btn btn-sm btn-outline-primary-sm">Reset</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var gateways = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.A01_GatewayAndDeviceMonitoring_GatewayResultsItems.Select(p => p.id).ToList())));
+        $(gateways).each(function () {
+            $("#devicesLinked_" + this).load('@(Url.Content("/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_GatewayDetails_GetDeviceCount/"))' + this, function (response, status, xhr) {
+            });
+        });
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification';
+        }
+        $(document).ready(function () {
+            $("#latestBillingSync").load('@Url.Content("/operational/shared/billingsync/latestbillingsynccompany")');
+        });
+        function SendGatewaySMS(gatewayID, MSISDN) {
+            $("#loaderContent").css("display", "block");
+            $.get('/operational/A01_GatewayAndDeviceMonitoring/SendGatewayResetSMS/' + gatewayID + '/' + MSISDN, function (data, status) {
+                if (data == "false") {
+                    alert('There was a problem generating invoice for ' + gatewayID + '-' + MSISDN);
+                }
+                else {
+                    alert('SMS Sent ' + gatewayID + '-' + MSISDN);
+                }
+            }).done(function () {
+                $("#loaderContent").css("display", "none");
+            });
+        }
+        function DoUpdateSimCardNumber(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/A01_GatewayAndDeviceMonitoring/SimCardNumber_Update/" + ItemID,
+                {
+                    simCardNumber: $("#simCardNumber_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    </script>
+}

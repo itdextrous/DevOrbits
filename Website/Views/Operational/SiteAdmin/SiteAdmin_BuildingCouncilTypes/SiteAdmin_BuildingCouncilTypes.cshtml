@@ -1,0 +1,116 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_BuildingCouncilTypesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_BuildingCouncilTypes.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-responsive-xl table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Code</th>
+            <th scope="col">Name</th>
+            <th style="min-width:220px!important;width:220px!important;" scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col"><input id="add_code" type="text" /></td>
+            <td scope="col"><input id="add_name" type="text" /></td>
+            <td scope="col"><a onclick="DoAdd();" href="#" class="btn-sm btn-outline-primary"><i class="fas fa-plus-circle"></i>&nbsp;Add / Update</a></td>
+        </tr>
+        @foreach (var item in Model.SiteAdmin_BuildingCouncilTypesItems)
+        {
+            <tr style="cursor:pointer;" onclick="AutoFillEditValues('@item.BuildingCouncilTypeName', '@item.BuildingCouncilTypeCode');">
+                <td scope="col">@item.BuildingCouncilTypeCode</td>
+                <td scope="col">@item.BuildingCouncilTypeName</td>
+                <td scope="col">
+                    @if (item.LinkedItems == 0)
+                    {
+                        <a onclick="DoDelete('@item.ID', '@item.BuildingCouncilTypeCode - @item.BuildingCouncilTypeName');" href="#" class="btn-sm btn-outline-primary"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                    else
+                    {
+                        <span>Used by @item.LinkedItems linked items</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function AutoFillEditValues(add_name, add_code) {
+            $("#add_name").val(add_name);
+            $("#add_code").val(add_code);
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_name").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter name');
+                $("#add_name").focus();
+                return;
+            }
+
+            if ($("#add_code").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter code');
+                $("#add_code").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_BuildingCouncilTypes_ItemAdd",
+                {
+                    add_name: $("#add_name").val(),
+                    add_code: $("#add_code").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/SiteAdmin/SiteAdmin_BuildingCouncilTypes_ItemDelete/" + ItemID,
+                    {
+                        add_serial: $("#add_serial").val(),
+                        add_month: $("#add_month").val(),
+                        add_rate: $("#add_rate").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+    </script>
+}

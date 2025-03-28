@@ -1,0 +1,28 @@
+﻿@using MyVoltage.Models.MailGunReponse
+@model MailGun
+
+<h5>MailGun Details</h5>
+@if (Model.items.Count > 0)
+{
+    @foreach (var m in Model.items)
+    {
+        var date = Convert.ToDateTime(m.message.headers.SendDate);
+
+        <span>To: </span><span><b>@m.message.headers.to</b></span><br />
+        <span>From: </span><span><b>@m.message.headers.from</b></span><br />
+        <span>Subject: </span><span><b>@m.message.headers.subject</b></span><br />
+        <span>Date send: </span><span><b>@date.ToString("ddd, dd MMM yyy HH:mm:ss")</b></span><br />
+        <span>Event: </span><span><b>@m.eventName</b></span><br />
+        @if (m.deliveryStatus != null)
+        {
+            <span>Delivery status: </span><span><b>@m.deliveryStatus.message</b></span><br />
+        }
+        <hr />
+    }
+}
+else
+{
+    <span><b>No email details found</b></span>
+}
+
+

@@ -1,0 +1,133 @@
+﻿@model MyVoltage.Models.AccountViewModels.OTPConfirmViewModel
+@{
+    ViewData["Title"] = "Registration";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+        </div>
+    </div>
+</div>
+
+<div class="accounts_pages">
+    <div class="account_form text-center">
+        <form asp-action="OTPConfirmNew" asp-route-id="@ViewData["id"]" method="post" id="OTPConfirmForm" class="w-100">
+            <div class="row">
+                <div class="col justify-content-center text-center d-flex">
+                    <a href="/">
+                        <img src="/images/MVClientZoneLogo.png" height="115" alt="" class="d-block mx-auto MVClientZoneLogo">
+                    </a>
+                </div>
+            </div>
+            <div class="mt-75 max-w-400">
+                <div class="text-white queries_text">
+                    Enter one time pin (OTP)
+                </div>
+                <div class="mt-30 form-group mb-0 mx-auto otp_fields pt-1 pt-md-2">
+                    <div class="row gap_12">
+                        <div class="col">
+                            <input asp-for="OTP1" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" class="form-control text-center rounded" placeholder="-" onkeyup="FocusControl('OTP2', 'OTP1');" maxlength="1" autocomplete="off" />
+                        </div>
+                        <div class="col">
+                            <input asp-for="OTP2" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" class="form-control text-center rounded" placeholder="-" onkeyup="FocusControl('OTP3', 'OTP2');" maxlength="1" autocomplete="off" />
+                        </div>
+                        <div class="col">
+                            <input asp-for="OTP3" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" class="form-control text-center rounded" placeholder="-" onkeyup="FocusControl('OTP4', 'OTP3');" maxlength="1" autocomplete="off" />
+                        </div>
+                        <div class="col">
+                            <input asp-for="OTP4" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" class="form-control text-center rounded" placeholder="-" maxlength="1" autocomplete="off" />
+                        </div>
+                    </div>
+                    <span asp-validation-for="OTP1" class="text-danger text-center"></span>
+                </div>
+                <div class="text-white queries_text mt-30 pt-1 pt-md-2">
+                    <p class="mb_5">
+                        Did not receive OTP?
+                    </p>
+                    <a href="#" onclick="Resend();" class="decoration_none text-islandsunrise">
+                        Request a new OTP
+                    </a>
+                </div>
+                <div class="mt-50 steps_btns d-flex align-items-center justify-content-center">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-default">Back</a>
+                    <button type="submit" class="btn btn-default" onclick="CheckInvalidValues()">Next</button>
+                </div>
+            </div>
+            <div class="text-white queries_text mt-50">
+                <p class="m-0">Queries: <a href="mailto:info@myvoltage.co.za?Subject=Registration" class="decoration_none text-islandsunrise">info@myvoltage.co.za</a></p>
+            </div>
+            <div class="mt-50 text-center">
+                <img src="/images/Slogan_white.png" class="slogan_img" height="72" alt="">
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var currentUrl = window.location.href;
+            var url = new URL(currentUrl);
+            var emailCode = url.searchParams.get("Code");
+            $('#EmailCode').val(emailCode);
+
+
+            //steps form Js start here
+            $(".next-step").click(function (e) {
+                var activeTab = $(".registerTabs .tab-pane.active");
+                activeTab.next().addClass("active");
+                activeTab.removeClass("active");
+                return false;
+            });
+
+            $(".prev-step").click(function (e) {
+                var activeTab = $(".registerTabs .tab-pane.active");
+                activeTab.prev().addClass("active");
+                activeTab.removeClass("active");
+
+            });
+        })
+
+        function FocusControl(controlID, last) {
+            if ($("#" + last).val().length <= 0) return;
+            $("#" + controlID).focus();
+            $("#" + controlID).select();
+        }
+
+        function Resend() {
+            $("#loaderContent").css("display", "block");
+            $.ajax({
+                url: '/OTPConfirmNew?id=@ViewData["id"]&pn=' + $("#PhoneNumber").val(),
+                type: "GET",
+                success: function (response) {     
+                    $("#loaderContent").css("display", "none");
+                    if(response != null){
+                    toastr.options.toastClass = 'transform_none';
+                    toastr.success("OTP resent successfully.");
+                    toastr.options.toastClass = 'transform_none';
+                }
+                },
+                failure: function () {
+                    $("#loaderContent").css("display", "none");
+                }
+            })
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function CheckInvalidValues() {
+            var otp = $("#OTP").val();
+            var emailCode = $("#EmailCode").val();
+
+            if (otp == null || otp == "") { $("#OTP").val("0000"); }
+            if (emailCode == null || emailCode == "") { $("#EmailCode").val("000000"); }
+        }
+    </script>
+}
+

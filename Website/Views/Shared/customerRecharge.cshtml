@@ -1,0 +1,12 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@if (!(@User.IsInRole("CompanyAdmin") && @HttpContextAccessor.HttpContext.Session.GetString("CustomerID") != null && !@HttpContextAccessor.HttpContext.Session.GetString("CustomerID").Equals(String.Empty)))
+{
+    <a class="btn btn-cta mt-3" href="/recharge"><i class="fas fa-plus-circle"></i> Recharge</a>
+}
+else
+{
+    var customerID = @HttpContextAccessor.HttpContext.Session.GetString("CustomerID");
+    <h4><span class="text-primary">@customerID</span></h4>
+}

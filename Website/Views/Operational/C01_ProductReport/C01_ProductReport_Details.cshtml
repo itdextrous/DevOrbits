@@ -1,0 +1,446 @@
+@model MyVoltage.Models.OperationalModels.C01_ProductReportModels.C01_ProductReport_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C01_ProductReport_Details.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C01_ProductReport_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+@using MyVoltage.Extensions;
+@{
+    DateTime currentDate = Model.FromDate;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        Latest Sync Ended: @(operationalProvider.LatestGenLedgerSync.HasValue ? operationalProvider.LatestGenLedgerSync.Value.ToDateAndTimeShort() : "In Progress")
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        From:
+        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+        &nbsp;
+        To:
+        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-12">
+                @if (!Model.HideNoData)
+                {
+                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" checked="checked" />
+                    <span>Show All</span>
+                }
+                else
+                {
+                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" />
+                    <span>Show All</span>
+                }
+                @if (Model.HideNoData)
+                {
+                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" checked="checked" />
+                    <span>Hide No Data Items</span>
+                }
+                else
+                {
+                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" />
+                    <span>Hide No Data Items</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        Product:
+        <div class="row">
+            <div class="col-12">
+                @if (Model.ProductIDs.Count == 0 || Model.ProductIDs.Count == Model.SiteAdmin_Products.Count)
+                {
+                    <input type="checkbox" name="product_" id="product_" class="form-check-inline" checked="checked" />
+                    <span>Select All / None</span>
+                }
+                else
+                {
+                    <input type="checkbox" name="product_" id="product_" class="form-check-inline" />
+                    <span>Select All / None</span>
+                }
+            </div>
+        </div>
+        @foreach (var bCT in Model.SiteAdmin_Products)
+        {
+            <div class="row">
+                <div class="col-12">
+                    @if (Model.ProductIDs.Count == 0 || Model.ProductIDs.Contains(bCT.ID.ToString()))
+                    {
+                        <input type="checkbox" name="product_@bCT.ID" id="product_@bCT.ID" class="form-check-inline" checked="checked" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="product_@bCT.ID" id="product_@bCT.ID" class="form-check-inline" />
+                    }
+                    @bCT.ProductName
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <a href="/operational/C01_ProductReport/C01_ProductReport_Details" class="btn btn-outline-primary"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        &nbsp;
+        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a>
+    </div>
+</div>
+
+@if (operationalProvider.CompanyID != 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="2" scope="col" class="text-center">Latest Rerun</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Requested By</td>
+                        <td scope="col" class="text-nowrap">@(Model.LatestRequest != null ? Model.LatestRequest.CreatedByUsername : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Requested Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.LatestRequest != null ? Model.LatestRequest.CreatedDate.ToDateAndTimeShort() : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Started Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.LatestRequest != null ? Model.LatestRequest.DateStarted.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Ended Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.LatestRequest != null ? Model.LatestRequest.DateEnded.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Progress</td>
+                        <td scope="col" class="text-nowrap">@(Model.LatestRequest != null ? Model.LatestRequest.Progress.ToMoney() : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" scope="col" class="text-nowrap text-right">
+                            @if (Model.LatestRequest == null || Model.LatestRequest.DateEnded.HasValue)
+                            {
+                                <a href="#" onclick="RedirectToRequestRerun();" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request Rerun</a>
+                            }
+                            else
+                            {
+                                <span>Report in progress...</span>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <th scope="col">Company Name</th>
+            }
+            <th scope="col">Product Name</th>
+            <th scope="col">Account</th>
+            <th scope="col">Total</th>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                <th scope="col" class="text-center">@currentDate.ToMonth()</th>
+                currentDate = currentDate.AddMonths(1);
+            }
+
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            decimal? C01_ProductReport_DetailsProductItemsTotal = 0;
+            decimal? C01_ProductReport_DetailsSupplyCostItemsTotal = 0;
+            decimal? C01_ProductReport_DetailsGrossAmountItemsTotal = 0;
+        }
+        @foreach (var item in Model.C01_ProductReport_DetailsProductItems)
+        {
+            string rowClass = "table-success";
+            //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+            //{
+            //    rowClass = "table-danger";
+            //}
+            C01_ProductReport_DetailsProductItemsTotal = C01_ProductReport_DetailsProductItemsTotal + item.MonthlyValues.Select(p => p.Value).Sum();
+            <tr class="@Html.Raw(rowClass)">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <td scope="col">@item.CompanyName</td>
+                }
+                <td scope="col">@item.ProductName</td>
+                <td scope="col">Sales</td>
+                <td scope="col" class="text-right">@(item.MonthlyValues.Select(p => p.Value).Sum().ToMoneyNoDecimal())</td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal? amount = null;
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        amount = item.MonthlyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                    }
+                    <td style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID', '@currentDate.ToDateShort()', '@((new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month))).ToDateShort())');" title="@item.CompanyName - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToReading()</td>
+                    currentDate = currentDate.AddMonths(1);
+                }
+            </tr>
+        }
+        <tr class="border-table-total">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <td scope="col">@operationalProvider.CompanyName</td>
+            }
+            <td scope="col" colspan="2">Total</td>
+            <td scope="col" class="text-right">@(C01_ProductReport_DetailsProductItemsTotal.ToMoneyNoDecimal())</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                @foreach (var item in Model.C01_ProductReport_DetailsProductItems)
+                {
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate && p.Value.HasValue).Count() > 0)
+                    {
+                        amount = (amount.HasValue ? amount.Value : 0) + item.MonthlyValues.Where(p => p.Key == currentDate && p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                    }
+                }
+                <td title="Total - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToReading()</td>
+                currentDate = currentDate.AddMonths(1);
+            }
+        </tr>
+        @foreach (var item in Model.C01_ProductReport_DetailsSupplyCostItems)
+        {
+            string rowClass = "table-danger";
+            //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+            //{
+            //    rowClass = "table-danger";
+            //}
+            C01_ProductReport_DetailsSupplyCostItemsTotal = C01_ProductReport_DetailsSupplyCostItemsTotal + item.MonthlyValues.Select(p => p.Value).Sum();
+
+            <tr class="@Html.Raw(rowClass)">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <td scope="col">@item.CompanyName</td>
+                }
+                <td scope="col">@item.ProductName</td>
+                <td scope="col">Cost of Sales</td>
+                <td scope="col" class="text-right">@(item.MonthlyValues.Select(p => p.Value).Sum().ToMoneyNoDecimal())</td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal? amount = null;
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        amount = item.MonthlyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                    }
+                    <td style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID', '@currentDate.ToDateShort()', '@((new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month))).ToDateShort())');" title="@item.CompanyName - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToReading()</td>
+                    currentDate = currentDate.AddMonths(1);
+                }
+            </tr>
+        }
+        <tr class="border-table-total">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <td scope="col">@operationalProvider.CompanyName</td>
+            }
+            <td scope="col" colspan="2">Total</td>
+            <td scope="col" class="text-right">@(C01_ProductReport_DetailsSupplyCostItemsTotal.ToMoneyNoDecimal())</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                @foreach (var item in Model.C01_ProductReport_DetailsSupplyCostItems)
+                {
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate && p.Value.HasValue).Count() > 0)
+                    {
+                        amount = (amount.HasValue ? amount.Value : 0) + item.MonthlyValues.Where(p => p.Key == currentDate && p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                    }
+                }
+                <td title="Total - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToReading()</td>
+                currentDate = currentDate.AddMonths(1);
+            }
+        </tr>
+        @foreach (var item in Model.C01_ProductReport_DetailsGrossAmountItems)
+        {
+            C01_ProductReport_DetailsGrossAmountItemsTotal = C01_ProductReport_DetailsGrossAmountItemsTotal + item.MonthlyValues.Select(p => p.Value).Sum();
+            string rowClass = "table-warning";
+            //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+            //{
+            //    rowClass = "table-danger";
+            //}
+
+            <tr class="@Html.Raw(rowClass)">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <td scope="col">@item.CompanyName</td>
+                }
+                <td scope="col">@item.ProductName</td>
+                <td scope="col">Gross Profit</td>
+                <td scope="col" class="text-right">@(item.MonthlyValues.Select(p => p.Value).Sum().ToMoneyNoDecimal())</td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal? amount = null;
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        amount = item.MonthlyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                    }
+                    <td style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID', '@currentDate.ToDateShort()', '@((new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month))).ToDateShort())');" title="@item.CompanyName - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToReading()</td>
+                    currentDate = currentDate.AddMonths(1);
+                }
+            </tr>
+        }
+        <tr class="border-table-total">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <td scope="col">@operationalProvider.CompanyName</td>
+            }
+            <td scope="col" colspan="2">Total</td>
+            <td scope="col" class="text-right">@(C01_ProductReport_DetailsGrossAmountItemsTotal.ToMoneyNoDecimal())</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                @foreach (var item in Model.C01_ProductReport_DetailsGrossAmountItems)
+                {
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate && p.Value.HasValue).Count() > 0)
+                    {
+                        amount = (amount.HasValue ? amount.Value : 0) + item.MonthlyValues.Where(p => p.Key == currentDate && p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                    }
+                }
+                <td title="Total - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToReading()</td>
+                currentDate = currentDate.AddMonths(1);
+            }
+        </tr>
+        @foreach (var item in Model.C01_ProductReport_DetailsGrossPercItems)
+        {
+            string rowClass = "table-info";
+            //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+            //{
+            //    rowClass = "table-danger";
+            //}
+
+            <tr class="@Html.Raw(rowClass)">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <td scope="col">@item.CompanyName</td>
+                }
+                <td scope="col">@item.ProductName</td>
+                <td scope="col">Gross Profit %</td>
+                <td scope="col" class="text-right">-</td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal? amount = null;
+                    if (item.MonthlyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        amount = item.MonthlyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                    }
+                    <td style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID', '@currentDate.ToDateShort()', '@((new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month))).ToDateShort())');" title="@item.CompanyName - @currentDate.ToMonth()" class="text-right" scope="col">@(amount.HasValue ? amount.Value.ToString("N2") + "%" : "")</td>
+                    currentDate = currentDate.AddMonths(1);
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+
+@section Scripts {
+    <script>
+        $("#product_").change(function() {
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Products)));
+            $(products).each(function() {
+                    $("#product_" + this.ID).prop("checked", $("#product_").prop("checked"));
+            });
+        });
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Products)));
+            var productsString = "";
+            $(products).each(function() {
+                if ($("#product_" + this.ID).prop("checked") == true) {
+                    if (productsString == "") {
+                        productsString = this.ID;
+                    }
+                    else {
+                        productsString = productsString + "-" + this.ID;
+                    }
+                }
+            });
+
+            var hideNoData = "false";
+            if ($("#hideNoData").prop("checked") == true) {
+                hideNoData = "true";
+            }
+
+            document.location.href = '/operational/C01_ProductReport/C01_ProductReport_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&productID=' + productsString + '&hideNoData=' + hideNoData;
+        }
+        function RedirectToDetails(serial, fromdate, todate) {
+            $("#loaderContent").css("display", "block");
+            var returnUrl = document.location.href;
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Products)));
+            var productsString = "";
+            $(products).each(function() {
+                if ($("#product_" + this.ID).prop("checked") == true) {
+                    if (productsString == "") {
+                        productsString = this.ID;
+                    }
+                    else {
+                        productsString = productsString + "-" + this.ID;
+                    }
+                }
+            });
+
+            var hideNoData = "false";
+            if ($("#hideNoData").prop("checked") == true) {
+                hideNoData = "true";
+            }
+
+            document.location.href = '/operational/changeActiveCompany/' + serial + '?R=' + encodeURIComponent('/operational/C01_ProductReport/C01_ProductReport_Daily?from=' + fromdate + '&to=' + todate + '&productID=' + productsString + '&hideNoData=' + hideNoData);
+        }
+        function RedirectToRequestRerun(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C01_ProductReport/C01_ProductReport_Details_RequestRerun?R=' + encodeURIComponent(document.location.href);
+        }
+    </script>
+}

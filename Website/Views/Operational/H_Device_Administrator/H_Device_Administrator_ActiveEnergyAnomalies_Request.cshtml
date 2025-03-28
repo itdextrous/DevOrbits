@@ -1,0 +1,134 @@
+﻿@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_ActiveEnergyAnomalies_RequestModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_ActiveEnergyAnomalies_Request.GetDescription();
+}
+
+@if (Model.IsSuccessful)
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Report successfully requested. You will not be able to execute this date rage and company until the current report is completed.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Request" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <form asp-action="H_Device_Administrator_ActiveEnergyAnomalies_Request" enctype="multipart/form-data">
+                    <div class="card-header">
+
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="FromDate"></label>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="date" asp-for="FromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                                <span asp-validation-for="FromDate" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="CompanyID"></label>
+                            </div>
+                            <div class="col">
+                                @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                                <span asp-validation-for="CompanyID" class="text-red"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+
+                        <div class="row">
+                            <div class="col-12 text-right">
+                                <button type="submit" class="btn btn-outline-primary-sm">Request New Anomaly Run</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+
+            <table class="table table-sm table-hover table-bordered table-striped">
+
+                <thead>
+                    <tr>
+                        <th scope="col" colspan="4" class="text-center text-nowrap border-table-spanned">Report Filters</th>
+                        <th scope="col" colspan="4" class="text-center text-nowrap border-table-spanned">Progress Details</th>
+                    </tr>
+                    <tr>
+                        <th scope="col" class="text-center text-nowrap border-table-left">From Date</th>
+                        <th scope="col" class="text-center text-nowrap border-table">To Date</th>
+                        <th scope="col" class="text-center text-nowrap border-table">Company</th>
+                        <th scope="col" class="text-center text-nowrap border-table-right">Requested By</th>
+                        <th scope="col" class="text-center text-nowrap border-table-left">Date Requested</th>
+                        <th scope="col" class="text-center text-nowrap border-table">Date Started</th>
+                        <th scope="col" class="text-center text-nowrap border-table">Date Ended</th>
+                        <th scope="col" class="text-center text-nowrap border-table-right">Progress</th>
+                    </tr>
+                </thead>
+                @foreach (var entry in Model.H_Device_Administrator_ActiveEnergyAnomalies_RequestItems)
+                {
+                    string rowClass = "";
+                    if (entry.DateEnded.HasValue)
+                    {
+                        rowClass = "table-success";
+                    }
+                    <tr class="@Html.Raw(rowClass)">
+                        <td scope="col" class="text-center text-nowrap border-table-left">@entry.FromDate.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-center text-nowrap border-table">@entry.ToDate.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-center text-nowrap border-table">@entry.CompanyName</td>
+                        <td scope="col" class="text-center text-nowrap border-table-right">@entry.CreatedByUsername</td>
+                        <td scope="col" class="text-center text-nowrap border-table-left">@entry.DateCreated.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-center text-nowrap border-table">@entry.DateStarted.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-center text-nowrap border-table">
+                            @entry.DateEnded.ToDateAndTimeShort()
+                            @if (entry.DateEnded.HasValue && entry.DateStarted.HasValue)
+                            {
+                                <span>(@((entry.DateEnded.Value - entry.DateStarted.Value).TotalMinutes.ToString("N"))m)</span>
+                            }
+                        </td>
+                        <td scope="col" class="text-center text-nowrap border-table-right">@entry.Progress.ToMoney() %</td>
+                    </tr>
+                }
+
+
+            </table>
+
+        </div>
+    </div>
+}
+@section Scripts
+{
+    <script>
+    </script>
+}

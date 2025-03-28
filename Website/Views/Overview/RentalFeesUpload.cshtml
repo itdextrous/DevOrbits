@@ -1,0 +1,47 @@
+﻿@model MyVoltage.Models.MeterViewModels.RentalFeesUploadModel
+
+@{
+    ViewData["Title"] = "Rental Fees Upload";
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>
+                    Rental Upload Type
+                </span>
+                <select asp-for="SelectedRentalUploadType">
+                    @foreach (var item in Model.RentalUploadTypes)
+                    {
+                        <option value="@item.ID">@item.TypeName</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>
+                    CSV Data&nbsp;(PropertyLinked,MeterID(DeviceIDLinked),Month(yyyy/MM/01),Standard Monthly Rental (Excl. VAT),Agreed Monthly Rental (Excl. VAT))<a href="#" title="CSV Data">?</a>
+                </span>
+                <textarea asp-for="CSVString" class="form-control" type="" title="Device IDs"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Import</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                @Html.Raw(Model.ErrorMessage)
+            </div>
+        }
+    </div>
+
+}

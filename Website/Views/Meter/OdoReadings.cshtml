@@ -1,0 +1,62 @@
+﻿@model IEnumerable<MyVoltage.Models.MeterViewModels.OdoReadingsModel>;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Odo Readings";
+}
+
+<style>
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Serial)
+                </th>
+                <th style="width:150px;">
+                    @Html.DisplayNameFor(model => model.OdometerReading)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TimeLogged)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Serial)
+                    </td>
+                    <td class="text-right">
+                        @Html.DisplayFor(modelItem => item.OdometerReading)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TimeLogged)
+                    </td>
+                    <td>
+                        @if (item != null && !string.IsNullOrEmpty(item.PhotoFtpUrl))
+                        {
+                            <a asp-action="GetPhoto" asp-route-id="@item.Id" target="_blank">Download Photo</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

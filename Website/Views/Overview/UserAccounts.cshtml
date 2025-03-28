@@ -1,0 +1,210 @@
+﻿@using MyVoltage.Models.OverviewViewModels;
+@model List<UserAccountViewModel>;
+@{
+    ViewData["Title"] = "User Accounts";
+}
+
+
+<div class="row">
+    <div class="col-md-12 col-lg-9 mx-auto">
+        <form class="mt-4">
+        <p class="font-weight-bold mb-1">Search User</p>
+        <div class="clearfix">
+            <div class="form-group">
+                <input class="form-control" type="text" name="keyword" value="@ViewContext.HttpContext.Request.Query["keyword"]" placeholder="Enter Email, Cell Number, Customer Number, Client Name or Meter number"> 
+            </div>
+            <input type="submit" class="btn btn-primary float-right" value="Search" type="submit">
+        </div>
+
+           <h4 class="mt-4">Details</h4>
+           
+          
+            @if (Model != null && Model.Count != 0)
+            {
+                @foreach (var m in Model)
+                {
+                    <div class="card mb-5 clearfix">
+                        <div class="card-body">
+                
+                            <div class="user-acc-details">
+                                <span>Full Name: </span><span><b>@m.Fullname</b></span>
+                                <span>Account Type: </span><span><b>@m.AccountType</b></span>
+                                <span>Notification Email Address: </span><span><b>@(m.NotificationEmailAddress == null ? "-" : m.NotificationEmailAddress)</b></span>
+                                <span>Cell: </span><span><b>@(m.CellphoneNum == null ? "-" : m.CellphoneNum)</b></span>
+                                <span>Company: </span><span><b>@m.Company</b></span>
+                                <span>Customer Number: </span><span><b>@m.CustomerNumber</b></span>
+                                <span>Meter number: </span><span><b>@(m.MeterNumber == null ? "-" : m.MeterNumber)</b></span>
+                                <span>Email Verified: </span><span><b>@(m.EmailVerified == true ? "Yes" : "No")</b></span>
+                                <span>Cell Verified: </span><span><b>@(m.CellVerified == true ? "Yes" : "No")</b></span>
+                                <span>Active: </span><span><b>@(m.Active == true ? "Yes" : "No")</b></span><br />
+                                <span><i>Notification Limits:</i></span>
+                                <span>Disconnection Low Balance Notification 1: </span><span><b>@(m.DisconnectionLowBalanceNotification1 == "R " ? "-" : m.DisconnectionLowBalanceNotification1)</b></span>
+                            </div>
+            
+                        <div class="user-acc-actions">
+                            <a href="/userAccounts/EditProfile/@m.UserId/@m.CustomerId" class="p-0" target="_blank">Edit Profile Details</a>
+                            <a href="/userAccounts/EditNotifications/@m.UserId" class="p-0" target="_blank">Edit Notifications</a>
+                            <a href="/userAccounts/NotificationDeliveryDetails/@m.CustomerNumber" class="p-0" target="_blank">Notification Delivery Details</a>
+                        </div>
+            
+                   <div class="row">
+                       <div class="col-md-12 text-right">
+                           @if (m.Active == false)
+                            {
+                                <input class="btn btn-primary" type="button" value="Activate User" data-toggle="modal" data-target="#activateUser" data-id="@Newtonsoft.Json.JsonConvert.SerializeObject(m.UserId)" id="activateUserButton" />
+                            }
+                            else
+                            {
+                                <input class="btn btn-primary" type="button" value="Deactivate User" data-toggle="modal" data-target="#deactivateUser" data-id="@Newtonsoft.Json.JsonConvert.SerializeObject(m.UserId)" id="deactivateUserButton" />
+                            }
+                            <input class="btn btn-outline-primary" type="button" value="Delete User" data-toggle="modal" data-target="#deleteUser" data-id="@Newtonsoft.Json.JsonConvert.SerializeObject(m.UserId)" id="deleteUserButton" />
+                           
+                       </div>
+                       
+                   </div>
+                    
+                        </div>
+                    </div>
+                }
+            }
+           
+            else
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <span><b>No search results found...</b></span><br />
+                    </div>
+                </div>
+            }
+            
+    
+</form>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="deleteUserLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p class="font-weight-bold">Delete User</p>
+                <p>Are you sure you want to delete this user?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" onclick="DeleteUser()"><b>Yes</b></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><b>No</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activate a User Modal -->
+<div class="modal fade" id="activateUser" tabindex="-1" role="dialog" aria-labelledby="activateUserLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p class="font-weight-bold">Activate User</p>
+                <p>Are you sure you want to activate this user?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" onclick="ActivateUser()"><b>Yes</b></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><b>No</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deactivate a User Modal -->
+<div class="modal fade" id="deactivateUser" tabindex="-1" role="dialog" aria-labelledby="deactivateUserLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p class="font-weight-bold">Deactivate User</p>
+                <p>Are you sure you want to deactivate this user?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" onclick="DeactivateUser()"><b>Yes</b></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><b>No</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+
+@section Scripts
+{
+    <script>
+        var deleteUserID;
+        var activateUserID;
+        var deactivateUserID;
+
+        function ActivateUser()
+        {
+            $.ajax({
+                url: '/activateUser',
+                type: 'POST',
+                dataType: 'json',
+                data: { 'userID': activateUserID },
+                cache: false,
+                success: function (data) {
+                    if (data == true) {
+                        alert("User was successfully activated!");
+                        window.location.reload();
+                    }
+                }
+            });
+
+        }
+
+        function DeactivateUser()
+        {
+            $.ajax({
+                url: '/deactivateUser',
+                type: 'POST',
+                dataType: 'json',
+                data: { 'userID': deactivateUserID },
+                cache: false,
+                success: function (data) {
+                    if (data == true) {
+                        alert("User was successfully deactivated!");
+                        window.location.reload();
+                    }
+                }
+            });
+
+        }
+
+        function DeleteUser()
+        {
+            $.ajax({
+                url: '/deleteUser',
+                type: 'POST',
+                dataType: 'json',
+                data: { 'userID': deleteUserID },
+                cache: false,
+                success: function (data) {
+                    if (data == true) {
+                        alert("User was successfully deleted!");
+                        window.location.reload();
+                    }
+                }
+            });
+
+        }
+
+        $(document).on("click", "#deleteUserButton", function () {
+            deleteUserID = $(this).data('id');
+        });
+
+        $(document).on("click", "#activateUserButton", function () {
+            activateUserID = $(this).data('id');
+        });
+
+        $(document).on("click", "#deactivateUserButton", function () {
+            deactivateUserID = $(this).data('id');
+        });
+    </script>
+}
+

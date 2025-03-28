@@ -1,0 +1,54 @@
+﻿@using MyVoltage.Models.OverviewViewModels
+@using MyVoltage.Data
+@model UserAccountViewModel;
+@{
+    ViewData["Title"] = "Edit Profile";
+    var companies = (List<Company>)ViewData["Companies"];
+}
+
+<div class="row mt-4">
+    <div class="col-md-9 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    <div class="form-group">
+                        <span>Fullname: </span><input asp-for="Fullname" class="form-control" readonly />
+                        <span asp-validation-for="Fullname"></span>
+                    </div>
+                    <div class="form-group">
+                        <span>Email Address: </span><input asp-for="NotificationEmailAddress" class="form-control" />
+                        <span asp-validation-for="NotificationEmailAddress"></span>
+                    </div>
+                    <div class="form-group">
+                        <span>Cellphone Number: </span><input asp-for="CellphoneNum" class="form-control" />
+                        <span asp-validation-for="CellphoneNum"></span>
+                    </div>
+                    <div class="form-group">
+                        <span>Customer Number: </span><input asp-for="CustomerNumber" class="form-control" />
+                        <span asp-validation-for="CustomerNumber"></span>
+                    </div>
+                    <div class="form-group">
+                        <span>Company: </span>
+                        <select asp-for="CompanyId" class="form-control">
+                            @foreach (var company in companies)
+                            {
+                                <option value="@company.CompanyID">@company.Name</option>
+                
+                            }
+                        </select>
+                            <span asp-validation-for="CompanyId"></span>
+                </div>
+                    <button type="submit" class="btn btn-primary float-right">Edit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+<script>
+    var company = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CompanyId))
+    $("#Company").val(company)
+</script>
+}

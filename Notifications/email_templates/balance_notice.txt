@@ -1,0 +1,16 @@
+ <span style="font-size:19px"><p>Hello {name},<br/>
+	The current balance on meter {serial} is {balance} and might run out soon. Please recharge to avoid disconnection of services.<br/>
+	{etc}
+	For more information on convenient and easy ways to recharge, go to http://www.myvoltage.co.za/how-to.html
+  <br/><br/>
+  Kind Regards
+  <br/>
+ <strong style="color: #ff8a02;">The My Voltage Team</strong><br></span>
+  <span style="font-size:15px">
+  office +27 (0)87 057 2561<br>
+  mobile +27 (0)79 492 5036<br>
+  email info@myvoltage.co.za<br>
+ website <a href="http://www.myvoltage.co.za">www.myvoltage.co.za</span><br>
+  <br>
+  <img src="{url}/lib/email/logo.png"><br>
+  <br>

@@ -1,0 +1,451 @@
+@model MyVoltage.Models.OperationalModels.C01_ProductReportModels.C01_ProductReport_AuditSyncReport_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C01_ProductReport_AuditSyncReport_Details.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C01_ProductReport_AuditSyncReport_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+@{
+    DateTime currentDate = Model.FromDate;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        From:
+        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+        &nbsp;
+        To:
+        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-12">
+                @if (!Model.HideNoData)
+                {
+                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" checked="checked" />
+                    <span>Show All</span>
+                }
+                else
+                {
+                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" />
+                    <span>Show All</span>
+                }
+                @if (Model.HideNoData)
+                {
+                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" checked="checked" />
+                    <span>Hide No Data Items</span>
+                }
+                else
+                {
+                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" />
+                    <span>Hide No Data Items</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("ForecastType", Model.ForecastType, new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        Product:
+        <div class="row">
+            <div class="col-12">
+                @if (Model.ReportingDescriptions.Count == 0 || Model.ReportingDescriptions.Count == Model.AllReportingDescriptions.Count)
+                {
+                    <input type="checkbox" name="product_" id="product_" class="form-check-inline" checked="checked" />
+                    <span>Select All / None</span>
+                }
+                else
+                {
+                    <input type="checkbox" name="product_" id="product_" class="form-check-inline" />
+                    <span>Select All / None</span>
+                }
+            </div>
+        </div>
+        @foreach (var bCT in Model.AllReportingDescriptions)
+        {
+            <div class="row">
+                <div class="col-12">
+                    @if (Model.ReportingDescriptions.Count == 0 || Model.ReportingDescriptions.Contains(bCT.ID.ToString()))
+                    {
+                        <input type="checkbox" name="product_@bCT.ID" id="product_@bCT.ID" class="form-check-inline" checked="checked" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="product_@bCT.ID" id="product_@bCT.ID" class="form-check-inline" />
+                    }
+                    @bCT.DisplayName
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <a href="/operational/C01_ProductReport/C01_ProductReport_AuditSyncReport_Details" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        &nbsp;
+        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+    </div>
+</div>
+@if (operationalProvider.CompanyID == 0)
+{
+    <div class="row mb-md-2">
+        <div class="col-12 text-left">
+            Select company to begin...
+        </div>
+    </div>
+}
+else
+{
+    int nCount = 0;
+    @foreach (var item in Model.C01_ProductReport_AuditSyncReport_DetailsItems)
+    {
+        nCount++;
+        if (nCount == 2)
+        {
+            <hr class="bg-dark" />
+            <div class="row justify-content-center mt-3">
+                <div class="col">
+                    <h4>Gross Profit</h4>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-1">
+                <div class="col">
+                    <canvas id="myChart_GrossProfit" height="300"></canvas>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-1">
+                <div class="col">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover table-bordered table-striped ">
+                            <thead>
+                                <tr>
+                                    <th class="text-left text-nowrap"></th>
+                                    @{
+                                        currentDate = Model.FromDate;
+                                    }
+                                    @while (currentDate <= Model.ToDate)
+                                    {
+                                        <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                        currentDate = currentDate.AddMonths(1);
+                                    }
+                                    <th class="text-center text-nowrap">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.ReportingParentDescriptionItems_GrossProfit.Count > 0)
+                                {
+                                    @foreach (var itemg in Model.ReportingParentDescriptionItems_GrossProfit[0].ReportingCategoryItems)
+                                    {
+                                        <tr>
+                                            <td class="text-left text-nowrap">@itemg.ReportingDescription</td>
+                                            @{
+                                                currentDate = Model.FromDate;
+                                            }
+                                            @while (currentDate <= Model.ToDate)
+                                            {
+                                                <td class="text-right text-nowrap" title="@currentDate.ToMonth() - @itemg.ReportingDescription">@itemg.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                                currentDate = currentDate.AddMonths(1);
+                                            }
+                                            <td class="text-right text-nowrap" title="Total - @itemg.ReportingDescription">@itemg.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                                        </tr>
+                                    }
+                                    <tr class="border-table-total">
+                                        <td class="text-left text-nowrap">@Model.ReportingParentDescriptionItems_GrossProfit[0].Total.ReportingDescription</td>
+                                        @{
+                                            currentDate = Model.FromDate;
+                                        }
+                                        @while (currentDate <= Model.ToDate)
+                                        {
+                                            <td class="text-right text-nowrap" title="Summary Total">@Model.Total_GrossProfit.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                            currentDate = currentDate.AddMonths(1);
+                                        }
+                                        <td class="text-right text-nowrap" title="Total - @Model.ReportingParentDescriptionItems_GrossProfit[0].Total.ReportingDescription">@Model.Total_GrossProfit.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        <hr class="bg-dark" />
+        <div class="row justify-content-center mt-3">
+            <div class="col">
+                <h4>@item.ReportingDescription</h4>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-1">
+            <div class="col">
+                <canvas id="myChart_@(item.ReportingDescriptionCodeName)" height="300"></canvas>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-1">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered table-striped ">
+                        <thead>
+                            <tr>
+                                <th class="text-left text-nowrap"></th>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-left text-nowrap">Sales - Actual</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.Sales_Actual.MonthlyValues.ContainsKey(currentDate) ? item.Sales_Actual.MonthlyValues[currentDate].Item2 : "")" title="Sales - Actual">@(item.Sales_Actual.MonthlyValues.ContainsKey(currentDate) ? item.Sales_Actual.MonthlyValues[currentDate].Item1.ToMoneyNoDecimal() : "")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Cost Of Sales - Actual</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.CostOfSales_Actual.MonthlyValues.ContainsKey(currentDate) ? item.CostOfSales_Actual.MonthlyValues[currentDate].Item2 : "")" title="Cost Of Sales - Actual">@(item.CostOfSales_Actual.MonthlyValues.ContainsKey(currentDate) ? item.CostOfSales_Actual.MonthlyValues[currentDate].Item1.ToMoneyNoDecimal() : "")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Gross Profit - Actual</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.GrossProfit_Actual.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Actual.MonthlyValues[currentDate].Item2 : "")" title="Gross Profit - Actual">@(item.GrossProfit_Actual.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Actual.MonthlyValues[currentDate].Item1.ToMoneyNoDecimal() : "")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Gross Profit - Actual %</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.GrossProfit_Actual_Perc.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Actual_Perc.MonthlyValues[currentDate].Item2 : "")" title="Gross Profit - Actual %">@(item.GrossProfit_Actual_Perc.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Actual_Perc.MonthlyValues[currentDate].Item1.ToMoney(blankValue: "0.00") : "") %</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap"></td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap"></td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Sales - Forecast @Model.ForecastTypeID</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.Sales_Forecast1.MonthlyValues.ContainsKey(currentDate) ? item.Sales_Forecast1.MonthlyValues[currentDate].Item2 : "")" title="Sales - Forecast">@(item.Sales_Forecast1.MonthlyValues.ContainsKey(currentDate) ? item.Sales_Forecast1.MonthlyValues[currentDate].Item1.ToMoneyNoDecimal() : "")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Gross Profit - Forecast @Model.ForecastTypeID</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.GrossProfit_Forecast1.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Forecast1.MonthlyValues[currentDate].Item2 : "")" title="Gross Profit - Forecast">@(item.GrossProfit_Forecast1.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Forecast1.MonthlyValues[currentDate].Item1.ToMoneyNoDecimal() : "")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Gross Profit - Forecast @Model.ForecastTypeID %</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.GrossProfit_Forecast1_Perc.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Forecast1_Perc.MonthlyValues[currentDate].Item2 : "")" title="Gross Profit - Forecast %">@(item.GrossProfit_Forecast1_Perc.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Forecast1_Perc.MonthlyValues[currentDate].Item1.ToMoney(blankValue: "0.00") : "") %</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap"></td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap"></td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Gross Profit - Difference</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.GrossProfit_Difference.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Difference.MonthlyValues[currentDate].Item2 : "")" title="Gross Profit - Difference">@(item.GrossProfit_Difference.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Difference.MonthlyValues[currentDate].Item1.ToMoneyNoDecimal() : "")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                            <tr>
+                                <td class="text-left text-nowrap">Gross Profit - Difference %</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.GrossProfit_Difference_Perc.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Difference_Perc.MonthlyValues[currentDate].Item2 : "")" title="Gross Profit - Difference %">@(item.GrossProfit_Difference_Perc.MonthlyValues.ContainsKey(currentDate) ? item.GrossProfit_Difference_Perc.MonthlyValues[currentDate].Item1.ToMoney(blankValue: "0.00") : "") %</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+}
+@section Scripts {
+    <script src="/js/Chart.bundle.min.js"></script>
+    <script src="~/js/chart.utils.js"></script>
+    <script>
+        const data_GrossProfit = {
+            labels: [@(Html.Raw(string.Join(", ", Model.Total_GrossProfit.MonthlyValues.Select(p => $"'{p.Key.ToMonth()}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_GrossProfit_Datasets)))
+                                            };
+        const ctx_GrossProfit = document.getElementById('myChart_GrossProfit');
+        var config_GrossProfit = {
+            type: 'bar',
+            data: data_GrossProfit,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+            },
+        };
+        var chart_GrossProfit = new Chart(ctx_GrossProfit, config_GrossProfit);
+
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.C01_ProductReport_AuditSyncReport_DetailsItems)));
+        $(companies).each(function () {
+            const data = {
+                labels: this.ChartLabels,
+                datasets: this.Chart_Datasets
+            };
+
+            const ctx = document.getElementById('myChart_' + this.ReportingDescriptionCodeName);
+            var config = {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                        }
+                    },
+                    maintainAspectRatio: false
+                },
+            };
+
+            var chart = new Chart(ctx, config);
+
+
+
+        });
+
+        $("#product_").change(function () {
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.AllReportingDescriptions)));
+            $(products).each(function () {
+                $("#product_" + this.CodeName).prop("checked", $("#product_").prop("checked"));
+            });
+        });
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            var products = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.AllReportingDescriptions)));
+            var productsString = "";
+            $(products).each(function () {
+                if ($("#product_" + this.ID).prop("checked") == true) {
+                    if (productsString == "") {
+                        productsString = this.ID;
+                    }
+                    else {
+                        productsString = productsString + "-" + this.ID;
+                    }
+                }
+            });
+
+            var hideNoData = "false";
+            if ($("#hideNoData").prop("checked") == true) {
+                hideNoData = "true";
+            }
+
+            document.location.href = '/operational/C01_ProductReport/C01_ProductReport_AuditSyncReport_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&productID=' + productsString + '&hideNoData=' + hideNoData + '&ForecastType=' + $("#ForecastType").val();
+        }
+    </script>
+}

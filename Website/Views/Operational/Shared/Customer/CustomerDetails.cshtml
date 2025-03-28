@@ -1,0 +1,43 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedCustomerModels.CustomerDetailModel
+
+<div class="row">
+    <div class="col text-left"><h5 class="text-orange">Customer Details</h5></div>
+    <div class="col text-right"><a class="btn btn-outline-primary-sm" href="/operational/Customer/Customer_Profile">Details</a></div>
+</div>
+<div class="row">
+    <div class="col">Property</div>
+    <div class="col">@Model.CompanyName</div>
+</div>
+<div class="row">
+    <div class="col">Address</div>
+    <div class="col">@Model.CustomerAddress</div>
+</div>
+<div class="row">
+    <div class="col">Customer Name</div>
+    <div class="col">@Model.CustomerName</div>
+</div>
+<div class="row">
+    <div class="col">Phone</div>
+    <div class="col">@Model.CustomerPhone</div>
+</div>
+<div class="row">
+    <div class="col">Email</div>
+    <div class="col">@Model.CustomerEmail</div>
+</div>
+<div class="row">
+    <div class="col">Account Type</div>
+    <div class="col">@Model.CustomerAccountType</div>
+</div>
+<div class="row">
+    <div class="col">Amount Display</div>
+    <div class="col font-weight-bold">
+        @if (Model.ShowIncVAT)
+        {
+            <span class="text-red">Incl. VAT</span>
+        }
+        else
+        {
+            <span class="text-green">Excl. VAT</span>
+        }
+    </div>
+</div>

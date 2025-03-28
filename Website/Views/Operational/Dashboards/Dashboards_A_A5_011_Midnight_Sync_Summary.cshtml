@@ -1,0 +1,54 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A5_011_Midnight_Sync_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A05_Exceptions_MidnightSyncHistory_Summary.GetDescription() Details</h5>
+</div>
+@if (Model.A5_011_Midnight_Sync_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+            <th scope="col">Company</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Serial</th>
+            <th scope="col">Device Name</th>
+            <th scope="col">Time Logged</th>
+            <th scope="col">Reading</th>
+            <th scope="col">Live Reading</th>
+            <th scope="col">Where Was Reading Found</th>
+            <th scope="col">Original Time</th>
+            <th scope="col">Reason For Old Reading</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A5_011_Midnight_Sync_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveMeter/{item.m2mSerial}?R={Html.UrlEncoder.Encode("/operational/A05_Exceptions/A05_Exceptions_MidnightSyncHistory_Details")}";
+                <tr style="cursor:pointer;" title="View @item.m2mSerial" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@(item.SkybillCustomer != null ? $"{operationalProvider.Companies.Where(p => p.CompanyID == item.SkybillCustomer.CompanyID).FirstOrDefault().Name}" : "")</td>
+                    <td scope="col">@(item.SkybillCustomer != null ? $"{item.SkybillCustomer.Customer_No}" : "")</td>
+                    <td scope="col">@item.m2mSerial</td>
+                    <td scope="col">@item.m2mDeviceName</td>
+                    <td scope="col">@item.TimeLogged.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.Reading.ToReading()</td>
+                    <td scope="col">@item.LiveReading.ToReading()</td>
+                    <td scope="col">@item.WhereDidIFindThis</td>
+                    <td scope="col">@item.OriginalTime.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.ReasonForOldReading</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

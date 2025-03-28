@@ -1,0 +1,97 @@
+﻿@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_NewlyAddedDevicesModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_NewlyAddedDevices.GetDescription()}";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-12">
+        <h3>
+            @if (Model.ShowAll)
+            {
+                <text>All for today&nbsp;<a class="btn btn-outline-primary-sm" href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_NewlyAddedDevices">Show Offline Only</a></text>
+            }
+            else
+            {
+                <text>Offline Only&nbsp;<a class="btn btn-outline-primary-sm" href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_NewlyAddedDevices?showAll=t">Show All for today</a></text>
+            }
+        </h3>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <th>Serial Number</th>
+                <th>Meter Description</th>
+                <th>Meter Type</th>
+                <th>Status</th>
+                <th>Last Communicated</th>
+                <th>Signal</th>
+                <th>Battery</th>
+                <th>GatewayID</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Devices.Count == 0)
+            {
+                <tr>
+                    <td colspan="9" class="text-red">No devices</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var device in Model.Devices)
+                {
+                    <tr class="@(device.ExistsOnM2M ? "" : "table-danger")">
+                        <td>@device.SerialNumber</td>
+                        <td>@device.MeterDescription </td>
+                        <td>@device.MeterType </td>
+                        <td class="status font-weight-bold">@device.Status</td>
+                        <td>@device.LastCommunicated</td>
+                        <td>@device.Signal</td>
+                        <td>@device.Battery</td>
+                        <td>@(device.GatewayID.HasValue ? device.GatewayID.ToString() : "NONE")</td>
+                        <td class="text-nowrap">
+                            @if (device.GatewayID.HasValue)
+                            {
+                                <a title="Delete" href="#" onclick="ConfirmDelete('@device.GatewayID', '@device.DeviceID', '@device.MeterDescription - @device.SerialNumber');" class="btn btn-sm btn-outline-primary-sm text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                <span>&nbsp;</span>
+                            }
+                            @*else
+                            {
+                                <a title="Delete" href="#" onclick="ConfirmDeleteNoGW('@device.DeviceID', '@device.MeterDescription - @device.SerialNumber');" class="btn btn-sm btn-outline-primary-sm text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                <span>&nbsp;</span>
+                            }*@
+                            <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="alert('@device.FormXML');">Details</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+        });
+        function ConfirmDelete(gatewayID, itemID, description) {
+            if (confirm('Are you use you want to delete ' + description + '?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_DeviceReview_DeviceItem_DeleteDevice/' + gatewayID + '/' + itemID + '?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+        function ConfirmDeleteNoGW(itemID, description) {
+            if (confirm('Are you use you want to delete ' + description + '?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_DeviceReview_DeviceItem_DeleteDevice/' + itemID + '?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+    </script>
+}

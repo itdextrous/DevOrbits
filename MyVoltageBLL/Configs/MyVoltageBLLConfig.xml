@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<MyVoltageBLLConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<MyVoltageConnectionString>Data Source=myvoltageza.database.windows.net;Initial Catalog=MyVoltage;Persist Security Info=True;User ID=Myvoltage;Password=9!NMb*&amp;cf/OtR:</MyVoltageConnectionString>
+	<MyVoltageAPIConnectionString>Data Source=myvoltageza.database.windows.net;Initial Catalog=MyVoltageAPI;Persist Security Info=True;User ID=Myvoltage;Password=9!NMb*&amp;cf/OtR:</MyVoltageAPIConnectionString>
+	<MyVoltageLogConnectionString>Data Source=myvoltageza.database.windows.net;Initial Catalog=MyVoltageLog;Persist Security Info=True;User ID=Myvoltage;Password=9!NMb*&amp;cf/OtR:</MyVoltageLogConnectionString>
+	<MyVoltageBillingConnectionString>Data Source=.;Initial Catalog=MyVoltageBilling;Persist Security Info=True;User ID=sa;Password=QAZxcvfrew2</MyVoltageBillingConnectionString>
+	<MyVoltageSkybillSyncConnectionString>Data Source=.;Initial Catalog=MyVoltageSkybillSync;Persist Security Info=True;User ID=sa;Password=QAZxcvfrew2</MyVoltageSkybillSyncConnectionString>
+	<M2MBaseURL>http://m2m.mymetersa.co.za/api2/</M2MBaseURL>
+	<M2MUsername>myvoltage</M2MUsername>
+	<M2MPassword>myvoltage</M2MPassword>
+	<SkybillBaseURL>https://skybill.eu:31048/SBUBNZ/ODataV4/</SkybillBaseURL>
+	<SkybillUsername>webservice</SkybillUsername>
+	<SkybillPassword>MyVoltage_001</SkybillPassword>
+	<SkybillTenant>1f998066-df97-4de7-875d-0179278815b1</SkybillTenant>
+</MyVoltageBLLConfig>

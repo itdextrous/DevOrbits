@@ -1,0 +1,101 @@
+@model MyVoltage.Models.UsageViewModels.UsageCalcViewModel
+@{
+    ViewData["Title"] = "Usage Calculator";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                Welcome to the @(ViewData["Title"]), @Model.Customer.FullName
+                <br />
+                To get started please choose a meter below.
+            </div>
+            <div class="card-body bg-white" style=" background: rgba(203, 203, 210, 0.15);">
+                <table class="table table-responsive-xl table-striped">
+                    <tbody>
+                        @foreach (var meter in Model.Meters)
+                        {
+                            <tr style="cursor:pointer;" onclick="RedirectToCreate('@meter.Serial');" title="Click to Select">
+                                <td scope="col">@meter.Serial</td>
+                                <td scope="col">@meter.Description</td>
+                                <td scope="col">
+                                    @switch (meter.Type)
+                                    {
+                                        case "Electricity":
+                                            <img src="~/images/elec-icon-s.png" />
+                                            break;
+                                        case "Water":
+                                            <img src="~/images/water-icon-s.png" />
+                                            break;
+                                        case "Gas":
+                                            <img src="~/images/gas-icon-s.png" />
+                                            break;
+                                    }
+                                    @meter.Type
+                                </td>
+                                <td scope="col">
+                                    @if (meter.Status.ToUpper().Contains("ON"))
+                                    {
+                                        <i class="fas fa-lightbulb text-green"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-power-off text-red"></i>
+                                    }
+                                    @meter.Status
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.UsageCalcs.Count > 0)
+            {
+                <div class="card-body bg-white" style=" background: rgba(203, 203, 210, 0.15);">
+                    Your previous calculations:
+                </div>
+                <div class="card-body bg-white" style=" background: rgba(203, 203, 210, 0.15);">
+                    <table class="table table-responsive-xl table-striped">
+                        <tbody>
+                            @foreach (var calc in Model.UsageCalcs)
+                            {
+                                <tr style="cursor:pointer;" onclick="RedirectToEdit('@calc.UsageCalcID');" title="Click to Edit">
+                                    <td scope="col">@calc.MeterSerial</td>
+                                    <td scope="col">@calc.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            }
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToCreate(serial) {
+            document.location.href = '/usagecalccreate/' + serial;
+        }
+        function RedirectToEdit(id) {
+            document.location.href = '/usagecalcedit/' + id;
+        }
+    </script>
+}

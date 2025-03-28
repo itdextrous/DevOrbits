@@ -1,0 +1,157 @@
+@model MyVoltage.Models.OperationalModels.V03_HumanResources.V03_HumanResources_AllHumanResourcesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V03_HumanResources_AllHumanResources.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        <a href="/operational/V03_HumanResources/V03_HumanResources_PersonalDetails_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Personal Details</a>
+    </div>
+
+</div>
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" rowspan="2" class="border-table">Employee No</th>
+                    <th scope="col" rowspan="2" class="border-table">Full Name</th>
+                    <th scope="col" rowspan="2" class="border-table">Operational User</th>
+                    <th scope="col" rowspan="2" class="border-table">Reporting To User</th>
+                    <th scope="col" rowspan="2" class="border-table">Start Date</th>
+                    <th scope="col" rowspan="2" class="border-table">End Date</th>
+                    <th scope="col" colspan="3" class="border-table-spanned text-center">Personal Details</th>
+                    <th scope="col" colspan="3" class="border-table-spanned text-center">Job Description</th>
+                    <th scope="col" colspan="2" class="border-table-spanned text-center">Correspondences</th>
+                </tr>
+                <tr>
+                    <th scope="col" class="border-table-left">Responsible User</th>
+                    <th scope="col" class="border-table">Reporting To User</th>
+                    <th scope="col" class="border-table-right"></th>
+                    <th scope="col" class="border-table-left">Responsible User</th>
+                    <th scope="col" class="border-table">Reporting To User</th>
+                    <th scope="col" class="border-table-right"></th>
+                    <th scope="col" class="border-table-left">Count</th>
+                    <th scope="col" class="border-table-right"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.V03_HumanResources_AllHumanResourcesItems)
+                {
+                    <tr>
+                        <td scope="col" class="text-nowrap border-table">@item.EmployeeNo</td>
+                        <td scope="col" class="text-nowrap border-table">@item.FullName</td>
+                        <td scope="col" class="text-nowrap border-table">@item.OperationalUser</td>
+                        <td scope="col" class="text-nowrap border-table">@item.ReportingToUser</td>
+                        <td scope="col" class="text-nowrap border-table">@item.StartDate.ToDateShort()</td>
+                        <td scope="col" class="text-nowrap border-table">@item.EndDate.ToDateShort(true)</td>
+                        <td scope="col" class="font-weight-bold text-nowrap border-table-left">
+                            @if (item.ResponsibleUserAccepted.HasValue)
+                            {
+                                @if (item.ResponsibleUserAccepted.Value)
+                                {
+                                    <span class="text-green text-nowrap" title="@item.OperationalUser approved"><i class="fas fa-check-circle"></i>&nbsp;@item.OperationalUser</span><br />
+                                }
+                                else
+                                {
+                                    <span class="text-red text-nowrap" title="@item.OperationalUser rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.OperationalUser</span><br />
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-orange" title="@item.OperationalUser pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.OperationalUser</span><br />
+                            }
+                        </td>
+                        <td scope="col" class="font-weight-bold border-table">
+                            @if (item.ReportingToUserAccepted.HasValue)
+                            {
+                                @if (item.ReportingToUserAccepted.Value)
+                                {
+                                    <span class="text-green text-nowrap" title="@item.ReportingToUser approved"><i class="fas fa-check-circle"></i>&nbsp;@item.ReportingToUser</span><br />
+                                }
+                                else
+                                {
+                                    <span class="text-red text-nowrap" title="@item.ReportingToUser rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.ReportingToUser</span><br />
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-orange text-nowrap" title="@item.ReportingToUser pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.ReportingToUser</span><br />
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap border-table-right"><a href="#" onclick="RedirectToEditPersonalDetails('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-user"></i>&nbsp;Edit Personal Details</a></td>
+                        <td scope="col" class="font-weight-bold text-nowrap border-table-left">
+                            @if (item.V03_JobDescription != null)
+                            {
+                                @if (item.V03_JobDescription.ResponsibleUserAccepted.HasValue)
+                                {
+                                    @if (item.V03_JobDescription.ResponsibleUserAccepted.Value)
+                                    {
+                                        <span class="text-green text-nowrap" title="@item.OperationalUser approved"><i class="fas fa-check-circle"></i>&nbsp;@item.OperationalUser</span><br />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red text-nowrap" title="@item.OperationalUser rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.OperationalUser</span><br />
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-orange" title="@item.OperationalUser pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.OperationalUser</span><br />
+                                }
+                            }
+                        </td>
+                        <td scope="col" class="font-weight-bold border-table">
+                            @if (item.V03_JobDescription != null)
+                            {
+                                @if (item.V03_JobDescription.ReportingToUserAccepted.HasValue)
+                                {
+                                    @if (item.V03_JobDescription.ReportingToUserAccepted.Value)
+                                    {
+                                        <span class="text-green text-nowrap" title="@item.ReportingToUser approved"><i class="fas fa-check-circle"></i>&nbsp;@item.ReportingToUser</span><br />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red text-nowrap" title="@item.ReportingToUser rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.ReportingToUser</span><br />
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-orange text-nowrap" title="@item.ReportingToUser pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.ReportingToUser</span><br />
+                                }
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap border-table-right"><a href="#" onclick="RedirectToEditJobDescription('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-suitcase"></i>&nbsp;Edit Job Descriptions</a></td>
+                        <td scope="col" class="text-nowrap border-table-left text-right">@item.V03_CorrespondencesCount</td>
+                        <td scope="col" class="text-nowrap border-table-right"><a href="#" onclick="RedirectToEditCorrespondences('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-phone"></i>&nbsp;Edit Correspondences</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToEditPersonalDetails(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/V03_HumanResources/V03_HumanResources_PersonalDetails/' + ID;
+        }
+        function RedirectToEditJobDescription(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/V03_HumanResources/V03_HumanResources_JobDescriptions/' + ID;
+        }
+        function RedirectToEditCorrespondences(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/V03_HumanResources/V03_HumanResources_CorrespondenceList/' + ID;
+        }
+    </script>
+}

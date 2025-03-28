@@ -1,0 +1,41 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_BModels.B1_011_Account_Details_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentSummary.GetDescription() Details</h5>
+</div>
+@if (Model.B01_AccountPayments_AccountPaymentSummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Council Details Loaded</th>
+                <th scope="col">Meters Loaded</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.B01_AccountPayments_AccountPaymentSummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetails")}";
+                <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.CompanyName</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+                    <td scope="col" class="text-right">@item.CouncilDetailsLoaded</td>
+                    <td scope="col" class="text-right">@item.MetersLoaded</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

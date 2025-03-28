@@ -1,0 +1,74 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorReadingSummaryModel
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MirrorReadingSummary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-right">
+                @*<a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails" class="btn btn-outline-primary">More Details&nbsp;<i class="fas fa-chevron-right"></i></a>*@
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Customers Count</th>
+                            <th scope="col">Customers Checked</th>
+                            <th scope="col">Customers Not Checked</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A02_MirrorMeterAuditing_MirrorReadingSummaryItems)
+                        {
+                            string rowclass = "";
+                            string cellClass = "";
+                            if (item.Status == "Outstanding")
+                            {
+                                rowclass = " class=\"table-danger\"";
+                                cellClass = "text-red font-weight-bold";
+                            }
+                            else if (item.Status == "Too long ago")
+                            {
+                                rowclass = " class=\"text-orange font-weight-bold\"";
+                                cellClass = "text-orange font-weight-bold";
+                            }
+                            else if (item.Status == "Verified")
+                            {
+                                rowclass = " class=\"table-success\"";
+                                cellClass = "text-green font-weight-bold";
+                            }
+                            <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');" @Html.Raw(rowclass)>
+                                <td scope="col">@item.CompanyName</td>
+                                <td scope="col" class="@Html.Raw(cellClass)">@item.Status</td>
+                                <td scope="col">@item.CustomersCount</td>
+                                <td scope="col">@item.CustomersCheckedCount</td>
+                                <td scope="col">@item.CustomersNotCheckedCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingDetails';
+        }
+    </script>
+}

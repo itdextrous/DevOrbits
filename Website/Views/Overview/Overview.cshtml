@@ -1,0 +1,341 @@
+﻿@model MyVoltage.Models.MeterViewModels.OverviewDataModel
+
+@{
+    ViewData["Title"] = "Overview";
+    Layout = "LayoutAdmin";
+}
+
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+
+
+<div class="mt-5">
+    <button type="submit" onclick="return DownloadTable()" class="btn btn-outline-primary btn-sm float-right my-4">Download as xls</button>
+</div>
+
+<table id="GatewayDetails" class="table table-repsonsive-sm table-bordered table-hover admin-table table-fixed">
+    <thead>
+        <tr>
+            <td data-bind="click: model.sort, text: 'Gateway Name'" >Gateway Name</td>
+            <td>Gateway <br> ID</td>
+            <td id="hardwaretypeHead">Gateway <br>Hardware Type</td>
+            <td id="hardwareHead">Gateway <br> Hardware ID</td>
+            <td>Status</td>
+            <td id="sinceHead">Since</td>
+            <td>Sim Card Number</td>
+            <td id="firmwareHead">Firmware Version</td>
+            <td id="networkHead">Network</td>
+            <td id="gsmHead">GSM Serial No</td>
+            <td id="gisHead">GIS Location</td>
+            <td id="signalHead">Signal</td>
+            <td>Meters <br>Online</td>
+            <td class="table-options">
+                Meters <br>Offline
+            </td>
+            <td class="table-options">
+               <div class="dropdown dropleft">
+                    <i class="fas fa-ellipsis-v fa-lg" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded=true aria-hidden="false"></i>
+
+                    <div class="dropdown-menu show" aria-labelledby="dropdownMenuButton">
+<!--
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check1">
+                                <label class="form-check-label pl-2" for="Check1">Gateway ID</label>
+                            </div>
+                        </a>
+-->
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check2">
+                                <label class="form-check-label pl-2" for="Check2">Since</label>
+                            </div>
+                        </a>
+<!--
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check3">
+                                <label class="form-check-label pl-2" for="Check3">Sim Card Number</label>
+                            </div>
+                        </a>
+-->
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check4">
+                                <label class="form-check-label pl-2" for="Check4">Signal</label>
+                            </div>
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check5">
+                                <label class="form-check-label pl-2" for="Check5">Firmware Version</label>
+                            </div>
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check6">
+                                <label class="form-check-label pl-2" for="Check6">Gateway Hardware ID</label>
+                            </div>
+                        </a>
+
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check7">
+                                <label class="form-check-label pl-2" for="Check7">Gateway Hardware Type</label>
+                            </div>
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check8">
+                                <label class="form-check-label pl-2" for="Check8">Network</label>
+                            </div>
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check9">
+                                <label class="form-check-label pl-2" for="Check9">GSM Serial No</label>
+                            </div>
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="Check10">
+                                <label class="form-check-label pl-2" for="Check9">GIS Location</label>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+    </thead>
+    <tbody data-bind="foreach:  model.Gateways">
+        <tr style="cursor:pointer;" data-bind="click: function() { document.location.href = Url() }">
+            <td data-bind="text: Name"></td>
+            <td data-bind="text: ID"> </td>
+            <td id="hardwaretypeCol" data-bind="text: DeviceType"></td>
+            <td id="hardwareCol" data-bind="text: HardwareID"></td>
+            <td class="status font-weight-bold text-center" data-bind="text: DeviceStatus"></td>
+            <td id="sinceCol" data-bind="text: Since"></td>
+            <td data-bind="text: SimCardNumber"></td>
+            <td id="firmwareCol" data-bind="text: Version"> </td>
+            <td id="networkCol" data-bind="text: Network"></td>
+            <td id="gsmCol" class="text-left" data-bind="text: Serial"> </td>
+            <td id="gisCol" data-bind="text: GPSCoordinates"></td>
+            <td id="signalCol" data-bind="text: Csq"></td>
+            <td data-bind="text: OnlineDevices"></td>
+            <td data-bind="text: OfflineDevices"></td>
+            <td>&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="/js/FileSaver.min.js"></script>
+    <script src="/js/xlsx.core.min.js"></script>
+    <script src="/js/tableExport.js"></script>
+    <script src="/js/knockout.js"></script>
+    <script>
+        var overviewDataModel = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+        var asc = true;
+        function OverviewModel()
+        {
+            var self = this;
+            self.Gateways = ko.observableArray([]);
+
+            ko.utils.arrayForEach(overviewDataModel.gateways, function (d)
+            {
+                var device = new Device(d);
+                self.Gateways.push(ko.observable(device));
+            });
+
+            self.activeSort = ko.observable(function ()
+            {
+               // $(".loader-overlay").css("display", "none");
+                return 0;
+            }); //set the default sort
+            self.sort = function (header, event)
+            {
+                 var ascSort = function (a, b)
+                 {
+                     if (a().Name() === "" || a().Name() === null) return 1;
+                     if (b().Name() === "" || b().Name() === null) return -1;
+                     if (a().Name() === b().Name()) return 0;
+                     return a().Name() < b().Name() ? -1 : 1;
+                };
+
+                var descSort = function (a, b)
+                {
+                    if (a().Name() === "" || a().Name() === null) return 1;
+                    if (b().Name() === "" || b().Name() === null) return -1;
+                    if (a().Name() === b().Name()) return 0;
+                    return a().Name() > b().Name() ? -1 : 1;
+                };
+
+                var sortFunc = asc ? ascSort : descSort;
+
+                asc = !asc;
+                $(".loader-overlay").css("display", "block");
+
+                setTimeout(function ()
+                {
+                    var result = self.Gateways();
+                    result.sort(sortFunc);
+                    self.Gateways(result);
+                    $(".loader-overlay").css("display", "none");
+                }, 2000);
+               
+                //store the new active sort function
+                //self.activeSort(sortFunc);
+            };
+
+        }
+
+        function Device(d)
+        {
+            var self = this;
+            this.ID = ko.observable(d.id);
+            this.Name = ko.observable(d.name);
+            this.Serial = ko.observable(d.serial);
+            this.DeviceStatus = ko.observable(d.deviceStatus);
+            this.DeviceType = ko.observable(d.deviceTypeName);
+            this.HardwareID = ko.observable(d.type.id);
+            this.OfflineDevices = ko.observable("");
+            this.OnlineDevices = ko.observable("");
+            this.Since = ko.observable(d.since);
+            this.SimCardNumber = ko.observable("");
+            this.Version = ko.observable("");
+            this.Network = ko.observable("");
+            this.Csq = ko.observable("");
+            this.GPSCoordinates = ko.observable("");
+
+            this.Url = ko.computed(function ()
+            {
+                var url = 'overview/gateway/' + this.ID() +'/devices'
+                return url;
+            }, this);
+
+
+            $.get('overview/gateway/' + self.ID(),
+                function (data)
+                {
+                    self.DeviceStatus(data.deviceStatus)
+                    self.DeviceType(data.deviceTypeName)
+                    self.OnlineDevices(data.onlineDevices)
+                    self.OfflineDevices(data.offlineDevices)
+                    if (data.network != null && data.network != 'undefined')
+                    {
+                        self.SimCardNumber(data.network.msisdn);
+                        self.Version(data.network.version);
+                        self.Network(data.network.network);
+                        self.Csq(data.network.csq);
+
+                    }
+                });
+        }
+
+        var model = new OverviewModel();
+        ko.applyBindings(model);
+
+        function DownloadTable()
+        {
+            $(".loader-overlay").css("display", "block");
+            setTimeout(function ()
+            {
+                $('#GatewayDetails').tableExport({
+                    type: 'xlsx',
+                    postCallback: function ()
+                    {
+                        var delayInMilliseconds = 5000;
+
+                        setTimeout(function ()
+                        {
+                            $(".loader-overlay").css("display", "none");
+                        }, delayInMilliseconds);
+                    }
+                });
+            }, 2000);
+        }
+
+        $(".status:contains('online')").addClass("text-green");
+        $(".status:contains('offline')").addClass("text-red");
+
+        $(document).ready(function ()
+        {
+//            $('#Check1').change(function ()
+//            {
+//                if (this.checked)
+//                    $('#nameHead, #nameCol').fadeIn('slow');
+//                else
+//                    $('#nameHead, #nameCol').fadeOut('slow');
+//                    
+//            });
+            $('#Check2').change(function ()
+            {
+                if (this.checked)
+                    $('#sinceHead, #sinceCol').fadeIn('slow');
+                else
+                    $('#sinceHead, #sinceCol').fadeOut('slow');
+            });
+            $('#Check3').change(function ()
+            {
+                if (this.checked)
+                    $('#simnumHead, #simnumCol').fadeIn('slow');
+                else
+                    $('#simnumHead, #simnumCol').fadeOut('slow');
+            });
+            $('#Check4').change(function ()
+            {
+                if (this.checked)
+                    $('#signalHead, #signalCol').fadeIn('slow');
+                else
+                    $('#signalHead, #signalCol').fadeOut('slow');
+            });
+            $('#Check5').change(function ()
+            {
+                if (this.checked)
+                    $('#firmwareHead, #firmwareCol').fadeIn('slow');
+                else
+                    $('#firmwareHead, #firmwareCol').fadeOut('slow');
+            });
+            $('#Check6').change(function ()
+            {
+                if (this.checked)
+                    $('#hardwareHead, #hardwareCol').fadeIn('slow');
+                else
+                    $('#hardwareHead, #hardwareCol').fadeOut('slow');
+            });
+            $('#Check7').change(function ()
+            {
+                if (this.checked)
+                    $('#hardwaretypeHead, #hardwaretypeCol').fadeIn('slow');
+                else
+                    $('#hardwaretypeHead, #hardwaretypeCol').fadeOut('slow');
+            });
+            $('#Check8').change(function ()
+            {
+                if (this.checked)
+                    $('#networkHead, #networkCol').fadeIn('slow');
+                else
+                    $('#networkHead, #networkCol').fadeOut('slow');
+            });
+            $('#Check9').change(function ()
+            {
+                if (this.checked)
+                    $('#gsmHead, #gsmCol').fadeIn('slow');
+                else
+                    $('#gsmHead, #gsmCol').fadeOut('slow');
+            });
+
+            $('#Check10').change(function ()
+            {
+                if (this.checked)
+                    $('#gisHead, #gisCol').fadeIn('slow');
+                else
+                    $('#gisHead, #gisCol').fadeOut('slow');
+            });
+        });
+    </script>
+
+}

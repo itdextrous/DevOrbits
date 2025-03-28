@@ -1,0 +1,41 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A10_021_VirtualMeters_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A10_VirtualMeters_TOUReconReport_Summary.GetDescription() Details</h5>
+</div>
+@if (Model.A10_021_VirtualMeters_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Master Meters</th>
+                <th scope="col">TOU Meters</th>
+                <th scope="col">Meters With Diff</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A10_021_VirtualMeters_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/A10_VirtualMeters/A10_VirtualMeters_TOUReconReport_Details")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.Name</td>
+                    <td scope="col">@item.MasterMeters</td>
+                    <td scope="col">@item.TOUMeters</td>
+                    <td scope="col">@item.MetersWithDiff</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

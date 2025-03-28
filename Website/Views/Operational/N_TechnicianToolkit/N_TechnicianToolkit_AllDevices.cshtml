@@ -1,0 +1,69 @@
+﻿@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_AllDevicesModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Technician Toolkit - All Devices";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="table-responsive">
+    @if (operationalProvider.CompanyID == 0)
+    {
+        <span>Select a company to start...</span>
+    }
+    else
+    {
+        <table class="table table-bordered admin-table-detail mt-3 table-striped">
+            <tbody style="height:auto;">
+            <thead>
+                <tr>
+                    <td>Serial Number</td>
+                    <td>Meter Description</td>
+                    <td>Meter Type</td>
+                    <td>Status</td>
+                    <td>Last Communicated</td>
+                    <td>Signal</td>
+                    <td>Battery</td>
+                    <td>GatewayID</td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.OfflineDevices.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-red">No devices for @Model.CompanyName</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var device in Model.OfflineDevices)
+                    {
+                        <tr>
+                            <td>@device.SerialNumber</td>
+                            <td>@device.MeterDescription </td>
+                            <td>@device.MeterType </td>
+                            <td class="status font-weight-bold">@device.Status</td>
+                            <td>@device.LastCommunicated</td>
+                            <td>@device.Signal</td>
+                            <td>@device.Battery</td>
+                            <td>@device.GatewayID</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+</div>
+@section Scripts {
+    <script src="~/js/knockout.js"></script>
+    <script src="~/js/markerclusterer.js"></script>
+    <script src="~/js/date.format.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk"></script>
+    <script>
+        $(document).ready(function () {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+        });
+    </script>
+}

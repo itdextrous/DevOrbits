@@ -1,0 +1,92 @@
+@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_DeviceOverviewModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_DeviceOverview.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+            </div>
+            <div class="card-body">
+                @if (Model.H_Device_Administrator_DeviceOverviewItems.Count == 0)
+                {
+                    <span>There are no offline gateways for @operationalProvider.CompanyName</span>
+                }
+                else
+                {
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Gateway ID</th>
+                                <th scope="col">Gateway Name</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Since</th>
+                                <th scope="col">Sim</th>
+                                <th scope="col">Network</th>
+                                <th scope="col">GIS Location</th>
+                                <th scope="col">Signal</th>
+                                <th scope="col">Offline Duration</th>
+                                <th scope="col">Gateway Hardware Type</th>
+                                <th scope="col">Gateway Hardware ID</th>
+                                <th scope="col">Firmware Version</th>
+                                <th scope="col">Devices Linked</th>
+                                <th scope="col">Device API ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemC in Model.H_Device_Administrator_DeviceOverviewItems)
+                            {
+                                string rowclass = "";
+                                string cellClass = "";
+                                if (itemC.status.id == 1)
+                                {
+                                    rowclass = " class=\"table-success\"";
+                                    cellClass = " class=\"text-green font-weight-bold\"";
+                                }
+                                else
+                                {
+                                    rowclass = " class=\"table-danger\"";
+                                    cellClass = " class=\"text-red font-weight-bold\"";
+                                }
+                                <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @itemC.name" onclick="RedirectToDevices('@itemC.id');">
+                                    <td scope="col">@itemC.id</td>
+                                    <td scope="col">@itemC.name</td>
+                                    <td scope="col" @Html.Raw(cellClass)>@itemC.deviceStatus.ToUpper()</td>
+                                    <td scope="col">@Convert.ToDateTime(itemC.status.time).ToDateAndTimeShort()</td>
+                                    <td scope="col">@(itemC.network != null ? itemC.network.msisdn : "")</td>
+                                    <td scope="col">@(itemC.network != null ? itemC.network.network : "")</td>
+                                    <td scope="col">@(itemC.GISLocation)</td>
+                                    <td scope="col">@(itemC.network != null ? itemC.network.csq : "")</td>
+                                    <td scope="col">@itemC.OfflineDuration</td>
+                                    <td scope="col">@(itemC.type != null && !string.IsNullOrEmpty(itemC.type.name) ? itemC.type.name.ToString() : "")</td>
+                                    <td scope="col">@(itemC.type != null ? itemC.type.id.ToString() : "")</td>
+                                    <td scope="col">@(itemC.network != null ? itemC.network.version : "")</td>
+                                    <td scope="col">@itemC.DevicesLinked</td>
+                                    <td scope="col">@itemC.DeviceAPIID</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToDevices(serial) {
+            document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_DeviceOverview_Device/' + serial;
+        }
+    </script>
+}

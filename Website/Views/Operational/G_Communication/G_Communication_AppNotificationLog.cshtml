@@ -1,0 +1,102 @@
+@model MyVoltage.Models.OperationalModels.G_Communication.G_CommunicationModels.G_Communication_AppNotificationLogModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.G_Communication_AppNotificationLog.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select a company to start...</span>
+        }
+        else
+        {
+            <div>
+                <form asp-action="G_Communication_AppNotificationLog" enctype="multipart/form-data">
+                    <div class="row col-12"><label asp-for="CustomerNumber" class="control-label"></label>:</div>
+                    <div class="row col-12 mt-2 mb-2">
+                        <input class="form-control" style="width:90%;" id="CustomerNumber_Search" asp-for="CustomerNumber" />
+                        <span asp-validation-for="CustomerNumber" class="text-red"></span>
+                    </div>
+                    <div class="row col-12">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</button>
+                        &nbsp;
+                        <a href="/operational/G_Communication/G_Communication_AppNotificationLog" class="btn btn-outline-primary-sm"><i class="fas fa-plus"></i>&nbsp;Show All</a>
+                    </div>
+                </form>
+            </div>
+            <table class="table table-responsive-xl">
+                <thead>
+                    <tr>
+                        <th scope="col">Date Created</th>
+                        <th scope="col">Customer No</th>
+                        <th scope="col">Expiry Date</th>
+                        <th scope="col">Date Read</th>
+                        <th scope="col">Message Preview</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Log_Notifications)
+                    {
+                        string decodedMessage = System.Web.HttpUtility.HtmlDecode(entry.Message);
+                        <tr>
+                            <td>@entry.DateCreated.ToDateAndTimeShort()</td>
+                            <td>@entry.CustomerNo</td>
+                            <td>@entry.ExpiryDate.ToDateAndTimeShort()</td>
+                            <td>@entry.DateRead.ToDateAndTimeShort()</td>
+                            <td>@Html.Raw(decodedMessage)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (Model.TotalEntries > 10)
+            {
+                var prevDisabled = !Model.Log_Notifications.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.Log_Notifications.HasNextPage ? "disabled" : "";
+                <div width="" 100%">
+                    <div style="float: left;">
+                        <a asp-route-pageIndex="@(Model.Log_Notifications.PageIndex - 1)"
+                   class="btn btn-default @prevDisabled">
+                            Previous
+                        </a>
+                    </div>
+                    <div style="float: right;">
+                        <a align="left" asp-route-pageIndex="@(Model.Log_Notifications.PageIndex + 1)"
+                   class="btn btn-default @nextDisabled">
+                            Next
+                        </a>
+                    </div>
+                </div>
+            }
+
+        }
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CustomerNumber_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/G_Communication/G_Communication_NotificationLog/CustomerSearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

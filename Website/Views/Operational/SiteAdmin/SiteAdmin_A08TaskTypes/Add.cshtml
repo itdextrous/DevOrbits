@@ -1,0 +1,288 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_A08TaskTypesModels.SiteAdmin_A08_Task_TypesAddModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.SiteAdmin_A08TaskTypes.GetDescription()} - Create New";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Flag Type successfully added.<br />
+                    Dont forget to add the companies and schedule this task applies to otherwise it will never run.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes/Edit/@Model.ResultFlagTypeID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    Flag Details:
+                </div>
+                <form asp-action="SiteAdmin_A08TaskTypes_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="TemplateNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="TemplateNo" disabled />
+                                <span asp-validation-for="TemplateNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="TaskClassification" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("TaskClassification", Model.TaskClassification, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetTaskClassification();" })
+                                <span asp-validation-for="TaskClassification" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="WorkflowGroupID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("WorkflowGroupID", Model.WorkflowGroupID, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetWorkflow();" })
+                                <span asp-validation-for="WorkflowGroupID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessPillar" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessPillar", Model.BusinessPillar, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                <span asp-validation-for="BusinessPillar" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessDepartment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessDepartment", Model.BusinessDepartment, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="BusinessDepartment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Identifier" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Identifier" />
+                                <span asp-validation-for="Identifier" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Heading" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Heading" />
+                                <span asp-validation-for="Heading" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="Description"></textarea>
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ReportingToUser" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Priority" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Priority", Model.Priority, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="Priority" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LinkedSecureArea" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LinkedSecureArea", Model.LinkedSecureArea, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="LinkedSecureArea" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CreateIndividualFlagsForCompaniesLinked" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("CreateIndividualFlagsForCompaniesLinked", Model.CreateIndividualFlagsForCompaniesLinked, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="CreateIndividualFlagsForCompaniesLinked" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MinRequiredToClear" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="MinRequiredToClear" />
+                                <span asp-validation-for="MinRequiredToClear" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="HowToDocument" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="HowToDocument" />
+                                <span asp-validation-for="HowToDocument" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StatusGroup" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("StatusGroup", Model.StatusGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetStatuses();"  })
+                                <span asp-validation-for="StatusGroup" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultStatus" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultStatus", Model.DefaultStatus, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultStatus" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MeetingAgendaGroup" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("MeetingAgendaGroup", Model.MeetingAgendaGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetMeetingAgendaes();" })
+                                <span asp-validation-for="MeetingAgendaGroup" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultMeetingAgenda" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultMeetingAgenda", Model.DefaultMeetingAgenda, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultMeetingAgenda" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="UpdateExistingTask" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("UpdateExistingTask", Model.UpdateExistingTask, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="UpdateExistingTask" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Task Types</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        GetStatuses();
+        function GetStatuses() {
+            $("#DefaultStatus").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.StatusItems)));
+            $(companies).each(function() {
+                if (this.StatusGroupID ==  $("#StatusGroup").val()) {
+                    $("#DefaultStatus").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+        }
+        GetMeetingAgendaes();
+        function GetMeetingAgendaes() {
+            $("#DefaultMeetingAgenda").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.MeetingAgendaItems)));
+            $(companies).each(function() {
+                if (this.MeetingAgendaGroupID ==  $("#MeetingAgendaGroup").val()) {
+                    $("#DefaultMeetingAgenda").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+        }
+
+        GetTaskClassification();
+        function GetTaskClassification() {
+            if ($("#TaskClassification").val() == "1") {
+                $("#ResponsibleUser").val('7ef8d494-ca75-4dce-a629-20687bd55071');
+                $("#ReportingToUser").val('7ef8d494-ca75-4dce-a629-20687bd55071');
+                $("#Priority").val('8');
+                $("#StatusGroup").val('6');
+                GetStatuses();
+            }
+        }
+    </script>
+}

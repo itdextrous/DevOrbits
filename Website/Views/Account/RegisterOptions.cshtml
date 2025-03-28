@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "Registration";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+<div class="accounts_pages">
+    <div class="account_form text-center">
+        <div class="w-100">
+            <div class="row">
+                <div class="col justify-content-center text-center d-flex">
+                    <a href="/">
+                        <img src="/images/MVClientZoneLogo.png" height="115" alt="" class="d-block mx-auto MVClientZoneLogo">
+                    </a>
+                </div>
+            </div>
+            <div class="text-white queries_text mt-75">
+                Register for one of the options below:
+            </div>
+            <div class="mt-50">
+                <div>
+                    <a asp-action="RegisterNew" asp-route-returnurl="@ViewData["ReturnUrl"]" asp-route-type="Personal" class="btn btn-default">
+                        Personal Account
+                    </a>
+                </div>
+                <div class="mt-30">
+                    <a asp-action="RegisterNew" asp-route-returnurl="@ViewData["ReturnUrl"]" asp-route-type="Business" class="btn btn-default">
+                        Business Account
+                    </a>
+                </div>
+            </div>
+            <div class="text-white queries_text mt-50">
+                <p class="mb_10 pb-2">Queries: <a href="mailto:info@myvoltage.co.za?Subject=Registration" class="decoration_none text-islandsunrise">info@myvoltage.co.za</a></p>
+                <a asp-action="Login" class="text-islandsunrise decoration_none">Back to login page</a>
+            </div>
+            <div class="mt-50 text-center">
+                <img src="/images/Slogan_white.png" class="slogan_img" height="72" alt="">
+            </div>
+        </div>
+    </div>
+</div>

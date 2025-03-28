@@ -1,0 +1,156 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> _userManager;
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorReadingVerificationModel
+@{
+    ViewData["Title"] = "Mirror Meter Auditing - Mirror Reading Verification";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-1 text-left">
+                            <a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                        </div>
+                        @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MirrorReadingVerification, MyVoltage.Data.SecureAreaActionEnum.Add) && !string.IsNullOrEmpty(operationalProvider.CustomerNumber) && Model.LatestReadingOdoCreatedBy != _userManager.GetEmailAsync(_userManager.GetUserAsync(User).Result).Result)
+                        {
+                            <div class="col-2 text-right text-red font-weight-bold align-middle">
+                                Classify @operationalProvider.CustomerMeterSerial As:
+                            </div>
+                            <div class="col-9">
+                                @foreach (var action in Model.A02_MirrorMeterAuditing_MirrorReadingVerificationActions)
+                                {
+                                    <a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingVerification_Action/@action.ActionID/@Model.A02_MirrorMeterAuditing_MirrorReadingUpdateID@(Model.PreviousOdoID.HasValue ? $"/{Model.PreviousOdoID}" : "")" class="btn @action.ActionColor" title="@action.ActionDescription"><i class="fas fa-@action.ActionIcon"></i>&nbsp;@action.ActionDisplayName</a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row col-12">By clicking the verified button, you confirm the following:</div>
+                    <div class="row col-12">1) That the serial number of the meter displayed on the photo agrees to the serial number on the system</div>
+                    <div class="row col-12">2) That the latest audit reading captured on the system agrees to the photo taken</div>
+                    <div class="row col-12">3) That the time at which the photo was taken and the time entered on the system to your knowledge is as correct as possible</div>
+                    <div class="row col-12">4) That the reading captured on the system and the reading on the meter is the same unit base (e.g. both in litres and not kilolitres)</div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col">Company Name</div>
+                                <div class="col">@operationalProvider.CompanyName</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Device Name</div>
+                                <div class="col">@operationalProvider.CustomerMeterName</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Device Serial</div>
+                                <div class="col">@operationalProvider.CustomerMeterSerial</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Type Name</div>
+                                <div class="col">@operationalProvider.CustomerMeterDeviceType</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Latest Live Reading</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.LatestReading.ToDecimal(3) : Model.LatestReading.ToDecimal(0))</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Latest Live Reading Time</div>
+                                <div class="col">@Model.LatestReadingDateTime.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Pending Audit Reading</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.LatestReadingOdo.ToDecimal(3) : Model.LatestReadingOdo.ToDecimal(0))</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Pending Audit Reading Time</div>
+                                <div class="col">@Model.LatestReadingDateTimeOdo.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Pending Audit Reading Created</div>
+                                <div class="col">@Model.LatestReadingOdoCreatedDateTime.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Pending Audit Reading Created By</div>
+                                <div class="col">@Model.LatestReadingOdoCreatedBy</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Verification Reading</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.VerificationReading.ToDecimal(3) : Model.VerificationReading.ToDecimal(0))</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Verification Reading Time</div>
+                                <div class="col">@Model.VerificationReadingDateTime.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Calculated Difference Reading</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.CalculatedDifferenceReading.ToDecimal(3) : Model.CalculatedDifferenceReading.ToDecimal(0))</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Previous Odometer Reading</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.PreviousReadingOdo.ToDecimal(3) : Model.PreviousReadingOdo.ToDecimal(0))</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Actual Reading</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.PreviousVerificationReading.ToDecimal(3) : Model.PreviousVerificationReading.ToDecimal(0))</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Difference</div>
+                                <div class="col">@(operationalProvider.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas ? Model.PreviousCalculatedDifferenceReading.ToDecimal(3) : Model.PreviousCalculatedDifferenceReading.ToDecimal(0))</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Requires Recalculation</div>
+                                <div class="col">@Model.PreviousOdoRequiresRecalc.ToBoolean()</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">Status</div>
+                                <div class="col">@Model.Status.GetDescription()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Last Updated</div>
+                                <div class="col">@Model.ChangedDate.ToDateAndTimeShort()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Last Updated By</div>
+                                <div class="col">@Model.ChangedByUserName</div>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <img src="@Model.LatestReadingOdoPhotoURL" style="max-width:400px;" />
+                            <br />
+                            <a class="btn btn-sm btn-outline-primary-sm mt-2" href="@Model.LatestReadingOdoPhotoURL" target="_blank">Download</a>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        });
+    </script>
+}

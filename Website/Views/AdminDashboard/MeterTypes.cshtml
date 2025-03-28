@@ -1,0 +1,59 @@
+@model MyVoltage.Models.AdminViewModels.MeterTypesViewModel
+@{
+    ViewData["Title"] = "Meter Types";
+}
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row">
+    <a href="/admin/addmeterType" class="btn btn-outline-primary btn-sm float-right my-4">Add New</a>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-bordered admin-table-detail mt-3 table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Type Name</th>
+                    <th scope="col">Default Port</th>
+                    <th scope="col">Default Protocol</th>
+                    <th scope="col">Default Remote Address</th>
+                    <th scope="col">Default Remote Index</th>
+                    <th scope="col">Default Process Interval</th>
+                    <th scope="col">Requires Odo</th>
+                    <th scope="col">Device Type</th>
+                    <th scope="col">Create On Mirror</th>
+                    <th scope="col">Prefix</th>
+                    <th scope="col">Default Config Value</th>
+                    <th scope="col">Default Gateway Hardware Type</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.MeterTypes)
+                {
+                <tr>
+                    <td scope="row">@entry.ID</td>
+                    <td scope="row">@entry.TypeName</td>
+                    <td scope="row">@entry.Port</td>
+                    <td scope="row">@entry.Protocol</td>
+                    <td scope="row">@entry.RemoteAddress</td>
+                    <td scope="row">@entry.RemoteIndex</td>
+                    <td scope="row">@entry.ProcessInterval</td>
+                    <td scope="row">@entry.RequiresOdo</td>
+                    <td scope="row">@entry.DeviceTypeID</td>
+                    <td scope="row">@entry.CreateOnMirror</td>
+                    <td scope="row">@entry.Prefix</td>
+                    <td scope="row">@entry.Config</td>
+                    <td scope="row">@entry.GatewayHardwareType</td>
+                    <td scope="row"><a class="btn" href="/admin/editmetertype/@entry.ID" title="Edit @entry.TypeName">Edit</a></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>

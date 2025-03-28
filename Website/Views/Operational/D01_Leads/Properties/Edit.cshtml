@@ -1,0 +1,1792 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.Properties_EditModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Properties.GetDescription()} - Edit{(Model != null ? $" - {Model.Name}" : "")}";
+}
+<style>
+    /* Always set the map height explicitly to define the size of the div
+                                                        * element that contains the map. */
+    #map {
+        height: 100%;
+        background-color: lightblue;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (Model != null && Model.IsSuccess)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Property successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Property</a>
+                    &nbsp;
+                    <a href="/operational/D01_Leads/D01_Leads_Properties" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-body rounded">
+
+                    <div class="row mb-md-2">
+                        <div class="col">
+                            <a href="/operational/D01_Leads/D01_Leads_Properties" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Properties</a>
+                            @if (opProv.IsDeveloper)
+                            {
+                                <a href="/operational/D01_Leads/D01_Leads_Properties_Delete/@Model.PropertyID" class="btn btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete Forever</a>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <form method="post" asp-action="D01_Leads_Properties_Edit_TrackingInformation" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>0 Tracking information</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Property Lead ID</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.Property.ID
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Status" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                                <span asp-validation-for="Status" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Latest Status Change</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.Property.StatusChangeUserName - @Model.Property.StatusChangeDate.ToDateAndTimeShort(true)
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OverallStatus" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="OverallStatus"></textarea>
+                                <span asp-validation-for="OverallStatus" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Active" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Active", Model.Active, new { @class = "form-control" })
+                                <span asp-validation-for="Active" class="text-red"></span>
+                            </div>
+                        </div>
+                        @if (Model.Property.StatusSortOrder.HasValue && Model.Property.StatusSortOrder.Value > 2)
+                        {
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="CompanyID" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                                    <span asp-validation-for="CompanyID" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <h4>1 Source of the lead</h4>
+                    <p class="alert alert-dark font-italic">
+                        Track how the lead was generated (e.g., website form, referral, event) to evaluate the effectiveness of your lead generation strategies. (i.e. Record how the lead was generated or acquired. This information helps you assess the effectiveness of different marketing and lead generation strategies and optimize your efforts in the future.)
+                    </p>
+                </div>
+                <div class="card-body rounded-bottom">
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Lead Generator</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.Property.CreatedByUsername
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Lead Generator User</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.Property.LeadGeneratorName
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <form id="propertiesInfo" method="post" asp-action="D01_Leads_Properties_Edit_PropertyInformation" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="propertiesInfo" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>2 Property information</h4>
+                        <p class="alert alert-dark font-italic">
+                            Understand the property lead by collecting info such as name, property type, size, location, and any other relevant details.
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Name" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Description" />
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PropertyTypeID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("PropertyTypeID", Model.PropertyTypeID, new { @class = "form-control" })
+                                <span asp-validation-for="PropertyTypeID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NoOfRegisteredUnits" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NoOfRegisteredUnits" />
+                                <span asp-validation-for="NoOfRegisteredUnits" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NoOfMeteringPoints" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NoOfMeteringPoints" />
+                                <span asp-validation-for="NoOfMeteringPoints" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="YearOfDevelopment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="YearOfDevelopment" />
+                                <span asp-validation-for="YearOfDevelopment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="AverageValuation" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="AverageValuation" />
+                                <span asp-validation-for="AverageValuation" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="AverageLSM" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="AverageLSM" />
+                                <span asp-validation-for="AverageLSM" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Province" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Province", Model.Province, new { @class = "form-control", @onChange = "DoSelectedProvince();" })
+                                <span asp-validation-for="Province" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="TownOrCity" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("TownOrCity", Model.TownOrCity, new { @class = "form-control", @onChange = "DoSelectedTown();" })
+                                <span asp-validation-for="TownOrCity" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Suburb" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Suburb", Model.Suburb, new { @class = "form-control" })
+                                <span asp-validation-for="Suburb" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StreetAddress" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="StreetAddress" />
+                                <span asp-validation-for="StreetAddress" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LocalMunicipality" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LocalMunicipality", Model.LocalMunicipality, new { @class = "form-control" })
+                                <span asp-validation-for="LocalMunicipality" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+@*                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Address" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Address" />
+                                <span asp-validation-for="Address" class="text-red"></span>
+                            </div>
+                        </div>
+
+*@                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Website" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Website" />
+                                <span asp-validation-for="Website" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="GPSLat" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="GPSLat" />
+                                <span asp-validation-for="GPSLat" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="GPSLong" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="GPSLong" />
+                                <span asp-validation-for="GPSLong" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div id="map" style="height:600px"></div>
+                        <div style="clear:both; height:50px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="contactDetails" method="post" asp-action="D01_Leads_Properties_Edit_ContactDetails" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="contactDetails" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <div class="row col-12">
+                            <h4>3 Contact details</h4>
+                            <p class="alert alert-dark font-italic">
+                                Obtain the contact lead's full name, job title, email address, phone number, and any other relevant contact information. Link it to the property that is the ultimate goal of making a sale.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PartnerID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("PartnerID", Model.PartnerID, new { @class = "form-control" })
+                                <span asp-validation-for="PartnerID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <h5>Linked To Contacts</h5>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <a href="/operational/D01_Leads/D01_Leads_Contacts_AddToProperty?PropertyID=@Model.PropertyID&R=Property" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Link Contact to @Model.Name</a>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="row col-12">
+                                <table class="table table-sm table-striped table-hover table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Full Name</th>
+                                            <th scope="col">Phone Number</th>
+                                            <th scope="col">Alt Phone Number</th>
+                                            <th scope="col">Complex Name</th>
+                                            <th scope="col">ID Number Or Company Reg</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.ContactsItems)
+                                        {
+                                            string rowClass = "";
+                                            string title = $"{item.FullName}";
+                                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                                <td scope="col" class="text-nowrap">
+                                                    @item.FullName
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @item.PhoneNumber
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @item.AltPhoneNumber
+                                                </td>
+                                                <td scope="col" class="text-nowrap text-right">
+                                                    @item.ComplexName
+                                                </td>
+                                                <td scope="col" class="text-nowrap text-right">
+                                                    @item.IDNumberOrCompanyReg
+                                                </td>
+                                                <td scope="col">
+                                                    <a href="/operational/D01_Leads/D01_Leads_Contacts_Edit/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                                    &nbsp;
+                                                    <a href="/operational/D01_Leads/D01_Leads_Contacts_DeleteFromProperty?ContactID=@item.ID&PropertyID=@Model.PropertyID&R=Property" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Remove Link</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <h5>Linked To ManagingAgents</h5>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <a href="/operational/D01_Leads/D01_Leads_ManagingAgents_AddToProperty?PropertyID=@Model.PropertyID&R=Property" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Link ManagingAgent to @Model.Name</a>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="row col-12">
+                                <table class="table table-sm table-striped table-hover table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Full Name</th>
+                                            <th scope="col">Phone Number</th>
+                                            <th scope="col">Alt Phone Number</th>
+                                            <th scope="col">Complex Name</th>
+                                            <th scope="col">ID Number Or Company Reg</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.ManagingAgentsItems)
+                                        {
+                                            string rowClass = "";
+                                            string title = $"{item.FullName}";
+                                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                                <td scope="col" class="text-nowrap">
+                                                    @item.FullName
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @item.PhoneNumber
+                                                </td>
+                                                <td scope="col" class="text-nowrap">
+                                                    @item.AltPhoneNumber
+                                                </td>
+                                                <td scope="col" class="text-nowrap text-right">
+                                                    @item.ComplexName
+                                                </td>
+                                                <td scope="col" class="text-nowrap text-right">
+                                                    @item.IDNumberOrCompanyReg
+                                                </td>
+                                                <td scope="col">
+                                                    <a href="/operational/D01_Leads/D01_Leads_ManagingAgents_Edit/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                                    &nbsp;
+                                                    <a href="/operational/D01_Leads/D01_Leads_ManagingAgents_DeleteFromProperty?ManagingAgentID=@item.ID&PropertyID=@Model.PropertyID&R=Property" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Remove Link</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="painPoints" method="post" asp-action="D01_Leads_Properties_Edit_PainPointsAndNeeds" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="painPoints" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>4 Pain points and needs</h4>
+                        <p class="alert alert-dark font-italic">
+                            Identify the challenges, pain points, or goals the property lead wants to be addressed. This information will help tailor the sales pitch to their specific requirements. (i.e.  Understand the specific needs and challenges. Identify the problems they are trying to solve or the goals they want to achieve.
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfIdentifiedPainPoints" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfIdentifiedPainPoints"></textarea>
+                                <span asp-validation-for="DetailsOfIdentifiedPainPoints" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NeedsIdentified" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="NeedsIdentified"></textarea>
+                                <span asp-validation-for="NeedsIdentified" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="KeyObjectivesIdentified" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="KeyObjectivesIdentified"></textarea>
+                                <span asp-validation-for="KeyObjectivesIdentified" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="leadProducts" method="post" asp-action="D01_Leads_Properties_Edit_Products" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="leadProducts" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>5 Products</h4>
+                        <p class="alert alert-dark font-italic">
+                            The products the property lead is in need of
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ProductID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ProductID", Model.ProductID, new { @class = "form-control" })
+                                <span asp-validation-for="ProductID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ServiceID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ServiceID", Model.ServiceID, new { @class = "form-control" })
+                                <span asp-validation-for="ServiceID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="budgetAuthority" method="post" asp-action="D01_Leads_Properties_Edit_BudgetAndPurchasingAuthority" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="budgetAuthority" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>6 Budget and purchasing authority</h4>
+                        <p class="alert alert-dark font-italic">
+                            Determine the property lead's budget range and their decision-making authority. This information will help gauge the potential for a sale and tailor the offerings accordingly. i.e.  Determine the property lead's budget or financial capabilities to ensure that the product or service aligns with their financial capacity.
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LeadsBudgetRequirements" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="LeadsBudgetRequirements"></textarea>
+                                <span asp-validation-for="LeadsBudgetRequirements" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LeadsPurchasingAuthority" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="LeadsPurchasingAuthority"></textarea>
+                                <span asp-validation-for="LeadsPurchasingAuthority" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="solutionProvider" method="post" asp-action="D01_Leads_Properties_Edit_CurrentSolutionProvider" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="solutionProvider" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>7 Current solution/provider</h4>
+                        <p class="alert alert-dark font-italic">
+                            Determine if the property lead is currently using a similar product or service and gather information about their satisfaction level. This knowledge can help to position the offering as a better alternative. (i.e.  Find out if the lead is currently using any alternative solutions or providers for the problem you aim to solve. Knowing this will allow you to highlight the unique value your offering brings.)
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfCurrentSolution" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfCurrentSolution"></textarea>
+                                <span asp-validation-for="DetailsOfCurrentSolution" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfCurrentServiceProvider" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfCurrentServiceProvider"></textarea>
+                                <span asp-validation-for="DetailsOfCurrentServiceProvider" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="competition" method="post" asp-action="D01_Leads_Properties_Edit_Competition" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="competition" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>8 Competition</h4>
+                        <p class="alert alert-dark font-italic">
+                            Identify any competitors the property lead is considering or has previously considered. This will allow us to highlight the unique value proposition and differentiate from others. (i.e.  Identify if the lead is considering or using products/services from your competitors. This will help to tailor the sales pitch and differentiate our offering.)
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfCompetitionInMarket" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfCompetitionInMarket"></textarea>
+                                <span asp-validation-for="DetailsOfCompetitionInMarket" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="salesAnalysis" method="post" asp-action="D01_Leads_Properties_Edit_SalesViabilityAnalysis" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="salesAnalysis" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>9 Sales viability analysis</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">No Of Registered Units</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.Property.NoOfRegisteredUnits
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">No Of Metering Points</label>
+                            </div>
+                            <div class="col-6">
+                                @Model.Property.NoOfMeteringPoints
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ExpectedMonthlyGrossProfitPerRegisteredUnit" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ExpectedMonthlyGrossProfitPerRegisteredUnit" />
+                                <span asp-validation-for="ExpectedMonthlyGrossProfitPerRegisteredUnit" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ExpectedAverageCapitalCostPerMeteringPoint" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ExpectedAverageCapitalCostPerMeteringPoint" />
+                                <span asp-validation-for="ExpectedAverageCapitalCostPerMeteringPoint" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Total calculated expected monthly gross profit</label>
+                            </div>
+                            <div class="col-6">
+                                @if (Model.Property.NoOfRegisteredUnits.HasValue && Model.ExpectedMonthlyGrossProfitPerRegisteredUnit.HasValue)
+                                {
+                                    <span>@((Model.Property.NoOfRegisteredUnits.Value * Model.ExpectedMonthlyGrossProfitPerRegisteredUnit.Value).ToMoney())</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label">Total calculated expected average capital cost</label>
+                            </div>
+                            <div class="col-6">
+                                @if (Model.Property.NoOfMeteringPoints.HasValue && Model.ExpectedAverageCapitalCostPerMeteringPoint.HasValue)
+                                {
+                                    <span>@((Model.Property.NoOfMeteringPoints.Value * Model.ExpectedAverageCapitalCostPerMeteringPoint.Value).ToMoney())</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ExpectedElectricityConsumption" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ExpectedElectricityConsumption" />
+                                <span asp-validation-for="ExpectedElectricityConsumption" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="influencers" method="post" asp-action="D01_Leads_Properties_Edit_InfluencersAndDecisionMakers" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="influencers" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>10 Influencers and decision-makers</h4>
+                        <p class="alert alert-dark font-italic">
+                            Determine who is involved in the decision-making process within the property lead's organization. Identify key stakeholders and influencers to ensure we address their concerns and gain their support. (i.e.  Determine the property lead's authority to make purchasing decisions independently or if they need approval from higher-ups or a procurement department.)
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfInfluencersIdentified" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfInfluencersIdentified"></textarea>
+                                <span asp-validation-for="DetailsOfInfluencersIdentified" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOnDecisionMakersIdentified" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOnDecisionMakersIdentified"></textarea>
+                                <span asp-validation-for="DetailsOnDecisionMakersIdentified" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfDecisionMakingProcess" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfDecisionMakingProcess"></textarea>
+                                <span asp-validation-for="DetailsOfDecisionMakingProcess" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ManagingAgent" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="ManagingAgent"></textarea>
+                                <span asp-validation-for="ManagingAgent" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BodyCorp" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="BodyCorp"></textarea>
+                                <span asp-validation-for="BodyCorp" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="InformationOnLandlord" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="InformationOnLandlord"></textarea>
+                                <span asp-validation-for="InformationOnLandlord" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="communicationPreferences" method="post" asp-action="D01_Leads_Properties_Edit_CommunicationPreferences" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="communicationPreferences" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>11 Communication preferences</h4>
+                        <p class="alert alert-dark font-italic">
+                            Ask the property  lead's contacts about their preferred communication channels (e.g., email, phone, in-person meetings) and frequency of contact. Respecting their preferences can enhance the relationship-building process.  If the lead has had any previous interactions with us as a company, gather information about those engagements. This includes any previous communication, inquiries, or interactions with the website, events, or marketing materials. Understanding their previous engagement history can provide context and inform the approach.
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CommunicationPreferences" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="CommunicationPreferences"></textarea>
+                                <span asp-validation-for="CommunicationPreferences" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DetailsOfPreviousInteractions" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="DetailsOfPreviousInteractions"></textarea>
+                                <span asp-validation-for="DetailsOfPreviousInteractions" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="timelines" method="post" asp-action="D01_Leads_Properties_Edit_Timelines" asp-route-propertyID="@Model.PropertyID" asp-route-sectionID="timelines" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>12 Timelines</h4>
+                        <p class="alert alert-dark font-italic">
+                            Understand the property lead's timeline for making a purchase decision. Knowing when they intend to implement a solution can help prioritize and manage sales pipeline effectively. (i.e.  Determine the prospect's timeframe for making a decision or implementing a solution. This will help you prioritize and align your sales process accordingly.)
+                        </p>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Comments" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="Comments"></textarea>
+                                <span asp-validation-for="Comments" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NextFollowUpDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" asp-for="NextFollowUpDate" />
+                                <span asp-validation-for="NextFollowUpDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                    <div class="card-footer">
+
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changed from</th>
+                                <th>To</th>
+                                <th>Days In Status</th>
+                            </tr>
+
+                            @foreach (var item in Model.D01_Property_Status_LogItems)
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>
+                                        @(Html.Raw(item.StatusBeforeText))
+                                    </td>
+                                    <td>
+                                        @(Html.Raw(item.StatusAfterText))
+                                    </td>
+                                    <td>@item.DaysInStatus.ToString("N2")</td>
+                                </tr>
+                            }
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row mb-4" id="salesCommissions">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <div class="row col-12">
+                        <h4>13 Sales Commissions</h4>
+                        <p class="alert alert-dark font-italic">
+                            Obtain the contact lead's full name, job title, email address, phone number, and any other relevant contact information. Link it to the property that is the ultimate goal of making a sale.
+                        </p>
+                    </div>
+                </div>
+                <div class="card-body rounded-bottom">
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <h5>Targets</h5>
+                        </div>
+                    </div>
+                    <div class="row mb-md-2">
+                        <div class="row col-12">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="min-width:200px;">User</th>
+                                        <th scope="col" style="min-width:200px;">Property</th>
+                                        <th scope="col" style="min-width:200px;">Remuneration Type</th>
+                                        <th scope="col" style="min-width:50px;">Type</th>
+                                        <th scope="col" style="min-width:50px;">Interval</th>
+                                        <th scope="col" style="min-width:50px;">Price</th>
+                                        <th scope="col" style="min-width:50px;">Units</th>
+                                        <th scope="col" style="min-width:50px;">Total</th>
+                                        <th scope="col" style="min-width:50px;">Month Target</th>
+                                        <th scope="col">Created By</th>
+                                        <th scope="col">Approved By</th>
+                                        <th scope="col">Paid By</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="target_UserID" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.LocalUsers)
+                                                {
+                                                    <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input type="hidden" id="hidden-target_PropertyID" name="hidden-PropertyID" value="">
+                                            <input type="text" id="target_PropertyID" class="form-control" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="target_CommissionID" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.D01_Leads_Commissions)
+                                                {
+                                                    <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            Target
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Interval" type="text" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Price" type="text" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Units" type="text" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Total" type="text" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="target_Month" type="month" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap"></td>
+                                        <td scope="col" class="text-nowrap"></td>
+                                        <td scope="col" class="text-nowrap"></td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoAddCommissionTarget();" href="#salesCommissions" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                        </td>
+                                    </tr>
+                                    @foreach (var item in Model.Property.D01_Leads_Commissions_Details_Target_Items)
+                                    {
+                                        <tr>
+                                            <td scope="col" class="text-nowrap">
+                                                <select id="target_UserID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                    @foreach (var bCT in Model.LocalUsers)
+                                                    {
+                                                        if (item.UserID == bCT.Value)
+                                                        {
+                                                            <option value="@(bCT.Value)" selected="selected">@(bCT.Text)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <input type="hidden" id="hidden-target_PropertyID@(item.ID)" name="hidden-PropertyID" value="@(item.PropertyID.HasValue ? item.PropertyID.ToString() : "")">
+                                                <input type="text" id="target_PropertyID@(item.ID)" class="form-control" value="@item.PropertyName" readonly="readonly" />
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <select id="target_CommissionID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                    @foreach (var bCT in Model.D01_Leads_Commissions)
+                                                    {
+                                                        if (item.D01_Leads_CommissionsID == bCT.ID)
+                                                        {
+                                                            <option value="@(bCT.ID)" selected="selected">@(bCT.Description)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                Target
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                @item.D01_Leads_Commission.Interval.GetDescription()
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                @item.D01_Leads_Commission.Price.ToMoney()
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <input class="form-control" id="target_Units@(item.ID)" type="text" value="@item.Units.ToMoneyNoDecimal()" />
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                @item.Total.ToMoney()
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <input class="form-control" id="target_Month@(item.ID)" type="month" value="@item.MonthTarget.ToString("yyyy-MM")" />
+                                            </td>
+                                            <td scope="col" class="text-nowrap">@item.CreatedByUsername - @item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                            <td scope="col" class="text-nowrap">@item.ApprovedByUsername - @item.ApprovedByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                            <td scope="col" class="text-nowrap">@item.PaidByUsername - @item.PaidByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                            <td scope="col" class="text-nowrap">
+                                                <a onclick="DoUpdateCommissionTarget('@(item.ID)');" href="#salesCommissions" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                                &nbsp;
+                                                <a onclick="DoDeleteCommissionTarget('@(item.ID)');" href="#salesCommissions" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <h5>Actuals</h5>
+                        </div>
+                    </div>
+                    <div class="row mb-md-2">
+                        <div class="row col-12">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="min-width:200px;">User</th>
+                                        <th scope="col" style="min-width:200px;">Property</th>
+                                        <th scope="col" style="min-width:200px;">Remuneration Type</th>
+                                        <th scope="col" style="min-width:50px;">Type</th>
+                                        <th scope="col" style="min-width:50px;">Interval</th>
+                                        <th scope="col" style="min-width:50px;">Price</th>
+                                        <th scope="col" style="min-width:50px;">Units</th>
+                                        <th scope="col" style="min-width:50px;">Total</th>
+                                        <th scope="col" style="min-width:50px;">Month Actual</th>
+                                        <th scope="col">Created By</th>
+                                        <th scope="col">Approved By</th>
+                                        <th scope="col">Paid By</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="actual_UserID" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.LocalUsers)
+                                                {
+                                                    <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input type="hidden" id="hidden-actual_PropertyID" name="hidden-PropertyID" value="">
+                                            <input type="text" id="actual_PropertyID" class="form-control" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="actual_CommissionID" class="form-control" onchange="FillInUserName('');">
+                                                @foreach (var bCT in Model.D01_Leads_Commissions)
+                                                {
+                                                    <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            Actual
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Interval" type="text" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Price" type="text" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Units" type="text" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Total" type="text" readonly="readonly" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="actual_Month" type="month" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap"></td>
+                                        <td scope="col" class="text-nowrap"></td>
+                                        <td scope="col" class="text-nowrap"></td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoAddCommissionActual();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                        </td>
+                                    </tr>
+                                    @foreach (var item in Model.Property.D01_Leads_Commissions_Details_Actual_Items)
+                                    {
+                                        <tr>
+                                            <td scope="col" class="text-nowrap">
+                                                <select id="actual_UserID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                    @foreach (var bCT in Model.LocalUsers)
+                                                    {
+                                                        if (item.UserID == bCT.Value)
+                                                        {
+                                                            <option value="@(bCT.Value)" selected="selected">@(bCT.Text)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <input type="hidden" id="hidden-actual_PropertyID@(item.ID)" name="hidden-PropertyID" value="@(item.PropertyID.HasValue ? item.PropertyID.ToString() : "")">
+                                                <input type="text" id="actual_PropertyID@(item.ID)" class="form-control" value="@item.PropertyName" readonly="readonly" />
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <select id="actual_CommissionID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                    @foreach (var bCT in Model.D01_Leads_Commissions)
+                                                    {
+                                                        if (item.D01_Leads_CommissionsID == bCT.ID)
+                                                        {
+                                                            <option value="@(bCT.ID)" selected="selected">@(bCT.Description)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(bCT.ID)">@(bCT.Description)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                Actual
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                @item.D01_Leads_Commission.Interval.GetDescription()
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                @item.D01_Leads_Commission.Price.ToMoney()
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <input class="form-control" id="actual_Units@(item.ID)" type="text" value="@item.Units.ToMoneyNoDecimal()" />
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                @item.Total.ToMoney()
+                                            </td>
+                                            <td scope="col" class="text-nowrap">
+                                                <input class="form-control" id="actual_Month@(item.ID)" type="month" value="@item.MonthPayable.ToString("yyyy-MM")" />
+                                            </td>
+                                            <td scope="col" class="text-nowrap">@item.CreatedByUsername - @item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                            <td scope="col" class="text-nowrap">@item.ApprovedByUsername - @item.ApprovedByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                            <td scope="col" class="text-nowrap">@item.PaidByUsername - @item.PaidByUserTimestamp.ToDateAndTimeShort(true)</td>
+                                            <td scope="col" class="text-nowrap">
+                                                <a onclick="DoUpdateCommissionActual('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                                &nbsp;
+                                                <a onclick="DoDeleteCommissionActual('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <h5 class="text-orange">Edit History</h5>
+                </div>
+
+                <div class="card-body rounded-bottom">
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Changes</th>
+                        </tr>
+
+                        @foreach (var item in Model.SiteAdmin_Property_LogItems.OrderByDescending(p => p.DateCreated))
+                        {
+                            <tr>
+                                <td class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                                <td class="text-nowrap">@item.Username</td>
+                                <td>
+                                    @(Html.Raw(item.SystemDescription))
+                                </td>
+                            </tr>
+                        }
+
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({
+            key: "AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk",
+            v: "weekly",
+        });
+    </script>
+    <script>
+        // Load Suburbs/Towns/Provinces for page load
+
+        if ('@(Model.Property.SuburbID.HasValue)'  == 'True') {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+            var provinces = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Provinces)));
+            var municipalities = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Municipalities)));
+
+            $("#Province").empty();
+            $("#Province").append(`<option value="">[--Select Province--]</option>`);
+            $(provinces).each(function () {
+                if (this.Value == '@Model.Property.ProvinceID') {
+                    $("#Province").append(`<option selected="selected" value="${this.Value}">${this.Text}</option>`);
+                }
+                else {
+                    $("#Province").append(`<option value="${this.Value}">${this.Text}</option>`);
+                }
+            });
+            $("#Province").val('@(Model.Property.ProvinceID)');
+
+            $("#Municipality").empty();
+            $(municipalities).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    if (this.ID.toString() == '@Model.Property.MunicipalityID') {
+                        $("#Municipality").append(`<option selected="selected" value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                    else {
+                        $("#Municipality").append(`<option value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                }
+            });
+            $("#Municipality").val('@(Model.Property.MunicipalityID)');
+
+            $("#TownOrCity").empty();
+            $(towns).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    if (this.ID.toString() == '@Model.Property.TownID') {
+                        $("#TownOrCity").append(`<option selected="selected" value="${this.ID}">${this.TownName}</option>`);
+                    }
+                    else {
+                        $("#TownOrCity").append(`<option value="${this.ID}">${this.TownName}</option>`);
+                    }
+                }
+            });
+            $("#TownOrCity").val('@(Model.Property.TownID)');
+
+            $("#Suburb").empty();
+            $(suburbs).each(function () {
+                if (this.TownID == $("#TownOrCity").val()) {
+                    if (this.ID.toString() == '@Model.Property.SuburbID') {
+                        $("#Suburb").append(`<option selected="selected" value="${this.ID}">${this.SuburbName}</option>`);
+                    }
+                    else {
+                        $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                    }
+                }
+            });
+            $("#Suburb").val('@(Model.Property.SuburbID)');
+        }
+        else {
+            var provinces = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Provinces)));
+
+            $("#Province").empty();
+            $("#Province").append(`<option value="">[--Select Province--]</option>`);
+            $(provinces).each(function () {
+                $("#Province").append(`<option value="${this.Value}">${this.Text}</option>`);
+            });
+            $("#Province").val('@(Model.Property.ProvinceID)');
+
+            $("#LocalMunicipality").empty();
+            $("#LocalMunicipality").append(`<option value="">[--Select Province--]</option>`);
+            $('#LocalMunicipality').prop('disabled', 'disabled');
+
+            $("#TownOrCity").empty();
+            $("#TownOrCity").append(`<option value="">[--Select Province--]</option>`);
+            $('#TownOrCity').prop('disabled', 'disabled');
+
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[--Select Province--]</option>`);
+            $('#Suburb').prop('disabled', 'disabled');
+        }
+
+        function DoSelectedProvince() {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+            var municipalities = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Municipalities)));
+
+            $("#LocalMunicipality").append(`<option value="">[--Select Municipality--]</option>`);
+            $('#LocalMunicipality').prop('disabled', false);
+            $("#LocalMunicipality").empty();
+            $(municipalities).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    if (this.ID.toString() == '@Model.Property.MunicipalityID') {
+                        $("#LocalMunicipality").append(`<option selected="selected" value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                    else {
+                        $("#LocalMunicipality").append(`<option value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                }
+            });
+
+            $('#TownOrCity').prop('disabled', false);
+            $("#TownOrCity").empty();
+            $("#TownOrCity").append(`<option value="">[--Select Town--]</option>`);
+            $(towns).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    $("#TownOrCity").append(`<option value="${this.ID}">${this.TownName}</option>`);
+                }
+            });
+
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[--Select Town--]</option>`);
+            $('#Suburb').prop('disabled', 'disabled');
+            $(suburbs).each(function () {
+                if (this.TownID == $("#TownOrCity").val()) {
+                    $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                }
+            });
+        }
+
+        function DoSelectedTown() {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+
+            $('#Suburb').prop('disabled', false);
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[--Select Suburb--]</option>`);
+            $(suburbs).each(function () {
+                if (this.TownID == $("#TownOrCity").val()) {
+                    $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                }
+            });
+        }
+
+        function DoAddCommissionActual() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#actual_Units").val() == "") {
+                alert("Units required");
+                $("#actual_Units").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#actual_Month").val() == "") {
+                alert("Month required");
+                $("#actual_Month").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Add_Actual",
+                {
+                    actual_UserID: $("#actual_UserID").val(),
+                    actual_PropertyID: @(Model.PropertyID),
+                    actual_CommissionID: $("#actual_CommissionID").val(),
+                    actual_Units: $("#actual_Units").val(),
+                    actual_Month: $("#actual_Month").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateCommissionActual(ID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#actual_Units" + ID).val() == "") {
+                alert("Units required");
+                $("#actual_Units" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#actual_Month" + ID).val() == "") {
+                alert("Month required");
+                $("#actual_Month" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Update_Actual/" + ID,
+                {
+                    actual_UserID: $("#actual_UserID" + ID).val(),
+                    actual_PropertyID: @(Model.PropertyID),
+                    actual_CommissionID: $("#actual_CommissionID" + ID).val(),
+                    actual_Units: $("#actual_Units" + ID).val(),
+                    actual_Month: $("#actual_Month" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteCommissionActual(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Delete_Actual/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddCommissionTarget() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#target_Units").val() == "") {
+                alert("Units required");
+                $("#target_Units").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#target_Month").val() == "") {
+                alert("Month required");
+                $("#target_Month").focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Add_Target",
+                {
+                    target_UserID: $("#target_UserID").val(),
+                    target_PropertyID: @(Model.PropertyID),
+                    target_CommissionID: $("#target_CommissionID").val(),
+                    target_Units: $("#target_Units").val(),
+                    target_Month: $("#target_Month").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateCommissionTarget(ID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#target_Units" + ID).val() == "") {
+                alert("Units required");
+                $("#target_Units" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            if ($("#target_Month" + ID).val() == "") {
+                alert("Month required");
+                $("#target_Month" + ID).focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Update_Target/" + ID,
+                {
+                    target_UserID: $("#target_UserID" + ID).val(),
+                    target_PropertyID: @(Model.PropertyID),
+                    target_CommissionID: $("#target_CommissionID" + ID).val(),
+                    target_Units: $("#target_Units" + ID).val(),
+                    target_Month: $("#target_Month" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteCommissionTarget(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Details_Delete_Target/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+        async function initMap() {
+
+            const { Map } = await google.maps.importLibrary("maps");
+            map = new Map(document.getElementById("map"), {
+                center: { lat: -25.8092082, lng: 28.2957713 },
+                zoom: 15,
+            });
+
+            infoWindow = new google.maps.InfoWindow();
+
+            if ("@(Model.Property.GPSLat.HasValue && Model.Property.GPSLong.HasValue)" == "True") {
+
+                const SystemButton = document.createElement("button");
+
+                SystemButton.textContent = "System Location";
+                SystemButton.classList.add("custom-map-control-button");
+                SystemButton.classList.add("btn");
+                SystemButton.classList.add("btn-sm");
+                SystemButton.classList.add("btn-outline");
+                map.controls[google.maps.ControlPosition.TOP_CENTER].push(SystemButton);
+                SystemButton.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const pos = {
+                                    lat: @(Model.Property.GPSLat.HasValue ? Model.Property.GPSLat.ToString() : "0"),
+                                    lng: @(Model.Property.GPSLong.HasValue ? Model.Property.GPSLong.ToString() : "0"),
+                                };
+
+                                infoWindow.setPosition(pos);
+                                infoWindow.setContent("System Location");
+                                infoWindow.open(map);
+                                map.setCenter(pos);
+                            },
+                            () => {
+                                handleLocationError(true, infoWindow, map.getCenter());
+                            }
+                        );
+                    } else {
+                        // Browser doesn't support Geolocation
+                        handleLocationError(false, infoWindow, map.getCenter());
+                    }
+                });
+
+            }
+
+
+            const locationButton = document.createElement("button");
+
+            locationButton.textContent = "Your location";
+            locationButton.classList.add("custom-map-control-button");
+            locationButton.classList.add("btn");
+            locationButton.classList.add("btn-sm");
+            locationButton.classList.add("btn-outline");
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+            locationButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const pos = {
+                                lat: position.coords.latitude,
+
+                                lng: position.coords.longitude,
+                            };
+
+                            infoWindow.setPosition(pos);
+                            infoWindow.setContent("Your location");
+                            infoWindow.open(map);
+                            map.setCenter(pos);
+                        },
+                        () => {
+                            handleLocationError(true, infoWindow, map.getCenter());
+                        }
+                    );
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false, infoWindow, map.getCenter());
+                }
+            });
+
+            function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+                infoWindow.setPosition(pos);
+                infoWindow.setContent(
+                    browserHasGeolocation
+                        ? "Error: The Geolocation service failed."
+                        : "Error: Your browser doesn't support geolocation."
+                );
+                infoWindow.open(map);
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+
+                        infoWindow.setPosition(pos);
+                        infoWindow.setContent("Your location");
+                        infoWindow.open(map);
+                        map.setCenter(pos);
+                    },
+                    () => {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                    }
+                );
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+
+        }
+        initMap();
+    </script>
+}

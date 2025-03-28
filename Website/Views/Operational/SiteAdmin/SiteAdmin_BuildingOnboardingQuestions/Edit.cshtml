@@ -1,0 +1,140 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_BuildingOnboardingQuestionsModels.SiteAdmin_BuildingOnboardingQuestionsEditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_BuildingOnboardingQuestions.GetDescription()} - Edit";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Building Onboarding Question successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/SiteAdmin/SiteAdmin_BuildingOnboardingQuestions/Edit/@Model.BuildingOnboardingQuestion.ID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    BuildingOnboardingQuestion Details:
+                </div>
+                <form asp-action="SiteAdmin_BuildingOnboardingQuestions_Edit" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Heading" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Heading" />
+                                <span asp-validation-for="Heading" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="Description"></textarea>
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="QuestionTypeID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("QuestionTypeID", Model.QuestionTypeID, new { @class = "form-control" })
+                                <span asp-validation-for="QuestionTypeID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LinkedSecureArea" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LinkedSecureArea", Model.LinkedSecureArea, new { @class = "form-control" })
+                                <span asp-validation-for="LinkedSecureArea" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/SiteAdmin/SiteAdmin_BuildingOnboardingQuestions" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Building Onboarding Questions</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row col-12 mb-md-2">
+                            <h6>Companies Linked:</h6>
+                        </div>
+                        <div class="row col-12 mb-md-2">
+                            @foreach (var userCompany in Model.BuildingOnboardingQuestions_Companies)
+                            {
+                                var company = operationalProvider.Companies.Where(p => p.CompanyID == userCompany.CompanyID).SingleOrDefault();
+                                <div class="border border-primary rounded p-2 m-1">
+                                    @company.Name
+                                    <text>&nbsp;</text>
+                                    <a href="/operational/SiteAdmin/SiteAdmin_BuildingOnboardingQuestions/DeleteCompany/@Model.BuildingOnboardingQuestion.ID/@userCompany.ID" title="Remove @company.Name from @Model.Description"><i class="fas fa-trash-alt"></i></a>
+                                </div>
+                            }
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-3 text-right">
+                                <select id="addCompanyDropDown" class="form-control">
+                                    @foreach (var company in operationalProvider.Companies)
+                                    {
+                                        if (Model.BuildingOnboardingQuestions_Companies.Where(p => p.CompanyID == company.CompanyID).Count() == 0)
+                                        {
+                                            <option value="@company.CompanyID">@company.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col"><a href="#" onclick="AddCompany();" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Company</a></div>
+                        </div>
+                    </div>
+
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function AddCompany() {
+            var companyID = $("#addCompanyDropDown").val();
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_BuildingOnboardingQuestions/AddCompany/@Model.BuildingOnboardingQuestion.ID/' + companyID;
+        }
+    </script>
+}

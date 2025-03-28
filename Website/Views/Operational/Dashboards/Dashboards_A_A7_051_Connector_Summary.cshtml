@@ -1,0 +1,58 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A7_051_Connector_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_Connector_Summary.GetDescription() Details</h5>
+</div>
+@if (Model.A7_051_Connector_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Latest Connection Run</th>
+
+                <th scope="col">More Than 7 Days</th>
+                <th scope="col">Less Than 7 Days</th>
+                <th scope="col">Less Than 3 Days</th>
+                <th scope="col">Less Than 24 Hours</th>
+                <th scope="col">Less Than 4 Hours</th>
+                <th scope="col">Offline</th>
+                <th scope="col">Online</th>
+
+                <th scope="col">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A7_051_Connector_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_Connector_Details")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.Name</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+                    <td scope="col">@item.LatestConnectionRun.ToDateAndTimeShort(true)</td>
+                    <td scope="col">@item.MoreThan7DaysCount</td>
+                    <td scope="col">@item.LessThan7DaysCount</td>
+                    <td scope="col">@item.LessThan3DaysCount</td>
+                    <td scope="col">@item.LessThan24HoursCount</td>
+                    <td scope="col">@item.LessThan4HoursCount</td>
+                    <td scope="col">@item.OfflineCount</td>
+                    <td scope="col">@item.OnlineCount</td>
+
+                    <td scope="col">@item.TotalCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

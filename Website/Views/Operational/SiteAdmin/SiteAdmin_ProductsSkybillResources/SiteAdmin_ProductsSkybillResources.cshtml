@@ -1,0 +1,131 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_ProductsSkybillResourcesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_ProductsSkybillResources.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table-sm table-responsive-xl table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Company</th>
+            <th scope="col">No</th>
+            <th scope="col">Name</th>
+            <th scope="col">Type</th>
+            <th scope="col">Usage Calculation Type</th>
+            <th scope="col">Base Unit Of Measure</th>
+            <th scope="col">Resource Group No</th>
+            <th scope="col">Linked Product</th>
+            <th scope="col">Unit Billing</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.SiteAdmin_ProductsSkybillResourcesItems)
+        {
+            string rowclass = "";
+            @if (!item.ProductID.HasValue)
+            {
+                rowclass = "table-danger";
+            }
+            <tr class="@Html.Raw(rowclass)" title="@item.UpdatedByUsername - @item.DateUpdated.ToDateAndTimeShort(true)">
+                <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                <td scope="col" class="text-nowrap">@item.No</td>
+                <td scope="col" class="text-nowrap">@item.Name</td>
+                <td scope="col" class="text-nowrap">@item.Type</td>
+                <td scope="col" class="text-nowrap">@item.Usage_Calculation_Type</td>
+                <td scope="col" class="text-nowrap">@item.Base_Unit_Of_Measure</td>
+                <td scope="col" class="text-nowrap">@item.Resource_Group_No</td>
+                <td scope="col">
+                    <select class="form-control" id="add_counciltype_@item.ID" onchange="DpUpdate('@item.ID', 'add_counciltype_@item.ID');">
+                        @if (!item.ProductID.HasValue)
+                        {
+                            <option value="" selected="selected">[Not Linked]</option>
+                        }
+                        else
+                        {
+                            <option value="">[Not Linked]</option>
+                        }
+                        @foreach (var bCT in Model.SiteAdmin_Products)
+                        {
+                            @if (item.ProductID.HasValue && item.ProductID.Value == bCT.ID)
+                            {
+                                <option value="@(bCT.ID)" selected="selected">@bCT.ProductName</option>
+                            }
+                            else
+                            {
+                                <option value="@(bCT.ID)">@bCT.ProductName</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select class="form-control" id="add_excludeunitsfrombilling_@item.ID" onchange="DpUpdateExcludeUnitsFromBilling('@item.ID', 'add_excludeunitsfrombilling_@item.ID');">
+                        @if (item.ExcludeUnitsFromBilling)
+                        {
+                            <option selected="selected" value="true">Exclude Units From Billing</option>
+                            <option value="false">Include Units From Billing</option>
+                        }
+                        else
+                        {
+                            <option value="true">Exclude Units From Billing</option>
+                            <option selected="selected" value="false">Include Units From Billing</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function DpUpdate(ItemID, selectID) {
+            $("#loaderContent").css("display", "block");
+
+
+            $.post("/operational/SiteAdmin/SiteAdmin_ProductsSkybillResources_ItemUpdate/" + ItemID,
+                {
+                    productid: $("#" + selectID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+        function DpUpdateExcludeUnitsFromBilling(ItemID, selectID) {
+            $("#loaderContent").css("display", "block");
+
+
+            $.post("/operational/SiteAdmin/SiteAdmin_ProductsSkybillResources_ItemUpdateExcludeUnitsFromBilling/" + ItemID,
+                {
+                    productid: $("#" + selectID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

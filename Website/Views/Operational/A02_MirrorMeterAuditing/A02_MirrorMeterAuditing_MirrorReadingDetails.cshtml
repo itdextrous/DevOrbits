@@ -1,0 +1,173 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorReadingDetailsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MirrorReadingDetails.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        @if (operationalProvider.CompanyID > 0)
+        {
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col">Completed Today: @Model.CompletedToday</div>
+                                <div class="col">Left Today: @Model.LeftToday</div>
+                                <div class="col">Total: @Model.Total</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover table-sm">
+                            <tbody style="height:auto;">
+                            <thead>
+                                <tr>
+                                    <td>Serial</td>
+                                    <td>Name</td>
+                                    <td>Meter No</td>
+                                    <td>Latest Audit Reading</td>
+                                    <td>Latest Audit Reading Time</td>
+                                    <td>Latest Audit Reading Created</td>
+                                    <td>Status</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    @foreach (var item in Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems)
+                                    {
+                                        string rowclass = "";
+                                        string cellClass = "";
+                                        //if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Unverified)
+                                        //{
+                                        //    rowclass = " class=\"table-danger\"";
+                                        //    cellClass = " class=\"text-red font-weight-bold\"";
+                                        //}
+                                        //else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Deleted)
+                                        //{
+                                        //    rowclass = " class=\"table-warning\"";
+                                        //    cellClass = " class=\"text-orange font-weight-bold\"";
+                                        //}
+                                        //else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Verified)
+                                        //{
+                                        //    rowclass = " class=\"table-success\"";
+                                        //    cellClass = " class=\"text-green font-weight-bold\"";
+                                        //}
+                                    <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @item.Serial" onclick="RedirectToVerification('@item.Serial');">
+                                        <td style="text-align:left;">@item.Serial</td>
+                                        <td style="text-align:left;">@item.DeviceName</td>
+                                        <td style="text-align:left;">@item.SkybillCustomer.No</td>
+                                        <td class="text-right">
+                                                @if (item.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                                                {
+                                                <span>@item.LatestAuditReading.ToString("N3")</span>
+
+                                                }
+                                                else
+                                                {
+                                                <span>@item.LatestAuditReading.ToString("N0")</span>
+                                                }
+                                        </td>
+                                        <td style="text-align:left;">@item.LatestAuditReadingTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td style="text-align:left;">@item.LatestAuditReadingCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td style="text-align:left;" @Html.Raw(cellClass)>@item.Status</td>
+                                    </tr>
+                                    }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    @if (true@* Model.TotalEntries > Model.EntriesPerPage *@)
+                    {
+                        var prevDisabled = !Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.HasPreviousPage ? "disabled" : "";
+                        var nextDisabled = !Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.HasNextPage ? "disabled" : "";
+                        <div class="row mt-2">
+                            <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                                <div class="col-md-auto text-left">
+                                    <a href="#" onclick="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.PageIndex - 1));"
+                                       class="btn btn-outline-primary-sm @prevDisabled">
+                                        <i class="fas fa-step-backward"></i>&nbsp;Previous Page
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col text-center">
+                                @for (int pageNumber = 1; pageNumber <= Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.TotalPages; pageNumber++)
+                                {
+                                    var numberDisabled = Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.PageIndex == pageNumber ? "btn-outline-warning disabled" : "btn-outline-primary-sm";
+                                    <a href="#" onclick="RedirectToFilter(@(pageNumber));"
+                                       class="btn btn-sm @numberDisabled">
+                                        @pageNumber
+                                    </a>
+                                }
+                            </div>
+                            <div class="col-md-auto">
+                                <select id="EntriesPerPage" class="form-control" onchange="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.PageIndex));">
+                                    @if (Model.EntriesPerPage == 100)
+                                    {
+                                        <option value="100" selected="selected">100</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="100">100</option>
+                                    }
+                                    @if (Model.EntriesPerPage == 500)
+                                    {
+                                        <option value="500" selected="selected">500</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="500">500</option>
+                                    }
+                                    @if (Model.EntriesPerPage == 1000)
+                                    {
+                                        <option value="1000" selected="selected">1000</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="1000">1000</option>
+                                    }
+                                    @if (Model.EntriesPerPage == Model.TotalEntries)
+                                    {
+                                        <option value="@Model.TotalEntries" selected="selected">All (@(Model.TotalEntries))</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@Model.TotalEntries">All (@(Model.TotalEntries))</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-auto text-right">
+                                <a align="left" href="#" onchange="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_MirrorReadingDetailsItems.PageIndex + 1));"
+                                   class="btn btn-outline-primary-sm @nextDisabled">
+                                    <i class="fas fa-step-forward"></i>&nbsp;Next Page
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <div>Select a company to start...</div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?EntriesPerPage=' + $("#EntriesPerPage").val() + '&pageIndex=' + pageIndex;
+        }
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingVerification';
+        }
+    </script>
+}

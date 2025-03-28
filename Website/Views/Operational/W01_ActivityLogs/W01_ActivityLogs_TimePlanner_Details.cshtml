@@ -1,0 +1,246 @@
+@model MyVoltage.Models.OperationalModels.W01_ActivityLogsModels.W01_ActivityLogs_TimePlanner_DetailsModel
+@using MyVoltage.Extensions;
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.W01_ActivityLogs_TimePlanner_Details.GetDescription()}";
+    System.DateTime current = Model.FromDate.Value;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        From Date
+                    </div>
+                    <div class="col">
+                        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        To Date
+                    </div>
+                    <div class="col">
+                        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" />
+                    </div>
+                </div>
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ActivityType" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ActivityType", Model.ActivityType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ActivityType" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Company" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Company" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ResponsibleUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="DisplayAs" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("DisplayAs", Model.DisplayAs, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="DisplayAs" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col text-right"><a onclick="RedirectToFilter(1);" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                @if (true@* Model.TotalEntries > Model.EntriesPerPage *@)
+                {
+                    var prevDisabled = !Model.W01_ActivityLogs_TimePlanner_DetailsItems.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.W01_ActivityLogs_TimePlanner_DetailsItems.HasNextPage ? "disabled" : "";
+                    <div class="row mt-2">
+                        <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                            <div class="col-md-auto text-left">
+                                <a href="#" onclick="RedirectToFilter(@(Model.W01_ActivityLogs_TimePlanner_DetailsItems.PageIndex - 1));"
+                                   class="btn btn-outline-primary-sm @prevDisabled">
+                                    <i class="fas fa-step-backward"></i>&nbsp;Previous Page
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            @for (int pageNumber = 1; pageNumber <= Model.W01_ActivityLogs_TimePlanner_DetailsItems.TotalPages; pageNumber++)
+                            {
+                                var numberDisabled = Model.W01_ActivityLogs_TimePlanner_DetailsItems.PageIndex == pageNumber ? "btn-outline-warning disabled" : "btn-outline-primary-sm";
+                                <a href="#" onclick="RedirectToFilter(@(pageNumber));"
+                                   class="btn btn-sm @numberDisabled">
+                                    @pageNumber
+                                </a>
+                            }
+                        </div>
+                        <div class="col-md-auto">
+                            <select id="EntriesPerPage" class="form-control" onchange="RedirectToFilter(1);">
+                                @if (Model.EntriesPerPage == 100)
+                                {
+                                    <option value="100" selected="selected">100</option>
+                                }
+                                else
+                                {
+                                    <option value="100">100</option>
+                                }
+                                @if (Model.EntriesPerPage == 500)
+                                {
+                                    <option value="500" selected="selected">500</option>
+                                }
+                                else
+                                {
+                                    <option value="500">500</option>
+                                }
+                                @if (Model.EntriesPerPage == 1000)
+                                {
+                                    <option value="1000" selected="selected">1000</option>
+                                }
+                                else
+                                {
+                                    <option value="1000">1000</option>
+                                }
+                                @if (Model.EntriesPerPage == Model.TotalEntries)
+                                {
+                                    <option value="@Model.TotalEntries" selected="selected">All (@(Model.TotalEntries))</option>
+                                }
+                                else
+                                {
+                                    <option value="@Model.TotalEntries">All (@(Model.TotalEntries))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-auto text-right">
+                            <a align="left" href="#" onchange="RedirectToFilter(@(Model.W01_ActivityLogs_TimePlanner_DetailsItems.PageIndex + 1));"
+                               class="btn btn-outline-primary-sm @nextDisabled">
+                                <i class="fas fa-step-forward"></i>&nbsp;Next Page
+                            </a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-nowrap">User Name</th>
+                    <th scope="col" class="text-nowrap">Activity Type</th>
+                    <th scope="col" class="text-nowrap">Type Heading</th>
+                    <th scope="col" class="text-nowrap">Latest Comment</th>
+                    <th scope="col" class="text-nowrap">Description</th>
+                    <th scope="col" class="text-nowrap">Company</th>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        string cellClass = $"";
+                        if (current.DayOfWeek == DayOfWeek.Saturday
+                        || current.DayOfWeek == DayOfWeek.Sunday)
+                        {
+                            cellClass = $"table-secondary";
+                        }
+                        <th scope="col" class="text-nowrap text-center @Html.Raw(cellClass)">@Html.Raw(current.ToString("dddd<br />dd<br />MMM<br />yyyy"))</th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.W01_ActivityLogs_TimePlanner_DetailsItems)
+                {
+                    <tr>
+                        <td scope="col" class="text-nowrap">@item.UserName</td>
+                        <td scope="col" class="text-nowrap">
+                            @if (!string.IsNullOrEmpty(item.ActivityURL))
+                            {
+                                <a class="btn btn-outline-primary-sm btn-sm" href="@item.ActivityURL">@item.ActivityType.GetDescription() - @item.ActivityID</a>
+                            }
+                            else
+                            {
+                                <span>@item.ActivityType.GetDescription() - @item.ActivityID</span>
+                            }
+                        </td>
+                        <td scope="col" class="">@item.ActivityHeading</td>
+                        <td scope="col" class="">@Html.Raw(item.LatestComment)</td>
+                        <td scope="col" class="text-nowrap">@item.DescriptionOfWorkPlanned</td>
+                        <td scope="col" class="text-nowrap">@item.Company</td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            string cellClass = $"";
+                            if (current.DayOfWeek == DayOfWeek.Saturday
+                            || current.DayOfWeek == DayOfWeek.Sunday)
+                            {
+                                cellClass = $"table-secondary";
+                            }
+                            var timeSpent = item.TimeSpent.Where(p => p.Key == current).SingleOrDefault();
+                            string displayValue = timeSpent.Value.ToMoneyNoDecimal();
+                            if (string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["DisplayAs"]) || ViewContext.HttpContext.Request.Query["DisplayAs"].ToString() == "1")
+                            {
+                                displayValue = $"{TimeSpan.FromMinutes(Convert.ToDouble(timeSpent.Value)).Hours:00}:{TimeSpan.FromMinutes(Convert.ToDouble(timeSpent.Value)).Minutes:00}";
+                            }
+                            if (timeSpent.Value == 0)
+                            {
+                                displayValue = "";
+                            }
+                            <td scope="col" class="text-nowrap text-right @Html.Raw(cellClass)" title="@current.ToDateShort()">@displayValue</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+        function RedirectToFilter(pageIndex) {
+        $("#loaderContent").css("display", "block");
+            document.location.href = window.location.href.split('?')[0] + '?EntriesPerPage=' + $("#EntriesPerPage").val() + '&pageIndex=' + pageIndex + '&from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&ActivityType=' + $("#ActivityType").val() + '&Company=' + $("#Company").val() + '&ResponsibleUser=' + $("#ResponsibleUser").val() + '&DisplayAs=' + $("#DisplayAs").val();
+    }
+</script>
+}

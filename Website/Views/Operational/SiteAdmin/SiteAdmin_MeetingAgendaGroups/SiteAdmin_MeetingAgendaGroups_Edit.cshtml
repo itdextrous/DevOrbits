@@ -1,0 +1,382 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_MeetingAgendaGroups_EditModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.SiteAdmin_MeetingAgendaGroups.GetDescription()} - {Model.MeetingAgendaGroupName}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to List</a>
+    </div>
+</div>
+@if (Model != null && Model.IsSuccess)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            @Model.MeetingAgendaGroupName successfully updated.
+                        </div>
+                    </div>
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            <a href="/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_Edit/@Model.MeetingAgendaGroupID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+
+                <div class="card-header">
+                    <h4>Meeting Agenda Group Name Change</h4>
+                    @*Note: Changes are instant. Clicking the "Save Changes" button only changes the MeetingAgenda Group Name.*@
+                </div>
+                <form asp-action="SiteAdmin_MeetingAgendaGroups_Edit" enctype="multipart/form-data">
+
+                    <div class="card-body">
+                        <div class="row mb-2 mt-2">
+                            <div class="col">
+                                <label asp-for="MeetingAgendaGroupName" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                <input title="MeetingAgenda Group Name" class="form-control" type="text" asp-for="MeetingAgendaGroupName" />
+                                <span asp-validation-for="MeetingAgendaGroupName" class="text-red"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    @Model.ErrorMessage
+                                </div>
+                            </div>
+                        }
+                        <div class="row mb-2 mt-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+
+                <div class="card-header">
+                    <h4>Meeting Agenda Group Actions and Reporting for "@Model.MeetingAgendaGroupName"</h4>
+                    @*Note: Changes are instant. Clicking the "Save Changes" button only changes the MeetingAgenda Group Name.*@
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Action</th>
+                                <th scope="col">Reporting</th>
+                                <th scope="col">Is Resolved MeetingAgenda</th>
+                                <th scope="col">WIP Type</th>
+                                <th scope="col"></th>
+                            </tr>
+                            <tr>
+                                <th scope="col">
+                                    <input id="addAction" name="addAction" type="text" class="form-control" placeholder="Enter New Meeting Agenda Action Here" />
+                                </th>
+                                <th scope="col">
+                                    <input id="addReporting" name="addReporting" type="text" class="form-control" placeholder="Enter New Meeting Agenda Reporting Here" />
+                                </th>
+                                <th scope="col">
+                                    <select id="addIsResolved" name="addIsResolved" class="form-control">
+                                        <option value="">Not Resolved</option>
+                                        <option value="true">Resolved</option>
+                                    </select>
+                                </th>
+                                <th scope="col">
+                                    <select id="addWIPType" name="addWIPType" class="form-control">
+                                        @foreach (MyVoltage.Data.SiteAdmin_MeetingAgenda_WIP_TypeEnum wip in (MyVoltage.Data.SiteAdmin_MeetingAgenda_WIP_TypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.SiteAdmin_MeetingAgenda_WIP_TypeEnum)))
+                                        {
+                                            <option value="@((int)wip)">@(wip.GetDescription())</option>
+                                        }
+                                    </select>
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <a class="btn btn-outline-primary-sm" href="#" onclick="DoAdd();"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in Model.SiteAdmin_MeetingAgendaGroups_EditItems)
+                            {
+                                <tr>
+                                    <td scope="row">
+                                        @if (entry.IsDeleted)
+                                        {
+                                            <del>@entry.SiteAdmin_MeetingAgendaAction.MeetingAgendaActionName</del>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control" id="updateAction_@entry.ID" name="updateAction_@entry.ID" value="@entry.SiteAdmin_MeetingAgendaAction.MeetingAgendaActionName" />
+                                        }
+                                    </td>
+                                    <td scope="row">
+                                        @if (entry.IsDeleted)
+                                        {
+                                            <del>@entry.SiteAdmin_MeetingAgendaReporting.MeetingAgendaReportingName</del>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control" id="updateReporting_@entry.ID" name="updateReporting_@entry.ID" value="@entry.SiteAdmin_MeetingAgendaReporting.MeetingAgendaReportingName" />
+                                        }
+                                    </td>
+                                    <td scope="row">
+                                        @if (entry.IsDeleted)
+                                        {
+                                            <del>@entry.IsResolvedMeetingAgenda.ToBoolean()</del>
+                                        }
+                                        else
+                                        {
+                                            if (entry.IsResolvedMeetingAgenda.HasValue && entry.IsResolvedMeetingAgenda.Value)
+                                            {
+                                                <select id="updateIsResolved_@entry.ID" name="updateIsResolved_@entry.ID" class="form-control">
+                                                    <option value="">Not Resolved</option>
+                                                    <option value="true" selected="selected">Resolved</option>
+                                                </select>
+                                            }
+                                            else
+                                            {
+                                                <select id="updateIsResolved_@entry.ID" name="updateIsResolved_@entry.ID" class="form-control">
+                                                    <option value="" selected="selected">Not Resolved</option>
+                                                    <option value="true">Resolved</option>
+                                                </select>
+                                            }
+                                        }
+                                    </td>
+                                    <td scope="row">
+                                        @if (entry.IsDeleted)
+                                        {
+                                            <del>@entry.WIPTypeEnum.GetDescription()</del>
+                                        }
+                                        else
+                                        {
+                                            <select id="updateWIPType_@entry.ID" name="updateWIPType_@entry.ID" class="form-control">
+                                                @foreach (MyVoltage.Data.SiteAdmin_MeetingAgenda_WIP_TypeEnum wip in (MyVoltage.Data.SiteAdmin_MeetingAgenda_WIP_TypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.SiteAdmin_MeetingAgenda_WIP_TypeEnum)))
+                                                {
+                                                    if (entry.WIPTypeEnum == wip)
+                                                    {
+                                                        <option value="@((int)wip)" selected="selected">@(wip.GetDescription())</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@((int)wip)">@(wip.GetDescription())</option>
+                                                    }
+                                                }
+                                            </select>
+                                        }
+                                    </td>
+                                    <td scope="row" class="text-center">
+                                        @if (entry.IsDeleted)
+                                        {
+                                            <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_MeetingAgenda_Restore/@entry.ID/@Model.MeetingAgendaGroupID" title="Restore @entry.SiteAdmin_MeetingAgendaAction.MeetingAgendaActionName - @entry.SiteAdmin_MeetingAgendaReporting.MeetingAgendaReportingName"><i class="fas fa-undo"></i>&nbsp;Restore</a>
+                                        }
+                                        else
+                                        {
+                                            <a class="btn btn-outline-primary-sm" href="#" onclick="DoUpdate('@entry.ID')"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            <text>&nbsp;</text>
+                                            <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_MeetingAgenda_Delete/@entry.ID/@Model.MeetingAgendaGroupID" title="Delete @entry.SiteAdmin_MeetingAgendaAction.MeetingAgendaActionName - @entry.SiteAdmin_MeetingAgendaReporting.MeetingAgendaReportingName"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <div class="card-footer">
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $("#addAction").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_ActionSearch",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+        $("#addReporting").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_ReportingSearch",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+        var itemsUpdatable = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_MeetingAgendaGroups_EditItems)));
+        $(itemsUpdatable).each(function () {
+            $("#updateAction_" + this.MeetingAgendaActionID).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_ActionSearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                }
+            });
+
+            $("#updateReporting_" + this.MeetingAgendaReportingID).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_ReportingSearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                }
+            });
+        });
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#addAction").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Action');
+                $("#addAction").focus();
+                return;
+            }
+
+            if ($("#addReporting").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Reporting');
+                $("#addReporting").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_ItemAdd",
+                {
+                    addAction: $("#addAction").val(),
+                    addReporting: $("#addReporting").val(),
+                    addIsResolved: $("#addIsResolved").val(),
+                    addWIPType: $("#addWIPType").val(),
+                    MeetingAgendaGroupID: '@Model.MeetingAgendaGroupID'
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoUpdate(itemID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#updateAction_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Action');
+                $("#updateAction_" + itemID).focus();
+                return;
+            }
+
+            if ($("#updateReporting_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Reporting');
+                $("#updateReporting_" + itemID).focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_ItemUpdate",
+                {
+                    addAction: $("#updateAction_" + itemID).val(),
+                    addReporting: $("#updateAction_" + itemID).val(),
+                    addIsResolved: $("#updateIsResolved_" + itemID).val(),
+                    addWIPType: $("#updateWIPType_" + itemID).val(),
+                    MeetingAgendaGroupID: '@Model.MeetingAgendaGroupID',
+                    ItemID: itemID
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+
+    </script>
+}

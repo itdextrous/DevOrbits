@@ -1,0 +1,116 @@
+@model MyVoltage.Models.CompanyAdminViewModels.PQAllocationViewModel
+@{
+    ViewData["Title"] = "PQ Allocation";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row mt-0 mt-md-5 mb-4">
+    <div class="col">
+        <a href="/companyadmin/pqallocation/create" class="btn btn-outline-primary"><i class="fas fa-plus"></i>&nbsp;ADD NEW PQ ALLOCATION</a>
+    </div>
+    <div class="col text-right">
+        <a href="/companyadmin/pqallocation/downloadxlsx" class="btn btn-outline-primary"><i class="fas fa-file-excel"></i>&nbsp;DOWNLOAD EXCEL</a>
+    </div>
+</div>
+
+@if (Model.PQAllocationItems.Count == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-body">
+                    No entries currently added. Click the add button to add one now.
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    foreach (var item in Model.PQAllocationItems)
+    {
+        string readingType = "";
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-4 mv-gradient">
+                    <div class="card-header">
+                        @item.SerialNumber
+                        @switch (item.DeviceType)
+                        {
+                            case MyVoltage.Controllers.AccountController.DeviceType.Electricity:
+                                readingType = "kWh";
+                                <img src="~/images/elec-icon-s.png" />
+                                break;
+                            case MyVoltage.Controllers.AccountController.DeviceType.Water:
+                                readingType = "kl";
+                                <img src="~/images/water-icon-s.png" />
+                                break;
+                            case MyVoltage.Controllers.AccountController.DeviceType.Gas:
+                                readingType = "m3";
+                                <img src="~/images/gas-icon-s.png" />
+                                break;
+                        }
+                        (<strong>@item.DeviceType.ToString()</strong>)
+                        <a href="/companyadmin/pqallocation/edit/@item.ID" class="btn btn-action">EDIT</a>
+                        <a id="@item.ID" href="#@item.ID" onclick="RedirectToDeletConfirm('@item.ID','@item.SerialNumber');" class="btn btn-action">DELETE</a>
+
+                    </div>
+                    <div class="card-body bg-white" style=" background: rgba(203, 203, 210, 0.15);">
+                        <table class="table table-responsive-xl table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer No</th>
+                                    <th scope="col">Calculation Basis</th>
+                                    <th scope="col">PQ %</th>
+                                    <th scope="col">PQ Meter Serial</th>
+                                    <th scope="col">Latest Reading</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itemCustomer in item.PQAllocationCustomers)
+                                {
+                                    <tr>
+                                        <td scope="col">@itemCustomer.CustomerNo</td>
+                                        <td scope="col">@itemCustomer.QuotaAmount.ToString("0.000")</td>
+                                        <td scope="col">@itemCustomer.PQPerc.ToString("0.00000") %</td>
+                                        <td scope="col">@(item.SerialNumber + "-" + itemCustomer.CustomerNo)</td>
+                                        <td scope="col">@(itemCustomer.Reading.ToString("N"))&nbsp;@readingType</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td scope="col">Total</td>
+                                    <td scope="col">
+                                        @item.PQAllocationCustomers.Select(p => p.QuotaAmount).Sum().ToString("0.000")
+                                    </td>
+                                    <td scope="col">@item.PQAllocationCustomers.Select(p => p.PQPerc).Sum().ToString("0.00000") %</td>
+                                    <td scope="col"></td>
+                                    <td scope="col">
+                                        @item.PQAllocationCustomers.Select(p => p.Reading).Sum().ToString("0.00")&nbsp;@readingType
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+}
+@section Scripts {
+    <script>
+        function RedirectToDeletConfirm(id, serial) {
+            if (confirm('Are you sure you want to delete ' + serial + '?')) {
+                document.location.href = '/companyadmin/pqallocation/Delete/' + id;
+            }
+        }
+    </script>
+}

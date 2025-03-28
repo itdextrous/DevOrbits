@@ -1,0 +1,109 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_Metering_SummaryModel.AF_AfroxAdministration_Metering_SummaryItem
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+
+@{
+    string rowclass = "";
+    string cellClass = "";
+}
+
+@if (Model.MetrixMeterPerc == 100)
+{
+    rowclass = "table-success";
+}
+
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@Model.Name</td>
+<td scope="col" class="text-nowrap border-table">@Model.PartnerName</td>
+<td scope="col" class="text-nowrap border-table">
+    @if (Model.ResponsibleUserTimestamp.HasValue)
+    {
+        <div class="row align-items-center flex-nowrap">
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        @Model.ResponsibleUsername
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        @Model.ResponsibleUserTimestamp.ToDateAndTimeShort()
+                    </div>
+                </div>
+            </div>
+            @if (Model.ResponsibleUserID != userManager.GetUserId(User))
+            {
+                <div class="col">
+                    <a href="#" onclick="UpdateResponsibleUser('@Model.CompanyID');" class="btn btn-sm btn-outline-primary-sm" title="Take Responsibility"><i class="fas fa-user-circle"></i></a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row align-items-center">
+            <div class="col">
+                <a href="#" onclick="UpdateResponsibleUser('@Model.CompanyID');" class="btn btn-sm btn-outline-primary-sm" title="Take Responsibility"><i class="fas fa-user-circle"></i></a>
+            </div>
+        </div>
+    }
+</td>
+<td scope="col" class="text-nowrap border-table">
+    @if (Model.Next_E01_BuildingOnboardingTask != null)
+    {
+        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review/@Model.Next_E01_BuildingOnboardingTask.TaskTypeID/@Model.Next_E01_BuildingOnboardingTask.ID">@Model.Next_E01_BuildingOnboardingTask.E01_BuildingOnboardingTask_Type.Heading</a>
+    }
+</td>
+<td scope="col" class="text-nowrap border-table flex-nowrap">
+    @if (Model.Next_E01_BuildingOnboardingTask != null)
+    {
+        <span>@Model.Next_E01_BuildingOnboardingTask.DueDate.ToDateShort()</span>
+    }
+</td>
+<td scope="col" class="text-nowrap border-table flex-nowrap">
+    @if (Model.Next_E01_BuildingOnboardingTask != null)
+    {
+        <span>@Model.Next_E01_BuildingOnboardingTask.ResponsibleUserUsername</span>
+    }
+</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Gateways Online (Click to view details)" scope="col" class="text-center text-nowrap border-table-left">@Model.GatewaysOnline</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Gateways Offline (Click to view details)" scope="col" class="text-center text-nowrap border-table-right">@Model.GatewaysOffline</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Meters Online (Click to view details)" scope="col" class="text-center text-nowrap border-table-left">@Model.MetersOnline</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Meters Offline (Click to view details)" scope="col" class="text-center text-nowrap border-table">@Model.MetersOffline</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Meters Unknown (Click to view details)" scope="col" class="text-center text-nowrap border-table">@Model.MetersUnknown</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Meters Not Installed (Click to view details)" scope="col" class="text-center text-nowrap border-table-right">@Model.MetersNotInstalled</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Information Complete (Click to view details)" scope="col" class="@(Model.InformationComplete ? "table-success" : "table-danger") text-center text-nowrap border-table-left">@Model.InformationComplete.ToBoolean() (@Model.InformationCompleteCount/@(Model.TotalCount))</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name System Setup Sign Off (Click to view details)" scope="col" class="@(Model.SystemSetupSignOff ? "table-success" : "table-danger") text-center text-nowrap border-table">@Model.SystemSetupSignOff.ToBoolean() (@Model.SystemSetupSignOffCount/@(Model.TotalCount))</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Customer Setup Sign Off (Click to view details)" scope="col" class="@(Model.CustomerSetupSignOff ? "table-success" : "table-danger") text-center text-nowrap border-table">@Model.CustomerSetupSignOff.ToBoolean() (@Model.CustomerSetupSignOffCount/@(Model.TotalCount))</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name MeterSerialNoCheck (Click to view details)" scope="col" class="@(Model.MeterSerialNoCheck ? "table-success" : "table-danger") text-center text-nowrap border-table">@Model.MeterSerialNoCheck.ToBoolean() (@Model.MeterSerialNoCheckCount/@(Model.TotalCount))</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Verification (Click to view details)" scope="col" class="@(Model.Verification ? "table-success" : "table-danger") text-center text-nowrap border-table-right">@Model.Verification.ToBoolean() (@Model.VerificationCount/@(Model.TotalCount))</td>
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Verification Upload Review (Click to view details)" scope="col" class="@(Model.VerificationUploadReview ? "table-success" : "table-danger") text-center text-nowrap border-table-right">@Model.VerificationUploadReview.ToBoolean() (@Model.VerificationUploadReviewCount/@(Model.VerificationUploadReviewTotalCount))</td>
+@{
+    bool isFirst = true;
+}
+@foreach (var man in Model.Manufacturers)
+{
+    int count = 0;
+    if (Model.MeterManufacturers.ContainsKey(man))
+        count = Model.MeterManufacturers[man];
+    if (isFirst)
+    {
+        isFirst = false;
+        <td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name @man Meters (Click to view details)" scope="col" class="text-center text-nowrap border-table-left">@count</td>
+    }
+    else
+    {
+        <td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name @man Meters (Click to view details)" scope="col" class="text-center text-nowrap border-table">@count</td>
+    }
+}
+
+<td onclick="CompanyChange('@Model.CompanyID');" style="cursor:pointer;" title="@Model.Name Metrix Meter % (Click to view details)" scope="col" class="text-center text-nowrap border-table-right">@Model.MetrixMeterPerc.ToMoneyNoDecimal() %</td>
+
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+    @*if (@Model.MetersCount == 0) {
+            $('#@Model.TableRowID').css("display", "none");
+            }*@
+        });
+</script>

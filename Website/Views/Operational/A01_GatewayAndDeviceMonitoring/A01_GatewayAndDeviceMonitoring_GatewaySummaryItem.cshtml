@@ -1,0 +1,39 @@
+@model MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_GatewaySummaryModel
+
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_GatewaySummaryModel.StatusType.Problematic)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_GatewaySummaryModel.StatusType.AttentionRequired)
+    {
+        rowclass = "table-warning";
+        cellClass = " class=\"text-orange font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_GatewaySummaryModel.StatusType.Ok)
+    {
+        rowclass = "table-success";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+}
+    <td scope="col">@Model.CompanyName</td>
+    <td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+
+    <td scope="col">@Model.MoreThan7DaysCount</td>
+    <td scope="col">@Model.LessThan7DaysCount</td>
+    <td scope="col">@Model.LessThan3DaysCount</td>
+    <td scope="col">@Model.LessThan24HoursCount</td>
+    <td scope="col">@Model.LessThan4HoursCount</td>
+    <td scope="col">@Model.DevicesImpactedCount</td>
+    <td scope="col">@Model.OfflineCount</td>
+    <td scope="col">@Model.OnlineCount</td>
+
+    <td scope="col">@Model.TotalCount</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

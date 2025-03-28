@@ -1,0 +1,85 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_TarrifReviewModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_TarrifReview.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row">
+                    <div class="col-12 table-warning">
+                        Legend: Product link missing
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 table-danger">
+                        Legend: Resource link missing
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Select company to start...</span>
+                }
+                else
+                {
+                    <table class="table table-sm table-responsive-xl table-striped table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Resource No</th>
+                                <th scope="col">Starting Date</th>
+                                <th scope="col">Quantity From</th>
+                                <th scope="col">Quantity To</th>
+                                <th scope="col">Resource Name</th>
+                                <th scope="col">Unit Price</th>
+                                <th scope="col">Linked Resource</th>
+                                <th scope="col">Linked Product</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.A06_BillingControlReport_TarrifReviewItems)
+                            {
+                                string rowclass = "";
+                                if (item.SkybillResource == null)
+                                {
+                                    rowclass = " class=\"table-danger\"";
+                                }
+                                else if (item.Product == null)
+                                {
+                                    rowclass = " class=\"table-warning\"";
+                                }
+                                <tr title="@item.Resource_No" @Html.Raw(rowclass)>
+                                    <td scope="col" class="text-nowrap">@item.Resource_No</td>
+                                    <td scope="col" class="text-nowrap">@item.Starting_Date.ToDateShort()</td>
+                                    <td scope="col">@item.Quantity_From</td>
+                                    <td scope="col"></td>
+                                    <td scope="col">@item.Resource_Name</td>
+                                    <td scope="col">@item.Unit_Price</td>
+                                    <td scope="col">@(item.SkybillResource != null ? item.SkybillResource.Name : "Not Linked")</td>
+                                    <td scope="col">@(item.Product != null ? item.Product.ProductName : "Not Linked")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

@@ -1,0 +1,199 @@
+@model MyVoltage.Models.OperationalModels.C01_ProductReportModels.C01_ProductReport_Details_DetailsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.C01_ProductReport_Details_Details.GetDescription()} - {operationalProvider.CompanyName}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body text-left">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col text-left">Between</div>
+                                    <div class="col"><input class="form-control" type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                                    <div class="col text-center">And</div>
+                                    <div class="col"><input class="form-control" type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                @Html.DropDownList("Products", Model.Products, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                @Html.DropDownList("ServiceAddress", Model.ServiceAddress, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                @Html.DropDownList("Tariffs", Model.Tariffs, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col text-nowrap">
+                                @if (!Model.HideNoData)
+                                {
+                                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" checked="checked" />
+                                    <span>Show All</span>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" />
+                                    <span>Show All</span>
+                                }
+                                @if (Model.HideNoData)
+                                {
+                                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" checked="checked" />
+                                    <span>Hide No Data Items</span>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" />
+                                    <span>Hide No Data Items</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select company to view report</span>
+        }
+        else
+        {
+            <table class="table table-sm table-responsive-xl table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Service Address</th>
+                        <th scope="col">Customer No</th>
+                        <th scope="col">Customer Name</th>
+                        <th scope="col">Contract Start Date</th>
+                        <th scope="col">Contract End Date</th>
+                        <th scope="col">Occupancy</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Tariff Name</th>
+                        <th scope="col" class="text-nowrap text-center">Total</th>
+                        @{ DateTime currentDate = Model.FromDate;}
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            <th class="text-nowrap text-center" scope="col">@Html.Raw(currentDate.ToString("yyyy<br />MMM<br />dd"))</th>
+                            currentDate = currentDate.AddDays(1);
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        string rowClass = "";
+                        decimal grandTotal = 0;
+                    }
+                    @foreach (var item in Model.C01_ProductReport_Details_DetailsItems)
+                    {
+                        @foreach (var customerItem in item.C01_ProductReport_Details_DetailsSubItems)
+                        {
+                            @foreach (var utilItem in customerItem.SkybillCustomersUtilityItems)
+                            {
+                                grandTotal = grandTotal + utilItem.Total;
+                                <tr>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@item.ServiceAddress</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@customerItem.Customer_No</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@customerItem.Customer_Name</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@utilItem.Contract_Start_Date.ToDateShort()</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@(utilItem.Contract_End_Date.HasValue ? utilItem.Contract_End_Date.ToDateShort() : "Active")</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@customerItem.Occupancy</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="">@(utilItem.Product != null ? utilItem.Product.ProductName : "[NONE]")</td>
+                                    <td scope="col" class="text-nowrap @Html.Raw(rowClass)" title="@utilItem.Meter_No">@utilItem.Description</td>
+
+                                    <td title="@customerItem.Customer_No - @customerItem.Customer_Name - Total" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.C01_ProductReportModels.C01_ProductReport_Details_DetailsModel.GetCellClass(utilItem.Total, true, rowClass))>@utilItem.Total.ToString("N2")</td>
+                                    @{ currentDate = Model.FromDate;}
+                                    @while (currentDate <= Model.ToDate)
+                                    {
+                                        var billingItem = utilItem.BillingFigures.Where(p => p.Key == currentDate).SingleOrDefault();
+                                        <td title="@customerItem.Customer_No - @customerItem.Customer_Name - @currentDate.ToString("yyyy MMM dd")" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.C01_ProductReportModels.C01_ProductReport_Details_DetailsModel.GetCellClass(billingItem.Value, false, rowClass))>@billingItem.Value.ToMoney()</td>
+                                        currentDate = currentDate.AddDays(1);
+                                    }
+                                </tr>
+                            }
+                        }
+                        if (string.IsNullOrEmpty(rowClass))
+                        {
+                            rowClass = "table-primary";
+                        }
+                        else
+                        {
+                            rowClass = "";
+                        }
+
+                    }
+
+                    <tr>
+                        <td scope="col" colspan="8" class="text-nowrap border-table-total" title="">Total</td>
+
+                        <td title="Total" scope="col" class="text-nowrap border-table-total">@grandTotal.ToString("N2")</td>
+                        @{ currentDate = Model.FromDate;}
+                        @while (currentDate <= Model.ToDate)
+                        {
+                            decimal billingItemTotal = 0;
+                            @foreach (var item in Model.C01_ProductReport_Details_DetailsItems)
+                            {
+                                @foreach (var customerItem in item.C01_ProductReport_Details_DetailsSubItems)
+                                {
+                                    @foreach (var utilItem in customerItem.SkybillCustomersUtilityItems)
+                                    {
+                                        var billingItem = utilItem.BillingFigures.Where(p => p.Key == currentDate).SingleOrDefault();
+                                        try
+                                        {
+                                            billingItemTotal = billingItemTotal + billingItem.Value.Value;
+                                        }
+                                        catch { }
+                                    }
+                                }
+                            }
+                            <td title="Total - @currentDate.ToString("yyyy MMM dd")" scope="col" class="text-nowrap border-table-total">@billingItemTotal.ToMoney()</td>
+                            currentDate = currentDate.AddDays(1);
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToCustomer(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/C01_ProductReport/C01_ProductReport_Details_Details%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val() + '%26Products=' + $("#Products").val() + '%26ServiceAddress=' + $("#ServiceAddress").val() + '%26Tariffs=' + $("#Tariffs").val();
+        }
+        function RedirectToFilter() {
+            var hideNoData = "false";
+            if ($("#hideNoData").prop("checked") == true) {
+                hideNoData = "true";
+            }
+
+            document.location.href = '/operational/C01_ProductReport/C01_ProductReport_Details_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&Products=' + $("#Products").val() + '&ServiceAddress=' + $("#ServiceAddress").val() + '&Tariffs=' + $("#Tariffs").val() + '&hideNoData=' + hideNoData;
+        }
+    </script>
+}

@@ -1,0 +1,417 @@
+﻿@model MyVoltage.Models.CompanyAdminViewModels.MapViewModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<style>
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<form>
+    <div class="mt-3">
+        <input class="custom-search-input d-inline" type="text" name="keyword" value="@ViewContext.HttpContext.Request.Query["keyword"]" placeholder="Serial Number/Meter Description"> <input class="custom-search-input d-inline" type="submit" value="Search" />
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <td>Customer No</td>
+                <td class="text-right">Balance</td>
+                <td>Account</td>
+                <td>Meter Description</td>
+                <td>Serial Number</td>
+                <td>Meter Type</td>
+                <td>Meter Status</td>
+                <td>Disconnection Type</td>
+                <td>Contactor state</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach:  model.Devices">
+            <tr>
+                <td style="cursor:pointer;" data-bind="text: CustomerNo, click: function() {if(MapClikable()){document.location.href = Url()}}">></td>
+                <td style="cursor:pointer;" class="text-right" data-bind="text: Balance, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td style="cursor:pointer;" data-bind="text: Account, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td style="cursor:pointer;" data-bind="text: Name, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td style="cursor:pointer;" data-bind="text: Serial, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td style="cursor:pointer;" data-bind="text: DeviceType, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td style="cursor:pointer;" class="status font-weight-bold" data-bind="text: DeviceStatus, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td><a class="connect font-weight-bold" href="#" data-bind="text: AutoDisconnectStatus, click: ToggleDisconnect"></a></td>
+                <td style="cursor:pointer;" class="contactorState fix-col-md text-right" data-bind="text: ContactorState, click: function() {if(MapClikable()){document.location.href = Url()}}"> </td>
+                <td><a class="state font-weight-bold" data-bind="attr:{ href: ConnectUrl, id : ID}, text: State" onclick="ConfirmAction(this)"></a></td>
+            </tr>
+        </tbody>
+    </table>
+    @if (@Model.total > @Model.pageSize)
+    {
+        var prevDisabled = !@Model.hasPreviousPage ? "disabled" : "";
+        var nextDisabled = !@Model.hasNextPage ? "disabled" : "";
+        var root = "";
+        var keyword = ViewContext.HttpContext.Request.Query["keyword"];
+        var firstPage = Model.pageIndex - 5;
+        var lastPage = Model.pageIndex + 5;
+
+        if (firstPage <= 0)
+        {
+            firstPage = 1;
+        }
+
+        if (lastPage > Model.totalPages + 1)
+        {
+            lastPage = Model.totalPages + 1;
+        }
+
+        if (keyword.Count > 0)
+        {
+            root = "/CreditControlView?keyword=" + keyword + "&pageIndex=";
+        }
+        else
+        {
+            root = "/CreditControlView?pageIndex=";
+        }
+
+<div class="custom-pagination">
+    <div style="float: left;">
+        <a href="@root@(Model.pageIndex - 1)"
+           class="btn btn-default @prevDisabled">
+
+            Previous
+        </a>
+    </div>
+    @if ((firstPage != 1) && Model.pageIndex != 1)
+    {
+        var pageOne = 1;
+        <div style="float: left;">
+
+            <a href="@root@pageOne"
+               class="btn btn-default">
+
+                1
+            </a>
+        </div>
+        <div style="float: left;">
+            <a class="btn btn-default">
+                ...
+            </a>
+        </div>
+    }
+
+    @for (int i = firstPage; i < lastPage; i++)
+    {
+        <div style="float: left;">
+            <a href="@root@i" id="page-@i"
+               class="btn btn-default">
+
+                @i
+            </a>
+        </div>
+    }
+
+    @if ((lastPage != Model.totalPages + 1) && (Model.pageIndex != Model.totalPages))
+    {
+        <div style="float: left;">
+            <a class="btn btn-default">
+                ...
+            </a>
+        </div>
+        <div style="float: left;">
+            <a href="@root@Model.totalPages"
+               class="btn btn-default">
+
+                @Model.totalPages
+            </a>
+        </div>
+    }
+
+    <div style="float: left;">
+        <a align="left" href="@root@(Model.pageIndex + 1)"
+           class="btn btn-default @nextDisabled">
+
+            Next
+        </a>
+    </div>
+</div>
+    }
+</div>
+@section Scripts {
+    <script src="~/js/knockout.js"></script>
+    <script src="~/js/markerclusterer.js"></script>
+    <script src="~/js/date.format.js"></script>
+    <script>
+        var mapDataModel = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        var meterNumber = "@(HttpContextAccessor.HttpContext.Session.GetString("MeterNumber") != null ? @HttpContextAccessor.HttpContext.Session.GetString("MeterNumber") : null)";
+
+        function toFixed(number, decimals)
+        {
+                var x = Math.pow(10, Number(decimals) + 1);
+                return (Number(number) + (1 / x)).toFixed(decimals)
+        }
+
+        function numberWithCommas(number)
+        {
+            if (number > 1)
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            else
+                return number.toString()
+        }
+
+        function OverviewModel()
+        {
+            var self = this;
+            this.Devices = ko.observableArray([]);
+
+            ko.utils.arrayForEach(mapDataModel.devices, function (d)
+            {
+                var device = new Device(d);
+                self.Devices.push(ko.observable(device));
+            });
+        }
+
+        function Device(d)
+        {
+            var self = this;
+            this.ID = ko.observable(d.id);
+            this.Serial = ko.observable(d.serial);
+            this.Name = ko.observable(d.name);
+            this.DeviceTypeName = ko.observable(d.deviceTypeName);
+            this.DeviceStatus = ko.observable(d.deviceStatus);
+            this.PartnerCode = ko.observable(d.partner_code != "" ? d.partner_code : "ACTUAL");
+            this.DeviceType = ko.observable(d.deviceType == 'elec' ? 'Electricity' : (d.deviceType == 'water' ? 'Water' : (d.deviceType == 'control valve' ? 'Control Valve' : (d.deviceType == 'gas' ? 'Gas' : ''))));
+            this.Time = ko.observable(d.status != null ? d.status.time : new Date('0001-01-01T00:00:00Z'));
+            this.MeterReading = ko.observable("");
+            this.CustomerNo = ko.observable(d.customer_number);
+            this.MapClikable = ko.observable(d.mapClickable);
+            this.Balance = ko.observable("R " + numberWithCommas(Math.round(parseFloat(d.balance.replace(",", "").replace("R ", "")))));
+            this.Account = ko.observable("");
+            this.ConnectUrl = ko.observable("");
+            this.AutoDisconnect = ko.observable(d.autoDisconnect);
+            this.ContactorState = ko.observable("");
+            this.State = ko.observable("");
+
+            this.LastComunicated = ko.computed(function ()
+            {
+                var d = new Date(self.Time());
+                return dateFormat(d, "yyyy-mm-dd HH:MM:ss");
+            });        
+
+            this.Url = ko.computed(function ()
+            {
+                var url = ""
+
+                if ('True' == '@User.IsInRole("CompanyAdmin")')
+                {
+                    url = '/companyAdmin/usage/' + self.Serial()
+                }
+                else
+                {
+                    url = '/usage/' + self.Serial() 
+                }
+
+                return url;
+            }, this);
+
+            this.AutoDisconnectStatus = ko.computed(function ()
+            {
+                if (self.AutoDisconnect())
+                {
+                    return "Auto";
+                }
+                else
+                {
+                    return "Manual";
+                }
+            });
+
+            this.ToggleDisconnect = function (itm)
+            {
+                $(".loader-overlay").css("display", "block");
+                 $.get("/administrator/toggleDisconnect/" + self.Serial() + "/" + d.type.id,
+                    function (result) {
+                        $(".loader-overlay").css("display", "none");
+                        itm.AutoDisconnect(result);
+                        if (result == 1)
+                        {
+                            itm.State("Auto");
+                        }
+                        else
+                        {
+                            $.get('/deviceDetails/' + self.ID(),
+                                function (data) {
+                                    if (data.register.contactorState != null)
+                                    {
+                                        if (data.register.contactorState == "1")
+                                        {
+                                            itm.State("Manual - Disconnect");
+                                            ChangeStateColor();
+                                        }
+                                        else if (data.register.contactorState == "0")
+                                        {
+                                            itm.State("Manual - Reconnect");
+                                            ChangeStateColor();
+                                        }
+                                    }
+                                 });   
+                        }
+                         ChangeDisconnectColor();
+                        ChangeStateColor();
+                    });
+            }
+
+            var connectUrl = "/connect";
+         
+            $.get('/deviceDetails/' + self.ID(),
+            function (data)
+            {
+                var contactorState = "";
+                if (data.register.contactorState != null)
+                {
+                    if (data.register.contactorState == "1")
+                    {
+                        contactorState = "Connected"
+                    }
+                    else if (data.register.contactorState == "0")
+                    {
+                        contactorState = "Disconnected"
+                    }
+                }
+
+                if (data.register.contactorState == null || data.register.contactorState == "")
+                {
+                    contactorState = "Not available"
+                }
+
+                self.ContactorState(contactorState);
+                var state = "";
+                if (data.register.contactorState != null)
+                {
+                    if (d.autoDisconnect == true)
+                    {
+                        state = "Auto"
+                    }
+                    else if (d.autoDisconnect == false)
+                    {
+                        if (data.register.contactorState == "1")
+                        {
+                            state = "Manual - Disconnect"
+                        }
+                        else
+                        {
+                            state = "Manual - Reconnect"
+                        } 
+                    }
+                }
+                
+                $(".contactorState:contains('Not available')").addClass("text-muted");
+                if (data.register.contactorState == null || data.register.contactorState == "")
+                {
+                    state = "Not available"
+                }
+
+                self.State(state);
+                $(".state:contains('Auto')").addClass("text-green");
+                $(".state:contains('Manual')").addClass("text-red");
+
+                if (state.search("Auto") != -1)
+                {
+                     self.ConnectUrl("");
+                }
+                else
+                {
+                     self.ConnectUrl(data.register.contactorState == "1" ? connectUrl + "/0/" + d.id + "/" + d.type.id + "/" + d.serial : connectUrl + "/1/" + d.id + "/" + d.type.id + "/" + d.serial);
+                }
+
+                if (state.search("Not available") != -1)
+                {
+                    self.ConnectUrl("");
+                    $(".state:contains('Not available')").addClass("text-muted");
+                }
+            });
+
+            var customerNo = encodeURIComponent(self.CustomerNo());
+
+            if (customerNo != null && customerNo.length > 0)
+            {
+                $.get('/customerDetailsByCustomerNo/' + customerNo,
+                    function (data)
+                    {
+                        self.Account(data.Billing_Cycle)
+                    });
+            }
+        }
+
+        var model = new OverviewModel();
+        ko.applyBindings(model);
+
+        function ConfirmAction(e)
+        {
+            var url = $(e).attr('href');
+            var id = $(e).attr('id');
+            var text = $(e).text();
+
+            if (text.search("Auto") == -1 && text.search("Not available") == -1)
+            {
+                $.confirm({
+                    title: 'Confirm!',
+                    content: 'Are you sure you want to ' + text + ' the device ID: ' + id + '?',
+                    buttons: {
+                        confirm: function ()
+                        {
+                            $(".loader-overlay").css("display", "block");
+                            $.get(url,
+                                function (data)
+                                {
+                                    var delayInMilliseconds = 1000;
+                                    setTimeout(function ()
+                                    {
+                                        $(".loader-overlay").css("display", "none");
+                                        location.reload();
+                                    }, delayInMilliseconds);
+                                });
+                        },
+                        cancel: function ()
+                        {
+
+                        }
+                    }
+                });
+                return false;
+            }  
+        }
+
+        function ChangeDisconnectColor()
+        {
+            $(".connect:contains('Auto')").removeClass("text-red");
+            $(".connect:contains('Manual')").removeClass("text-green");
+            $(".connect:contains('Auto')").addClass("text-green");    
+            $(".state:contains('Auto')").attr("onclick","ConfirmAction()");    
+            $(".connect:contains('Manual')").addClass("text-red");
+       
+    }
+
+        function ChangeStateColor()
+        {
+            $(".state:contains('Auto')").removeClass("text-red");
+            $(".state:contains('Manual')").removeClass("text-green");
+            $(".state:contains('Auto')").addClass("text-green");    
+            $(".state:contains('Manual')").addClass("text-red");
+       
+        }
+
+        $(document).ready(function ()
+        {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+            $(".connect:contains('Auto')").addClass("text-green");
+            $(".connect:contains('Manual')").addClass("text-red");
+            $('#page-' + @Model.pageIndex).attr("class", "btn btn-default active");
+        });
+
+    </script>
+}

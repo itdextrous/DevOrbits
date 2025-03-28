@@ -1,0 +1,173 @@
+﻿@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Http
+@model LoginViewModel
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div class="myvoltage-login accounts_pages">
+    <div class="account_form text-center">
+        <form id="frm" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="w-100">
+            <div class="row">
+                <div class="col justify-content-center text-center d-flex">
+                    <a href="/">
+                        <img src="/images/MVClientZoneLogo.png" height="115" alt="" class="d-block mx-auto MVClientZoneLogo">
+                    </a>
+                </div>
+            </div>
+            <div class="mt-75 max-w-400">
+                <div class="">
+                    <input asp-for="Email" class="form-control-trim" value="@ViewData["Email"]" onkeypress="return noSpaces(event)" placeholder="Email Address" autocomplete="asfasfasf" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mt-25">
+                    <div class="position-relative">
+                        <input asp-for="Password" id="PasswordField" type="password" class="form-control-trim" placeholder="Password" autocomplete="new-password" />
+                        <span class="fa fa-fw fa-eye toggle-password"></span>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                @Html.ValidationSummary(true,"")
+            </div>
+
+            <div class="row mt-30">
+                <div class="col text-center">
+                    <a asp-action="ForgotPassword" class="islandsunrise mb-3 regBody">Forgot Password?</a>
+                </div>
+            </div>
+            <div class="row mt-50">
+                <div class="col">
+                    <button type="submit" class="btn btn-default" onclick="Login();">Login</button>
+                </div>
+            </div>
+            <div class="mt-50 account-text">
+                <h4>
+                    Don’t have an account?
+                </h4>
+                <a asp-controller="Account" asp-action="RegisterOptions" class="link-text text-islandsunrise">Register here</a>
+            </div>
+            <div class="mt-50 text-center">
+                <img src="/images/Slogan_white.png" class="slogan_img" height="72" alt="">
+            </div>
+
+            @if (@ViewData["LoginMessage1"] != null && !string.IsNullOrEmpty(@ViewData["LoginMessage1"].ToString()))
+            {
+                <div class="mt-50 text-center text-white">
+                    @Html.Raw(System.Web.HttpUtility.HtmlDecode(@ViewData["LoginMessage1"].ToString()))
+                </div>
+            }
+            @if (@ViewData["LoginMessage2"] != null && !string.IsNullOrEmpty(@ViewData["LoginMessage2"].ToString()))
+            {
+                <div class="mt-50 text-center text-white">
+                    @Html.Raw(System.Web.HttpUtility.HtmlDecode(@ViewData["LoginMessage2"].ToString()))
+                </div>
+            }
+            @if (@ViewData["LoginMessage3"] != null && !string.IsNullOrEmpty(@ViewData["LoginMessage3"].ToString()))
+            {
+                <div class="mt-50 text-center text-white">
+                    @Html.Raw(System.Web.HttpUtility.HtmlDecode(@ViewData["LoginMessage3"].ToString()))
+                </div>
+            }
+
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script type="text/javascript">
+        function getCookie(name) {
+            var cname = name + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(cname) == 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function setCookie(name, value, exp_days) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exp_days * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toGMTString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        $(document).ready(function () {
+            var useremail = atob(getCookie("useremail"));
+            var pass = atob(getCookie("userpassword"));
+            if (useremail) {
+                //$("#Email").val(useremail);
+                //$("#PasswordField").val(pass);
+            }
+            let loginError = '@ViewData["invalidlogin"]';
+            if (loginError) {
+                toastr.error(loginError);
+            }
+
+            loginError = '@ViewData["LogoutInfo"]';
+            if (loginError) {
+                toastr.success(loginError);
+            }
+
+        })
+
+        $(document).on("click", ".toggle-password", function () {
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            let currentType = $("#PasswordField").attr('type');
+            if (currentType == "password") {
+                $("#PasswordField").attr('type', "text")
+            }
+            else {
+                $("#PasswordField").attr('type', "password")
+            }
+        });
+
+        $(function cleanBody() {
+            var body = $('body');
+            body.addClass('mv-gradient');
+
+        });
+
+        function Login() {
+
+            $("#Email").removeClass("is-invalid");
+            if ($("#Email").val() == '') {
+                $("#Email").addClass("is-invalid");
+            }
+
+            $("#Password").removeClass("is-invalid");
+            if ($("#Password").val() == '') {
+                $("#Password").addClass("is-invalid");
+            }
+
+            if ($("#Email").val() != '' && $("#Password").val() != '') {
+                setCookie("useremail", btoa($("#Email").val()), 7);
+                setCookie("userpassword", btoa($("#PasswordField").val()), 7);
+                $("#frm").submit();
+                $("#frm").reset();
+            }
+        }
+
+        function noSpaces(event) {
+            var key = event.keyCode || event.which;
+            if (key === 32) {
+                event.preventDefault();
+                return false;
+            }
+        }
+    </script>
+
+}

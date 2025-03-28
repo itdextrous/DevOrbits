@@ -1,0 +1,32 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_MeterOnManualSummaryModel
+@using MyVoltage.Extensions; 
+@using MyVoltage.Data;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.Problematic)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.AttentionRequired)
+    {
+        rowclass = "table-warning";
+        cellClass = " class=\"text-orange font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.Ok)
+    {
+        rowclass = "table-success";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+}
+<td scope="col">@Model.CompanyName</td>
+<td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+<td scope="col">@Model.CustomersCount</td>
+<td scope="col">@Model.MeterCount</td>
+<td scope="col">@Model.ElecMetersOnManual</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

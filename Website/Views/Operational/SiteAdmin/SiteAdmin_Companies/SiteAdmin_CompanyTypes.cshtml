@@ -1,0 +1,110 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_CompanyTypesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_CompanyTypes.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Company Type Name</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col" class="text-nowrap">
+                <input type="text" id="companyTypeName" class="form-control" placeholder="Create new item..." />
+            </td>
+            <td scope="col" class="text-nowrap">
+                <a onclick="DoAddReportingDescription();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+            </td>
+        </tr>
+        @foreach (var item in Model.SiteAdmin_CompanyTypesItems)
+        {
+            <tr>
+                <td scope="col" class="text-nowrap">
+                    <input type="text" id="companyTypeName_@item.ID" onchange="DoUpdateReportingDescriptions_ReportingDescription('@item.ID');" class="form-control" value="@item.CompanyTypeName" />
+                </td>
+                <td scope="col" class="text-nowrap">
+                    @if (item.AllowDelete)
+                    {
+                        <a onclick="DoDeleteReportingDescription('@item.ID');" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+<script>
+    function DoAddReportingDescription() {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_CompanyTypes_Add",
+            {
+                companyTypeName: $("#companyTypeName").val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateReportingDescriptions_ReportingDescription(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_CompanyTypes_Update/" + ItemID,
+            {
+                companyTypeName: $("#companyTypeName_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoDeleteReportingDescription(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_CompanyTypes_Delete/" + ItemID,
+            {
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+</script>
+}

@@ -1,0 +1,257 @@
+@model MyVoltage.Models.OperationalModels.DeveloperPageModel
+@{
+    ViewData["Title"] = "Developer Page";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+@using MyVoltage.Extensions;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-12 text-nowrap">
+                        <h3>Prism Modules</h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col text-nowrap">Production (TSM 500)</div>
+                    <div class="col text-nowrap text-left" id="divPrismProd"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+
+                <div class="row">
+                    <div class="col text-nowrap">Backup (TSM 250)</div>
+                    <div class="col text-nowrap text-left" id="divPrismBack"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+
+            </div>
+            <div class="card-body">
+                <div class="row col-12 m-2">
+                    <a href="/operational/developerpage/syncsecureareaenum" class="btn btn-outline-primary-sm">Sync Secure Area Enum</a>
+                </div>
+                <div class="row col-12 m-2">
+                    <a href="/operational/developerpage/CleanupOldFlags" class="btn btn-outline-primary-sm">Clean up Old Flags</a>
+                </div>
+                @*<div class="row col-12 m-2">
+                <a href="/operational/developerpage/Copy_C05_MonthlyManualInvoicing_BillingsToOwner_Attachment" class="btn btn-outline-primary">Copy_C05_MonthlyManualInvoicing_BillingsToOwner_Attachment</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/clearcache/KEY_Gateways" class="btn btn-outline-primary">CacheClear - KEY_Gateways</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/clearcache/KEY_Devices" class="btn btn-outline-primary">CacheClear - KEY_Devices</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/clearcache/KEY_SkybillCustomers" class="btn btn-outline-primary">CacheClear - KEY_SkybillCustomers</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/clearcache/KEY_SystemGeneratedReports" class="btn btn-outline-primary">CacheClear - KEY_SystemGeneratedReports</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/clearcache/KEY_Zendesk_Tickets" class="btn btn-outline-primary">CacheClear - KEY_Zendesk_Tickets</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/clearcache/KEY_RentalDataDumps" class="btn btn-outline-primary">CacheClear - KEY_RentalDataDumps</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/BuildingDetailsCompanyID" class="btn btn-outline-primary">BuildingDetailsCompanyID</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/buildingcouncildetailsredesign" class="btn btn-outline-primary">buildingcouncildetailsredesign</a>
+                </div>
+                <div class="row col-12 m-2">
+                <a href="/operational/developerpage/buildingcouncilinvoicesredesign" class="btn btn-outline-primary">BuildingCouncilInvoicesRedesign</a>
+                </div>*@
+            </div>
+            <div class="card-body">
+                @{
+                    var me = System.Diagnostics.Process.GetCurrentProcess();
+                }
+                @if (me != null)
+                {
+                    <div class="row">
+                        <div class="col-2 text-nowrap">Working Set</div>
+                        <div class="col-1 text-nowrap text-right">@((((int)me.WorkingSet / 1024) / 1024).ToString("N0")) MB</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-2 text-nowrap">Peak Working Set</div>
+                        <div class="col-1 text-nowrap text-right">@((((int)me.PeakWorkingSet / 1024) / 1024).ToString("N0")) MB</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-2 text-nowrap">Working Set 64</div>
+                        <div class="col-1 text-nowrap text-right">@((((int)me.WorkingSet64 / 1024) / 1024).ToString("N0")) MB</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-2 text-nowrap">Peak Working Set 64</div>
+                        <div class="col-1 text-nowrap text-right">@(((me.PeakWorkingSet64 / 1024) / 1024).ToString("N0")) MB</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-2 text-nowrap">Min Working Set</div>
+                        <div class="col-1 text-nowrap text-right">@((((int)me.MinWorkingSet / 1024) / 1024).ToString("N0")) MB</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-2 text-nowrap">Max Working Set</div>
+                        <div class="col-1 text-nowrap text-right">@((((int)me.MaxWorkingSet / 1024) / 1024).ToString("N0")) MB</div>
+                    </div>
+                }
+
+            </div>
+            <div class="card-body">
+                Currently using Azure Skybill: @operationalProvider.UseAzureSkybill.ToBoolean()
+                <br />
+                <a href="/operational/developerpage/switchskybill" class="btn btn-outline-primary-sm">Switch</a>
+            </div>
+            <div class="card-body">
+                DB: @Model.Database
+            </div>
+            <div class="card-body">
+                <a href="/operational/developerpage/SendEmailCodeAsync" class="btn btn-outline-primary-sm">SendEmailCodeAsync</a>
+            </div>
+            <div class="card-body">
+                <input type="date" id="date" onchange="Redirect();" value="@HttpContextAccessor.HttpContext.Request.Query["date"]" />
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(HttpContextAccessor.HttpContext.Request.Query["date"]))
+                {
+                    DateTime date = Convert.ToDateTime(HttpContextAccessor.HttpContext.Request.Query["date"]);
+                    var statement = MyVoltage.Api.NetcashAPI.GetStatement(operationalProvider.Companies.Where(p => p.CompanyID == operationalProvider.CompanyID).SingleOrDefault().MasterServiceKey, date);
+                    string xML = statement.ToXML<MyVoltage.Api.NetcashAPI.Statement, MyVoltage.Api.NetcashAPI.Statement>();
+
+                    @if (statement != null)
+                    {
+                        <table class="table table-hover table-bordered table-striped">
+                            <tr>
+                                <th>Date</th>
+                                <th>TransactionCode</th>
+                                <th>TransactionCodeDescription</th>
+                                <th>InternalDBID</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Effect</th>
+                                <th>InternalIndicator</th>
+                                <th>LedgerAccountAffected</th>
+                            </tr>
+                            <tr>
+                                <td>@statement.OpeningBalance.Date</td>
+                                <td>@statement.OpeningBalance.TransactionCode</td>
+                                <td>@statement.OpeningBalance.TransactionCodeDescription</td>
+                                <td>@statement.OpeningBalance.InternalDBID</td>
+                                <td>@statement.OpeningBalance.Description</td>
+                                <td>@statement.OpeningBalance.Amount</td>
+                                <td>@statement.OpeningBalance.Effect</td>
+                                <td>@statement.OpeningBalance.InternalIndicator</td>
+                                <td>@statement.OpeningBalance.LedgerAccountAffected</td>
+                            </tr>
+                            @foreach (var si in statement.StatementItems)
+                            {
+                                <tr>
+                                    <td>@si.Date</td>
+                                    <td>@si.TransactionCode</td>
+                                    <td>@si.TransactionCodeDescription</td>
+                                    <td>@si.InternalDBID</td>
+                                    <td>@si.Description</td>
+                                    <td>@si.Amount</td>
+                                    <td>@si.Effect</td>
+                                    <td>@si.InternalIndicator</td>
+                                    <td>@si.LedgerAccountAffected</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td>@statement.ClosingBalance.Date</td>
+                                <td>@statement.ClosingBalance.TransactionCode</td>
+                                <td>@statement.ClosingBalance.TransactionCodeDescription</td>
+                                <td>@statement.ClosingBalance.InternalDBID</td>
+                                <td>@statement.ClosingBalance.Description</td>
+                                <td>@statement.ClosingBalance.Amount</td>
+                                <td>@statement.ClosingBalance.Effect</td>
+                                <td>@statement.ClosingBalance.InternalIndicator</td>
+                                <td>@statement.ClosingBalance.LedgerAccountAffected</td>
+                            </tr>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-body">
+                <table class="table table-sm table-hover table-bordered table-striped">
+                    @{
+                        System.Reflection.PropertyInfo[] properties = operationalProvider.GetType().GetProperties();
+                    }
+                    @foreach (var prop in properties.OrderBy(p => p.Name))
+                    {
+                        var propVal = prop.GetValue(operationalProvider);
+                        if (propVal != null)
+                        {
+                            <tr>
+                                <td>@prop.Name</td>
+                                <td>@prop.GetValue(operationalProvider).ToString()</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+            <div class="card-body">
+            </div>
+            <div class="card-body">
+                @*@Html.Raw(MyVoltage.Api.NetcashAPI.GetStatementTest2("e08c4ec8-8cc6-4bd5-828c-9fff4d1c8fb2"))*@
+            </div>
+            <div class="card-body">
+                Post:
+                @Model.OrderPost
+            </div>
+            <div class="card-body">
+                Response:
+                @Model.OrderResponse
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-12 text-nowrap">
+                        <h3>System Dashboard</h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col text-nowrap">Production (TSM 500)</div>
+                    <div class="col text-nowrap text-left" id="divPrismProd1"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+
+                <div class="row">
+                    <div class="col text-nowrap">Backup (TSM 250)</div>
+                    <div class="col text-nowrap text-left" id="divPrismBack1"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#divPrismProd").load('/operational/developerpage/prism/true', function () {
+        });
+        $("#divPrismBack").load('/operational/developerpage/prism/false', function () {
+        });
+        function Redirect() {
+            document.location.href = '/operational/developerpage/?date=' + $("#date").val();
+        }
+    </script>
+}

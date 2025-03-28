@@ -1,0 +1,89 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_Connector_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_Connector_Summary.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div id="latestSync" class="card-header text-left">
+                <div class="text-orange">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Sync Status...
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Latest Connection Run</th>
+
+                            <th scope="col">More Than 7 Days</th>
+                            <th scope="col">Less Than 7 Days</th>
+                            <th scope="col">Less Than 3 Days</th>
+                            <th scope="col">Less Than 24 Hours</th>
+                            <th scope="col">Less Than 4 Hours</th>
+                            <th scope="col">Offline</th>
+                            <th scope="col">Online</th>
+
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A07_CreditControlAndNotifierProcess_Connector_SummaryModelItems)
+                        {
+                            <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');">
+                                <td scope="col">@item.CompanyName</td>
+                                <td scope="col">@item.LatestConnectionRun.ToDateAndTimeShort(true)</td>
+                                <td scope="col">@item.MoreThan7DaysCount</td>
+                                <td scope="col">@item.LessThan7DaysCount</td>
+                                <td scope="col">@item.LessThan3DaysCount</td>
+                                <td scope="col">@item.LessThan24HoursCount</td>
+                                <td scope="col">@item.LessThan4HoursCount</td>
+                                <td scope="col">@item.OfflineCount</td>
+                                <td scope="col">@item.OnlineCount</td>
+
+                                <td scope="col">@item.TotalCount</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        @*$("#latestSync").load('@Url.Content("/operational/shared/meter/DeviceSyncStatus")');
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompaniesWithNone)));
+        $(companies).each(function() {
+            $("#NotBilledSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_Connector_SummaryItem/"))' + this.CompanyID + '/' + "NotBilledSummaryItem_" + this.CompanyID, function(response, status, xhr) {
+                });
+        });*@
+        function RedirectToDetails(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_Connector_Details';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

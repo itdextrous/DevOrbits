@@ -1,0 +1,242 @@
+@model MyVoltage.Models.OperationalModels.X_MeterTeamAdmin.X_MeterTeamAdmin_RecourceLists_AddModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_RecourceLists_Add.GetDescription()} - {operationalProvider.CompanyName}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Recource List successfully added. Click Ok to update Recource List Details
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_RecourceLists_Edit/@Model.ResultCompanyID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="X_MeterTeamAdmin_RecourceLists_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="No" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="No" />
+                                <span asp-validation-for="No" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Name" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Type" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Type" />
+                                <span asp-validation-for="Type" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Usage_Calculation_Type" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Usage_Calculation_Type" />
+                                <span asp-validation-for="Usage_Calculation_Type" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Base_Unit_Of_Measure" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Base_Unit_Of_Measure" />
+                                <span asp-validation-for="Base_Unit_Of_Measure" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Resource_Group_No" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Resource_Group_No" />
+                                <span asp-validation-for="Resource_Group_No" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Direct_Unit_Cost" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Direct_Unit_Cost" />
+                                <span asp-validation-for="Direct_Unit_Cost" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Indirect_Cost_Percent" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Indirect_Cost_Percent" />
+                                <span asp-validation-for="Indirect_Cost_Percent" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Unit_Cost" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Unit_Cost" />
+                                <span asp-validation-for="Unit_Cost" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Price_Profit_Calculation" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Price_Profit_Calculation" />
+                                <span asp-validation-for="Price_Profit_Calculation" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Profit_Percent" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Profit_Percent" />
+                                <span asp-validation-for="Profit_Percent" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Unit_Price" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Unit_Price" />
+                                <span asp-validation-for="Unit_Price" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Gen_Prod_Posting_Group" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Gen_Prod_Posting_Group" />
+                                <span asp-validation-for="Gen_Prod_Posting_Group" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="VAT_Prod_Posting_Group" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="VAT_Prod_Posting_Group" />
+                                <span asp-validation-for="VAT_Prod_Posting_Group" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="County" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="County" />
+                                <span asp-validation-for="County" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Search_Name" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Search_Name" />
+                                <span asp-validation-for="Search_Name" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Default_Deferral_Template_Code" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Default_Deferral_Template_Code" />
+                                <span asp-validation-for="Default_Deferral_Template_Code" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ProductID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ProductID", Model.ProductID, new { @class = "form-control" })
+                                <span asp-validation-for="ProductID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_RecourceLists" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Recource Lists</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Add Recource List</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

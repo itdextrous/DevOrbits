@@ -1,0 +1,104 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_WinshuttleExportRequestsModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_WinshuttleExportRequests.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover table-hover table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Partner</th>
+            <th scope="col">Company</th>
+            <th scope="col">From Date</th>
+            <th scope="col">To Date</th>
+            <th scope="col">Report Items</th>
+            <th scope="col">Report Requested</th>
+            <th scope="col">Report Started</th>
+            <th scope="col">Report Ended</th>
+            <th scope="col">Progress</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.AF_AfroxAdministration_WinshuttleExportRequestItems)
+        {
+            string rowClass = "";
+            if (item.Progress < 100 && item.DateEnded.HasValue)
+            {
+                rowClass = "table-danger";
+            }
+            else if (item.Progress == 100 && item.DateEnded.HasValue)
+            {
+                rowClass = "table-success";
+            }
+            <tr class="@rowClass">
+                <td scope="col" class="text-nowrap">@item.PartnerName</td>
+                <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                <td scope="col" class="text-nowrap">@item.FromDate.ToDateShort()</td>
+                <td scope="col" class="text-nowrap">@item.ToDate.AddSeconds(-1).ToDateShort()</td>
+                <td scope="col" class="text-nowrap">@item.ItemCount</td>
+                <td scope="col" class="text-nowrap">@Html.Raw(item.DateRequested.ToDateAndTimeShort("<br />"))</td>
+                <td scope="col" class="text-nowrap">@Html.Raw(item.DateStarted.ToDateAndTimeShort(timeLineBreak: "<br />"))</td>
+                <td scope="col" class="text-nowrap">@Html.Raw(item.DateEnded.ToDateAndTimeShort(timeLineBreak: "<br />"))</td>
+                <td scope="col" class="text-nowrap">
+                    @item.Progress.ToMoney()
+                    <span> %</span>
+                    @if (!item.DateEnded.HasValue && item.Progress != 0)
+                    {
+                        double totalMSSinceStart = (DateTime.Now - item.DateStarted.Value).TotalMilliseconds;
+                        double progressLeft = Convert.ToDouble(100) - Convert.ToDouble(item.Progress);
+                        double partsLeft = progressLeft / Convert.ToDouble(item.Progress);
+                        double msLeft = partsLeft * totalMSSinceStart;
+                        <span>(ETA: @(DateTime.Now.AddMilliseconds(msLeft).ToDateAndTimeShort()))</span>
+                    }
+                </td>
+                <td scope="col" class="text-nowrap">
+                    @if (item.ItemCount > 0)
+                    {
+                        <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportRequest_Download/@item.ID/1" class="btn btn-sm btn-outline-primary-sm" target="_blank"><i class="fas fa-download"></i>&nbsp;Download Pre Billing Export</a>
+                        <span>&nbsp;</span>
+                        <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportRequest_Download/@item.ID/2" class="btn btn-sm btn-outline-primary-sm" target="_blank"><i class="fas fa-download"></i>&nbsp;Download Meter Readings Export</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@*<div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+
+
+                <div class="card-header">
+                    <h5>Export Request Results:</h5>
+                </div>
+
+                <div class="card-body">
+
+                </div>
+
+                <div class="card-footer">
+                </div>
+
+            </div>
+        </div>
+    </div>*@
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExport?P=' + $("#PartnerID").val() + '&F=' + $("#fromDate").val() + '&T=' + $("#toDate").val();
+        }
+    </script>
+}

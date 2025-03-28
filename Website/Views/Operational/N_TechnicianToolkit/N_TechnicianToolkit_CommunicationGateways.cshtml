@@ -1,0 +1,76 @@
+﻿@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_CommunicationGatewaysModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Technician Toolkit - Communication Gateways";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="table-responsive">
+    @if (operationalProvider.CompanyID == 0)
+    {
+        <span>Select a company to start...</span>
+    }
+    else
+    {
+        <table class="table table-bordered admin-table-detail mt-3 table-striped">
+            <tbody style="height:auto;">
+            <thead>
+                <tr>
+                    <td>Gateway ID</td>
+                    <td>Name</td>
+                    <td>Status</td>
+                    <td>Since</td>
+                    <td>Sim</td>
+                    <td>Network</td>
+                    <td>GIS Location</td>
+                    <td>Signal</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.OfflineGateways.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-red">No gateways for @Model.CompanyName</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var device in Model.OfflineGateways)
+                    {
+                        <tr>
+                            <td>@device.GatewayID</td>
+                            <td>@device.Name</td>
+                            <td class="status font-weight-bold">@device.Status</td>
+                            <td>@device.Since</td>
+                            <td>@device.Sim</td>
+                            <td>@device.Network</td>
+                            <td>@device.GISLocation</td>
+                            <td>@device.Signal</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(device.Sim) && device.Sim.StartsWith('+'))
+                                {
+                                    <a href="/operational/A01_GatewayAndDeviceMonitoring/SendGatewayResetSMS/@device.GatewayID/@device.Sim.Replace("+", string.Empty)" class="btn btn-link">Reset</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+</div>
+@section Scripts {
+    <script src="~/js/knockout.js"></script>
+    <script src="~/js/markerclusterer.js"></script>
+    <script src="~/js/date.format.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk"></script>
+    <script>
+        $(document).ready(function () {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+        });
+    </script>
+}

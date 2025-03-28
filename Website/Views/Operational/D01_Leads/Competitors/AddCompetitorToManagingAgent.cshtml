@@ -1,0 +1,183 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.Competitors_AddToManagingAgentModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Competitors.GetDescription()} - Add to ManagingAgent";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Competitor successfully added. Click Ok to update Competitor Details
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/D01_Leads/D01_Leads_Competitors_Edit/@Model.ResultCompetitorID" class="btn btn-outline-primary-sm">Back to Competitor</a>
+                    <a href="/operational/D01_Leads/D01_Leads_ManagingAgents_Edit/@Model.ResultManagingAgentID" class="btn btn-outline-primary-sm">Back to ManagingAgent</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="D01_Leads_Competitors_AddToManagingAgent" enctype="multipart/form-data">
+                    <div class="card-body">
+                        <input type="hidden" id="hidden-CompetitorID" name="hidden-CompetitorID" value="@(Model.ResultCompetitorID)">
+                        <input type="hidden" id="hidden-ManagingAgentID" name="hidden-ManagingAgentID" value="@(Model.ResultManagingAgentID)">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CompetitorID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @if (string.IsNullOrEmpty(Model.CompetitorID))
+                                {
+                                    <input type="text" asp-for="CompetitorID" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input type="text" asp-for="CompetitorID" class="form-control" disabled="disabled" />
+                                }
+                                <span asp-validation-for="CompetitorID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ManagingAgentID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @if (string.IsNullOrEmpty(Model.ManagingAgentID))
+                                {
+                                    <input type="text" asp-for="ManagingAgentID" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input type="text" asp-for="ManagingAgentID" class="form-control" disabled="disabled" />
+                                }
+                                <span asp-validation-for="ManagingAgentID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/D01_Leads/D01_Leads_Competitors" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Competitors</a>
+                                <a href="/operational/D01_Leads/D01_Leads_ManagingAgents" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to ManagingAgents</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <a href="#" class="btn btn-outline-primary-sm" onclick="DoPost();"><i class="fas fa-save"></i>&nbsp;Add Link</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Hidden field to store the selected value
+            var hiddenFieldC = $("#hidden-CompetitorID");
+
+            $("#CompetitorID").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/operational/D01_Leads/D01_Leads_Competitors_AddToManagingAgent_SearchCompetitors',
+                        type: 'POST',
+                        data: {
+                            Prefix: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    // Set the selected value in the hidden field
+                    hiddenFieldC.val(ui.item.value);
+                    // Display the selected text in the text box
+                    $(this).val(ui.item.label);
+                    return false;
+                }
+            });
+            // Hidden field to store the selected value
+            var hiddenFieldP = $("#hidden-ManagingAgentID");
+
+            $("#ManagingAgentID").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/operational/D01_Leads/D01_Leads_Competitors_AddToManagingAgent_SearchManagingAgents',
+                        type: 'POST',
+                        data: {
+                            Prefix: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    // Set the selected value in the hidden field
+                    hiddenFieldP.val(ui.item.value);
+                    // Display the selected text in the text box
+                    $(this).val(ui.item.label);
+                    return false;
+                }
+            });
+        });
+
+        function DoPost() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Competitors_AddToManagingAgent",
+                {
+                    CompetitorID: $("#hidden-CompetitorID").val(),
+                    ManagingAgentID: $("#hidden-ManagingAgentID").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        if ('@Model.ManagingAgentID' != '') {
+                            document.location.href = "/operational/D01_Leads/D01_Leads_ManagingAgents_Edit/@Model.ResultManagingAgentID";
+                        }
+                        else if ('@Model.CompetitorID' != '') {
+                            document.location.href = "/operational/D01_Leads/D01_Leads_Competitors_Edit/@Model.ResultCompetitorID";
+                        }
+                        //window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

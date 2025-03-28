@@ -1,0 +1,99 @@
+﻿@inject MyVoltage.Services.OperationalProvider operationalProvider
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <link rel="icon" href="/favicon.svg" type="favicon.svg" />
+    @if (!string.IsNullOrEmpty(ViewBag.MetaDescription))
+    {
+        <meta name="description" content="@ViewBag.MetaDescription">
+    }
+
+    @if (Context.Request.Path.ToString().Length > 1)
+    {
+        <title>@ViewData["Title"] - MyVoltage</title>
+    }
+
+    <!-- Fontawesome 5 -->
+    <script>
+        FontAwesomeConfig = { searchPseudoElements: true };
+    </script>
+    <script defer src="https://kit.fontawesome.com/bc7f8103a7.js"></script>
+
+    <link rel="stylesheet" href="~/css/jquery-confirm.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.structure.min.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.theme.min.css" />
+    <link rel="stylesheet" href="~/css/myvoltage-operational.css?d=@DateTime.Now.ToString("yyyyMMddHHmmss")" />
+    <link rel="stylesheet" href="/operational/css" />
+    <script>
+        function ChangeActiveCompany() {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var value = $('#globalCompanySelector').val();
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveCompany/' + value + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function ChangeActiveMeter() {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var value = $('#globalMeterSelector').val();
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + value + '?R=' + encodeURIComponent(returnUrl);
+        }
+    </script>
+
+
+</head>
+<body>
+
+
+    <div class="wrapper">
+        @await Html.PartialAsync("OperationalSidebar")
+        <div class="main-panel">
+            <div class="top-banner">
+                <a href="javascript:void(0)" class="navbar-toggler"><i class="fas fa-bars"></i></a>
+                <a href=""><img src="/operational/logo" alt="MyVoltage" class="img-fluid logo-width logo-width"></a>
+            </div>
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="logo d-none d-lg-block mb-5">
+                        <a href=""><img src="/operational/logo" alt="MyVoltage" class="logo-width"></a>
+                    </div>
+                    <div class="row mt-0 mt-md-5">
+                        <div class="col-12 col-md-12">
+                            <h3>@ViewData["Title"]</h3>
+                        </div>
+                    </div>
+
+                    @RenderBody()
+                </div>
+            </div>
+            <div class="close-layer"></div>
+        </div>
+    </div>
+
+    <script src="~/js/jquery-3.2.1.min.js"></script>
+    <script src="~/js/popper.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/jquery-confirm.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/jquery-ui.min.js"></script>
+    <script src="~/js/jquery.fileDownload.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            $(".chevron-btn").click(function () {
+                $("#SidebarToggle").toggleClass("sidebar-hide");
+                $("span").toggleClass("expanded");
+
+            });
+            $('#@(operationalProvider.CurrentParentSecureArea.ParentSecureAreaCodeName)_collapse').collapse();
+        });
+    </script>
+
+</body>
+</html>

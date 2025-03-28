@@ -1,0 +1,41 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_BModels.B5_011_Payment_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.B05_AccountPayments_PaymentSummary.GetDescription() Details</h5>
+</div>
+@if (Model.B05_AccountPayments_PaymentSummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Building Council Invoice Count</th>
+                <th scope="col">Payments Count</th>
+                <th scope="col">Latest Payment Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.B05_AccountPayments_PaymentSummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails")}";
+                <tr style="cursor:pointer;" title="View @item.PropertyLinked" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.PropertyLinked</td>
+                    <td scope="col">@item.BuildingCouncilInvoiceCount</td>
+                    <td scope="col">@item.BuildingCouncilDetails_InvoiceItemsCount</td>
+                    <td scope="col">@(item.Latest_BuildingCouncilDetails_InvoiceItem != null ? item.Latest_BuildingCouncilDetails_InvoiceItem.CreatedDate.ToDateAndTimeShort() : "")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

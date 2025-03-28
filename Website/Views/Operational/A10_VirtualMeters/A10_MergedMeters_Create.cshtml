@@ -1,0 +1,94 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_MergedMeters_CreateModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_MergedMeters_Create.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select Company to begin...
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                <form asp-action="A10_MergedMeters_Create" enctype="multipart/form-data">
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col text-uppercase font-weight-bold">
+                                <label asp-for="Serial" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" id="Serial_Search" asp-for="Serial" />
+                                <span asp-validation-for="Serial" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="row mb-2 mt-2">
+                                <div class="col-12">
+                                    @Model.ErrorMessage
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                    <div class="card-footer">
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <a href="/operational/A10_VirtualMeters/A10_MergedMeters_Details" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to list</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/A10_VirtualMeters/A10_MergedMeters_Create/serialsearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

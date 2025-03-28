@@ -1,0 +1,174 @@
+@model MyVoltage.Models.MeterViewModels.AddDeviceStep3ViewModel
+@{
+    ViewData["Title"] = "Add Device Step 3";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<form asp-action="AddDeviceStep3" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+                    @if (Model == null || !Model.IsSuccess)
+                    {
+
+                        <div class="row">
+                            <div class="col"><label asp-for="GatewayID" class="control-label"></label>:</div>
+                            <div class="col">
+                                @Model.GatewayID
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="GatewayName" class="control-label"></label>:</div>
+                            <div class="col">
+                                @Model.GatewayName
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="GatewayHardwareType" class="control-label"></label>:</div>
+                            <div class="col">
+                                @Model.GatewayHardwareType
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="MeterType" class="control-label"></label>:</div>
+                            <div class="col">
+                                @Model.MeterType
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="DeviceType" class="control-label"></label>:</div>
+                            <div class="col">
+                                @Model.DeviceType
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col"><label asp-for="SerialNumber" class="control-label"></label>:</div>
+                            <div class="col">
+                                @Model.Prefix<input class="form-group" type="text" asp-for="SerialNumber" />
+                                <span asp-validation-for="SerialNumber" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="Name" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" type="text" asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-red"></span>
+                            </div>
+                        </div>
+                        @if (Model.ShowPort)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="Port" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="Port" />
+                                    <span asp-validation-for="Port" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowProtocol)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="Protocol" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="Protocol" />
+                                    <span asp-validation-for="Protocol" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowRemoteAddress)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="RemoteAddress" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="RemoteAddress" />
+                                    <span asp-validation-for="RemoteAddress" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowRemoteIndex)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="RemoteIndex" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="RemoteIndex" />
+                                    <span asp-validation-for="RemoteIndex" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowProcessInterval)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="ProcessInterval" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="ProcessInterval" />
+                                    <span asp-validation-for="ProcessInterval" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowOdo)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="Odo" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="Odo" />
+                                    <span asp-validation-for="Odo" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="OdoReadingTime" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" type="text" asp-for="OdoReadingTime" />
+                                    <span asp-validation-for="OdoReadingTime" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col"><label asp-for="file" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="file" />
+                                <span asp-validation-for="file" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="row">
+                                <div class="col-12">
+                                    <span class="text-red font-weight-bold">@Model.ErrorMessage</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="row">
+                            <input type="submit" value="Create Device" class="btn btn-default" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            Your External Charges has been added to the schedule successfully.
+                        </div>
+                        <div class="row">
+                            <a href="/technician/newdevices" class="btn btn-default">Go to Device List</a>
+                            <a href="/adddevice" class="btn btn-default">Add Another Decice</a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>

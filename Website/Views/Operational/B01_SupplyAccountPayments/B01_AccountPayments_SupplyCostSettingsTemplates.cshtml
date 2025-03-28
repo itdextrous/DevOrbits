@@ -1,0 +1,691 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_SupplyCostSettingsTemplatesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsTemplates.GetDescription() + " - " + opProv.CompanyName;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (opProv.CompanyID == 0)
+{
+    <div class="row col-12">
+        Select company to see results...
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body text-left">
+                    <div class="row mt-2 mb-2">
+                        <div class="col">
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col text-left">Between</div>
+                                        <div class="col"><input class="form-control" type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                                        <div class="col text-center">And</div>
+                                        <div class="col"><input class="form-control" type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    @Html.DropDownList("Products", Model.Products, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <table class="table table-bordered table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" class="">Company</th>
+                        <th scope="col" style="min-width:220px!important;width:220px!important;">Account No</th>
+                        <th scope="col" class="" style="width:150px;">Device Type</th>
+                        <th scope="col" class="" style="width:300px;">Product</th>
+                        <th scope="col" class="" style="width:150px;">ResourceType</th>
+                        <th scope="col" class="" style="width:500px;">Tariff</th>
+                        <th scope="col" class="" style="width:500px;">Units calculated based on Tariff's billings</th>
+                        <th scope="col" class="" style="width:150px;">Month</th>
+                        <th scope="col" class="" style="width:200px;">Meter Serial</th>
+                        <th scope="col" class="" style="width:100px;">Total Number Of Units Used During Month</th>
+                        <th scope="col" class="">Number Of Units in Building</th>
+                        <th scope="col" class="">Average Number Of Units Used per Unit</th>
+                        <th scope="col" class="">Average Cost Per Unit</th>
+                        <th scope="col" class="" style="width:100px;">Average Rate Per Unit</th>
+                        <th scope="col" class="">Amount Excl</th>
+                        <th scope="col" class="" style="width:150px;">Calculation Type</th>
+                        <th scope="col" class="">Unit Billing</th>
+                        <th scope="col" class=""></th>
+                        <th scope="col" class=""></th>
+                        <th scope="col" class=""></th>
+                    </tr>
+                    <tr>
+                        <td title="Company" scope="col">
+                            <input type="text" readonly="readonly" class="form-control" value="@opProv.CompanyName" />
+                        </td>
+                        <td scope="col">
+                            <select id="bcd" class="form-control">
+                                <option selected="selected" value="">[--Not Selected--]</option>
+                                @foreach (var bCD in Model.BuildingCouncilDetails)
+                                {
+                                    <option value="@bCD.ID">@bCD.CouncilElecAccNo</option>
+                                }
+                            </select>
+                        </td>
+                        <td title="Device Type" scope="col">
+                            <select id="deviceType" class="form-control" onchange="PopulateLabelsForAdd();">
+                                <option value="">[Select Device Type]</option>
+                                @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                                {
+                                    if (dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Unknown
+                                    || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.GPS
+                                    || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Valve)
+                                    {
+                                        continue;
+                                    }
+                                    <option value="@((int)dt)">@dt.GetDescription()</option>
+                                }
+                            </select>
+                        </td>
+                        <td title="Product" scope="col">
+                            @*<select id="product" class="form-control" onchange="PopulateLabelsForAdd();">
+                        <option value="">[Select Product]</option>
+                        @foreach (var bCT in Model.SiteAdmin_Products)
+                        {
+                        <option value="@(bCT.ID)">@bCT.ProductName</option>
+                        }
+                        </select>*@
+                        </td>
+                        <td title="Resource Type" scope="col">
+                        </td>
+                        <td title="Tariff" scope="col">
+                            <select id="tarrif" class="form-control" onchange="PopulateLabelsForAdd();">
+                                <option value="">[Select Tarrif]</option>
+                                @foreach (var bCT in Model.Tarrifs.OrderBy(p => p.Resource_No))
+                                {
+                                    <option value="@(bCT.Resource_No)">@(bCT.Resource_No) - @bCT.Resource_Name</option>
+                                }
+                            </select>
+                        </td>
+                        <td title="Linked Tariff" scope="col">
+                            <select id="linkedtarrif" class="form-control" onchange="PopulateLabelsForAdd();">
+                                <option value="">[Select Tarrif]</option>
+                                @foreach (var bCT in Model.Tarrifs.OrderBy(p => p.Resource_No))
+                                {
+                                    <option value="@(bCT.Resource_No)">@(bCT.Resource_No) - @bCT.Resource_Name</option>
+                                }
+                            </select>
+                        </td>
+                        <td title="Month" scope="col">
+                            <input id="month" type="month" class="form-control" onchange="PopulateLabelsForAdd();" />
+                        </td>
+                        <td title="Meter Serial" scope="col">
+                            <input id="meterserial" type="text" class="form-control" onchange="PopulateLabelsForAdd();" />
+                        </td>
+                        <td title="Total Number Of Units Used During Month" scope="col" class="text-nowrap text-right">
+                            <input class="form-control" id="lblTotalNumberOfUnitsUsedDuringMonth" type="text" onchange="PopulateLabelsForAdd();" />
+                        </td>
+                        <td title="Number Of Units in Building" scope="col" class="text-nowrap text-right"><label id="lblNumberOfUnitsinBuilding"></label></td>
+                        <td title="Average Number Of Units Used per Unit" scope="col" class="text-nowrap text-right"><label id="lblAverageNumberOfUnitsUsedperUnit"></label></td>
+                        <td title="Average Cost Per Unit" scope="col" class="text-nowrap text-right"><label id="lblAverageCostPerUnit"></label></td>
+                        <td title="Average Rate Per Unit" scope="col" class="text-nowrap text-right">
+                            <input class="form-control" id="lblAverageRatePerUnit" type="text" onchange="PopulateLabelsForAdd();" />
+                        </td>
+                        <td title="Amount Excl" scope="col" class="text-nowrap text-right"><label id="lblAmountExcl"></label></td>
+                        <td title="Calculation Type" scope="col">
+                            <select id="calculationType" class="form-control" onchange="PopulateLabelsForAdd();">
+                                <option value="">[Select Calculation Type]</option>
+                                @foreach (MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum dt in ((MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum))).OrderBy(p => p.GetDescription()))
+                                {
+                                    <option value="@((int)dt)">@dt.GetDescription()</option>
+                                }
+                            </select>
+                        </td>
+                        <td title="" scope="col"></td>
+                        <td title="" scope="col" class="text-center">
+                            <a onclick="DoAdd();" href="#month" class="btn btn-sm btn-outline-primary-sm" title="Add"><i class="fas fa-plus-circle"></i></a>
+                        </td>
+                        <td title="" scope="col"></td>
+                        <td title="" scope="col"></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        string rowClass = "";
+                        DateTime? previousDate = null;
+                    }
+                    @foreach (var item in Model.Company_CostSettings_Templates)
+                    {
+                        if (previousDate.HasValue && previousDate.Value != item.Month)
+                        {
+                            if (string.IsNullOrEmpty(rowClass))
+                            {
+                                rowClass = "table-primary";
+                            }
+                            else
+                            {
+                                rowClass = "";
+                            }
+                        }
+                        <tr class="@Html.Raw(rowClass)">
+                            <td title="Company" scope="col" class="text-nowrap">@opProv.CompanyName</td>
+                            <td scope="col">
+                                @if (item.ProductID == 7@*Monthly Meter Rental*@)
+                                {
+
+                                }
+                                else
+                                {
+                                    <select id="bcd_@item.ID" onchange="UpdateBCD('@item.ID', this.value)" class="form-control">
+                                        @if (!item.BuildingCouncilDetailID.HasValue)
+                                        {
+                                            <option selected="selected" value="">[--Not Selected--]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="">[--Not Selected--]</option>
+                                        }
+                                        @foreach (var bCD in Model.BuildingCouncilDetails)
+                                        {
+                                            @if (item.BuildingCouncilDetailID.HasValue && item.BuildingCouncilDetailID.Value == bCD.ID)
+                                            {
+                                                <option selected="selected" value="@bCD.ID">@bCD.CouncilElecAccNo</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@bCD.ID">@bCD.CouncilElecAccNo</option>
+                                            }
+                                        }
+                                    </select>
+                                }
+                            </td>
+                            <td title="Device Type" scope="col" class="text-nowrap">
+                                <select id="deviceType_@item.ID" class="form-control" onchange="PopulateLabelsForUpdate('@item.ID');">
+                                    @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                                    {
+                                        if (dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Unknown
+                                        || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.GPS
+                                        || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Valve)
+                                        {
+                                            continue;
+                                        }
+                                        if (item.DeviceType == dt)
+                                        {
+                                            <option selected="selected" value="@((int)dt)">@dt.GetDescription()</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)dt)">@dt.GetDescription()</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td title="Product" scope="col" class="text-nowrap">
+                                <select id="product_@item.ID" class="form-control" onchange="PopulateLabelsForUpdate('@item.ID');" disabled>
+                                    @foreach (var bCT in Model.SiteAdmin_Products)
+                                    {
+                                        if (item.ProductID == bCT.ID)
+                                        {
+                                            <option selected="selected" value="@(bCT.ID)">@bCT.ShortName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@(bCT.ID)">@bCT.ShortName</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td title="Resource Type" scope="col" class="text-nowrap">@item.ResourceType</td>
+                            <td title="Tariff" scope="col" class="text-nowrap">
+                                <select id="tarrif_@item.ID" class="form-control" onchange="PopulateLabelsForUpdate('@item.ID');">
+                                    @foreach (var bCT in Model.Tarrifs.OrderBy(p => p.Resource_No))
+                                    {
+                                        if (item.Tarrif_Resource_No == bCT.Resource_No)
+                                        {
+                                            <option selected="selected" value="@(bCT.Resource_No)">@(bCT.Resource_No) - @bCT.Resource_Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@(bCT.Resource_No)">@(bCT.Resource_No) - @bCT.Resource_Name</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td title="Linked Tariff" scope="col" class="text-nowrap">
+                                <select id="linkedtarrif_@item.ID" class="form-control" onchange="PopulateLabelsForUpdate('@item.ID');">
+                                    @if (string.IsNullOrEmpty(item.LinkedTarrif_Resource_No))
+                                    {
+                                        <option selected="selected" value="">[--Not Selected--]</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="">[--Not Selected--]</option>
+                                    }
+                                    @foreach (var bCT in Model.Tarrifs.OrderBy(p => p.Resource_No))
+                                    {
+                                        if (item.LinkedTarrif_Resource_No == bCT.Resource_No)
+                                        {
+                                            <option selected="selected" value="@(bCT.Resource_No)">@(bCT.Resource_No) - @bCT.Resource_Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@(bCT.Resource_No)">@(bCT.Resource_No) - @bCT.Resource_Name</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td title="Month" scope="col" class="text-nowrap">
+                                <input id="month_@item.ID" type="month" class="form-control" value="@item.Month.ToString("yyyy-MM")" onchange="PopulateLabelsForUpdate('@item.ID');" />
+                            </td>
+                            <td title="Meter Serial" scope="col" class="text-nowrap">
+                                <input id="meterserial_@item.ID" type="text" class="form-control" value="@item.MeterSerial" onchange="PopulateLabelsForUpdate('@item.ID');" />
+                            </td>
+                            <td title="Total Number Of Units Used During Month" scope="col" class="text-nowrap text-right">
+                                <input class="form-control" type="text" id="lblTotalNumberOfUnitsUsedDuringMonth_@item.ID" value="@(item.Units.ToMoney())" onchange="PopulateLabelsForUpdate('@item.ID');" />
+                            </td>
+                            <td title="Number Of Units in Building" scope="col" class="text-nowrap text-right"><label id="lblNumberOfUnitsinBuilding_@item.ID"></label></td>
+                            <td title="Average Number Of Units Used per Unit" scope="col" class="text-nowrap text-right"><label id="lblAverageNumberOfUnitsUsedperUnit_@item.ID"></label></td>
+                            <td title="Average Cost Per Unit" scope="col" class="text-nowrap text-right"><label id="lblAverageCostPerUnit_@item.ID"></label></td>
+                            <td title="Average Rate Per Unit" scope="col" class="text-nowrap text-right">
+                                <input class="form-control" type="text" id="lblAverageRatePerUnit_@item.ID" value="@(item.RatePerUnit.HasValue ? item.RatePerUnit.Value.ToString("N4") : "")" onchange="PopulateLabelsForUpdate('@item.ID');" />
+                            </td>
+                            <td title="Amount Excl" scope="col" class="text-nowrap text-right"><label id="lblAmountExcl_@item.ID"></label></td>
+                            <td title="Calculation Type" scope="col" class="text-nowrap">
+                                <select id="calculationType_@item.ID" class="form-control" onchange="PopulateLabelsForUpdate('@item.ID');">
+                                    @foreach (MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum dt in ((MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum))).OrderBy(p => p.GetDescription()))
+                                    {
+                                        if (item.CalculationType == dt)
+                                        {
+                                            <option selected="selected" value="@((int)dt)">@dt.GetDescription()</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)dt)">@dt.GetDescription()</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td title="" scope="col" class="text-center">@(item.SkybillResourceList != null && item.SkybillResourceList.ExcludeUnitsFromBilling ? "Exclude" : "Include")</td>
+                            <td title="" scope="col" class="text-center">
+                                <a onclick="DoUpdate('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update"><i class="fas fa-save"></i></a>
+                            </td>
+                            <td title="" scope="col" class="text-center">
+                                <a onclick="DoDelete('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                            </td>
+                            <td title="" scope="col" class="text-center">
+                                <a onclick="DoViewDetails('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Calculation Details"><i class="fas fa-eye"></i></a>
+                            </td>
+                        </tr>
+                        previousDate = item.Month;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&Products=' + $("#Products").val();
+        }
+
+        function PopulateLabelsForAdd() {
+
+            $("#lblNumberOfUnitsinBuilding").html('<i class="fas fa-spinner fa-spin"></i>');
+            $("#lblAverageNumberOfUnitsUsedperUnit").html('<i class="fas fa-spinner fa-spin"></i>');
+            $("#lblAverageCostPerUnit").html('<i class="fas fa-spinner fa-spin"></i>');
+            $("#lblAmountExcl").html('<i class="fas fa-spinner fa-spin"></i>');
+
+            if ($("#calculationType").val() == '' || $("#calculationType").val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Manual)') {
+                $('#lblTotalNumberOfUnitsUsedDuringMonth').attr('readonly', false);
+                $('#lblTotalNumberOfUnitsUsedDuringMonth').attr('disabled', false);
+                $('#lblAverageRatePerUnit').attr('readonly', false);
+                $('#lblAverageRatePerUnit').attr('disabled', false);
+            }
+            else {
+                $('#lblTotalNumberOfUnitsUsedDuringMonth').attr('readonly', true);
+                $('#lblTotalNumberOfUnitsUsedDuringMonth').attr('disabled', true);
+                $('#lblAverageRatePerUnit').attr('readonly', true);
+                $('#lblAverageRatePerUnit').attr('disabled', true);
+            }
+
+            if ($("#calculationType").val() == '' || $("#calculationType").val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Metered)' || $("#calculationType").val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.MaxDemand)') {
+                $('#meterserial').attr('readonly', false);
+                $('#meterserial').attr('disabled', false);
+            }
+            else {
+                $('#meterserial').attr('readonly', true);
+                $('#meterserial').attr('disabled', true);
+            }
+
+            if ($("#calculationType").val() == '' || $("#calculationType").val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.LinkedCalculated)') {
+                $('#linkedtarrif').attr('readonly', false);
+                $('#linkedtarrif').attr('disabled', false);
+            }
+            else {
+                $('#linkedtarrif').attr('readonly', true);
+                $('#linkedtarrif').attr('disabled', true);
+                $('#linkedtarrif').val('');
+            }
+
+            $.post('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_GetCalculation',
+                {
+                    devicetype: $("#deviceType").val(),
+                    product: $("#product").val(),
+                    tarrif: $("#tarrif").val(),
+                    linkedtarrif: $("#linkedtarrif").val(),
+                    month: $("#month").val(),
+                    calculationtype: $("#calculationType").val(),
+                    meterserial: $("#meterserial").val(),
+                    lblTotalNumberOfUnitsUsedDuringMonth: $("#lblTotalNumberOfUnitsUsedDuringMonth").val(),
+                    lblAverageRatePerUnit: $("#lblAverageRatePerUnit").val(),
+                })
+                .done(function (data) {
+                    $("#lblNumberOfUnitsinBuilding").html(data.numberOfUnitsinBuilding);
+                    $("#lblAverageNumberOfUnitsUsedperUnit").html(data.averageUnitsUsedPerUnit);
+                    $("#lblAverageCostPerUnit").html(data.averageCostPerUnit);
+                    $("#lblAmountExcl").html(data.amountExcl);
+                    if ($("#calculationType").val() == '' || $("#calculationType").val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Manual)') {
+                    }
+                    else {
+                        $("#lblTotalNumberOfUnitsUsedDuringMonth").val(data.totalNumberOfUnitsUsedDuringMonth);
+                        $("#lblAverageRatePerUnit").val(data.averageRatePerUnit);
+                    }
+                });
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#deviceType").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Device Type');
+                $("#deviceType").focus();
+                return;
+            }
+
+            if ($("#product").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Product');
+                $("#product").focus();
+                return;
+            }
+
+            if ($("#tarrif").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Tarrif');
+                $("#tarrif").focus();
+                return;
+            }
+
+            if ($("#month").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Month');
+                $("#month").focus();
+                return;
+            }
+
+            if ($("#calculationType").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Calculation Type');
+                $("#calculationType").focus();
+                return;
+            }
+
+            $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_ItemAdd",
+                {
+                    devicetype: $("#deviceType").val(),
+                    product: $("#product").val(),
+                    tarrif: $("#tarrif").val(),
+                    linkedtarrif: $("#linkedtarrif").val(),
+                    month: $("#month").val(),
+                    calculationtype: $("#calculationType").val(),
+                    meterserial: $("#meterserial").val(),
+                    lblTotalNumberOfUnitsUsedDuringMonth: $("#lblTotalNumberOfUnitsUsedDuringMonth").val(),
+                    lblAverageRatePerUnit: $("#lblAverageRatePerUnit").val(),
+                    bcd: $("#bcd").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function PopulateLabelsForUpdate(itemID) {
+
+            $("#lblNumberOfUnitsinBuilding_" + itemID).html('<i class="fas fa-spinner fa-spin"></i>');
+            $("#lblAverageNumberOfUnitsUsedperUnit_" + itemID).html('<i class="fas fa-spinner fa-spin"></i>');
+            $("#lblAverageCostPerUnit_" + itemID).html('<i class="fas fa-spinner fa-spin"></i>');
+            $("#lblAmountExcl_" + itemID).html('<i class="fas fa-spinner fa-spin"></i>');
+
+            if ($("#calculationType_" + itemID).val() == '' || $("#calculationType_" + itemID).val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Manual)') {
+                $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).attr('readonly', false);
+                $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).attr('disabled', false);
+                $("#lblAverageRatePerUnit_" + itemID).attr('readonly', false);
+                $("#lblAverageRatePerUnit_" + itemID).attr('disabled', false);
+            }
+            else {
+                $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).attr('readonly', true);
+                $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).attr('disabled', true);
+                $("#lblAverageRatePerUnit_" + itemID).attr('readonly', true);
+                $("#lblAverageRatePerUnit_" + itemID).attr('disabled', true);
+            }
+
+            if ($("#calculationType_" + itemID).val() == '' || $("#calculationType_" + itemID).val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Metered)' || $("#calculationType_" + itemID).val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.MaxDemand)') {
+                $("#meterserial_" + itemID).attr('readonly', false);
+                $("#meterserial_" + itemID).attr('disabled', false);
+            }
+            else {
+                $("#meterserial_" + itemID).attr('readonly', true);
+                $("#meterserial_" + itemID).attr('disabled', true);
+            }
+
+            if ($("#calculationType_" + itemID).val() == '' || $("#calculationType_" + itemID).val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.LinkedCalculated)') {
+                $("#linkedtarrif_" + itemID).attr('readonly', false);
+                $("#linkedtarrif_" + itemID).attr('disabled', false);
+            }
+            else {
+                $("#linkedtarrif_" + itemID).attr('readonly', true);
+                $("#linkedtarrif_" + itemID).attr('disabled', true);
+                $("#linkedtarrif_" + itemID).val('');
+            }
+
+            $.post('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_GetCalculation',
+                {
+                    devicetype: $("#deviceType_" + itemID).val(),
+                    product: $("#product_" + itemID).val(),
+                    tarrif: $("#tarrif_" + itemID).val(),
+                    linkedtarrif: $("#linkedtarrif_" + itemID).val(),
+                    month: $("#month_" + itemID).val(),
+                    calculationtype: $("#calculationType_" + itemID).val(),
+                    meterserial: $("#meterserial_" + itemID).val(),
+                    lblTotalNumberOfUnitsUsedDuringMonth: $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).val(),
+                    lblAverageRatePerUnit: $("#lblAverageRatePerUnit_" + itemID).val(),
+                    bcd: $("#bcd_" + itemID).val(),
+                })
+                .done(function (data) {
+                    $("#lblNumberOfUnitsinBuilding_" + itemID).html(data.numberOfUnitsinBuilding);
+                    $("#lblAverageNumberOfUnitsUsedperUnit_" + itemID).html(data.averageUnitsUsedPerUnit);
+                    $("#lblAverageCostPerUnit_" + itemID).html(data.averageCostPerUnit);
+                    $("#lblAmountExcl_" + itemID).html(data.amountExcl);
+                    if ($("#calculationType_" + itemID).val() == '' || $("#calculationType_" + itemID).val() == '@((int)MyVoltage.Data.Company_CostSettings_Template.CalculationTypeEnum.Manual)') {
+                    }
+                    else {
+                        $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).val(data.totalNumberOfUnitsUsedDuringMonth);
+                        $("#lblAverageRatePerUnit_" + itemID).val(data.averageRatePerUnit);
+                    }
+                });
+        }
+
+        function DoUpdate(itemID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#deviceType_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Device Type');
+                $("#deviceType_" + itemID).focus();
+                return;
+            }
+
+            if ($("#product_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Product');
+                $("#product_" + itemID).focus();
+                return;
+            }
+
+            if ($("#tarrif_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Tarrif');
+                $("#tarrif_" + itemID).focus();
+                return;
+            }
+
+            if ($("#month_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Month');
+                $("#month_" + itemID).focus();
+                return;
+            }
+
+            if ($("#calculationType_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Calculation Type');
+                $("#calculationType_" + itemID).focus();
+                return;
+            }
+
+            $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_ItemUpdate",
+                {
+                    itemid: itemID,
+                    devicetype: $("#deviceType_" + itemID).val(),
+                    product: $("#product_" + itemID).val(),
+                    tarrif: $("#tarrif_" + itemID).val(),
+                    linkedtarrif: $("#linkedtarrif_" + itemID).val(),
+                    month: $("#month_" + itemID).val(),
+                    calculationtype: $("#calculationType_" + itemID).val(),
+                    meterserial: $("#meterserial_" + itemID).val(),
+                    lblTotalNumberOfUnitsUsedDuringMonth: $("#lblTotalNumberOfUnitsUsedDuringMonth_" + itemID).val(),
+                    lblAverageRatePerUnit: $("#lblAverageRatePerUnit_" + itemID).val(),
+                    bcd: $("#bcd_" + itemID).val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(itemID) {
+            if (confirm('Are you sure you wish to delete this item? This action cannot be undone.')) {
+                $("#loaderContent").css("display", "block");
+
+                $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_ItemDelete",
+                    {
+                        itemid: itemID,
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                        }
+                    });
+            }
+        }
+
+        function DoViewDetails(itemID) {
+            $("#loaderContent").css("display", "block");
+
+            document.location.href = '/operational/Change_B01_TemplateID/' + itemID + '?R=' + encodeURIComponent('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplatesCalculationDetails');
+        }
+
+        $("#meterserial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+        $(document).ready(function () {
+            var items = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Company_CostSettings_Templates)));
+            $(items).each(function () {
+                PopulateLabelsForUpdate(this.ID);
+                $("#meterserial_" + this.ID).autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: "/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates_Search",
+                            type: "POST",
+                            dataType: "json",
+                            data: { Prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.text, value: item.value };
+                                }))
+
+                            }
+                        })
+                    }
+                });
+
+            });
+        });
+
+    </script>
+}

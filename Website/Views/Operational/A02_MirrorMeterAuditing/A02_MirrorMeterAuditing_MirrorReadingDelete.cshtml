@@ -1,0 +1,236 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorReadingDeleteModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions; 
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MirrorReadingDelete.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerMeterSerial}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccessful)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Device Readings successfully deleted.<br />
+                    @Model.RowsRemoved readings affected.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingDelete" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+
+                <div class="card-header">
+
+                    <div class="row mb-md-2 text-orange">
+                        <div class="col text-left">
+                            <h6>Search Meter:</h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2 text-orange">
+                        <div class="col">
+                            <input id="serialSearch" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col text-left">
+                            @*<a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingDeleteNoAccess" class="btn btn-outline-danger-sm"><i class="fas fa-exclamation-circle"></i>&nbsp;No Access</a>*@
+                        </div>
+                        <div class="col text-right">
+                            <a id="searchButton" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+                    {
+                        @if (operationalProvider.MirrorDevices.Where(p => p.Value == operationalProvider.CustomerMeterSerial).Count() > 0)
+                        {
+                            <form asp-action="A02_MirrorMeterAuditing_MirrorReadingDelete" enctype="multipart/form-data">
+                                <div class="row text-orange mb-md-2">
+                                    <div class="col-12">
+                                        <h5>Create Odo</h5>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Company:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CompanyName
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Customer Number:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CustomerNumber
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Meter No:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CustomerMeterNo
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Serial:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CustomerMeterSerial
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Pulsar Serial (Remote Addr):
+                                    </div>
+                                    <div class="col">
+                                        @Model.RemoteAddress
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        <label asp-for="DateLogged" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" asp-for="DateLogged" placeholder="yyyy-MM-dd" />
+                                        <span asp-validation-for="DateLogged" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        <label asp-for="TimeLogged" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" asp-for="TimeLogged" placeholder="HH:mm" />
+                                        <span asp-validation-for="TimeLogged" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                @*<div class="row mb-md-2">
+                                    <div class="col">
+                                        <a href="#" onclick="GetReadingAndDiff();" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Check With System</a>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Latest Live Reading
+                                    </div>
+                                    <div class="col">
+                                        <label id="latestLiveReading"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Latest Live Reading Time
+                                    </div>
+                                    <div class="col">
+                                        <label id="latestLiveReadingTime"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Calculated Difference
+                                    </div>
+                                    <div class="col">
+                                        <label id="calculatedDifference"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col-12">
+                                        <label id="differenceMessage" class="font-weight-bold"></label>
+                                    </div>
+                                </div>*@
+
+                                <div class="row mb-md-2">
+                                    <div class="col-12 text-right">
+                                        <button class="btn btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete Readings</button>
+                                    </div>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div>@operationalProvider.CustomerMeterSerial not found in mirror...</div>
+                        }
+                    }
+                    else
+                    {
+                        <div>Select or Search a meter to start...</div>
+                    }
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        //function GetReadingAndDiff() {
+        //    $("#loaderContent").css("display", "block");
+        //    $.get("/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingUpdate_GetReadingAndDiff?OdoReading=" + $("#OdoReading").val())
+        //        .done(function (data) {
+        //            $("#latestLiveReading").html(data.latestLiveReading);
+        //            $("#latestLiveReadingTime").html(data.latestLiveReadingTime);
+        //            $("#calculatedDifference").html(data.calculatedDifference);
+        //            $("#differenceMessage").html(data.differenceMessage);
+        //            $("#loaderContent").css("display", "none");
+        //        });
+        //}
+
+        $("#serialSearch").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingUpdate_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { serialOrName: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+        $("#searchButton").click(function () {
+            $("#loaderContent").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + $("#serialSearch").val() + '?R=' + returnUrl;
+        });
+
+        $(document).ready(function () {
+            GetReadingAndDiff();
+        });
+    </script>
+}

@@ -1,0 +1,201 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_MeterOnManualRequestReviewModel
+@{
+    ViewData["Title"] = "Credit Control And Notifier Process - Meter On Manual Request Review";
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-1 text-left">
+                        <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualRequestDetails" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_MeterOnManualRequestReview, MyVoltage.Data.SecureAreaActionEnum.Approval) && !string.IsNullOrEmpty(operationalProvider.CustomerNumber) && !Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedDate.HasValue)
+                    {
+                        @*<div class="col-2 text-right text-red font-weight-bold">
+                                Classify @operationalProvider.CustomerNumber As:
+                            </div>*@
+                        <div class="col-11 text-right">
+                            Meter goes back to auto disconnect on:
+                            <input id="approvedExpirationDate" name="approvedExpirationDate" type="date" title="New Expiration Date" min="@DateTime.Now.AddDays(1).ToDateShort()" max="@DateTime.Now.AddDays(30).ToDateShort()" />
+                            @foreach (var action in Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestActions)
+                            {
+                                <a onclick="DoAction('@action.ActionID');" href="#" class="btn btn-outline-primary @action.ActionColor" title="@action.ActionDescription"><i class="fas fa-@action.ActionIcon"></i>&nbsp;@action.ActionDisplayName</a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-body">
+                    <div class="row col-12 mt-md-2">
+                        <h5 class="text-orange">Request Details</h5>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Company</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.CompanyName</div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Customer No</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.CustomerNo</div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Serial No</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.SerialNo</div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Requested By</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.Username</div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Created Date</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.CreatedDate.ToDateAndTimeShort()</div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Reason For Request</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ReasonForRequest</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row col-12 mt-md-2">
+                        <h5 class="text-orange">Approval Details</h5>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Approved By</div>
+                        <div class="col-6">
+                            @Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedByUsername
+                            @if (Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedActionID.HasValue)
+                            {
+                                var action = Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestActions.Where(p => p.ActionID == Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedActionID.Value).SingleOrDefault();
+                                <span class="font-weight-bold @action.ActionColor">(@action.ActionDisplayName)</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Approved Date</div>
+                        <div class="col-6">@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedDate.ToDateAndTimeShort()</div>
+                    </div>
+                    <div class="row mt-md-2">
+                        <div class="col-6">Expiration Date (7 days after creation if not approved)</div>
+                        @{
+                            DateTime expireDate = Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.CreatedDate.AddHours(48);
+                            if (Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedExpirationDate.HasValue)
+                            {
+                                expireDate = Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ApprovedExpirationDate.Value;
+                            }
+                        }
+                        <div class="col-6" title="@((expireDate - DateTime.Now).TotalHours.ToString("N")) hours remaining">
+                            @(expireDate.ToString("dd MMM yyyy HH:mm"))
+                        </div>
+                    </div>
+                </div>
+
+                <div id="deviceDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Device Details...
+                    </div>
+                </div>
+
+                <div id="billingDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Billing Details...
+                    </div>
+                </div>
+
+                <div id="customerDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Details...
+                    </div>
+                </div>
+
+                <div id="customerUsage" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Usage...
+                    </div>
+                </div>
+
+                <div id="customerMeterList" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter List...
+                    </div>
+                </div>
+
+                <div id="customerGraphsDaily" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter Graphs...
+                    </div>
+                </div>
+
+                <div id="customerOccupancyStatus" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Occupancy Status...
+                    </div>
+                </div>
+            }
+
+            <div class="card-footer align-middle">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#customerGraphsDaily").load('@Url.Content($"/operational/shared/meter/GraphDaily/{(int)MyVoltage.Data.AccountTypeEnum.PrepaidCredit}/{(int)MyVoltage.Data.MeterTypeEnum.Balance}/{DateTime.Now.Year}/{DateTime.Now.Month}")');
+            $("#deviceDetails").load('@Url.Content("/operational/shared/meter/DeviceDetails")');
+            $("#billingDetails").load('@Url.Content("/operational/shared/meter/billingDetails")');
+            $("#customerDetails").load('@Url.Content("/operational/shared/customer/customerdetails")');
+            $("#customerUsage").load('@Url.Content("/operational/shared/customer/customerusage")');
+            $("#customerMeterList").load('@Url.Content("/operational/shared/customer/customermeterlist")');
+            $("#customerOccupancyStatus").load('@Url.Content("/operational/shared/customer/customeroccupancystatus")');
+        });
+        function DoAction(actionID) {
+            $("#loaderContent").css("display", "block");
+
+            if (actionID == 1 && $("#approvedExpirationDate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please select a new expiration date');
+                $("#approvedExpirationDate").focus();
+                return;
+            }
+
+        $.post("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualRequestReviewAction/@Model.A07_CreditControlAndNotifierProcess_MeterOnManualRequestItem.ID/" + actionID,
+        {
+            approvedExpirationDate: $("#approvedExpirationDate").val()
+        })
+            .done(function( data ) {
+            $("#loaderContent").css("display", "none");
+            if (data == "true") {
+                alert("Success");
+                window.location.reload();
+            }
+            else {
+                alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+            }
+            });
+
+        }
+
+    </script>
+}

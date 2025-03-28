@@ -1,0 +1,51 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_VehiclesModels.SiteAdmin_VehiclesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_Vehicles.GetDescription()}";
+}
+<div class="row col-12">
+    <a href="/operational/SiteAdmin/SiteAdmin_Vehicles/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Vehicle</a>
+</div>
+
+<div class="row col-12">
+
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Registration Number</th>
+                <th scope="col">Vehicle Type</th>
+                <th scope="col">Regular Driver</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Meter ID</th>
+                <th scope="col">Rate Per KM</th>
+                <th scope="col">M2M MeterID Lookup Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SiteAdmin_VehiclesItems)
+            {
+                <tr style="cursor:pointer;" title="View / Edit" onclick="RedirectToEditFlag('@item.ID');">
+                    <td scope="col">@item.RegistrationNumber</td>
+                    <td scope="col">@item.VehicleTypeName</td>
+                    <td scope="col">@item.RegularDriverUsername</td>
+                    <td scope="col">@item.OwnerUsername</td>
+                    <td scope="col">@item.DeviceIDLinked</td>
+                    <td scope="col">@item.RatePerKM.ToMoney("R")</td>
+                    <td scope="col">@(item.M2MDevice != null ? $"Found - {item.M2MDevice.name} {item.M2MDevice.serial} {(item.M2MDevice.status != null ? $"({item.M2MDevice.status.time.ToDateAndTimeShort()})" : "")}" : "Not Found")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_Vehicles/Edit/' + flagID;
+        }
+    </script>
+}

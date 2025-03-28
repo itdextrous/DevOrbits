@@ -1,0 +1,79 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_Connector_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_Connector_Details.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_Connector_Summary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (Model.A07_CreditControlAndNotifierProcess_Connector_DetailsItems.Count == 0)
+                {
+                    <span>There are no offline devices for @operationalProvider.CompanyName</span>
+                }
+                else
+                {
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer No</th>
+                                <th scope="col">Customer Name</th>
+                                <th scope="col">Meter Number</th>
+                                <th scope="col">Balance</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Action Date</th>
+                                <th scope="col">Auto Disconnect</th>
+                                <th scope="col">Is Contactor Connected</th>
+                                <th scope="col">Contactor Time Logged</th>
+                                <th scope="col">Last Receipt Date</th>
+                                <th scope="col">Receipt Amount</th>
+                                <th scope="col">Payment Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemC in Model.A07_CreditControlAndNotifierProcess_Connector_DetailsItems)
+                            {
+                                <tr style="cursor:pointer;" title="@itemC.MeterNumber" onclick="RedirectToVerification('@itemC.MeterNumber');">
+                                    <td scope="col">@itemC.CustomerNumber</td>
+                                    <td scope="col">@itemC.CustomerName</td>
+                                    <td scope="col">@itemC.MeterNumber</td>
+                                    <td scope="col" class="text-right">@itemC.Balance.ToMoneyNoDecimal()</td>
+                                    <td scope="col">@itemC.Action</td>
+                                    <td scope="col">@itemC.ActionDate.ToDateAndTimeShort()</td>
+                                    <td scope="col" class="@itemC.AutoDisconnect.ToAutoDisconnectStatus().ToUpper()">@itemC.AutoDisconnect.ToAutoDisconnectStatus()</td>
+                                    <td scope="col" class="@itemC.IsContactorConnected.ToContactorState().ToUpper()">@itemC.IsContactorConnected.ToContactorState()</td>
+                                    <td scope="col">@itemC.ContactorTimeLogged.ToDateAndTimeShort()</td>
+                                    <td scope="col">@itemC.LastReceiptDate.ToDateAndTimeShort()</td>
+                                    <td scope="col" class="text-right">@itemC.ReceiptAmount.ToMoneyNoDecimal()</td>
+                                    <td scope="col">@itemC.PaymentMethod</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=' + encodeURIComponent(returnUrl);
+        }
+    </script>
+}

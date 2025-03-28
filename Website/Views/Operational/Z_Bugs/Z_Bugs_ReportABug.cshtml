@@ -1,0 +1,150 @@
+@model MyVoltage.Models.OperationalModels.Z_BugsModels.Z_Bugs_ReportABugModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Z_Bugs_ReportABug.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Bug successfully reported.
+                    <br />Thank you for taking the time to report a problem on the system. If there is any progress you will be updated on your registered email.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/Z_Bugs/Z_Bugs_MyBugs" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    Bug Details:
+                </div>
+                <form asp-action="Z_Bugs_ReportABug" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="LinkedSecureAreaID" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* This is where you were on the menu when the error happened.
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LinkedSecureAreaID", Model.LinkedSecureAreaID, new { @class = "form-control" })
+                                <span asp-validation-for="LinkedSecureAreaID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="UserDescription" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* Tell us a story of what happened. Detailed explanations will help speed up the process.
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="UserDescription"></textarea>
+                                <span asp-validation-for="UserDescription" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="Screenshot" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* Supplying a screenshot of what you filled in before clicking a button for example, will help replicate the problem to get it resolved quickly.
+                                <br /><span class="text-red font-weight-bold">Only fullscreen screenshots will be accepted. "Snips" will be rejected.</span>
+                            </div>
+                            <div class="col-6">
+                                <input type="file" class="form-control" asp-for="Screenshot" />
+                                <span asp-validation-for="Screenshot" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="CompanyID" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* Select a company the problem happened on, if applicable.
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                                <span asp-validation-for="CompanyID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="CustomerNo" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* Enter the Customer Number the problem happened on, if applicable.
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CustomerNo" />
+                                <span asp-validation-for="CustomerNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="MeterSerial" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* Enter the Meter Serial the problem happened on, if applicable.
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="MeterSerial" />
+                                <span asp-validation-for="MeterSerial" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="PriorityID" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* This is how important the bug should be treated.
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("PriorityID", Model.PriorityID, new { @class = "form-control" })
+                                <span asp-validation-for="PriorityID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="PriorityReason" class="control-label font-weight-bold text-uppercase"></label>
+                                <br />* Explain why you chose how important this bug should be treated.
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="PriorityReason"></textarea>
+                                <span asp-validation-for="PriorityReason" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Report Bug</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

@@ -1,0 +1,82 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MeterCalibrationSummary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Meters Calibrated</th>
+                            <th scope="col">Meters Not Calibrated</th>
+                            <th scope="col">Meters That Cannot Be Calibrated</th>
+                            <th scope="col">% Calibrated</th>
+                            <th scope="col">Meters Probematic</th>
+                            <th scope="col">Meter Count</th>
+                            <th scope="col">Customers Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var uC in operationalProvider.Companies.Where(p => @*p.IsDailyBillingStatusActive &&*@ p.ExistsInSkybill.HasValue && p.ExistsInSkybill.Value && operationalProvider.UserCompanies.Select(c => c.CompanyID).Contains(p.CompanyID)))
+                        {
+                            <tr id="CalibrationSummaryItem_@uC.CompanyID" style="cursor:pointer;" title="View @uC.Name" onclick="RedirectToDetails('@uC.CompanyID');">
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        @uC.Name
+                                    </div>
+                                </td>
+                                <td colspan="8">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.Companies.Where(p => @*p.IsDailyBillingStatusActive &&*@ operationalProvider.UserCompanies.Select(c => c.CompanyID).Contains(p.CompanyID)))));
+        $(companies).each(function() {
+            $("#CalibrationSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationSummaryItem/"))' + this.CompanyID + '/' + "CalibrationSummaryItem_" + this.CompanyID, function(response, status, xhr) {
+                    var col = $("#" + this.id + "_col");
+                    if (col.length > 0) {
+                        var text = col[0].innerHTML;
+                        if (text == 'Reviewed') {
+                            $("#" + this.id).addClass("table-success");
+                        }
+                        else if (text == 'Outstanding') {
+                            $("#" + this.id).addClass("table-danger");
+                        }
+                    }
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

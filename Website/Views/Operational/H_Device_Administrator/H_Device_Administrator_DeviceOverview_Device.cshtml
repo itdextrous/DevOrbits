@@ -1,0 +1,226 @@
+@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_DeviceOverview_DeviceModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_DeviceOverview.GetDescription()} - {Model.GatewayName}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-2 mt-2">
+    <div class="col-6">
+        <a href="/operational/H_Device_Administrator/H_Device_Administrator_DeviceOverview" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+    </div>
+    <div class="col-6 text-right">
+        @if (Model.H_Device_Administrator_DeviceOverview_DeviceItems.Count > 0 && operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_DeviceOverview, MyVoltage.Data.SecureAreaActionEnum.Delete))
+        {
+            <a title="Delete" href="#" onclick="ConfirmDeleteAll('@Model.GatewayName');" class="btn btn-outline-primary-sm text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete All Devices</a>
+        }
+    </div>
+</div>
+
+@if (Model.H_Device_Administrator_DeviceOverview_DeviceItems.Count == 0)
+{
+    <span>There are no devices for @Model.GatewayName</span>
+}
+else
+{
+    <table class="table table-responsive-xl table-striped table-hover table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">Device ID</th>
+                <th scope="col">Device Name</th>
+                <th scope="col">Device Serial</th>
+                <th scope="col">Status</th>
+                <th scope="col">Since</th>
+                <th scope="col">Offline Duration</th>
+                <th scope="col">Type ID</th>
+                <th scope="col">Type Name</th>
+                <th scope="col">Mapping Index</th>
+                <th scope="col">Port</th>
+                <th scope="col">Protocol</th>
+                <th scope="col">Remote Index</th>
+                <th scope="col">Remote Address</th>
+                <th scope="col">Process Interval</th>
+
+                <th scope="col">Active Energy<br />(1)</th>
+                <th scope="col">Reactive Energy<br />(2)</th>
+                <th scope="col">Max Demand<br />(29)</th>
+                <th scope="col">CT Ratio<br />(70)</th>
+                <th scope="col">Water Consumption<br />(80)</th>
+                <th scope="col">Gas Consumption<br />(140)</th>
+                <th scope="col">Is Contactor Installed</th>
+                <th scope="col">Contactor State<br />(91)</th>
+                <th scope="col">Internal Battery V<br />(100)</th>
+                <th scope="col">Signal RSSI<br />(101)</th>
+                <th scope="col">SNR<br />(106)</th>
+                <th scope="col">Temp<br />(102)</th>
+                <th scope="col">Remaining Credit<br />(90)</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var itemC in Model.H_Device_Administrator_DeviceOverview_DeviceItems)
+            {
+                string rowclass = "";
+                string cellClass = "";
+                <tr id="NotBilledSummaryItem_@itemC.id" @Html.Raw(rowclass) @*style="cursor:pointer;" title="View @itemC.CustomerMeterSerial" onclick="RedirectToVerification('@itemC.CustomerMeterSerial');"*@>
+                    <td scope="col">@itemC.id</td>
+                    <td scope="col">@itemC.name</td>
+                    <td scope="col">@itemC.serial</td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.H_Device_Administrator_DeviceOverview_DeviceItems)));
+        $(companies).each(function() {
+            $("#NotBilledSummaryItem_" + this.id).load('@(Url.Content($"/operational/H_Device_Administrator/H_Device_Administrator_DeviceOverview_DeviceItem/{Model.GatewayID}/"))' + this.serial + '/' + "NotBilledSummaryItem_" + this.id);
+        });
+
+        function ConfirmDelete(itemID, description) {
+            if (confirm('Are you use you want to delete ' + description + '?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_DeviceOverview_DeviceItem_DeleteDevice/@Model.GatewayID/' + itemID + '?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+        function ConfirmDeleteAll(description) {
+            if (confirm('Are you use you want to delete ALL DEVICES on gateway ' + description + '?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_DeviceOverview_DeviceItem_DeleteDevicesInGateway/@Model.GatewayID?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+    </script>
+}

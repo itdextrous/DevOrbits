@@ -1,0 +1,54 @@
+@model MyVoltage.Models.OperationalModels.B02_CouncilReadingsModels.B02_CouncilReadings_CouncilReadingSummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B02_CouncilReadings_CouncilReadingSummary.GetDescription();
+}
+<table class="table table-responsive-xl table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Company Name</th>
+            <th scope="col">Payment Types</th>
+            <th scope="col">Council Meter Count</th>
+            <th scope="col">Readings Uploaded</th>
+            <th scope="col">Readings Verified</th>
+            <th scope="col">Readings Submitted</th>
+            <th scope="col">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.B02_CouncilReadings_CouncilReadingSummaryItems)
+        {
+            string rowclass = "";
+            if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.Unverified)
+            {
+                rowclass = " class=\"table-danger\"";
+            }
+            else if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.Verified)
+            {
+                rowclass = " class=\"table-warning\"";
+            }
+            else if (item.Status == MyVoltage.Data.B02_CouncilReadings_CouncilReadingUpdate.StatusTypes.Submitted)
+            {
+                rowclass = " class=\"table-success\"";
+            }
+            <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');" @Html.Raw(rowclass)>
+                <td scope="col">@item.CompanyName</td>
+                <td title="@item.CompanyName - Payment Types" scope="col">@item.PaymentTypes</td>
+                <td title="@item.CompanyName - Council Meter Count" scope="col">@item.CouncilMeterCount</td>
+                <td title="@item.CompanyName - Readings Uploaded" scope="col">@item.ReadingsUploadedCount</td>
+                <td title="@item.CompanyName - Readings Verified" scope="col">@item.ReadingsVerifiedCount</td>
+                <td title="@item.CompanyName - Readings Submitted" scope="col">@item.ReadingsSubmittedCount</td>
+                <td title="@item.CompanyName - Status" scope="col">@item.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/B02_CouncilReadings/B02_CouncilReadings_CouncilReadingDetails';
+        }
+    </script>
+}

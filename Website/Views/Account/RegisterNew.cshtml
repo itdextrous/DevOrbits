@@ -1,0 +1,411 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Registration";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+    var mError = TempData["isMeterNumberError"];
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+        </div>
+    </div>
+</div>
+<div class="accounts_pages">
+    <div class="account_form text-center">
+        <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="w-100" id="multistepsform">
+            <div class="row">
+                <div class="col justify-content-center text-center d-flex">
+                    <a href="/">
+                       <img src="/images/MVClientZoneLogo.png" height="115" alt="" class="d-block mx-auto MVClientZoneLogo">
+                    </a>
+                </div>
+            </div>
+            <div class="mt-75 max-w-400">
+                <div class="tab-content registerTabs">
+                    <div class="tab-pane active" role="tabpanel" id="basicInfo_tab">
+                        <div class="form-group m-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="FirstName" class="form-control-trim" placeholder="First Name" onchange="setTooltip('FirstName', 'First Name')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                            <span asp-validation-for="FirstName"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="LastName" class="form-control-trim" placeholder="Last Name" onchange="setTooltip('LastName', 'Last Name')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                            <span asp-validation-for="LastName"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="Email" class="form-control-trim" onkeypress="return noSpaces(event)" placeholder="Email Address" onchange="setTooltip('Email', 'Email Address')" autocomplete="asfasfasf" />
+                            <span asp-validation-for="Email" id="EmailError"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="PhoneNumber" onkeypress="return noSpecialCharacter1(event)" class="form-control-trim" type="number" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" placeholder="Cellphone Number" onchange="setTooltip('PhoneNumber', 'Phone Number')" autocomplete="off" maxlength="12" onkeydown="preventDownKey(event)" />
+                            <span asp-validation-for="PhoneNumber"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left edit_field">
+                            <input asp-for="OccupancyDate" hidden />
+                            <input id="OccupancyDateK" data-format="0:yyyy/MM/dd" type="datetime" class="form-control-trim datePicker_input" onkeydown="return false" placeholder="Occupancy Date" name="date" data-bs-toggle="tooltip" data-bs-placement="top" onmouseover="setTooltip('OccupancyDateK', 'Occupancy Date')" autocomplete="off" readonly="readonly" />
+                            <img class="edit" src="~/images/Clientzone/calendar_icon.png" height="20" onclick="ImgEditClick('OccupancyDateK')" />
+                            @*<span asp-validation-for="OccupancyDate"></span>*@
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.RegisterType) && Model.RegisterType.ToLower() == "personal")
+                        {
+                            <div class="mt-25 form-group mb-0 text-left" hidden>
+                                <input value="0" data-bs-toggle="tooltip" data-bs-placement="top" asp-for="CompanyID" class="form-control-trim" placeholder="Company Name" onchange="setTooltip('CompanyID', 'Company Name')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span asp-validation-for="CompanyID"></span>
+                            </div>
+                            <div class="mt-25 form-group mb-0 text-left">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="IDNumberOrCompanyReg" class="form-control-trim" placeholder="ID Number/Passport Number" onchange="setTooltip('IDNumberOrCompanyReg', 'ID Number/Passport Number')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span asp-validation-for="IDNumberOrCompanyReg"></span>
+                            </div>
+                        }
+
+                        @*Business Account Start*@
+                        else if (!string.IsNullOrEmpty(Model.RegisterType) && Model.RegisterType.ToLower() == "business")
+                        {
+                            <div class="mt-25 form-group mb-0 text-left">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="CompanyID" class="form-control-trim" placeholder="Company Name" onchange="setTooltip('CompanyID', 'Company Name')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span asp-validation-for="CompanyID"></span>
+                            </div>
+                            <div class="mt-25 form-group mb-0 text-left">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="IDNumberOrCompanyReg" class="form-control-trim" placeholder="Company Registration Number" onchange="setTooltip('IDNumberOrCompanyReg', 'Company Registration Number')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span asp-validation-for="IDNumberOrCompanyReg"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-25 form-group mb-0 text-left">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="CompanyID" class="form-control-trim" placeholder="Company Name" onchange="setTooltip('CompanyID', 'Company Name')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span asp-validation-for="CompanyID"></span>
+                            </div>
+                            <div class="mt-25 form-group mb-0 text-left">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="IDNumberOrCompanyReg" class="form-control-trim" placeholder="Company Registration Number" onchange="setTooltip('IDNumberOrCompanyReg', 'Company Registration Number')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span asp-validation-for="IDNumberOrCompanyReg"></span>
+                            </div>
+                        }
+                        @*Business Account End*@
+
+                        <div class="mt-50 steps_btns d-flex align-items-center justify-content-center">
+                            <a asp-controller="Account" asp-action="RegisterOptions" class="btn btn-default">Back</a>
+                            <input id="checkEmail" type="button" name="next" class="btn btn-default next-step disdbl" value="Next" />
+                        </div>
+                    </div>
+                    <div class="tab-pane" role="tabpanel" id="address_tab">
+                        <div class="form-group m-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="StreetAddress" class="form-control-trim" placeholder="Address" onchange="setTooltip('StreetAddress', 'Address')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                            <span asp-validation-for="StreetAddress"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="Suburb" class="form-control-trim" placeholder="Suburb" onchange="setTooltip('Suburb', 'Suburb')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                            <span asp-validation-for="Suburb"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="TownOrCity" class="form-control-trim" placeholder="Town / City" onchange="setTooltip('TownOrCity', 'Town / City')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                            <span asp-validation-for="TownOrCity"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="Province" class="form-control-trim" placeholder="Province" onchange="setTooltip('Province', 'Province')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                            <span asp-validation-for="Province"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="PostalCode" onkeypress="return noSpecialCharacter1(event)" class="form-control-trim" type="number" pattern="[0-9]{4}" placeholder="Postal Code" onchange="setTooltip('PostalCode', 'Postal Code')" autocomplete="off" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="4" onkeydown="preventDownKey(event)" />
+                            <span asp-validation-for="PostalCode"></span>
+                        </div>
+                        <div class="mt-50 steps_btns d-flex align-items-center justify-content-center">
+                            <input type="button" name="previous" class="prev-step btn btn-default" value="Back" />
+                            <input type="button" name="next" class="btn btn-default next-step disdbl" value="Next" />
+                        </div>
+                    </div>
+                    <div class="tab-pane" role="tabpanel" id="userPassword_tab">
+                        <div class="form-group m-0 text-left">
+                            <div class="position-relative">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="Password" id="RegisterPassword" class="form-control-trim" placeholder="Password" onchange="setTooltip('RegisterPassword', 'Password')" autocomplete="new-password" onkeypress="return preventSpaces(event)" />
+                                <span class="fa fa-fw fa-eye toggle-password1"></span>
+                            </div>
+                            <span asp-validation-for="Password" id="passwrdErr"></span>
+                        </div>
+                        <div class="mt-25 form-group mb-0 text-left">
+                            <div class="position-relative">
+                                <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="ConfirmPassword" id="ConfirmPassword" class="form-control-trim" placeholder="Confirm Password" onchange="setTooltip('ConfirmPassword', 'Confirm Password')" autocomplete="off" onkeypress="return preventSpaces(event)" />
+                                <span class="fa fa-fw fa-eye toggle-password2"></span>
+                            </div>
+                            <span asp-validation-for="ConfirmPassword"></span>
+                        </div>
+                        <div class="mt-50 steps_btns d-flex align-items-center justify-content-center">
+                            <input type="button" name="previous" class="prev-step btn btn-default" value="Back" />
+                            <input type="button" name="next" class="btn btn-default next-step disdbl" value="Next" />
+                        </div>
+                    </div>
+                    <div class="tab-pane" role="tabpanel" id="MeterNumberTab">
+                        <div class="form-group m-0 text-left">
+                            <input data-bs-toggle="tooltip" data-bs-placement="top" asp-for="MeterNumber" class="form-control-trim" placeholder="Meter Number" onkeypress="return noSpecialCharacter(event)" onchange="setTooltip('MeterNumber', 'Meter Number')" autocomplete="off" />
+                            <span asp-validation-for="MeterNumber" id="MeterNumberError"></span>
+                        </div>
+                        <div class="text-white queries_text mt-25 line_height_24">
+                            Your Meter Number can be allocated on the front of your meter.
+                        </div>
+                        <div class="mt-50 steps_btns d-flex align-items-center justify-content-center">
+                            <input type="button" name="previous" class="prev-step btn btn-default" value="Back" />
+                            @*<button type="submit" class="btn btn-default" value="RegisterNew">Next</button>*@
+                            <button id="subRegBtn" type="button" class="btn btn-default disdbl" value="RegisterNew">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-white queries_text mt-50">
+                <p class="m-0">Queries: <a href="mailto:info@myvoltage.co.za?Subject=Registration" class="decoration_none text-islandsunrise">info@myvoltage.co.za</a></p>
+            </div>
+            <div class="mt-50 text-center">
+                <img src="/images/Slogan_white.png" class="slogan_img" height="72" alt="">
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Metering Number Modal -->
+<div class="modal fade" id="meternumber" tabindex="-1" role="dialog" aria-labelledby="meternumberLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <p class="">Your Meter Number can be located on the meter itself.</p>
+                <h4 class="">No meter number?</h4>
+                <p>Contact our Customer Care Centre and have details of your property (e.g. The Towers, Unit 302) available for them to allocate your meter number on our system.</p>
+                <p><a href="mailto:info@myvoltage.co.za">info@myvoltage.co.za</a>&nbsp;|&nbsp;087 057 2561</p>
+                @*                <p class="text-muted">The numbers look similar to this: </p>
+                <img src="/images/barcodes.jpg" alt="" class="img-fluid ">
+                *@<button type="button" class="btn btn-link" data-dismiss="modal"><b>Close window</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        $(function () {
+            //$("#OccupancyDateK")[0].value = $("#OccupancyDate")[0].value.split(" ")[0];
+            $('#OccupancyDateK').datepicker({
+                format: "yyyy/mm/dd",
+                autoclose: "true",
+                //startDate: '01/01/1990'
+            });
+            $("#OccupancyDateK").datepicker("setDate", new Date());
+        });
+
+        $(document).on("click", ".toggle-password1", function () {
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            let currentType = $("#RegisterPassword").attr('type');
+            if (currentType == "password") {
+                $("#RegisterPassword").attr('type', "text")
+            }
+            else {
+                $("#RegisterPassword").attr('type', "password")
+            }
+        });
+
+        $(document).on("click", ".toggle-password2", function () {
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            let currentType = $("#ConfirmPassword").attr('type');
+            if (currentType == "password") {
+                $("#ConfirmPassword").attr('type', "text")
+            }
+            else {
+                $("#ConfirmPassword").attr('type', "password")
+            }
+        });
+
+        var mError = '@mError';
+        $(document).ready(function () {
+            $('#Email').val('');
+            $('#RegisterPassword').val('');
+            $(".next-step").click(async function (e) {
+                var valid = $("#multistepsform").valid();
+                let res = await $.get('/Account/CheckEmail?email=' + $('#Email').val());
+
+                true
+                if (!res.isValid) {
+                    $("#EmailError").text("Email address is already in use. Please contact info@myvoltage.co.za | 087 057 2561.");
+                    $("#EmailError").removeClass("field-validation-valid");
+                    $("#EmailError").addClass("field-validation-error");
+                }
+                if (valid && res.isValid) {
+                    var activeTab = $(".registerTabs .tab-pane.active");
+                    activeTab.next().addClass("active");
+                    activeTab.removeClass("active");
+                    $(".accounts_pages").animate({ scrollTop: 0 }, "0");
+                }
+                else { } 
+                return false;
+            });
+
+            $(".prev-step").click(function (e) {
+                var activeTab = $(".registerTabs .tab-pane.active");
+                activeTab.prev().addClass("active");
+                activeTab.removeClass("active");
+                $(".accounts_pages").animate({ scrollTop: 0 }, "0");
+            });
+            if (mError == true) {
+                $(".registerTabs .tab-pane").removeClass("active");
+                $(".registerTabs #MeterNumberTab").addClass("active meter_screen");
+            }
+            if ($("#passwrdErr").hasClass("field-validation-error") == true) {
+                $("#basicInfo_tab").removeClass("active");
+                $("#userPassword_tab").addClass('active');
+            } else if ($("#MeterNumberError").hasClass("field-validation-error") == true) {
+                $(".registerTabs .tab-pane").removeClass("active");
+                $(".registerTabs #MeterNumberTab").addClass("active meter_No_screen");
+            }
+
+            $(".disdbl").on('click', function (event) {
+                event.preventDefault();
+                var el = $(this);
+                el.prop('disabled', true);
+                setTimeout(function () { el.prop('disabled', false); }, 1000);
+
+            })
+
+            $("#checkEmail").on('click', function (event) {
+                event.preventDefault();
+                var el = $(this);
+                el.prop('disabled', true);
+                setTimeout(function () { el.prop('disabled', false); }, 1000);
+            });
+        });
+
+        $('#subRegBtn').click(() => {
+            $("#loaderContent").css("display", "block");
+            let data = $('#MeterNumber').val();
+            $.ajax({
+                url: "/Account/CheckMeterNumber?meterNumber=" + data,
+                type: "Get",
+                dataType: "json",
+                success: function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data.isValid) {
+                        $('#multistepsform').submit();
+                    } else {
+                        $(".registerTabs #MeterNumberTab").addClass("meter_No_screen");
+                        $('#MeterNumberError').removeClass('field-validation-valid');
+                        $('#MeterNumberError').addClass('field-validation-error');
+                        $('#MeterNumberError').text(data.errorMessage);
+                    }
+                },
+                failure: function (data) {
+                    $("#loaderContent").css("display", "none");
+                }
+            });
+        })
+
+        function setTooltip(id, title) {
+            if ($(`#${id}`).val().length > 0) {
+                $(`#${id}`).attr('data-bs-original-title', title);
+                //$(".tooltip").addClass("active_tooltip");
+            } else {
+                $(`#${id}`).removeAttr('data-bs-original-title');
+            }
+        }
+
+        function ImgEditClick(id) {
+            if (id == "OccupancyDateK"){
+                $("#OccupancyDateK").datepicker("update");
+            }
+            $(`#${id}`).focus();
+        }
+
+        function noSpaces(event) {
+            var keysToPrevent = [32];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+
+        function noSpecialCharacter(event) { // for meter number, special characters are disabled. Only hyphen (-) is allowed.
+            var keysToPrevent = [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96, 123, 124, 125, 126];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent);
+
+            // Check if the pressed key is a hyphen (-)
+            if (key === 45) {
+                var input = event.target.value;
+
+                // Check if the current input already contains a hyphen (-)
+                if (input.includes("-")) {
+                    // Check if the new key press will result in two consecutive hyphens (--)
+                    if (input.slice(-1) === "-") {
+                        event.preventDefault();
+                        return false;
+                    }
+                }
+            }
+
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function noSpecialCharacter1(event) {
+            var keysToPrevent = [4, 32, 43, 45, 46, 69, 101];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function preventSpaces(event) {
+            var key = event.keyCode || event.which;
+            var input = event.target.value;
+
+            if (key === 32) {
+                // Prevent white space at the beginning of the field
+                if (input.length === 0 || input.trim().length === 0 || event.target.selectionStart === 0) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                // Check if there is already a white space
+                var startIndex = event.target.selectionStart - 1;
+                var endIndex = event.target.selectionStart;
+                var prevChar = input.slice(startIndex, endIndex);
+                var nextChar = input.charAt(endIndex);
+
+                if (prevChar === ' ' || nextChar === ' ') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        $("#OccupancyDateK").change(function () {
+            let dates = this.value.split('/');
+            let newDate = dates[0]+ "-" + dates[1] + "-" + dates[2] + "T00:00";
+            $("#OccupancyDate").val(newDate);
+        })
+
+        $("#OccupancyDateK").click(() => {
+            $("#OccupancyDateK").datepicker("update");
+        })
+
+        function preventDownKey(event) {
+            var key = event.keyCode || event.which;
+
+            // Prevent down key if the input is empty or has only one character (0)
+            var input = event.target;
+            if (key === 40 && (input.value === '' || input.value === '0')) {
+                event.preventDefault();
+            }
+        }
+
+    </script>
+
+}

@@ -1,0 +1,101 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A6_031_Not_Billed_SummaryModel
+@using MyVoltage.Extensions;
+@using MyVoltage.Data;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_NotBilledSummary.GetDescription() Details</h5>
+</div>
+@if (Model.A6_031_Not_Billed_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" rowspan="2" scope="col">Company Name</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" rowspan="2" scope="col">Status</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Customer Count</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Meter Count</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Meters Not Billed</th>
+            </tr>
+        <tr>
+            @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+            {
+                <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+            }
+            <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>
+            @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+            {
+                <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+            }
+            <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>
+            @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+            {
+                <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+            }
+            <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>
+            @*@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                {
+                    <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+                }
+                <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>*@
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A6_031_Not_Billed_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledDetails")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td style="border-left:2px solid black;border-right:2px solid black;" scope="col">@item.Name</td>
+                    <td title="@item.Name - Status" style="border-left:2px solid black;border-right:2px solid black;">@item.Status.GetDescription()</td>
+                    @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                    {
+                        if (item.CustomersPerAccountTypeCount.ContainsKey(accountType))
+                        {
+                            <td class="text-right" title="@item.Name - @accountType.GetDescription() - Customer Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@item.CustomersPerAccountTypeCount[accountType]</td>
+                        }
+                        else
+                        {
+                            <td class="text-right" title="@item.Name - @accountType.GetDescription() - Customer Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+                        }
+                    }
+                    <td class="text-right" title="@item.Name - Total Customer Count" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@item.CustomersCount</td>
+
+                    @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                    {
+                        if (item.MetersPerAccountTypeCount.ContainsKey(accountType))
+                        {
+                            <td class="text-right" title="@item.Name - @accountType.GetDescription() - Meter Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@item.MetersPerAccountTypeCount[accountType]</td>
+                        }
+                        else
+                        {
+                            <td class="text-right" title="@item.Name - @accountType.GetDescription() - Meter Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+                        }
+                    }
+                    <td class="text-right" title="@item.Name - Total Meter Count" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@item.MetersCount</td>
+
+                    @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                    {
+                        if (item.MetersNotBilledPerAccountTypeCount.ContainsKey(accountType))
+                        {
+                            <td class="text-right" title="@item.Name - @accountType.GetDescription() - Meters Not Billed" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@item.MetersNotBilledPerAccountTypeCount[accountType]</td>
+                        }
+                        else
+                        {
+                            <td class="text-right" title="@item.Name - @accountType.GetDescription() - Meters Not Billed" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+                        }
+                    }
+                    <td class="text-right" title="@item.Name - Total Meters Not Billed" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@item.MetersNotBilledCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.svg" type="favicon.svg" />
+    @if (!string.IsNullOrEmpty(ViewBag.MetaDescription))
+    {
+        <meta name="description" content="@ViewBag.MetaDescription">
+    }
+    else
+    {
+        <meta name="description" content="MyVoltage Homepage Description here">
+    }
+
+    @if (Context.Request.Path.ToString().Length > 1)
+
+    {
+        <title>@ViewData["Title"] - MyVoltage</title>
+    }
+    
+    <!-- Fontawesome 5 -->
+	<script>
+		FontAwesomeConfig = { searchPseudoElements: true };
+	</script>
+	<script defer src="~/js/fontawesome-all.js"></script>
+
+    <link rel="stylesheet" href="~/css/myvoltage.css" />
+    <link rel="stylesheet" href="/css" />
+    
+</head>
+<body class="mv-gradient">
+    
+	<div class="container-fluid">
+    @RenderBody()
+	</div>
+
+    <script src="~/js/jquery-3.2.1.min.js"></script>
+	<script src="~/js/popper.min.js"></script>
+	<script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

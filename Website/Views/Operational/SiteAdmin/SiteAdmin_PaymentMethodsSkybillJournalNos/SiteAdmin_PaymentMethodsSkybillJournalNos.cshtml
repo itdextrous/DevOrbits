@@ -1,0 +1,85 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_PaymentMethodsSkybillJournalNosModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_PaymentMethodsSkybillJournalNos.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-responsive-xl table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Payment Method</th>
+            <th scope="col">Journal No</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.PaymentMethods_SkybillJournalNos)
+        {
+            string rowClass = "";
+            if (!item.SkybillJournalNo.HasValue)
+            {
+                rowClass = "table-danger";
+            }
+            <tr class="@Html.Raw(rowClass)" title="@item.PaymentMethod.GetDescription()">
+                <td scope="col" class="text-nowrap">
+                    @item.PaymentMethod.GetDescription()
+                </td>
+                <td scope="col">
+                    <select id="journalNo_@item.PaymentMethodID" onchange="DoUpdateJournalNo('@item.PaymentMethodID');" class="form-control">
+                        @if (!item.SkybillJournalNo.HasValue)
+                        {
+                            <option value="" selected="selected">None</option>
+                        }
+                        else
+                        {
+                            <option value="">None</option>
+                        }
+                        @foreach (var partner in Model.AvailableLedgers)
+                        {
+                            @if (item.SkybillJournalNo.HasValue && item.SkybillJournalNo.Value == partner.Key)
+                            {
+                                <option value="@(partner.Key)" selected="selected">@partner.Value</option>
+                            }
+                            else
+                            {
+                                <option value="@(partner.Key)">@partner.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function DoUpdateJournalNo(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_PaymentMethodsSkybillJournalNosUpdateJournalNo/" + ItemID,
+                {
+                    journalNo: $("#journalNo_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

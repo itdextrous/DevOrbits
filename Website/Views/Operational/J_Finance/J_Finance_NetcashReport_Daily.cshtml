@@ -1,0 +1,421 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_NetcashReport_DailyModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.J_Finance_NetcashReport_Daily.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.J_Finance_NetcashReport_Daily.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+@using MyVoltage.Extensions;
+@{
+    DateTime currentDate = Model.FromDate;
+    string rowClass = "";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        Latest Sync Ended: @(operationalProvider.LatestGenLedgerSync.HasValue ? operationalProvider.LatestGenLedgerSync.Value.ToDateAndTimeShort() : "In Progress")
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+@*                <div class="row mb-md-2">
+                    <div class="col-12">
+                        Partner:
+                        <select id="partner" class="form-control">
+                            @if (!Model.PartnerID.HasValue)
+                            {
+                                <option value="" selected="selected">Select Partner</option>
+                            }
+                            else
+                            {
+                                <option value="">All Partners</option>
+                            }
+                            @foreach (var partner in Model.SiteAdmin_Partners.OrderBy(p => p.PartnerName))
+                            {
+                                @if (Model.PartnerID.HasValue && Model.PartnerID.Value == partner.ID)
+                                {
+                                    <option value="@partner.ID" selected="selected">@partner.PartnerName</option>
+                                }
+                                else
+                                {
+                                    <option value="@partner.ID">@partner.PartnerName</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
+*@                <div class="row mb-md-2">
+                    <div class="col-12">
+                        From:
+                        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+                        &nbsp;
+                        To:
+                        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+                    </div>
+                </div>
+
+@*                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-12">
+                                @if (!Model.HideNoData)
+                                {
+                                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" checked="checked" />
+                                    <span>Show All</span>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" />
+                                    <span>Show All</span>
+                                }
+                                @if (Model.HideNoData)
+                                {
+                                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" checked="checked" />
+                                    <span>Hide No Data Items</span>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" />
+                                    <span>Hide No Data Items</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+*@            </div>
+
+            <div class="card-footer">
+
+                <div class="row mb-md-2">
+                    <div class="col-12 text-left">
+                        <a href="/operational/J_Finance/J_Finance_NetcashReport_Daily" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+                        &nbsp;
+                        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Product Name</th>
+            <th scope="col">Account</th>
+            <th scope="col">Total</th>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                <th scope="col" class="text-center">@Html.Raw(currentDate.ToString("yyyy<br>MMM<br>dd"))</th>
+                currentDate = currentDate.AddDays(1);
+            }
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+        {
+            rowClass = "table-success";
+
+            <tr>
+                <td scope="col" class="@Html.Raw(rowClass)">@item.Name</td>
+                <td scope="col" class="@Html.Raw(rowClass)">GL</td>
+                <td title="@item.Name - Total" class="text-right table-secondary" scope="col">@((item.DailyValues.Where(p => p.Value.HasValue).Select(p => p.Value).Sum()).ToMoney())</td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal? amount = null;
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                    }
+                    <td title="@item.Name - @currentDate.ToMonth()" class="text-right @Html.Raw(rowClass)" scope="col">@amount.ToMoney()</td>
+                    currentDate = currentDate.AddDays(1);
+                }
+            </tr>
+        }
+        @{
+            rowClass = "table-secondary";
+        }
+        <tr class="@Html.Raw(rowClass)" style="border-top:2px solid black;border-bottom:3px double black;">
+            <td scope="col">Total</td>
+            <td scope="col"></td>
+            @{
+                decimal grandTotal = 0;
+            }
+            @foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+            {
+                if (item.DailyValues.Where(p => p.Value.HasValue).Count() > 0)
+                {
+                    grandTotal = grandTotal + item.DailyValues.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                }
+            }
+            <td title="Total" class="text-right" scope="col">@grandTotal.ToMoney()</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+                {
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        if (amount.HasValue)
+                        {
+                            amount = amount.Value + (item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0);
+                        }
+                        else
+                        {
+                            amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0;
+                        }
+                    }
+                }
+                <td title="Sales Total - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToMoney()</td>
+                currentDate = currentDate.AddDays(1);
+            }
+        </tr>
+        <tr class="table-light">
+            <td scope="col">&nbsp;</td>
+            <td scope="col">&nbsp;</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+                {
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        if (amount.HasValue)
+                        {
+                            amount = amount.Value + (item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0);
+                        }
+                        else
+                        {
+                            amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0;
+                        }
+                    }
+                }
+                <td scope="col">&nbsp;</td>
+                currentDate = currentDate.AddDays(1);
+            }
+        </tr>
+        @foreach (var item in Model.J_Finance_NetcashReport_DailyNS)
+        {
+            rowClass = "table-primary";
+
+            <tr>
+                <td scope="col" class="@Html.Raw(rowClass)">@item.Name</td>
+                <td scope="col" class="@Html.Raw(rowClass)">Netcash</td>
+                @{
+                    currentDate = Model.FromDate;
+                }
+                <td title="@item.Name - Total" class="text-right table-secondary" scope="col">@((item.DailyValues.Where(p => p.Value.HasValue).Select(p => p.Value).Sum()).ToMoney())</td>
+                @while (currentDate <= Model.ToDate)
+                {
+                    decimal? amount = null;
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                    }
+                    <td title="@item.Name - @currentDate.ToMonth()" class="text-right @Html.Raw(rowClass)" scope="col">@amount.ToMoney()</td>
+                    currentDate = currentDate.AddDays(1);
+                }
+            </tr>
+        }
+
+        @{
+            rowClass = "table-secondary";
+        }
+        <tr class="@Html.Raw(rowClass)" style="border-top:2px solid black;border-bottom:3px double black;">
+            <td scope="col">Total</td>
+            <td scope="col">@*Nett Gross Profit*@</td>
+            @{
+                grandTotal = 0;
+            }
+            @foreach (var item in Model.J_Finance_NetcashReport_DailyNS)
+            {
+                if (item.DailyValues.Where(p => p.Value.HasValue).Count() > 0)
+                {
+                    grandTotal = grandTotal + item.DailyValues.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                }
+            }
+            <td title="Total" class="text-right" scope="col">@grandTotal.ToMoney()</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                foreach (var item in Model.J_Finance_NetcashReport_DailyNS)
+                {
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        if (amount.HasValue)
+                        {
+                            amount = amount.Value + (item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0);
+                        }
+                        else
+                        {
+                            amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0;
+                        }
+                    }
+                }
+                <td title="Sales Total - @currentDate.ToMonth()" class="text-right" scope="col">@amount.ToMoney()</td>
+                currentDate = currentDate.AddDays(1);
+            }
+        </tr>
+
+        <tr class="table-light">
+            <td scope="col">&nbsp;</td>
+            <td scope="col">&nbsp;</td>
+            <td scope="col">&nbsp;</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+                {
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        if (amount.HasValue)
+                        {
+                            amount = amount.Value + (item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0);
+                        }
+                        else
+                        {
+                            amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0;
+                        }
+                    }
+                }
+                <td scope="col">&nbsp;</td>
+                currentDate = currentDate.AddDays(1);
+            }
+        </tr>
+
+        @{
+            rowClass = "table-secondary";
+        }
+        <tr class="@Html.Raw(rowClass)" style="border-top:2px solid black;border-bottom:3px double black;">
+            <td scope="col">Difference</td>
+            <td scope="col"></td>
+            @{
+                grandTotal = 0;
+            }
+            @foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+            {
+                if (item.DailyValues.Where(p => p.Value.HasValue).Count() > 0)
+                {
+                    grandTotal = grandTotal + item.DailyValues.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                }
+            }
+            @foreach (var item in Model.J_Finance_NetcashReport_DailyNS)
+            {
+                if (item.DailyValues.Where(p => p.Value.HasValue).Count() > 0)
+                {
+                    grandTotal = grandTotal - item.DailyValues.Where(p => p.Value.HasValue).Select(p => p.Value.Value).Sum();
+                }
+            }
+            <td title="Total" class="text-right" scope="col">@grandTotal.ToMoney()</td>
+            @{
+                currentDate = Model.FromDate;
+            }
+            @while (currentDate <= Model.ToDate)
+            {
+                decimal? amount = null;
+                foreach (var item in Model.J_Finance_NetcashReport_DailyGL)
+                {
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        if (amount.HasValue)
+                        {
+                            amount = amount.Value + (item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0);
+                        }
+                        else
+                        {
+                            amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0;
+                        }
+                    }
+                }
+                foreach (var item in Model.J_Finance_NetcashReport_DailyNS)
+                {
+                    if (item.DailyValues.Where(p => p.Key == currentDate).Count() > 0)
+                    {
+                        if (amount.HasValue)
+                        {
+                            amount = amount.Value - (item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0);
+                        }
+                        else
+                        {
+                            amount = item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.HasValue ? item.DailyValues.Where(p => p.Key == currentDate).SingleOrDefault().Value.Value : 0;
+                        }
+                    }
+                }
+                
+                <td title="Sales Total - @currentDate.ToMonth()" class="text-right" scope="col">
+                    @amount.ToMoney()
+@*                    @if (amount > 0.05m)
+                    {
+                        <br />
+                        <a onclick="CreateJournal('@currentDate.ToDateShort()', '@amount');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus"></i>&nbsp;Create</a>
+                    }
+*@                </td>
+                currentDate = currentDate.AddDays(1);
+            }
+        </tr>
+
+    </tbody>
+</table>
+<br />
+
+@section Scripts {
+<script>
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/J_Finance/J_Finance_NetcashReport_Daily?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+    }
+    function RedirectToDetails(serial) {
+        $("#loaderContent").css("display", "block");
+        var returnUrl = '/operational/C01_ProductReport/C01_ProductReport_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        document.location.href = '/operational/changeActiveCompany/' + serial + '?R=' + encodeURIComponent(returnUrl);
+    }
+    function CreateJournal(month, amount) {
+        if (confirm('Create journal entry for ' + month + ':' + amount + '?')) {
+            $("#loaderContent").css("display", "block");
+                $.get('/operational/J_Finance/J_Finance_NetcashReport_Daily_Journal/' + month + '/' + amount)
+                .done(function( data ) {
+                    if (data == 'true') {
+                        alert('Journal successfully posted.');
+                        document.location.reload();
+                    }
+                    else {
+                        $("#loaderContent").css("display", "none");
+                        alert('There was an error posting your Journal.');
+                    }
+                });
+        }
+    }
+</script>
+}

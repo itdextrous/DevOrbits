@@ -1,0 +1,416 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_M2MMirrorReconReviewModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_M2MMirrorReconReview.GetDescription()}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        @if (string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+        {
+            <span>Select customer to start...</span>
+        }
+        else
+        {
+            <div class="row mb-4">
+                <div class="col">
+                    <div class="card p-md-1 mv-gradient">
+                        <div class="card-header text-orange">
+                            <h4>
+                                @switch (Model.Device.MeterType)
+                                {
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                        <img src="~/images/elec-icon-s.png" />
+                                        break;
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                        <img src="~/images/water-icon-s.png" />
+                                        break;
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                        <img src="~/images/gas-icon-s.png" />
+                                        break;
+                                }
+                                @Model.SkybillCustomer.Serial_No - Summary
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+
+                                <div class="col border border-primary rounded p-2 m-2">
+                                    <div class="row">
+                                        <div class="col-12 text-center">
+                                            <h6>Skybill Customer Details:</h6>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Company Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.Company.Name
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Customer No:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.SkybillCustomer.Customer_No
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Customer Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.SkybillCustomer.Customer_Name
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Account Type:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.SkybillCustomer.AccountType.GetDescription()
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col border border-primary rounded p-2 m-2">
+                                    <div class="row">
+                                        <div class="col-12 text-center">
+                                            <h6 title="Gateways and Devices Sync">Metering Database Details:</h6>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Device ID Linked:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.Device.DeviceIDLinked
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Serial:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.Device.Serial
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.Device.Name
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Type:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.Device.MeterType.GetDescription()
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col border border-primary rounded p-2 m-2" title="Odo and Latest Capture should be the same.">
+                                    <div class="row">
+                                        <div class="col-12 text-center">
+                                            <h6>Latest Mirror Reading Summary:</h6>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-6">
+                                            Latest Reading:
+                                        </div>
+                                        <div class="col-6 text-right">
+                                            @if (Model.LatestReading != null)
+                                            {
+                                                @if (Model.Device.MeterType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                                                {
+                                                    <span>@Model.LatestReading.VirtualOdoReading.ToDecimal(3)<br />@Model.LatestReading.TimeLogged.ToDateAndTimeShort()</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@Model.LatestReading.VirtualOdoReading.ToReading()<br />@Model.LatestReading.TimeLogged.ToDateAndTimeShort()</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span>Unknown</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-6">
+                                            Latest Odo:
+                                        </div>
+                                        <div class="col-6 text-right">
+                                            @if (Model.OdoReading != null)
+                                            {
+                                                string spanClass = "";
+                                                if (Model.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                                {
+                                                    if (Model.OdoReading.OdometerReading != Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                                    {
+                                                        spanClass = "text-red font-weight-bold";
+                                                    }
+                                                }
+                                                @if (Model.Device.MeterType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                                                {
+                                                    <span class="@Html.Raw(spanClass)">@Model.OdoReading.OdometerReading.ToDecimal(3)<br />@Model.OdoReading.TimeLogged.ToDateAndTimeShort()</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="@Html.Raw(spanClass)">@Model.OdoReading.OdometerReading.ToReading()<br />@Model.OdoReading.TimeLogged.ToDateAndTimeShort()</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span>Unknown</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-6">
+                                            Latest Capture:
+                                        </div>
+                                        <div class="col-6 text-right">
+                                            @if (Model.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                            {
+                                                string spanClass = "";
+                                                if (Model.OdoReading != null)
+                                                {
+                                                    if (Model.OdoReading.OdometerReading != Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                                    {
+                                                        spanClass = "text-red font-weight-bold";
+                                                    }
+                                                }
+
+                                                <span class="@Html.Raw(spanClass)">
+                                                    @if (Model.Device.MeterType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                                                    {
+                                                        <text>@Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading.ToDecimal(3)</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>@Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading.ToReading()</text>
+                                                    }
+                                                    <br />
+                                                    @Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.TimeLogged.ToDateAndTimeShort()
+                                                    <br />
+                                                    @(((MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes)Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusID).GetDescription())
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>Unknown</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            @if (Model.MirrorDevice == null || Model.Device == null || Model.SkybillCustomer == null)
+            {
+                <span class="text-red font-weight-bold">Error loading selected device from the mirror...</span>
+            }
+            else
+            {
+                <div class="row mb-4">
+                    <div class="col">
+                        <form asp-action="A02_MirrorMeterAuditing_M2MMirrorReconReview" enctype="multipart/form-data">
+                            <div class="card p-md-1 mv-gradient">
+                                <div class="card-header text-uppercase">
+                                    <h4>Edit Device:</h4>
+                                </div>
+                                <div class="card-body">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="DeviceIDLinked" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_M2MMirrorReconReview, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                                            {
+                                                <input class="form-control" asp-for="DeviceIDLinked" />
+                                            }
+                                            else
+                                            {
+                                                <input class="form-control" asp-for="DeviceIDLinked" disabled="disabled" />
+                                            }
+                                            <span asp-validation-for="DeviceIDLinked" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="Name" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="Name" disabled="disabled" />
+                                            <span asp-validation-for="Name" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="SerialNumber" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="SerialNumber" disabled="disabled" />
+                                            <span asp-validation-for="SerialNumber" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CorrectingFactor" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="CorrectingFactor" disabled="disabled" />
+                                            <span asp-validation-for="CorrectingFactor" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ConvFactor" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="ConvFactor" />
+                                            <span asp-validation-for="ConvFactor" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ConsumptionTariffCode" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("ConsumptionTariffCode", Model.ConsumptionTariffCode, new { @class = "form-control" })
+                                            <span asp-validation-for="ConsumptionTariffCode" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ConvertedConsumptionTariffCode" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("ConvertedConsumptionTariffCode", Model.ConvertedConsumptionTariffCode, new { @class = "form-control" })
+                                            <span asp-validation-for="ConvertedConsumptionTariffCode" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col-12 text-right">
+                                            <button type="submit" class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <div class="card p-md-1 mv-gradient">
+                            <div class="card-header text-orange text-uppercase">
+                                <h4>Odo Readings:</h4>
+                            </div>
+
+                            <div id="MirrorDeviceOdoReadings" class="card-body">
+                                <div class="text-orange">
+                                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Device Odo Readings...
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="row mb-4">
+                <div class="col">
+                    <div class="card p-md-1 mv-gradient">
+                        <div class="card-header text-orange text-uppercase">
+                            <h4>Device Readings:</h4>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    @Html.LabelFor(model => model.FromDate, new { @class = "control-label" })
+                                    <input type="datetime-local" id="txtFromDate" />
+                                </div>
+                                <div class="col">
+                                    @Html.LabelFor(model => model.ToDate, new { @class = "control-label" })
+                                    <input type="datetime-local" id="txtToDate" />
+                                </div>
+                                <div class="col">
+                                    <a id="btnSearchDeviceReadings" name="btnSearchDeviceReadings" href="#btnSearchDeviceReadings" onclick="SearchDeviceReadings();" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    Note: Bigger date ranges will take longer to load
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="deviceReadings" class="card-body">
+                            <div class="text-orange">
+                                <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Device Details...
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#txtFromDate").val('@Model.FromDate.ToDateAndTimeShort()');
+            $("#txtToDate").val('@Model.ToDate.ToDateAndTimeShort()');
+            SearchDeviceReadings();
+            $("#MirrorDeviceOdoReadings").load('@Url.Content("/operational/shared/meter/M2MDeviceOdoReadings")?DID=@Model.MirrorDeviceID');
+        });
+
+        function SearchDeviceReadings() {
+            $("#deviceReadings").load('@Url.Content("/operational/shared/meter/M2MDeviceReadings")?DID=@Model.Device.Id&StartTime=' + encodeURIComponent($("#txtFromDate").val()) + '&EndTime=' + encodeURIComponent($("#txtToDate").val()));
+        }
+    </script>
+}

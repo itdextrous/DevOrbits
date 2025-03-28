@@ -1,0 +1,24 @@
+﻿{
+  "ProviderId": "Microsoft.VisualStudio.ConnectedService.Wcf",
+  "Version": "15.0.20119.1312",
+  "ExtendedData": {
+    "Uri": "http://20.87.10.102:30147/SBUBNZ/WS/TEST MY VOLTAGE/Codeunit/WSManagement?tenant=1f998066-df97-4de7-875d-0179278815b1",
+    "Namespace": "ServiceReference2",
+    "SelectedAccessLevelForGeneratedClass": "Public",
+    "GenerateMessageContract": false,
+    "ReuseTypesinReferencedAssemblies": true,
+    "ReuseTypesinAllReferencedAssemblies": true,
+    "CollectionTypeReference": {
+      "Item1": "System.Array",
+      "Item2": "System.Runtime.dll"
+    },
+    "DictionaryCollectionTypeReference": {
+      "Item1": "System.Collections.Generic.Dictionary`2",
+      "Item2": "System.Collections.dll"
+    },
+    "CheckedReferencedAssemblies": [],
+    "InstanceId": null,
+    "Name": "ServiceReference2",
+    "Metadata": {}
+  }
+}

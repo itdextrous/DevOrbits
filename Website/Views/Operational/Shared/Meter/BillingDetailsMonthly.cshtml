@@ -1,0 +1,20 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.BillingDetailsMonthlyModel
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Units</th>
+                <th scope="col">Rate</th>
+            </tr>
+            @foreach (var item in Model.BillingDetailMonthlyItems)
+            {
+                <tr>
+                    <td scope="col">@item.Date</td>
+                    <td scope="col">R @item.Amount.ToString("N")</td>
+                    <td scope="col">@item.Units.ToString("N")</td>
+                    <td scope="col">@item.Rate.ToString("N")</td>
+                </tr>
+            }
+        </thead>
+    </table>

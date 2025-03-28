@@ -1,0 +1,909 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_LeadGeneratorsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_LeadGenerators.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Lead Generators <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Lead Generator Name</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated By</th>
+                                    <th scope="col">Updated</th>
+                                    <th scope="col">User Count</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_LeadGeneratorName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddLeadGenerator();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_LeadGeneratorsItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_LeadGeneratorName@(item.ID)" type="text" value="@item.LeadGeneratorName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.DateUpdated.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.UserCount</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateLeadGenerator('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            @if (item.ID != 1 && item.ID != 2)
+                                            {
+                                                @if (item.UserCount == 0)
+                                                {
+                                                    <a onclick="DoDeleteLeadGenerator('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Lead Generator Users <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Lead Generator User Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Local User</th>
+                                    <th scope="col">Lead Generator</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    @*<th scope="col">API Key</th>*@
+                                    <th scope="col">Lead Count</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_LeadGeneratorUserUserName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="add_LeadGeneratorUserLocalUserID" class="form-control" onchange="FillInUserName('');">
+                                            <option value="">[Not Linked]</option>
+                                            @foreach (var bCT in Model.LocalUsers)
+                                            {
+                                                <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="add_LeadGeneratorUserLeadGeneratorID" class="form-control">
+                                            @foreach (var bCT in Model.D01_Leads_LeadGeneratorsItems)
+                                            {
+                                                <option value="@(bCT.ID)">@(bCT.LeadGeneratorName)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    @*<td scope="col" class="text-nowrap"></td>*@
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddLeadGeneratorUser();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_LeadGeneratorUsersItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_LeadGeneratorUserUserName@(item.ID)" type="text" value="@item.LeadGeneratorUserName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.Email</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="add_LeadGeneratorUserLocalUserID@(item.ID)" class="form-control" onchange="FillInUserName('');">
+                                                @if (string.IsNullOrEmpty(item.LocalUserID))
+                                                {
+                                                    <option value="" selected="selected">[Not Linked]</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="">[Not Linked]</option>
+                                                }
+                                                @foreach (var bCT in Model.LocalUsers)
+                                                {
+                                                    if (item.LocalUserID == bCT.Value)
+                                                    {
+                                                        <option value="@(bCT.Value)" selected="selected">@(bCT.Text)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.Value)">@(bCT.Text)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="add_LeadGeneratorUserLeadGeneratorID@(item.ID)" class="form-control">
+                                                @foreach (var bCT in Model.D01_Leads_LeadGeneratorsItems)
+                                                {
+                                                    if (item.LeadGeneratorID == bCT.ID)
+                                                    {
+                                                        <option value="@(bCT.ID)" selected="selected">@(bCT.LeadGeneratorName)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(bCT.ID)">@(bCT.LeadGeneratorName)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                                        @*<td scope="col" class="text-nowrap">@item.APIKey</td>*@
+                                        <td scope="col" class="text-nowrap">@item.LeadCount</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateLeadGeneratorUser('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            @if (item.LeadCount == 0)
+                                            {
+                                                <a onclick="DoDeleteLeadGeneratorUser('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingThree">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+                            Lead Statuses <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Lead Status Name</th>
+                                    <th scope="col">Lead Status Description</th>
+                                    <th scope="col">Lead Status SortOrder</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated By</th>
+                                    <th scope="col">Updated</th>
+                                    <th scope="col">User Count</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_Leads_StatusesName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <textarea class="form-control" id="add_D01_Leads_StatusesDescription" type="text" placeholder="Add new item here..."></textarea>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_Leads_StatusesSortOrder" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddD01_Leads_Statuses();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_StatusesItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_Leads_StatusesName@(item.ID)" type="text" value="@item.StatusName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <textarea class="form-control" id="add_D01_Leads_StatusesDescription@(item.ID)" type="text">@item.Description</textarea>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_Leads_StatusesSortOrder@(item.ID)" type="text" value="@item.SortOrder" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.LeadCount</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateD01_Leads_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            <span>&nbsp;</span>
+                                            @if (item.LeadCount == 0)
+                                            {
+                                                <a onclick="DoDeleteD01_Leads_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingFour">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+                            Properties Statuses <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Properties Status Name</th>
+                                    <th scope="col">Properties Status Description</th>
+                                    <th scope="col">Properties Status SortOrder</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated By</th>
+                                    <th scope="col">Updated</th>
+                                    <th scope="col">User Count</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_Properties_StatusesName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <textarea class="form-control" id="add_D01_Properties_StatusesDescription" type="text" placeholder="Add new item here..."></textarea>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_Properties_StatusesSortOrder" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddD01_Properties_Statuses();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Properties_StatusesItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_Properties_StatusesName@(item.ID)" type="text" value="@item.StatusName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <textarea class="form-control" id="add_D01_Properties_StatusesDescription@(item.ID)" type="text">@item.Description</textarea>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_Properties_StatusesSortOrder@(item.ID)" type="text" value="@item.SortOrder" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.LeadCount</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateD01_Properties_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            <span>&nbsp;</span>
+                                            @if (item.LeadCount == 0)
+                                            {
+                                                <a onclick="DoDeleteD01_Properties_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingFive">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
+                            Contacts Statuses <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Contacts Status Name</th>
+                                    <th scope="col">Contacts Status Description</th>
+                                    <th scope="col">Contacts Status SortOrder</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated By</th>
+                                    <th scope="col">Updated</th>
+                                    <th scope="col">User Count</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_Contacts_StatusesName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <textarea class="form-control" id="add_D01_Contacts_StatusesDescription" type="text" placeholder="Add new item here..."></textarea>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_Contacts_StatusesSortOrder" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddD01_Contacts_Statuses();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Contacts_StatusesItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_Contacts_StatusesName@(item.ID)" type="text" value="@item.StatusName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <textarea class="form-control" id="add_D01_Contacts_StatusesDescription@(item.ID)" type="text">@item.Description</textarea>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_Contacts_StatusesSortOrder@(item.ID)" type="text" value="@item.SortOrder" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.LeadCount</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateD01_Contacts_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            <span>&nbsp;</span>
+                                            @if (item.LeadCount == 0)
+                                            {
+                                                <a onclick="DoDeleteD01_Contacts_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingSix">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
+                            Managing Agents Statuses <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Managing Agents Status Name</th>
+                                    <th scope="col">Managing Agents Status Description</th>
+                                    <th scope="col">Managing Agents Status SortOrder</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated By</th>
+                                    <th scope="col">Updated</th>
+                                    <th scope="col">User Count</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_ManagingAgents_StatusesName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <textarea class="form-control" id="add_D01_ManagingAgents_StatusesDescription" type="text" placeholder="Add new item here..."></textarea>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_D01_ManagingAgents_StatusesSortOrder" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddD01_ManagingAgents_Statuses();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_ManagingAgents_StatusesItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_ManagingAgents_StatusesName@(item.ID)" type="text" value="@item.StatusName" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <textarea class="form-control" id="add_D01_ManagingAgents_StatusesDescription@(item.ID)" type="text">@item.Description</textarea>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_D01_ManagingAgents_StatusesSortOrder@(item.ID)" type="text" value="@item.SortOrder" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.UpdatedDate.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">@item.LeadCount</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateD01_ManagingAgents_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            <span>&nbsp;</span>
+                                            @if (item.LeadCount == 0)
+                                            {
+                                                <a onclick="DoDeleteD01_ManagingAgents_Statuses('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function DoAddLeadGenerator() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_LeadGenerators_Add",
+                {
+                    add_LeadGeneratorName: $("#add_LeadGeneratorName").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateLeadGenerator(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_LeadGenerators_Update/" + ID,
+                {
+                    add_LeadGeneratorName: $("#add_LeadGeneratorName" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteLeadGenerator(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_LeadGenerators_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddLeadGeneratorUser() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_LeadGeneratorUsers_Add",
+                {
+                    add_LeadGeneratorUserUserName: $("#add_LeadGeneratorUserUserName").val(),
+                    add_LeadGeneratorUserLocalUserID: $("#add_LeadGeneratorUserLocalUserID").val(),
+                    add_LeadGeneratorUserLeadGeneratorID: $("#add_LeadGeneratorUserLeadGeneratorID").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateLeadGeneratorUser(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_LeadGeneratorUsers_Update/" + ID,
+                {
+                    add_LeadGeneratorUserUserName: $("#add_LeadGeneratorUserUserName" + ID).val(),
+                    add_LeadGeneratorUserLocalUserID: $("#add_LeadGeneratorUserLocalUserID" + ID).val(),
+                    add_LeadGeneratorUserLeadGeneratorID: $("#add_LeadGeneratorUserLeadGeneratorID" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteLeadGeneratorUser(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_LeadGeneratorUsers_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function FillInUserName(leadID) {
+            if (leadID == '') {
+                var text = $("#add_LeadGeneratorUserLocalUserID" + leadID + " option:selected").text();
+                $("#add_LeadGeneratorUserUserName" + leadID).val(text);
+
+            }
+            if ($("#add_LeadGeneratorUserUserName" + leadID).val() == '') {
+                var text = $("#add_LeadGeneratorUserLocalUserID" + leadID + " option:selected").text();
+                $("#add_LeadGeneratorUserUserName" + leadID).val(text);
+            }
+        }
+
+        function DoAddD01_Leads_Statuses() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Statuses_Add",
+                {
+                    add_D01_Leads_StatusesName: $("#add_D01_Leads_StatusesName").val(),
+                    add_D01_Leads_StatusesSortOrder: $("#add_D01_Leads_StatusesSortOrder").val(),
+                    add_D01_Leads_StatusesDescription: $("#add_D01_Leads_StatusesDescription").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateD01_Leads_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Statuses_Update/" + ID,
+                {
+                    add_D01_Leads_StatusesName: $("#add_D01_Leads_StatusesName" + ID).val(),
+                    add_D01_Leads_StatusesSortOrder: $("#add_D01_Leads_StatusesSortOrder" + ID).val(),
+                    add_D01_Leads_StatusesDescription: $("#add_D01_Leads_StatusesDescription" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteD01_Leads_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Statuses_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddD01_Properties_Statuses() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Properties_Statuses_Add",
+                {
+                    add_D01_Properties_StatusesName: $("#add_D01_Properties_StatusesName").val(),
+                    add_D01_Properties_StatusesDescription: $("#add_D01_Properties_StatusesDescription").val(),
+                    add_D01_Properties_StatusesSortOrder: $("#add_D01_Properties_StatusesSortOrder").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateD01_Properties_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Properties_Statuses_Update/" + ID,
+                {
+                    add_D01_Properties_StatusesName: $("#add_D01_Properties_StatusesName" + ID).val(),
+                    add_D01_Properties_StatusesDescription: $("#add_D01_Properties_StatusesDescription" + ID).val(),
+                    add_D01_Properties_StatusesSortOrder: $("#add_D01_Properties_StatusesSortOrder" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteD01_Properties_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Properties_Statuses_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddD01_Contacts_Statuses() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Contacts_Statuses_Add",
+                {
+                    add_D01_Contacts_StatusesName: $("#add_D01_Contacts_StatusesName").val(),
+                    add_D01_Contacts_StatusesSortOrder: $("#add_D01_Contacts_StatusesSortOrder").val(),
+                    add_D01_Contacts_StatusesDescription: $("#add_D01_Contacts_StatusesDescription").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateD01_Contacts_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Contacts_Statuses_Update/" + ID,
+                {
+                    add_D01_Contacts_StatusesName: $("#add_D01_Contacts_StatusesName" + ID).val(),
+                    add_D01_Contacts_StatusesSortOrder: $("#add_D01_Contacts_StatusesSortOrder" + ID).val(),
+                    add_D01_Contacts_StatusesDescription: $("#add_D01_Contacts_StatusesDescription" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteD01_Contacts_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Contacts_Statuses_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoAddD01_ManagingAgents_Statuses() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_ManagingAgents_Statuses_Add",
+                {
+                    add_D01_ManagingAgents_StatusesName: $("#add_D01_ManagingAgents_StatusesName").val(),
+                    add_D01_ManagingAgents_StatusesSortOrder: $("#add_D01_ManagingAgents_StatusesSortOrder").val(),
+                    add_D01_ManagingAgents_StatusesDescription: $("#add_D01_ManagingAgents_StatusesDescription").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateD01_ManagingAgents_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_ManagingAgents_Statuses_Update/" + ID,
+                {
+                    add_D01_ManagingAgents_StatusesName: $("#add_D01_ManagingAgents_StatusesName" + ID).val(),
+                    add_D01_ManagingAgents_StatusesSortOrder: $("#add_D01_ManagingAgents_StatusesSortOrder" + ID).val(),
+                    add_D01_ManagingAgents_StatusesDescription: $("#add_D01_ManagingAgents_StatusesDescription" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteD01_ManagingAgents_Statuses(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_ManagingAgents_Statuses_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

@@ -1,0 +1,180 @@
+@model MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Cost_Details.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Cost_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+<div class="row mb-4">
+    <div class="col">
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select company to view report</span>
+        }
+        else
+        {
+            <table class="table table-responsive-xl table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap text-center">Active Status</th>
+                        <th scope="col" class="text-nowrap text-center">Meter ID</th>
+                        <th scope="col" class="text-nowrap text-center">Type Name</th>
+                        <th scope="col" class="text-nowrap text-center">Meter Serial</th>
+                        <th scope="col" class="text-nowrap text-center">Meter Name</th>
+                        <th scope="col" class="text-nowrap text-center">Photo</th>
+                        <th scope="col" class="text-nowrap text-center">Customer No</th>
+                        <th scope="col" class="text-nowrap text-center">Status</th>
+                        <th scope="col" class="text-nowrap text-center">Last Communicated</th>
+                        <th scope="col" class="text-nowrap text-center">Owner</th>
+                        <th scope="col" class="text-nowrap text-center">Manufacturer</th>
+                        <th scope="col" class="text-nowrap text-center">Installation Date</th>
+                        <th scope="col" class="text-nowrap text-center">Billing Commencement Date</th>
+                        <th scope="col" class="text-center">Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Installation Cost - Labour And Consumables (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Preparation Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Antenna Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">CTs Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">RTU Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">RTU Probe Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">RTU Installation Cost - Labour And Consumables (Excl. VAT)</th>
+                        <th scope="col" class="text-center">RTU Preparation Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">RTU Antenna Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Control Unit Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Control Unit Installation Cost - Labour And Consumables (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Control Unit Preparation Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Antenna Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Sundy Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-nowrap text-center">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.L_MeterRentals_Cost_DetailsItems)
+                    {
+                        <tr onclick="RedirectToCustomer('@item.Device.Serial');" style="cursor:pointer;">
+                            <td scope="col" class="text-nowrap @(item.Device.ActiveStatusID.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@((item.Device.ActiveStatusID.HasValue ? ((MyVoltage.Data.ActiveStatus)item.Device.ActiveStatusID.Value).ToString() : "!UNKNOWN!"))</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.DeviceIDLinked > 0 ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.DeviceIDLinked</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.TypeID.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@((item.Device.TypeID.HasValue ? ((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.Device.TypeID.Value).ToString() : "!UNKNOWN!"))</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.Device.Serial) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.Serial</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.Device.Name) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.Name</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.PhotoURL) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">
+                                @if (!string.IsNullOrEmpty(item.PhotoURL))
+                                {
+                                    <a rel="popover" href="@item.PhotoURL" data-img="@item.PhotoURL" target="_blank">Show Photo</a>
+                                }
+                            </td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.SkybillCustomer.Customer_No) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.SkybillCustomer.Customer_No</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.IsOnline.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.IsOnline.ToIsOnlineStatus()</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.LastCommunicated.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.LastCommunicated.ToDateAndTimeShort()</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.SkybillCustomer.Owner) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.SkybillCustomer.Owner</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.SkybillCustomer.Manufacturer) ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.SkybillCustomer.Manufacturer</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.Installation_Date.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.Installation_Date.ToDateAndTimeShort()</td>
+
+                            <td scope="col" class="text-nowrap @(item.Device.BillingCommencementDate.HasValue ? "" : " table-danger")" title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Last Synced at @item.Device.DateLastSynced.ToDateAndTimeShort()">@item.Device.BillingCommencementDate.ToDateAndTimeShort()</td>
+
+                            <td scope="col" style="border-left: 3px solid black;" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.DeviceCost, true)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Device cost  (Excl. VAT)">@item.DeviceCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.DeviceInstallationCostLabourAndConsumables)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Device Installation cost - Labour and consumables (Excl. VAT)">@item.DeviceInstallationCostLabourAndConsumables.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.DevicePreparationCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Device Preparation Cost (Excl. VAT)">@item.DevicePreparationCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.DeviceAntennaCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Device Antenna cost  (Excl. VAT)">@item.DeviceAntennaCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.DeviceCTsCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Device CTs cost  (Excl. VAT)">@item.DeviceCTsCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.RTUCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - RTU cost  (Excl. VAT)">@item.RTUCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.RTUProbeCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - RTU Probe Cost (Excl. VAT)">@item.RTUProbeCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.RTUInstallationCostLabourAndConsumables)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - RTU Installation cost - Labour and consumables (Excl. VAT)">@item.RTUInstallationCostLabourAndConsumables.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.RTUPreparationCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - RTU Preparation Cost (Excl. VAT)">@item.RTUPreparationCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.RTUAntennaCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - RTU Antenna cost  (Excl. VAT)">@item.RTUAntennaCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.ControlUnitCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Control Unit cost  (Excl. VAT)">@item.ControlUnitCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.ControlUnitInstallationCostLabourAndConsumables)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Control Unit Installation cost - Labour and consumables (Excl. VAT)">@item.ControlUnitInstallationCostLabourAndConsumables.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.ControlUnitPreparationCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Control Unit Preparation Cost (Excl. VAT)">@item.ControlUnitPreparationCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.AntennaCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Antenna cost  (Excl. VAT)">@item.AntennaCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.SundyCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Sundy cost  (Excl. VAT)">@item.SundyCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" style="border-left: 3px solid black;border-right: 3px solid black;" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(item.TotalCost)) title="@item.Device.Serial - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Customer_Name - Total cost  (Excl. VAT)">@item.TotalCost.ToMoneyNoDecimal("R")</td>
+
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col" colspan="13" class="text-nowrap text-left" style="border-top:3px double black;border-bottom:3px double black;">Total</td>
+
+                        <td style="border-left: 3px solid black;border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceInstallationCostLabourAndConsumables).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceInstallationCostLabourAndConsumables).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DevicePreparationCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DevicePreparationCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceAntennaCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceAntennaCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceCTsCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.DeviceCTsCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUProbeCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUProbeCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUInstallationCostLabourAndConsumables).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUInstallationCostLabourAndConsumables).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUPreparationCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUPreparationCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUAntennaCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.RTUAntennaCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.ControlUnitCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.ControlUnitCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.ControlUnitInstallationCostLabourAndConsumables).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.ControlUnitInstallationCostLabourAndConsumables).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.ControlUnitPreparationCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.ControlUnitPreparationCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.AntennaCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.AntennaCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.SundyCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.SundyCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-left: 3px solid black;border-right: 3px solid black;border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Cost_DetailsModel.GetCellClass(Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.TotalCost).Sum(), true))>@Model.L_MeterRentals_Cost_DetailsItems.Select(p => p.TotalCost).Sum().ToMoneyNoDecimal("R")</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+$('a[rel=popover]').popover({
+html: true,
+trigger: 'hover',
+placement: 'bottom',
+content: function(){return '<img height="100px;" src="'+$(this).data('img') + '" />';}
+});
+        function RedirectToCustomer(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/L_MeterRentals/L_MeterRentals_Cost_Details%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/L_MeterRentals/L_MeterRentals_Cost_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

@@ -1,0 +1,300 @@
+@model MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItemModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B03_SupplyCouncilStatements_CouncilStatementCapture.GetDescription() + " - " + operationalProvider.CompanyName + " - Invoice Item";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                }
+                else
+                {
+
+                    <div class="card-header">
+                        <div class="col border border-primary rounded p-2 m-2">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h6>Invoice Details:</h6>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Account Number</div>
+                                <div class="col">TAX Invoice No</div>
+                                <div class="col">TAX Invoice Date</div>
+                                <div class="col">Final Date For Payment</div>
+                                <div class="col">Current Reading Date</div>
+                                <div class="col">Description</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">@Model.BuildingCouncilDetail.CouncilElecAccNo</div>
+                                <div class="col">@Model.BuildingCouncilDetails_Invoice.TAXInvoiceNo</div>
+                                <div class="col">@Model.BuildingCouncilDetails_Invoice.TAXInvoiceDate.ToDateShort()</div>
+                                <div class="col">@Model.BuildingCouncilDetails_Invoice.FinalDateForPayment.ToDateShort()</div>
+                                <div class="col">@Model.BuildingCouncilDetails_Invoice.CurrentReadingDate.ToDateShort()</div>
+                                <div class="col">@Model.BuildingCouncilDetails_Invoice.Description</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItem" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ReferencedDocument" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="ReferencedDocument" />
+                                            <span asp-validation-for="ReferencedDocument" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+@*                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ResourceType" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("ResourceType", Model.ResourceType, new { @class = "form-control", @onChange = "AutoFillMeterDetails();" })
+                                            <span asp-validation-for="ResourceType" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCouncilMeter" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("BuildingCouncilMeter", Model.BuildingCouncilMeter, new { @class = "form-control", @onChange = "AutoFillMeterDetails();" })
+                                            <span asp-validation-for="BuildingCouncilMeter" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ChargeType" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("ChargeType", Model.ChargeType, new { @class = "form-control", @onChange = "AutoFillMeterDetails();" })
+                                            <span asp-validation-for="ChargeType" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ActionDate" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input id="actionDate" class="form-control" asp-for="ActionDate" type="date" />
+                                            <span asp-validation-for="ActionDate" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="Description" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="Description" />
+                                            <span asp-validation-for="Description" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div id="consumption">
+
+
+                                        <div class="row mb-2 mt-2">
+                                            <div class="col text-uppercase font-weight-bold">
+                                                <label asp-for="ReadingType" class="control-label"></label>
+                                            </div>
+                                            <div class="col">
+                                                @Html.DropDownList("ReadingType", Model.ReadingType, new { @class = "form-control" })
+                                                <span asp-validation-for="ReadingType" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-2 mt-2">
+                                            <div class="col text-uppercase font-weight-bold">
+                                                <label asp-for="CurrentDate" class="control-label"></label>
+                                            </div>
+                                            <div class="col">
+                                                <input id="currentDate" class="form-control" asp-for="CurrentDate" type="date" />
+                                                <span asp-validation-for="CurrentDate" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-2 mt-2">
+                                            <div class="col text-uppercase font-weight-bold">
+                                                <label asp-for="PreviousDate" class="control-label"></label>
+                                            </div>
+                                            <div class="col">
+                                                <input id="previousDate" class="form-control" asp-for="PreviousDate" type="date" />
+                                                <span asp-validation-for="PreviousDate" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-2 mt-2">
+                                            <div class="col text-uppercase font-weight-bold">
+                                                <label asp-for="ClosingForMeter" class="control-label"></label>
+                                            </div>
+                                            <div class="col">
+                                                <input id="closingForMeter" class="form-control" asp-for="ClosingForMeter" />
+                                                <span asp-validation-for="ClosingForMeter" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-2 mt-2">
+                                            <div class="col text-uppercase font-weight-bold">
+                                                <label asp-for="OpeningForMeter" class="control-label"></label>
+                                            </div>
+                                            <div class="col">
+                                                <input id="openingForMeter" class="form-control" asp-for="OpeningForMeter" />
+                                                <span asp-validation-for="OpeningForMeter" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="AmountExcl" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="AmountExcl" />
+                                            <span asp-validation-for="AmountExcl" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="VAT" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="VAT" />
+                                            <span asp-validation-for="VAT" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="PayableByServiceProvider" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="PayableByServiceProvider" />
+                                            <span asp-validation-for="PayableByServiceProvider" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+*@@*                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="PaymentBy" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("PaymentBy", Model.PaymentBy, new { @class = "form-control" })
+                                            <span asp-validation-for="PaymentBy" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+*@                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-6 text-left">
+                                    <a href="/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                </div>
+                                <div class="col-6 text-right">
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentDetails, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                    {
+                                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                    }
+                                </div>
+                            </div>
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+<script>
+    $("#DeviceSearch_Serial").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/operational/A07_CreditControlAndNotifierProcess/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter_Search",
+                type: "POST",
+                dataType: "json",
+                data: { Prefix: request.term },
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return { label: item.text, value: item.value };
+                    }))
+
+                }
+            })
+        }
+    });
+
+    function AutoFillMeterDetails() {
+        if ($("#BuildingCouncilMeter").val() != "") {
+            // If BuildingCouncilMeter is selected. Make CHARGE TYPE Consumption
+                $("#ChargeType").val("2");
+            }
+
+        if ($("#ChargeType").val().toString() == "1") {
+            $("#consumption").css("display", "none");
+            }
+        else {
+            $("#consumption").css("display", "block");
+        }
+
+        if ($("#BuildingCouncilMeter").val() != "") {
+            $.get("/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetailsBuildingCouncilMeter_AutoFillPreviousDetails/@Model.BuildingCouncilDetails_Invoice.ID/" + $("#ChargeType").val() + "/" + $("#ResourceType").val() + "/" + $("#BuildingCouncilMeter").val())
+            .done(function( data ) {
+                if (data.reading != "") {
+                    $("#openingForMeter").val(data.reading);
+                }
+                if (data.readingDate != "") {
+                    $("#previousDate").val(data.readingDate);
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        AutoFillMeterDetails();
+    });
+
+</script>
+}

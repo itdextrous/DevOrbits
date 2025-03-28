@@ -1,0 +1,81 @@
+﻿@model MyVoltage.Models.AccountViewModels.RegisterConfirmViewModel
+@{
+    ViewData["Title"] = "Confirm";
+    Layout = "~/Views/Shared/LayoutEmpty.cshtml";
+}
+
+<div class="diagonal">
+    <img src="/images/diagonal-line.png" alt="">
+</div>
+
+<div class="row my-5">
+    <div class="col-md-4 mx-auto text-white">
+        <img src="/logo/white" alt="" class="my-5 d-block mx-auto logo-width">
+        <h5>Hi @Model.FullName,</h5>
+        <p><b>Just some final details and you will be done with registration.</b></p>
+        <p>Please confirm that your phone number and email are correct.</p>
+        <form method="post">
+
+            <div class="form-group">
+                <input asp-for="PhoneNumber" class="form-control" placeholder="Phone number" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input asp-for="Email" class="form-control d-block" placeholder="Email Address" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <p class="font-weight-bold mb-0">Occupancy Date</p>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-4 mt-2">
+                        <select asp-for="Day" class="form-control" asp-items="@Model.Days">
+                            <option>Day</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mt-2">
+                        <select asp-for="Month" class="form-control" asp-items="@Model.Months">
+                            <option>Month</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mt-2">
+                        <select asp-for="Year" class="form-control" asp-items="@Model.Years">
+                            <option>Year</option>
+                        </select>
+                    </div>
+                </div>
+                <span asp-validation-for="Day" class="text-danger"></span>
+                <span asp-validation-for="Month" class="text-danger"></span>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-outline-default">Next</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Metering Number Modal -->
+<div class="modal fade" id="meternumber" tabindex="-1" role="dialog" aria-labelledby="meternumberLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p class="font-weight-bold">Metering number</p>
+                <p>The meter number can be found on the metering device or underneath its cover.</p>
+                <p class="text-muted">The numbers look similar to this: </p>
+                <img src="/images/barcodes.jpg" alt="" class="img-fluid ">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal"><b>Close</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+    function goBack() {
+        window.history.back();
+    }
+    </script>
+}

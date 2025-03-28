@@ -1,0 +1,239 @@
+@model MyVoltage.Models.ClientzoneModels.DashboardModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@inject UserManager<ApplicationUser> userMan;
+@{
+    ViewData["Title"] = "Billing - Invoices";
+    Layout = "LayoutClientzone";
+    var SelectedMonth1 = DateTime.Now;
+}
+
+<div class="container invoices tax_invoice">
+    <div class="pt_m_45 mb-m25">
+        <h3 class="text-center page_heading">Billing information</h3>
+        <h4 class="text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">Tax invoice</h4>
+    </div>
+
+    <div class="mt-85 max-w-415">
+        <div class="mb-30">
+            <input onkeydown="return false" data-date-end-date="0d" type="text" name="date" class="form-control-trim invoiceDateInput datePicker_input" id="invoiceDate" placeholder="yyyy-mm" value="@(SelectedMonth1.ToString("yyyy-MM"))" autocomplete="off">
+        </div>
+
+        <div class="mt-45 text-center PDFButtons" id="PDFButton">
+            <a href="#" id="diaplayPdf" class="btn btn-islandsunrise" onclick="GetInvoice();">Display PDF</a>
+            <a class="btn btn-islandsunrise PDF_default_btn pdfDisable" onclick="DownloadInvoice();" id="dwnldPdfTaxInvoice">Download PDF</a>
+            <a class="btn btn-islandsunrise bg-grape ConsumptionPdfBtn" id="myButton">
+                Download Consumption Insights
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-85 pt-85" id="divResult" style="display:none;">
+        <div id="invoice_view" class="show_pdf_preview"></div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(() => {
+            $(".invoiceDateInput").datepicker({
+                format: "yyyy-mm",
+                startView: "months",
+                minViewMode: "months",
+                autoclose: "true",
+                startDate: '-12M'
+            });
+            enableDisableBtn();
+        })
+        var loaderCount = 0;
+
+        //select box js start
+        const inputs = document.getElementsByClassName('js-static-input');
+        const selects = document.getElementsByClassName('js-select');
+
+        for (let i = 0; i < inputs.length; i++) {
+            getSelected(i);
+            selects[i].addEventListener("change", function () {
+                getSelected(i);
+            });
+        }
+
+        document.getElementById("myButton").onclick = function () {
+            location.href = "/clientzone/consumptioninsights";
+        };
+
+        function getSelected(i) {
+            inputs[i].value = selects[i].options[selects[i].selectedIndex].text;
+        }
+        //select box js end
+
+        $('#billingLI').addClass("active");
+        $('#Billing_collapse').addClass("show");
+
+        function GetInvoice() {
+            $("#divResult").fadeOut();
+            //$("#loaderContent").css("display", "block");
+            addLoaderToDisplayBtn();
+            if ($("#invoiceDate").val() == '') {
+                toastr.warning('Please select a month.');
+                $('#invoiceDate').focus();
+                $("#loaderContent").css("display", "none");
+            }
+            else 
+            {
+                $("#invoice_view").load('@Url.Content("/clientzone/billing/invoice_view")?d=' + $("#invoiceDate").val() + 
+                    ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)'), function () {
+                    $("#divResult").fadeIn();
+                    $("#PDFButton").addClass('PDFButtonDiv');
+                    $(".tax_invoice").addClass('tax_invoice_view');
+                    //$("#loaderContent").css("display", "none");
+                        removeDisplayBtnLoader();
+                });
+            }
+        }
+
+        async function DownloadInvoice() {
+            $("#loaderContent").css("display", "block");
+            if ($("#invoiceDate").val() == '') {
+                toastr.warning('Please select a month.');
+                $('#invoiceDate').focus();
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            var url = '/clientzone/billing/invoices_downloadjson?d=' + $("#invoiceDate").val() +
+                ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&PV=t');
+
+            try {
+                var result = await $.get(url);
+                if (result) {
+                    saveByteArray(result?.name, result?.data);
+                    $("#loaderContent").css("display", "none");
+                } else {
+                    toastr.error("Something went wrong. Please try again later.");
+                }
+            } catch (err) {
+                toastr.error("Something went wrong. Please try again later.");
+            }
+        }
+
+        //function enableDownloadBtns(){
+        //    //enableDownloadBtn();
+        //    enableDisableBtn();
+        //}
+
+        function saveByteArray(reportName, base64) {
+            var link = document.createElement('a');
+            link.href = "data:application/pdf;base64," + base64;
+            link.download = reportName;
+            link.click();
+        };
+
+        //async function DownloadInsights() {
+        //    $("#loaderContent").css("display", "block");
+
+        //    if ($("#invoiceDate").val() == '') {
+        //        $("#loaderContent").css("display", "none");
+        //        toastr.warning('Please select a month.');
+        //        $('#invoiceDate').focus();
+        //        return;
+        //    }
+
+        //    if ($("#Products").val() == '') {
+        //        $("#loaderContent").css("display", "none");
+        //        toastr.warning('Please select utility type.');
+        //        $('#Products').focus();
+        //        return;
+        //    }
+
+        //    var url = '/clientzone/consumptioninsights_downloadjson?d=' + $("#invoiceDate").val() + '&p=' + $("#Products").val() + 
+        //    ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&SV=@(clientzoneProvider.ShowCostInclVAT)&PV=t&U=@(userMan.GetUserId(User))');
+
+        //    var result = await $.get(url);
+        //    if (result) {
+        //        saveByteArray(result?.name, result?.data);
+        //        $("#loaderContent").css("display", "none");
+        //    } else {
+        //        toastr.error("Something went wrong. Please try again later.")
+        //    }
+
+        //    //window.location.href = url;
+        //}
+
+        $(".datePicker_input").change(function () {
+            $("#divResult").fadeOut();
+            enableDisableBtn();
+        })
+
+        //function enableDownloadBtn() {
+        //    $("#divResult").fadeOut();
+        //    $("#loaderContent").css("display", "block");
+        //    var url = '/clientzone/consumptioninsightscheckdata?d=' + $("#invoiceDate").val() + '&p=' +
+        //        ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&CheckPV=t&U=@(userMan.GetUserId(User))');
+        //    $.ajax({
+        //        url: url,
+        //        type: "GET",
+        //        dataType: "json",
+        //        success: function (response) {
+        //            $("#loaderContent").css("display", "none");
+        //            if (!response) {
+        //                $(".ConsumptionPdfBtn").addClass('pdfDisable');
+        //                $("#divResult").fadeOut();
+        //            } else {
+        //                $(".ConsumptionPdfBtn").removeClass('pdfDisable');
+        //                $("#divResult").fadeOut();
+        //            }
+        //        },
+        //        failure: function () {
+        //            $("#loaderContent").css("display", "none");
+        //            $("#divResult").fadeOut();
+        //        }
+        //    })
+        //}
+  
+        function enableDisableBtn() {
+            downloadBtnLoader();
+
+            var url = '/clientzone/billing/invoice_view?d=' + $("#invoiceDate").val() +
+                ('&CID=@(clientzoneProvider.CompanyID)&CN=@(clientzoneProvider.CustomerNumber)&CheckPV=t');
+
+            $.ajax(url)
+                .done((response) => {
+                    if (response.taxInvoiceTemplate == null) {
+                        $("#dwnldPdfTaxInvoice").addClass('pdfDisable');
+                        //$("#divResult").fadeOut();
+                    } else {
+                        $("#dwnldPdfTaxInvoice").removeClass('pdfDisable');
+                        //$("#divResult").fadeOut();
+                    }
+                }).fail(function (err) {
+
+                }).always(function () {
+                    $('#dwnldPdfTaxInvoice').html('Download PDF');
+                });
+        }
+
+        $("#invoiceDate").click(() => {
+            $("#invoiceDate").datepicker("update");
+        })
+
+        function downloadBtnLoader(){
+            $('#dwnldPdfTaxInvoice').text('')
+            $('#dwnldPdfTaxInvoice').html('<i class="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>');
+            $('#dwnldPdfTaxInvoice').addClass('pdfDisable');
+        }
+
+        function addLoaderToDisplayBtn() {
+            $('#diaplayPdf').text('')
+            $('#diaplayPdf').html('<i class="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>');
+            $('#diaplayPdf').addClass('pdfDisable');
+        }
+
+        function removeDisplayBtnLoader() {
+            $('#diaplayPdf').html('Display PDF');
+            $("#diaplayPdf").removeClass('pdfDisable');
+        }
+
+    </script>
+}

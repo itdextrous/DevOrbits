@@ -1,0 +1,94 @@
+﻿@model MyVoltage.Models.MirrorViewModels.MirrorDeviceOverviewperbuildingViewModel
+@{
+    ViewData["Title"] = "Mirror Device Overview per building";
+}
+<form enctype="multipart/form-data">
+    <div class="dash-block">
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-4">
+                    <div class="card-content">
+                        <div>
+                            Company
+                        </div>
+                        <div class="row">
+                            @Html.DropDownList("Company", Model.Companies as List<SelectListItem>)
+                        </div>
+                        <div class="row">
+                            <button type="submit" class="btn btn-link">Show Mirror Device Overview per building</button>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model != null && Model.MirrorAuditCompletenessResultItems != null && Model.MirrorAuditCompletenessResultItems.Count > 0)
+                {
+                    <div class="card top-details">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col">Completed Today: @Model.CompletedToday</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">Left Today: @Model.LeftToday</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">Total: @Model.Total</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-md-4">
+                        <div class="card-content">
+                            <div class="table-responsive">
+                                <table class="table table-bordered admin-table-detail mt-3 table-striped">
+                                    <tbody style="height:auto;">
+                                    <thead>
+                                        <tr>
+                                            <td>Serial</td>
+                                            <td>Name</td>
+                                            <td>Latest Reading</td>
+                                            <td>Latest Reading Time</td>
+                                            <td>Latest Audit Reading</td>
+                                            <td>Latest Audit Reading Time</td>
+                                            <td>Latest Audit Reading Created</td>
+                                            <td>Latest Audit Reading Name</td>
+                                            <td>Latest Audit Reading UploadName</td>
+                                            <td>Photo</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.MirrorAuditCompletenessResultItems)
+                                        {
+                                        <tr>
+                                            <td style="text-align:left;">@item.Serial</td>
+                                            <td style="text-align:left;">@item.DeviceName</td>
+                                            <td style="text-align:left;">@item.LatestReading.ToString("N")</td>
+                                            <td style="text-align:left;">@item.LatestReadingTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td style="text-align:left;">@item.LatestAuditReading.ToString("N")</td>
+                                            <td style="text-align:left;">@item.LatestAuditReadingTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td style="text-align:left;">@item.LatestAuditReadingCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td style="text-align:left;">@item.LatestAuditReadingName</td>
+                                            <td style="text-align:left;">@item.LatestAuditReadingUploadName</td>
+                                            <td style="text-align:left;">
+                                                @if (!string.IsNullOrEmpty(item.PhotoDownloadURL))
+                                                {
+                                                    <a href="@item.PhotoDownloadURL" target="_blank">Get Photo</a>
+                                                }
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+        </div>
+    </div>
+</form>

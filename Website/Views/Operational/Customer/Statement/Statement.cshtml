@@ -1,0 +1,247 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.Customer.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.Customer_Statement.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerNumber}";
+}
+
+@*@{
+        await Html.RenderPartialAsync("customerRecharge");
+    }*@
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (operationalProvider.CompanyID > 0 && operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.Customer_Statement, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <h4>@operationalProvider.CompanyName Statement</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col">Year</div>
+                        <div class="col">
+                            <select id="yearDropDownAll" class="form-control">
+                                @for (int i = 0; i > -2; i--)
+                                {
+                                    <option value="@DateTime.Now.AddYears(i).Year">@(DateTime.Now.AddYears(i).ToString("yyyy"))</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col">Month</div>
+                        <div class="col">
+                            <select id="monthDropDownAll" class="form-control">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@(new System.DateTime(DateTime.Now.Year, i, 1).ToString("MMMM"))</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col"></div>
+                        <div class="col">
+                            <a onclick="DoGetAll();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-building"></i>&nbsp;@operationalProvider.CompanyName Statement</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer align-middle">
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h4>@operationalProvider.CustomerNumber Statement</h4>
+            </div>
+            <div class="card-body">
+                @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                {
+                    <div>Select customer for individual statements...</div>
+                }
+                else
+                {
+                    <div class="row mt-2 mb-2">
+                        <div class="col">Year</div>
+                        <div class="col">
+                            <select id="yearDropDown" class="form-control">
+                                @for (int i = 0; i > -2; i--)
+                                {
+                                    <option value="@DateTime.Now.AddYears(i).Year">@(DateTime.Now.AddYears(i).ToString("yyyy"))</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col">Month</div>
+                        <div class="col">
+                            <select id="monthDropDown" class="form-control">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@(new System.DateTime(DateTime.Now.Year, i, 1).ToString("MMMM"))</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col">Email</div>
+                        <div class="col">
+                            <input id="emailTxt" type="text" class="form-control" value="@userManager.GetEmailAsync(userManager.GetUserAsync(User).Result).Result" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col">Report Type</div>
+                        <div class="col">
+                            <select id="statementTypeDropDown" class="form-control">
+                                <option value="Download">Download</option>
+                                <option value="Email">Email</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col"></div>
+                        <div class="col">
+                            <a id="getReportBtn" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-file-excel"></i>&nbsp;@operationalProvider.CustomerNumber Statement (Excel)</a>
+                            <a id="getReportBtnPDF" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-file-pdf"></i>&nbsp;@operationalProvider.CustomerNumber Statement (PDF)</a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="card-footer align-middle">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function DoGetAll() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_name").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter name');
+                $("#add_name").focus();
+                return;
+            }
+
+            $.post("/operational/customer/Customer_Statement_Email_Company",
+                {
+                    yearDropDownAll: $("#yearDropDownAll").val(),
+                    monthDropDownAll: $("#monthDropDownAll").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("@operationalProvider.CompanyName Statement request success. Statement will be sent to your registered email.");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        $("#getReportBtn").click(function (e) {
+            if ($("#emailTxt").val() == '' && $("#statementTypeDropDown").val() == 'Email') {
+                alert('Email address missing.');
+                return;
+            }
+            $("#loaderContent").css("display", "block");
+
+            if ($("#statementTypeDropDown").val() == 'Email') {
+
+                $.get('/operational/customer/Customer_Statement_Email/' + $("#yearDropDown").val() + '/' + $("#monthDropDown").val() + '/' + $("#emailTxt").val(), function (data, status) {
+                    if (data == "false") {
+                        alert('There was a problem generating invoice for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                    else {
+                        alert('Email sent for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                }).done(function() {
+                    $("#loaderContent").css("display", "none");
+                });
+
+            }
+            else {
+                $("#loaderContent").css("display", "none");
+                window.open('/operational/customer/Customer_Statement_Download/' + $("#yearDropDown").val() + '_' + $("#monthDropDown").val() + '.xlsx');
+                return false;
+                $.fileDownload('/operational/customer/Customer_Statement_Download/' + $("#yearDropDown").val() + '_' + $("#monthDropDown").val() + '.xlsx', {
+                    successCallback: function (url) {
+                        document.location.href = '/operational/customer/Customer_Statement';
+                    },
+                    failCallback: function (html, url) {
+                        alert('There was a problem downloading invoice for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                });
+                $("#loaderContent").css("display", "none");
+                return false;
+            }
+
+
+        });
+        $("#getReportBtnPDF").click(function (e) {
+            if ($("#emailTxt").val() == '' && $("#statementTypeDropDown").val() == 'Email') {
+                alert('Email address missing.');
+                return;
+            }
+            $("#loaderContent").css("display", "block");
+
+            if ($("#statementTypeDropDown").val() == 'Email') {
+
+                $.get('/operational/customer/Customer_Statement_EmailPDF/' + $("#yearDropDown").val() + '/' + $("#monthDropDown").val() + '/' + $("#emailTxt").val(), function (data, status) {
+                    if (data == "false") {
+                        alert('There was a problem generating invoice for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                    else {
+                        alert('Email sent for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                }).done(function() {
+                    $("#loaderContent").css("display", "none");
+                });
+
+            }
+            else {
+                $("#loaderContent").css("display", "none");
+                window.open('/operational/customer/Customer_Statement_DownloadPDF/' + $("#yearDropDown").val() + '_' + $("#monthDropDown").val() + '.pdf');
+                return false;
+                $.fileDownload('/operational/customer/Customer_Statement_DownloadPDF/' + $("#yearDropDown").val() + '_' + $("#monthDropDown").val() + '.pdf', {
+                    successCallback: function (url) {
+                        document.location.href = '/operational/customer/Customer_Statement';
+                    },
+                    failCallback: function (html, url) {
+                        alert('There was a problem downloading invoice for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                });
+                $("#loaderContent").css("display", "none");
+                return false;
+            }
+
+
+        });
+    </script>
+}

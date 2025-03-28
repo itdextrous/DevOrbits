@@ -1,0 +1,144 @@
+@using Microsoft.AspNetCore.Http
+@model MyVoltage.Models.CompanyAdminViewModels.TSInvoicesViewModel
+@inject MyVoltage.Services.CustomerProvider customerProvider
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Report";
+}
+
+@using (Html.BeginForm("TSInvoices", "companyadmin", FormMethod.Post))
+{
+    if (!string.IsNullOrEmpty(@HttpContextAccessor.HttpContext.Session.GetString("CustomerID")))
+    {
+        <div class="row mt-0 mt-md-5">
+            <div class="col-12 col-md-6">
+                <h3>@ViewData["Title"] for @customerProvider.CustomerNumber</h3>
+            </div>
+        </div>
+
+        <div class="dash-block billing mt-4 mb-5">
+            <div class="row">
+                <div class="col-12 col-md-2 pt-4 px-4">
+                    <p class="billing-address">Year</p>
+                    <p class="billing-details">
+                        <select asp-for="Year">
+                            @for (int i = 0; i > -2; i--)
+                            {
+                                <option value="@DateTime.Now.AddYears(i).Year">@(DateTime.Now.AddYears(i).ToString("yyyy"))</option>
+                            }
+                        </select>
+                    </p>
+                </div>
+                <div class="col-12 col-md-2 pt-4 px-4">
+                    <p class="billing-address">Month</p>
+                    <p class="billing-details">
+                        <select asp-for="Month">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i">@(new System.DateTime(DateTime.Now.Year, i, 1).ToString("MMMM"))</option>
+                            }
+                        </select>
+                    </p>
+                </div>
+                <div class="col-12 col-md-2 pt-4 px-4">
+                    <p class="billing-address">Email</p>
+                    <p class="billing-details">
+                        <input type="text" asp-for="Email" />
+                    </p>
+                </div>
+                <div class="col-12 col-md-2 pt-4 px-4">
+                    <p class="billing-address">Report Type</p>
+                    <p class="billing-details">
+                        <select asp-for="StatementType">
+                            <option value="Download">Download</option>
+                            <option value="Email">Email</option>
+                        </select>
+                    </p>
+                </div>
+                <div class="col-12 col-md-2 pt-4">
+                    <button type="submit" class="btn btn-outline-primary d-block mx-auto float-md-right float-sm-none"><i class="fas fa-download"></i>&nbsp;GET REPORT</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p class="text-muted text-center text-md-right float-md-right float-sm-none">&nbsp;</p>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="row">
+                    <div class="col">
+                        <p class="text-red text-center text-md-right float-md-right float-sm-none">@Model.ErrorMessage</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+@using (Html.BeginForm("TSInvoicesAll", "companyadmin", FormMethod.Post))
+{
+
+    <div class="row mt-0 mt-md-5">
+        <div class="col-12 col-md-6">
+            <h3>@ViewData["Title"] for All Customers</h3>
+        </div>
+    </div>
+
+    <div class="dash-block billing mt-4 mb-5">
+        <div class="row">
+            <div class="col-12 col-md-2 pt-4 px-4">
+                <p class="billing-address">Year</p>
+                <p class="billing-details">
+                    <select asp-for="AllYear">
+                        @for (int i = 0; i > -2; i--)
+                        {
+                            <option value="@DateTime.Now.AddYears(i).Year">@(DateTime.Now.AddYears(i).ToString("yyyy"))</option>
+                        }
+                    </select>
+                </p>
+            </div>
+            <div class="col-12 col-md-2 pt-4 px-4">
+                <p class="billing-address">Month</p>
+                <p class="billing-details">
+                    <select asp-for="AllMonth">
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@i">@(new System.DateTime(DateTime.Now.Year, i, 1).ToString("MMMM"))</option>
+                        }
+                    </select>
+                </p>
+            </div>
+            <div class="col-12 col-md-2 pt-4 px-4">
+                <p class="billing-address">Email</p>
+                <p class="billing-details">
+                    <input type="text" asp-for="AllEmail" />
+                </p>
+            </div>
+            <div class="col-12 col-md-2 pt-4 px-4">
+                <p class="billing-address">Report Type</p>
+                <p class="billing-details">
+                    <select asp-for="AllStatementType">
+                        <option value="Email">Email</option>
+                    </select>
+                </p>
+            </div>
+            <div class="col-12 col-md-2 pt-4">
+                <button type="submit" class="btn btn-outline-primary d-block mx-auto float-md-right float-sm-none"><i class="fas fa-download"></i>&nbsp;GET REPORT</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <p class="text-muted text-center text-md-right float-md-right float-sm-none">&nbsp;</p>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.AllErrorMessage))
+        {
+            <div class="row">
+                <div class="col">
+                    <p class="text-red text-center text-md-right float-md-right float-sm-none">@Model.AllErrorMessage</p>
+                </div>
+            </div>
+        }
+    </div>
+
+}

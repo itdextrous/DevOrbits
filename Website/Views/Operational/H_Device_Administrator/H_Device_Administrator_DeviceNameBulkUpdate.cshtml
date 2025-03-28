@@ -1,0 +1,36 @@
+﻿@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_DeviceNameBulkUpdateModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_DeviceNameBulkUpdate.GetDescription();
+}
+
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>Device IDs&nbsp;<a href="#" title="Device IDs">?</a></span>
+                <textarea asp-for="DeviceIDs" class="form-control" type="" title="Device IDs"></textarea>
+            </div>
+            <div class="col">
+                <span asp-validation-for="NewDeviceName">New Device Name</span>
+                <input asp-for="NewDeviceName" class="form-control" type="text" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-right">
+                <button type="submit" class="btn btn-outline-primary">Change Names</button>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                <span class="text-red">@Model.ErrorMessage</span>
+            </div>
+        }
+    </div>
+
+}

@@ -1,0 +1,177 @@
+﻿@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_ActiveEnergyAnomalies_SummaryModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_ActiveEnergyAnomalies_Summary.GetDescription();
+    DateTime current = Model.FromDate;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+
+            </div>
+
+            <div class="card-body">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="FromDate"></label>
+                    </div>
+                    <div class="col">
+                        <input class="form-control" type="date" asp-for="FromDate" value="@(Model.FromDate.ToDateShort())" />
+                        <span asp-validation-for="FromDate" class="text-red"></span>
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="ToDate"></label>
+                    </div>
+                    <div class="col">
+                        <input class="form-control" type="date" asp-for="ToDate" value="@(Model.ToDate.ToDateShort())" />
+                        <span asp-validation-for="ToDate" class="text-red"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+
+                <div class="row">
+                    <div class="col-12 text-right">
+                        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div class="col-12">
+
+        <table class="table table-sm table-hover table-bordered table-striped">
+
+            <thead>
+                <tr>
+                    <th scope="col" class="text-left text-nowrap border-table" rowspan="2">Company Name</th>
+                    @{
+                        current = Model.FromDate;
+                    }
+                    @while (current <= Model.ToDate)
+                    {
+                        <th scope="col" class="text-center text-nowrap border-table-spanned" colspan="2">
+                            <div class="row flex-nowrap">
+                                <div class="col">
+                                    @Html.Raw(current.ToString("yyyy<br/>MMM"))
+                                </div>
+                                <div class="col">
+                                    <a href="#" onclick="RedirectToRecreateAllCompanies('@current.Year', '@current.Month');" title="Execute Rerun" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-play"></i>&nbsp;ALL</a>
+                                </div>
+                            </div>
+                        </th>
+                        current = current.AddMonths(1);
+                    }
+                </tr>
+                <tr>
+                    @{
+                        current = Model.FromDate;
+                    }
+                    @while (current <= Model.ToDate)
+                    {
+                        <th scope="col" class="text-center text-nowrap border-table-left">Status</th>
+                        <th scope="col" class="text-center text-nowrap border-table-right">Error Count</th>
+                        current = current.AddMonths(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.H_Device_Administrator_ActiveEnergyAnomalies_SummaryItems)
+                {
+                    string rowClass = "";
+
+                    <tr>
+                        <td scope="col" class="text-left text-nowrap border-table">@entry.Name</td>
+                        @{
+                            current = Model.FromDate;
+                        }
+                        @while (current <= Model.ToDate)
+                        {
+                            var item = entry.H_Device_Administrator_ActiveEnergyAnomalies_SummaryMonthlyItems.Where(p => p.Month == current).SingleOrDefault();
+                            if (item != null)
+                            {
+                                <td scope="col" class="text-center flex-nowrap text-nowrap border-table-left @(item.IsCompleted.HasValue ? (item.IsCompleted.Value ? "table-success" : "table-warning") : "table-danger")">
+                                    <div class="row flex-nowrap">
+                                        <div class="col">
+                                            @(item.IsCompleted.HasValue ? (item.IsCompleted.Value ? "Completed" : "In Progress") : "Not Requested")
+                                            @if (item.DateCompleted.HasValue)
+                                            {
+                                                <br />
+                                                @item.DateCompleted.ToDateAndTimeShort()
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            @if (!item.IsCompleted.HasValue || item.IsCompleted.Value)
+                                            {
+                                                <a id="targetDate_@entry.CompanyID" href="#targetDate_@entry.CompanyID" onclick="RedirectToRecreate('@entry.CompanyID', '@current.Year', '@current.Month');" title="Execute Rerun" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-play"></i></a>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td scope="col" @(item.ErrorCount > 0 ? Html.Raw($"style=\"cursor:pointer;\" onclick=\"RedirectToErrors('{entry.CompanyID}', '{current.Year}', '{current.Month}');\"") : Html.Raw("")) class="text-center text-nowrap border-table-right @(item.ErrorCount == 0 ? (item.IsCompleted.HasValue && item.IsCompleted.Value ? "table-success" : "table-warning") : "table-danger")">@item.ErrorCount</td>
+                            }
+                            else
+                            {
+                                <td scope="col" class="text-center text-nowrap border-table-left table-warning">Not Requested</td>
+                                <td scope="col" class="text-center text-nowrap border-table-right table-warning">0</td>
+                            }
+                            current = current.AddMonths(1);
+                        }
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        function RedirectToDetails(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Details';
+        }
+        function RedirectToErrors(companyID, year, month) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Details/' + year + '/' + month;
+        }
+        function RedirectToRecreate(companyID, year, month) {
+            $("#loaderContent").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Request/' + companyID + '/' + year + '/' + month + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function RedirectToRecreateAllCompanies(year, month) {
+            if (confirm('Are you sure you wish to delete and rerun ALL companies for ' + year + '-' + month + '? This might take a while. DO NOT CLICK THIS BUTTON IF YOU DO NOT KNOW HOW IT WORKS.')) {
+                $("#loaderContent").css("display", "block");
+                var returnUrl = document.location.href;
+                document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Request_AllCompanies/' + year + '/' + month + '?R=' + encodeURIComponent(returnUrl);
+            }
+        }
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/H_Device_Administrator/H_Device_Administrator_ActiveEnergyAnomalies_Summary?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val();
+        }
+    </script>
+}

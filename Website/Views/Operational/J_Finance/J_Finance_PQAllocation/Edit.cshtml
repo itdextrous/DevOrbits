@@ -1,0 +1,100 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_PQAllocationEditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_PQAllocation.GetDescription()} - {Model.J_Finance_PQAllocation.SerialNumber} - Edit";
+}
+
+<form asp-action="PQAllocationEdit" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    @Model.J_Finance_PQAllocation.SerialNumber
+                    @switch (Model.J_Finance_PQAllocation.DeviceType)
+                    {
+                        case MyVoltage.Controllers.AccountController.DeviceType.Electricity:
+                            <img src="~/images/elec-icon-s.png" />
+                            break;
+                        case MyVoltage.Controllers.AccountController.DeviceType.Water:
+                            <img src="~/images/water-icon-s.png" />
+                            break;
+                        case MyVoltage.Controllers.AccountController.DeviceType.Gas:
+                            <img src="~/images/gas-icon-s.png" />
+                            break;
+                    }
+                    (<strong>@Model.J_Finance_PQAllocation.DeviceType.ToString()</strong>)
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer No</th>
+                                <th scope="col">Calculation Basis</th>
+                                <th scope="col">PQ %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemCustomer in Model.J_Finance_PQAllocation.PQAllocationCustomers)
+                            {
+                                <tr>
+                                    <td scope="col">@itemCustomer.CustomerNo</td>
+                                    <td scope="col">
+                                        <input type="text" name="Quota_@itemCustomer.CustomerNo" id="Quota_@itemCustomer.CustomerNo" value="@itemCustomer.QuotaAmount.ToString("0.000")" />
+                                    </td>
+                                    <td scope="col">@itemCustomer.PQPerc.ToString("0.00000") %</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td scope="col">Total</td>
+                                <td scope="col">
+                                    @Model.J_Finance_PQAllocation.PQAllocationCustomers.Select(p => p.QuotaAmount).Sum().ToString("0.000")
+                                </td>
+                                <td scope="col">@Model.J_Finance_PQAllocation.PQAllocationCustomers.Select(p => p.PQPerc).Sum().ToString("0.00000") %</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="card-footer">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <a href="/operational/J_Finance/J_Finance_PQAllocation" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to list</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/companyAdmin/pqallocation/serialsearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

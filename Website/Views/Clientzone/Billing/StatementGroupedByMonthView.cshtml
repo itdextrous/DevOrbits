@@ -1,0 +1,222 @@
+@model MyVoltage.Models.ClientzoneModels.StatementGroupedByMonth_ViewModel;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"Billing - Statement - {Model.FromDate.ToMonth()} - {Model.ToDate.ToMonth()}";
+    Layout = "LayoutPrint";
+}
+@if (Model.TaxInvoiceTemplates.Count == 0)
+{
+    <h5 class="m-0 text-center py-3 bold">
+        No data to display
+    </h5>
+}
+else
+{
+    <div class="row text-londonsky" style="margin-top:50px; margin-left:20px; margin-right:20px;">
+        <div class="col">
+
+            <div class="row">
+                <div class="col">
+                    <img src="~/images/Clientzone/logo_alt.png" height="100" />
+                </div>
+                <div class="col text-right bold">
+                    <h3>Account Statement</h3>
+                </div>
+            </div>
+
+            <div class="row mt-20">
+                <div class="col bold">
+                    @Model.TaxInvoiceTemplates[0].RecipientName
+                </div>
+                <div class="col text-right bold" style="margin-right:20px;">
+                    @Model.TaxInvoiceTemplates[0].CustomerNo
+                </div>
+            </div>
+
+            <div class="row mt-20">
+                <div class="col">
+                    @Model.TaxInvoiceTemplates[0].RecipientAddress<br />
+                    @Model.TaxInvoiceTemplates[0].Address2<br />
+                    @Model.TaxInvoiceTemplates[0].Address3
+                </div>
+                <div class="col-md-auto text-right">
+                    <table>
+                        <tr>
+                            <td>VAT #:</td>
+                            <td style="min-width:100px;">@Model.TaxInvoiceTemplates[0].RecipientVATNumber</td>
+                        </tr>
+                        <tr>
+                            <td>Account Summary #:</td>
+                            <td>@Model.TaxInvoiceTemplates[0].RecipientReferenceNumber</td>
+                        </tr>
+                        <tr>
+                            <td>Customer #:</td>
+                            <td>@Model.TaxInvoiceTemplates[0].CustomerNo</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mt-20">
+                <div class="col bold">
+                    Billing Period: @Html.Raw(new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1).ToString("dd MMM &#39;yy")) - @Html.Raw(new DateTime(Model.ToDate.Year, Model.ToDate.Month, DateTime.DaysInMonth(Model.ToDate.Year, Model.ToDate.Month)).ToString("dd MMM &#39;yy"))
+                </div>
+                <div class="col">
+                    <table class="table table-sm table-londonsky">
+                        <tr>
+                            <th>Opening Balance</th>
+                            <th style="min-width:100px;" class="text-right">@Model.TaxInvoiceTemplates.OrderBy(p => p.Month).FirstOrDefault().OpeningBalance.ToMoney("R")</th>
+                        </tr>
+                        <tr>
+                            <td>Payments made and convenience fees charged</td>
+                            <td class="text-right">@Model.TaxInvoiceTemplates.Select(p => p.PaymentsReceived).Sum().ToMoney("R")</td>
+                        </tr>
+                        <tr>
+                            <td>Current charges</td>
+                            <td class="text-right">@((Model.TaxInvoiceTemplates.Select(p => p.Total).Sum() * 1.15m).ToMoney("R"))</td>
+                        </tr>
+                        @{
+                            decimal balance = Model.TaxInvoiceTemplates.OrderBy(p => p.Month).FirstOrDefault().OpeningBalance;
+                        }
+                        @foreach (var item in Model.TaxInvoiceTemplates)
+                        {
+                            balance = balance - ((Math.Round(item.Total, 2) * 1.15m) * -1.0m);
+                            @foreach (var payment in item.LedgerItems)
+                            {
+                                balance = balance - (Math.Round(payment.TotalExVAT, 2) * -1.0m);
+                            }
+                        }
+                        <tr>
+                            <td>Closing balance</td>
+                            <td class="text-right">@balance.ToMoney("R")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mt-20">
+                <div class="col">
+                    @{
+                        balance = Model.TaxInvoiceTemplates.OrderBy(p => p.Month).FirstOrDefault().OpeningBalance;
+                    }
+                    <table class="table table-sm table-londonsky table-striped">
+                        <tr>
+                            <th class="text-center">Date</th>
+                            <th class="text-center">Ref no</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Debit</th>
+                            <th class="text-center">Credit</th>
+                            <th class="text-center">Balance</th>
+                        </tr>
+                        <tr>
+                            <td class="text-left">@(new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1).ToDateShort())</td>
+                            <td class="text-left"></td>
+                            <td class="text-left">Opening balance</td>
+                            <td class="text-left"></td>
+                            <td class="text-left"></td>
+                            <td class="text-right">@balance.ToMoney("R")</td>
+                        </tr>
+                        @foreach (var item in Model.TaxInvoiceTemplates)
+                        {
+                            @foreach (var payment in item.LedgerItems.OrderBy(p => p.Date))
+                            {
+                                balance = balance - (Math.Round(payment.TotalExVAT, 2) * -1.0m);
+                                var paymentAmount = (payment.TotalExVAT * -1.0m);
+                                <tr>
+                                    <td class="text-left">@payment.Date.ToDateShort()</td>
+                                    <td class="text-left">@payment.Description.Split(':')[0]</td>
+                                    <td class="text-left">@payment.Description</td>
+                                    @if (paymentAmount > 0)
+                                    {
+                                        <td class="text-right">@(paymentAmount.ToMoney("R"))</td>
+                                        <td class="text-left"></td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-left"></td>
+                                        <td class="text-right">@((paymentAmount * -1.0m).ToMoney("R"))</td>
+                                    }
+                                    <td class="text-right">@balance.ToMoney("R")</td>
+                                </tr>
+                            }
+                            balance = balance - ((Math.Round(item.Total, 2) * 1.15m) * -1.0m);
+                            <tr>
+                                <td class="text-left">@((new DateTime(item.Month.Year, item.Month.Month, DateTime.DaysInMonth(item.Month.Year, item.Month.Month))).ToDateShort())</td>
+                                <td class="text-left">@item.InvoiceNo</td>
+                                <td class="text-left">Invoice</td>
+                                <td class="text-right">@(((item.Total * 1.15m) * -1.0m).ToMoney("R"))</td>
+                                <td class="text-left"></td>
+                                <td class="text-right">@balance.ToMoney("R")</td>
+                            </tr>
+                        }
+
+                        @*                        <tr class="bg-white table-borderless bold">
+                            <td colspan="7" class="text-right">TOTAL (EXCL. VAT)</td>
+                            <td class="text-right">@((Model.TaxInvoiceTemplate.Total * -1.0m).ToMoney("R"))</td>
+                            </tr>
+                            <tr class="bg-white table-borderless">
+                            <td colspan="7" class="text-right">VAT</td>
+                            <td class="text-right">@(((Model.TaxInvoiceTemplate.Total * 0.15m) * -1.0m).ToMoney("R"))</td>
+                            </tr>
+                            <tr class="table-borderless">
+                            <th colspan="7" class="text-right">TOTAL (INCL. VAT)</th>
+                            <th class="text-right">@(((Model.TaxInvoiceTemplate.Total * 1.15m) * -1.0m).ToMoney("R"))</th>
+                            </tr>
+
+                        *@
+                    </table>
+                </div>
+            </div>
+            @if (Model.ShowingPrintView)
+            {
+                <div class="row" style="margin-top: 40px;">
+                    <div class="col-md-auto text-plumber" style="font-size:15px;">
+                        <div class="row">
+                            <div class="col-12 bold text-nowrap" style="font-size:17px;">
+                                @Model.TaxInvoiceTemplates[0].SupplierName @Model.TaxInvoiceTemplates[0].SupplierVATNumber
+                            </div>
+                        </div>
+
+                        <div class="row mt-1">
+                            <div class="col-12 text-nowrap d-flex align-items-center">
+                                <img src="~/images/icons/address.png" height="20" style="margin-right:5px;" /> @Model.TaxInvoiceTemplates[0].SupplierAddress
+                            </div>
+                        </div>
+
+                        <div class="row mt-1">
+                            <div class="col-md-auto text-nowrap d-flex align-items-center">
+                                <img src="~/images/icons/Postal.png" height="20" style="margin-right:5px;" /> @Model.TaxInvoiceTemplates[0].SupplierPostal
+                            </div>
+                            <div class="col-md-auto text-nowrap d-flex align-items-center ps-3">
+                                <img src="~/images/icons/telephone.png" height="20" style="margin-right:5px;" /> @Model.TaxInvoiceTemplates[0].SupplierPhone
+                            </div>
+                            <div class="col-md-12 text-nowrap mt-1 d-flex align-items-center">
+                                <img src="~/images/icons/web.png" height="20" style="margin-right:5px;" />
+                                <a class="text-plumber SemiBold" href="http://@Model.TaxInvoiceTemplates[0].SupplierURL">
+                                    @Model.TaxInvoiceTemplates[0].SupplierURL
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mt-20">
+                            <img src="~/images/Clientzone/PDF_FooterIcon.png" height="64px" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="banking_details">
+                            <div class="h4">Banking details</div>
+                            <div><label>Bank name:</label>@Model.TaxInvoiceTemplates[0].NetcashBankName</div>
+                            <div><label>Account no:</label>@Model.TaxInvoiceTemplates[0].NetcashBankAccountNo</div>
+                            <div><label>Account type:</label>@Model.TaxInvoiceTemplates[0].NetcashBankAccountType</div>
+                            <div><label>Branch code:</label>@Model.TaxInvoiceTemplates[0].NetcashBankBranchCode</div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    .BillingDataView {
+                        margin: 42px 22px 15px;
+                    }
+                </style>
+            }
+        </div>
+    </div>
+}

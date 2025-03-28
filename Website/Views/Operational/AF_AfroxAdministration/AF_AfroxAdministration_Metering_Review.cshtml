@@ -1,0 +1,543 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> _userManager;
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_Metering_ReviewModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_Metering_Review.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerMeterSerial}";
+}
+<style>
+    /* Always set the map height explicitly to define the size of the div
+                                    * element that contains the map. */
+    #map {
+        height: 100%;
+        background-color: lightblue;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col text-left">
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-12">
+                            Note:<br />
+                            To convert this view into a PDF document, select "Ctrl + P".<br />
+                            Select the "Print to PDF" option.
+                        </div>
+                    </div>
+
+                </div>
+                @foreach (var cdItem in Model.CustomersDetails)
+                {
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col text-left">
+                                <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details_VerificationUpload/@cdItem.ID" class="btn btn-sm btn-outline-primary-sm" title="Upload"><i class="fas fa-upload"></i>&nbsp;Upload Attachment</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row mt-3">
+                                    <div class="col">Time Of Report</div>
+                                    <div class="col">@DateTime.Now.ToDateAndTimeShort()</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Site Name</div>
+                                    <div class="col">@operationalProvider.CompanyName</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Meter Point</div>
+                                    <div class="col">@operationalProvider.CustomerMeterName</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Device Serial No</div>
+                                    <div class="col">@operationalProvider.CustomerMeterSerial</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Utility Type</div>
+                                    <div class="col">@operationalProvider.CustomerMeterDeviceType</div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col">Customer Trading Name</div>
+                                    <div class="col">@cdItem.CustomerTradingName</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">SAP Customer Acc No</div>
+                                    <div class="col">@cdItem.CustomerAccNo</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Building GPS Location</div>
+                                    <div class="col">@cdItem.BuildingLat,@cdItem.BuildingLong</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">System GPS Location</div>
+                                    <div class="col">@cdItem.SystemLat,@cdItem.SystemLong</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Metering GPS Location</div>
+                                    <div class="col">
+                                        @(cdItem.MeteringLat),@(cdItem.MeteringLong)(@cdItem.MeteringLatLongDate.ToDateAndTimeShort() - @cdItem.MeteringLatLongUsername)
+                                        <br />
+                                        <a href="#" id="updateLatLong" class="btn btn-sm btn-outline-primary-sm">Update with current location</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">Reviewed</div>
+                                    <div class="col">
+                                        @{
+                                            string reviewClass = "";
+                                            if (cdItem.TotalCount == cdItem.ReviewedCount)
+                                            {
+                                                reviewClass = "text-green";
+                                            }
+                                            else
+                                            {
+                                                reviewClass = "text-red";
+                                            }
+                                        }
+                                        <div class="@reviewClass">@(cdItem.ReviewedCount)/@(cdItem.TotalCount)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div id="map" style="height:600px"></div>
+                                <div style="clear:both; height:50px"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        @foreach (var cdaItem in cdItem.CustomersDetails_Attachments)
+                        {
+                            <div class="row">
+                                <div class="col-12">
+                                    <hr />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row mt-3">
+                                        <div class="col">Created By</div>
+                                        <div class="col">@cdaItem.Username - @cdaItem.DateCreated.ToDateAndTimeShort()</div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col">Reviewed By</div>
+                                        <div class="col">
+                                            @if (cdaItem.ReviewedDate.HasValue)
+                                            {
+                                                <span>@cdaItem.ReviewedByUsername - @cdaItem.ReviewedDate.ToDateAndTimeShort()</span>
+                                            }
+                                            else
+                                            {
+                                                <a href="#" onclick="UpdateReviewedBy('@cdaItem.ID');" class="btn btn-sm btn-outline-primary-sm">Update Reviewed By</a>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">Comments</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col"><textarea id="addComment_@cdaItem.ID" class="form-control"></textarea></div>
+                                        <div class="col"><a href="#" onclick="AddComment('@cdaItem.ID');" class="btn btn-sm btn-outline-primary-sm">Add Comment</a></div>
+                                    </div>
+                                    @foreach (var comment in cdaItem.CustomersDetails_Attachments_Comments)
+                                    {
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <hr />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">@comment.Comment</div>
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col">@comment.DateCreated.ToDateAndTimeShort()</div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col">@comment.Username</div>
+                                                </div>
+                                            </div>
+                                            @if (_userManager.GetUserId(User) == comment.UserID)
+                                            {
+                                                <div class="col">
+                                                    <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review_DeleteComment/@comment.ID?R=R" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col text-center">
+                                    <div class="row">
+                                        <div class="col">
+                                            <img src="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details_VerificationDownload/@cdaItem.ID" style="max-height:300px;" />
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col">
+                                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details_VerificationDownload/@cdaItem.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm">Download</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col text-center">
+                                    <div class="row">
+                                        <div class="col">
+                                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details_VerificationDelete/@cdaItem.ID?R=R" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({
+            key: "AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk",
+            v: "weekly",
+        });
+    </script>
+    <script>
+        function AddComment(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review_AddComment/" + ID,
+                {
+                    addComment: $("#addComment_" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+        function UpdateReviewedBy(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review_UpdateReviewedBy/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+        async function initMap() {
+            //var mapOptions = {
+            //    zoom: 12,
+            //    center: new google.maps.LatLng(-25.8092082, 28.2957713),
+            //    mapTypeId: 'roadmap'
+            //};
+            //var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            const { Map } = await google.maps.importLibrary("maps");
+            map = new Map(document.getElementById("map"), {
+                center: { lat: -25.8092082, lng: 28.2957713 },
+                zoom: 15,
+            });
+
+            infoWindow = new google.maps.InfoWindow();
+            const updateLatLongButton = document.getElementById("updateLatLong");
+
+            //map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+            updateLatLongButton.addEventListener("click", () => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            $("#loaderContent").css("display", "block");
+
+                            $.post("/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review_UpdateLocation",
+                                {
+                                    latitude: position.coords.latitude,
+                                    longitude: position.coords.longitude,
+                                })
+                                .done(function (data) {
+                                    $("#loaderContent").css("display", "none");
+                                    if (data == "true") {
+                                        alert("Success");
+                                        $("#loaderContent").css("display", "block");
+                                        window.location.reload();
+                                    }
+                                    else {
+                                        alert("There was a problem completing requested action.");
+                                    }
+                                });
+
+                        },
+                        () => {
+                            handleLocationError(true, infoWindow, map.getCenter());
+                        }
+                    );
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false, infoWindow, map.getCenter());
+                }
+            });
+
+            if ("@(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].BuildingLat.HasValue)" == "True") {
+
+                const BuildingButton = document.createElement("button");
+
+                BuildingButton.textContent = "Building Location";
+                BuildingButton.classList.add("custom-map-control-button");
+                BuildingButton.classList.add("btn");
+                BuildingButton.classList.add("btn-sm");
+                BuildingButton.classList.add("btn-outline");
+                map.controls[google.maps.ControlPosition.TOP_CENTER].push(BuildingButton);
+                BuildingButton.addEventListener("click", () => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const pos = {
+                                    lat: @(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].BuildingLat.HasValue ? Model.CustomersDetails[0].BuildingLat.ToString() : "0"),
+                                    lng: @(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].BuildingLong.HasValue ? Model.CustomersDetails[0].BuildingLong.ToString() : "0"),
+                                };
+
+                                infoWindow.setPosition(pos);
+                                infoWindow.setContent("Building Location");
+                                infoWindow.open(map);
+                                map.setCenter(pos);
+                            },
+                            () => {
+                                handleLocationError(true, infoWindow, map.getCenter());
+                            }
+                        );
+                    } else {
+                        // Browser doesn't support Geolocation
+                        handleLocationError(false, infoWindow, map.getCenter());
+                    }
+                });
+
+            }
+
+            if ("@(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].SystemLat.HasValue)" == "True") {
+
+                const SystemButton = document.createElement("button");
+
+                SystemButton.textContent = "System Location";
+                SystemButton.classList.add("custom-map-control-button");
+                SystemButton.classList.add("btn");
+                SystemButton.classList.add("btn-sm");
+                SystemButton.classList.add("btn-outline");
+                map.controls[google.maps.ControlPosition.TOP_CENTER].push(SystemButton);
+                SystemButton.addEventListener("click", () => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const pos = {
+                                    lat: @(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].SystemLat.HasValue ? Model.CustomersDetails[0].SystemLat.ToString() : "0"),
+                                    lng: @(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].SystemLong.HasValue ? Model.CustomersDetails[0].SystemLong.ToString() : "0"),
+                                };
+
+                                infoWindow.setPosition(pos);
+                                infoWindow.setContent("System Location");
+                                infoWindow.open(map);
+                                map.setCenter(pos);
+                            },
+                            () => {
+                                handleLocationError(true, infoWindow, map.getCenter());
+                            }
+                        );
+                    } else {
+                        // Browser doesn't support Geolocation
+                        handleLocationError(false, infoWindow, map.getCenter());
+                    }
+                });
+
+            }
+
+            if ("@(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].MeteringLat.HasValue)" == "True") {
+
+                const meteringButton = document.createElement("button");
+
+                meteringButton.textContent = "Metering Point";
+                meteringButton.classList.add("custom-map-control-button");
+                meteringButton.classList.add("btn");
+                meteringButton.classList.add("btn-sm");
+                meteringButton.classList.add("btn-outline");
+                map.controls[google.maps.ControlPosition.TOP_CENTER].push(meteringButton);
+                meteringButton.addEventListener("click", () => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const pos = {
+                                    lat: @(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].MeteringLat.HasValue ? Model.CustomersDetails[0].MeteringLat.ToString() : "0"),
+                                    lng: @(Model.CustomersDetails.Count != 0 && Model.CustomersDetails[0].MeteringLong.HasValue ? Model.CustomersDetails[0].MeteringLong.ToString() : "0"),
+                                };
+
+                                infoWindow.setPosition(pos);
+                                infoWindow.setContent("Metering Point");
+                                infoWindow.open(map);
+                                map.setCenter(pos);
+                            },
+                            () => {
+                                handleLocationError(true, infoWindow, map.getCenter());
+                            }
+                        );
+                    } else {
+                        // Browser doesn't support Geolocation
+                        handleLocationError(false, infoWindow, map.getCenter());
+                    }
+                });
+
+            }
+
+            const locationButton = document.createElement("button");
+
+            locationButton.textContent = "Your location";
+            locationButton.classList.add("custom-map-control-button");
+            locationButton.classList.add("btn");
+            locationButton.classList.add("btn-sm");
+            locationButton.classList.add("btn-outline");
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+            locationButton.addEventListener("click", () => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const pos = {
+                                lat: position.coords.latitude,
+
+                                lng: position.coords.longitude,
+                            };
+
+                            infoWindow.setPosition(pos);
+                            infoWindow.setContent("Your location");
+                            infoWindow.open(map);
+                            map.setCenter(pos);
+                        },
+                        () => {
+                            handleLocationError(true, infoWindow, map.getCenter());
+                        }
+                    );
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false, infoWindow, map.getCenter());
+                }
+            });
+
+            function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+                infoWindow.setPosition(pos);
+                infoWindow.setContent(
+                    browserHasGeolocation
+                        ? "Error: The Geolocation service failed."
+                        : "Error: Your browser doesn't support geolocation."
+                );
+                infoWindow.open(map);
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+
+                        infoWindow.setPosition(pos);
+                        infoWindow.setContent("Your location");
+                        infoWindow.open(map);
+                        map.setCenter(pos);
+                    },
+                    () => {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                    }
+                );
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+            $.ajax({
+                type: "GET",
+                async: true,
+                url: "/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review_Markers",
+                dataType: "xml",
+                success:
+                    function (xml) {
+                        var markers = xml.documentElement.getElementsByTagName("Marker");
+
+                        for (var i = 0; i < markers.length; i++) {
+                            var lat = markers[i].getElementsByTagName('Lat')[0].innerHTML;
+                            var long = markers[i].getElementsByTagName('Long')[0].innerHTML
+                            var name = markers[i].getElementsByTagName('Name')[0].innerHTML;
+                            var latLng = new google.maps.LatLng(lat, long);
+                            var marker = new google.maps.Marker({
+                                position: latLng,
+                                map: map,
+                                label: name
+                            });
+                            //const markerButton = document.createElement("button");
+
+                            //markerButton.textContent = name;
+                            //markerButton.classList.add("custom-map-control-button");
+                            //markerButton.classList.add("btn");
+                            //markerButton.classList.add("btn-sm");
+                            //markerButton.classList.add("btn-primary-sm");
+                            //map.controls[google.maps.ControlPosition.TOP_CENTER].push(markerButton);
+                            //markerButton.addEventListener("click", () => {
+                            //    infoWindow.setPosition(latLng);
+                            //    infoWindow.setContent(name);
+                            //    infoWindow.open(map);
+                            //    map.setCenter(latLng);
+                            //});
+                            //map.setCenter(latLng);
+
+
+                        }
+                    }
+            });
+
+        }
+        initMap();
+    </script>
+}

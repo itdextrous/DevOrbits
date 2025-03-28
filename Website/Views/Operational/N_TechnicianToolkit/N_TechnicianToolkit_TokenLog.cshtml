@@ -1,0 +1,232 @@
+@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_TokenLogModel
+@{
+    ViewData["Title"] = "Technician Toolkit - Token Log";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select a company to start...</span>
+        }
+        else
+        {
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-body">
+                    <div>
+                        <form asp-action="N_TechnicianToolkit_TokenLog" enctype="multipart/form-data">
+                            <div class="row col-12"><label asp-for="CustomerNumber" class="control-label"></label>:</div>
+                            <div class="row col-12">
+                                <input class="form-group" style="width:90%;" id="CustomerNumber_Search" asp-for="CustomerNumber" />
+                                <span asp-validation-for="CustomerNumber" class="text-red"></span>
+                            </div>
+                            <div class="row col-12">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</button>
+                                &nbsp;
+                                <a href="/operational/N_TechnicianToolkit/N_TechnicianToolkit_TokenLog" class="btn btn-outline-primary-sm"><i class="fas fa-plus"></i>&nbsp;Show All</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-responsive-xl">
+                <thead>
+                    <tr>
+                        <th scope="col">Customer No</th>
+                        <th scope="col">Date Requested</th>
+                        <th scope="col">Serial No</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Token</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Token Completed</th>
+                        <th scope="col">Connection Completed</th>
+                        <th scope="col">Balance</th>
+                        <th scope="col">Contactor State</th>
+                        <th scope="col">Meter Status</th>
+                        <th scope="col">Remaining Credit</th>
+                        @*<th scope="col">CompanyName</th>*@
+                        <th scope="col">Meter Status Time</th>
+                        <th scope="col">Token Type</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Log_Tokens)
+                    {
+                        string tokenType = "First Time";
+                        if (entry.IsRetry)
+                        {
+                            tokenType = "Auto Retry";
+                        }
+                        if (entry.IsResent)
+                        {
+                            tokenType = "Manual Resend";
+                        }
+                        string contactorState = entry.ContactorState;
+                        string meterStatus = "";
+                        if (!string.IsNullOrEmpty(entry.MeterStatus))
+                        {
+                            meterStatus = entry.MeterStatus;
+                        }
+                        if (!string.IsNullOrEmpty(entry.ContactorState))
+                        {
+                            if (entry.ContactorState.Contains("- 1"))
+                            {
+                                contactorState = "Connected";
+                            }
+                            else if (entry.ContactorState.Contains("- 0"))
+                            {
+                                contactorState = "Disconnected";
+                            }
+                            try
+                            {
+                                switch (Convert.ToInt32(entry.ContactorState))
+                                {
+                                    case 1:
+                                        contactorState = "Connected";
+                                        break;
+                                    case 0:
+                                        contactorState = "Disconnected";
+                                        break;
+                                }
+                            }
+                            catch
+                            {
+                            }
+                        }
+                        <tr>
+                            <td scope="row">@entry.CustomerNo</td>
+                            <td scope="row">@entry.DateRequested.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td scope="row">@entry.SerialNo</td>
+                            @switch (entry.Type)
+                            {
+                                default:
+                                    <td scope="row">@entry.Type</td>
+                                    break;
+                                case "set-postpaid":
+                                    <td scope="row">Connect</td>
+                                    break;
+                                case "set-prepaid":
+                                    <td scope="row">Disconnect</td>
+                                    break;
+                                case "amount":
+                                    <td scope="row">kWh Units</td>
+                                    break;
+                            }
+
+                            @if (!string.IsNullOrEmpty(entry.Token))
+                            {
+                                @*<td scope="row"><a href="#" onclick="alert('@entry.Token');">Show</a></td>*@
+                                <td scope="row">@entry.Token</td>
+                            }
+                            else
+                            {
+                                <td scope="row"></td>
+                            }
+                            <td scope="row">@entry.Source</td>
+                            @if (entry.DateTokenCompleted.HasValue)
+                            {
+                                <td scope="row">@entry.DateTokenCompleted.Value.ToString("yyyy-MM-dd HH:mm")</td>
+                            }
+                            else
+                            {
+                                <td scope="row">FAILED</td>
+                            }
+                            @if (entry.DateConnCompleted.HasValue)
+                            {
+                                <td scope="row">@entry.DateConnCompleted.Value.ToString("yyyy-MM-dd HH:mm")</td>
+                            }
+                            else
+                            {
+                                <td scope="row">FAILED</td>
+                            }
+                            @*<td scope="row">@entry.CompanyName</td>*@
+                            <td scope="row">@entry.Balance.ToString("N")</td>
+                            <td scope="row" class="@contactorState.ToUpper()">@contactorState</td>
+                            <td scope="row" class="@meterStatus.ToUpper()">@meterStatus</td>
+                            <td scope="row">@entry.RemainingCredit</td>
+                            <td scope="row">@entry.MeterStatusTime.ToDateAndTimeShort()</td>
+                            @*@if (entry.ConnID.HasValue)
+                                {
+                                    <td scope="row" id="td_@entry.ConnID.Value">
+                                        <div class="text-orange">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td scope="row"></td>
+                                }*@
+                            <td scope="row">@tokenType</td>
+                            <td scope="row"><a class="btn" href="@entry.ResendURL">Resend</a></td>
+                            <td scope="row">
+                                @if (!string.IsNullOrEmpty(entry.SerialNo))
+                                {
+                                    <a href="/operational/changeActiveMeter/@entry.SerialNo?R=/operational/customer/Customer_Billing" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-alt"></i>&nbsp;Billing</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (Model.TotalEntries > 10)
+            {
+                var prevDisabled = !Model.Log_Tokens.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.Log_Tokens.HasNextPage ? "disabled" : "";
+                <div width="" 100%">
+                    <div style="float: left;">
+                        <a asp-route-pageIndex="@(Model.Log_Tokens.PageIndex - 1)"
+                           class="btn btn-default @prevDisabled">
+                            Previous
+                        </a>
+                    </div>
+                    <div style="float: right;">
+                        <a align="left" asp-route-pageIndex="@(Model.Log_Tokens.PageIndex + 1)"
+                           class="btn btn-default @nextDisabled">
+                            Next
+                        </a>
+                    </div>
+                </div>
+            }
+
+        }
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CustomerNumber_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/N_TechnicianToolkit/N_TechnicianToolkit_TokenLog/CustomerSearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+
+            var tokenLogItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Log_Tokens.Where(p => p.ConnID.HasValue).Select(p => new { p.ConnID, p.SerialNo }).ToList())));
+            $(tokenLogItems).each(function() {
+                $("#td_" + this.ConnID).load('@(Url.Content("/operational/N_TechnicianToolkit/N_TechnicianToolkit_TokenLog_GetDeviceResponseTime/"))' + this.SerialNo, function() {
+                    });
+            });
+
+        })
+
+    </script>
+}

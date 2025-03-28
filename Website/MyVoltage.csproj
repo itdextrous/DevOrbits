@@ -1,0 +1,112 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<UserSecretsId>aspnet-MyVoltage-6735D3A2-3462-4860-8290-16C60B07AC9D</UserSecretsId>
+		<AssemblyName>MyVoltage</AssemblyName>
+		<RootNamespace>MyVoltage</RootNamespace>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>0</WarningLevel>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Jobs\NotificationsUpdater.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="Views\Operational\C02_SageLedgerReport\C02_SageLedgerReport_ConsolidatedTB.cshtml" />
+		<Content Remove="Views\Operational\C02_SageLedgerReport\C02_SageLedgerReport_Daily.cshtml" />
+		<Content Remove="Views\Operational\C02_SageLedgerReport\C02_SageLedgerReport_GLAuditUpdate.cshtml" />
+		<Content Remove="Views\Operational\C02_SageLedgerReport\C02_SageLedgerReport_GLAuditView.cshtml" />
+		<Content Remove="wwwroot\lib\email\balance_notice.txt" />
+		<Content Remove="wwwroot\lib\email\disconnection_notice.txt" />
+		<Content Remove="wwwroot\lib\email\noaccess_notice.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.3.4" />
+		<PackageReference Include="Azure.Storage.Files.Shares" Version="12.6.0" />
+		<PackageReference Include="ClosedXML" Version="0.95.2" />
+		<PackageReference Include="ClosedXML.Report" Version="0.2.0" />
+		<PackageReference Include="EPPlus" Version="4.5.1" />
+		<PackageReference Include="GemBox.Spreadsheet" Version="49.0.1017" />
+		<PackageReference Include="Hangfire" Version="1.7.33" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.7.33" />
+		<PackageReference Include="Hangfire.Core" Version="1.7.33" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.7.33" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.10" />
+		<PackageReference Include="Microsoft.Data.Services.Client" Version="5.8.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.2" />
+		<PackageReference Include="Microsoft.OpenApi" Version="1.3.2" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.4" PrivateAssets="All" />
+		<PackageReference Include="morelinq" Version="3.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="OfficeOpenXml.Core.ExcelPackage" Version="1.0.0" />
+		<PackageReference Include="RestSharp" Version="106.3.1" />
+		<PackageReference Include="Select.Pdf.NetCore" Version="22.1.0" />
+		<PackageReference Include="Serilog" Version="2.10.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+		<PackageReference Include="System.ServiceModel.Duplex" Version="4.9.0" />
+		<PackageReference Include="System.ServiceModel.Http" Version="4.9.0" />
+		<PackageReference Include="System.ServiceModel.NetTcp" Version="4.9.0" />
+		<PackageReference Include="System.ServiceModel.Security" Version="4.9.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.1" />
+		<DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
+		<DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<WCFMetadata Include="Connected Services" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="Views\Account\EditNotificationsSettings.cshtml">
+			<Pack>$(IncludeRazorContentInPack)</Pack>
+		</Content>
+		<Content Update="Views\Meter\Connector.cshtml">
+			<Pack>$(IncludeRazorContentInPack)</Pack>
+		</Content>
+		<Content Update="Views\Meter\OdoReadings.cshtml">
+			<Pack>$(IncludeRazorContentInPack)</Pack>
+		</Content>
+		<Content Update="Views\Meter\CreditControlView.cshtml">
+			<Pack>$(IncludeRazorContentInPack)</Pack>
+		</Content>
+		<Content Update="Views\Meter\Administration.cshtml">
+			<Pack>$(IncludeRazorContentInPack)</Pack>
+		</Content>
+		<Content Update="wwwroot\css\template.css">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Controllers\Operational\A08_AccountPayments\" />
+		<Folder Include="Models\OperationalModels\A08_AccountPayments\" />
+		<Folder Include="wwwroot\logs\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="wwwroot\lib\email\noaccess_notice.txt">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="wwwroot\lib\email\balance_notice.txt">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="wwwroot\lib\email\disconnection_notice.txt">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

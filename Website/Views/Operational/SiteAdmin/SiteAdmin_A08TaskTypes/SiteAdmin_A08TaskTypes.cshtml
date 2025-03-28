@@ -1,0 +1,251 @@
+﻿@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_A08TaskTypesModels.SiteAdmin_A08_Task_TypesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.SiteAdmin_A08TaskTypes.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_A08TaskTypes/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Task Type</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+
+@*                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Department" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Department", Model.Department, new { @class = "form-control" })
+                        <span asp-validation-for="Department" class="text-red"></span>
+                    </div>
+                </div>
+
+*@                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="TaskClassification" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("TaskClassification", Model.TaskClassification, new { @class = "form-control" })
+                        <span asp-validation-for="TaskClassification" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="SecureAreaGroupID" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("SecureAreaGroupID", Model.SecureAreaGroupID, new { @class = "form-control" })
+                        <span asp-validation-for="SecureAreaGroupID" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Company" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "form-control" })
+                        <span asp-validation-for="Company" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ResponsibleUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                        <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ReportingToUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "form-control" })
+                        <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Priority" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Priority", Model.Priority, new { @class = "form-control" })
+                        <span asp-validation-for="Priority" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row col-12">
+
+    <table id="myTable" class="display compact table table-sm" style="width:100%">
+        <thead>
+            <tr>
+                <th scope="col">Identifier</th>
+                <th scope="col">Workflow Group</th>
+                <th scope="col">Department</th>
+                <th scope="col">Pillar</th>
+                <th scope="col">Classification</th>
+                <th scope="col">Heading</th>
+                <th scope="col">Description</th>
+                <th scope="col">Responsible Person</th>
+                <th scope="col">Reporting To Person</th>
+                <th scope="col">Previous Create Tasks Date</th>
+                <th scope="col">Next Create Tasks Date</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status Group</th>
+                <th scope="col">Default Status</th>
+                <th scope="col">Linked Secure Area</th>
+                <th scope="col">Create Individual Flags For Companies Linked</th>
+                <th scope="col" style="min-width:500px;">Companies</th>
+                <th scope="col">Schedules</th>
+                <th scope="col" class="text-nowrap text-right">Workdays Required to Clear<br />(Mon-Fri)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SiteAdmin_A08TaskTypesItems)
+            {
+                string desc = "";
+                @foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                {
+                    foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                    {
+                        if (item.LinkedSecureAreaID == ((int)dsa.Item1))
+                        {
+                            desc = $"<span class=\"\">{psa.Key.Item3} - {dsa.Item3}</span>";
+                            break;
+                        }
+                    }
+                }
+                string systemTask = "Manual";
+                DateTime? nextRunDate = null;
+                if (item.A08_Task_Type_Frequencies.Count > 0)
+                {
+                    nextRunDate = item.A08_Task_Type_Frequencies.Select(p => p.NextRunDate).Max();
+                    systemTask = "System";
+                }
+                string rowClass = "";
+                if (item.IsDeleted.HasValue && item.IsDeleted.Value)
+                {
+                    rowClass = "table-danger";
+                }
+                <tr style="cursor:pointer;" title="View / Edit" onclick="RedirectToEditFlag('@item.ID');" class="@Html.Raw(rowClass)">
+                    <td scope="col">@item.Identifier</td>
+                    <td scope="col">@item.WorkflowGroupName</td>
+                    <td scope="col">@item.BusinessDepartmentName</td>
+                    <td scope="col">@item.BusinessPillarName</td>
+                    <td scope="col">@item.TaskClassification.GetDescription()</td>
+                    <td scope="col">@item.Heading</td>
+                    <td scope="col">@item.Description</td>
+                    <td scope="col">@item.ResponsibleUsername</td>
+                    <td scope="col">@item.ReportingToUserUsername</td>
+                    <td scope="col">@item.PreviousRunDate.ToDateShort()</td>
+                    <td scope="col" class="text-nowrap">@nextRunDate.ToDateShort()</td>
+                    <td scope="col">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "")</td>
+                    <td scope="col">@(item.SiteAdmin_StatusGroup != null ? item.SiteAdmin_StatusGroup.StatusGroupName : "[NONE]")</td>
+                    <td scope="col">@item.SiteAdmin_Status</td>
+                    <td scope="col">@(Html.Raw(desc))</td>
+                    <td scope="col">@(item.CreateIndividualFlagsForCompaniesLinked.ToBoolean())</td>
+                    <td scope="col">
+                        @if (item.CreateIndividualFlagsForCompaniesLinked)
+                        {
+                            @if (item.A08_Task_Type_Companies.Count > 0)
+                            {
+                                bool isFirst = true;
+                                foreach (var companyItem in item.A08_Task_Type_Companies)
+                                {
+                                    <text>@opProv.Companies.Where(p => p.CompanyID == companyItem.CompanyID).SingleOrDefault().Name</text>
+                                    @if (!isFirst)
+                                    {
+                                        <text>&nbsp;/&nbsp;</text>
+                                    }
+                                    @if (isFirst)
+                                    {
+                                        isFirst = false;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-red font-weight-bold">NONE</span>
+                            }
+                        }
+                        else
+                        {
+                            <span>ALL COMPANIES</span>
+                        }
+                    </td>
+                    <td scope="col" class="text-nowrap">
+                        @if (item.A08_Task_Type_Frequencies.Count > 0)
+                        {
+                            foreach (var freqItem in item.A08_Task_Type_Frequencies)
+                            {
+                                <span>@freqItem.Frequency.GetDescription() @(freqItem.Frequency == MyVoltage.Data.A08_Task_Type_Frequency.FrequencyEnum.OnceOff ? $"{freqItem.OneTimeExecuteDate.ToDateShort()}" : "")</span><br />
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-red font-weight-bold">NONE</span>
+                        }
+                    </td>
+                    <td scope="col">@item.MinRequiredToClear</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.js"></script>
+    <script>
+        new DataTable('#myTable', {
+            lengthMenu: [
+                [50, 100, 250, -1],
+                [50, 100, 250, 'All']
+            ]
+        });
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_A08TaskTypes?Department=' + $("#Department").val() + '&SecureAreaGroupID=' + $("#SecureAreaGroupID").val() + '&Company=' + $("#Company").val() + '&ResponsibleUser=' + $("#ResponsibleUser").val() + '&ReportingToUser=' + $("#ReportingToUser").val() + '&Priority=' + $("#Priority").val() + '&TaskClassification=' + $("#TaskClassification").val();
+        }
+        function RedirectToEditFlag(flagID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_A08TaskTypes/Edit/' + flagID;
+        }
+    </script>
+}

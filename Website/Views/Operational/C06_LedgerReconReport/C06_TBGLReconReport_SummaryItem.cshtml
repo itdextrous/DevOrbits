@@ -1,0 +1,29 @@
+@model MyVoltage.Models.OperationalModels.C06_LedgerReconReportModels.C06_TBGLReconReport_SummaryModel.C06_TBGLReconReport_SummaryItem
+@using MyVoltage.Extensions;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Convert.ToInt32(Model.Diff) < 20 && Convert.ToInt32(Model.Diff) > -20)
+    {
+        rowclass = "table-success";
+    }
+    else
+    {
+        rowclass = "table-danger";
+    }
+
+}
+<td scope="col">@Model.CompanyName</td>
+<td scope="col">@Model.ChartOfAccountsTotal.ToMoneyNoDecimal()</td>
+<td scope="col">@Model.LedgerTotal.ToMoneyNoDecimal()</td>
+<td scope="col">@Model.Diff.ToMoneyNoDecimal()</td>
+<td scope="col">@Model.DiffABS.ToMoneyNoDecimal()</td>
+<td scope="col">@Model.LatestSyncDate.ToDateAndTimeShort()</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        @*if (@Model.MetersCount == 0) {
+        $('#@Model.TableRowID').css("display", "none");
+        }*@
+    });
+</script>

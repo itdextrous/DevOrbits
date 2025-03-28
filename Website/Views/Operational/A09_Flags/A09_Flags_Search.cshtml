@@ -1,0 +1,334 @@
+@model MyVoltage.Models.OperationalModels.A09_Flags.A09_FlagsModels.A09_Flags_SearchModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A09_Flags_Search.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+
+            <div class="card-header">
+            </div>
+
+            <div class="card-body">
+
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Company" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Company" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="FlagID" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control" asp-for="FlagID" />
+                        <span asp-validation-for="FlagID" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="FlagType" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("FlagType", Model.FlagType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="FlagType" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Heading" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control" asp-for="Heading" />
+                        <span asp-validation-for="Heading" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Description" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <textarea class="form-control" asp-for="Description"></textarea>
+                        <span asp-validation-for="Description" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="LinkedTo" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control" asp-for="LinkedTo" />
+                        <span asp-validation-for="LinkedTo" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Comments" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <textarea class="form-control" asp-for="Comments"></textarea>
+                        <span asp-validation-for="Comments" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="ResponsibleUser" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="ReportingToUser" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DueDateFrom" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" asp-for="DueDateFrom" value="@(Model.DueDateFrom.ToDateShort(true))" />
+                        <span asp-validation-for="DueDateFrom" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DueDateTo" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" asp-for="DueDateTo" value="@(Model.DueDateTo.ToDateShort(true))" />
+                        <span asp-validation-for="DueDateTo" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="StatusGroup" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("StatusGroup", Model.StatusGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetStatuses();" })
+                        <span asp-validation-for="StatusGroup" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DefaultStatus" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("DefaultStatus", Model.DefaultStatus, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="DefaultStatus" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Priority" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("Priority", Model.Priority, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Priority" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="ResolvedStatusType" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("ResolvedStatusType", Model.ResolvedStatusType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ResolvedStatusType" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-2 mt-2">
+                    <div class="col-12 text-right">
+                        <a href="#" onclick="Search('', '', '', '', '', '', '', '', '', '', '', '', '', '', '');" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@if (Model.A09_Flags_TypeDetailsItems != null)
+{
+    @if (Model.A09_Flags_TypeDetailsItems.Count > 0)
+    {
+        <div class="row mb-4">
+            <div class="col">
+                <table id="myTable" class="display compact table table-sm" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="">Flag ID</th>
+                            <th scope="col" class="">Identifier</th>
+                            <th scope="col" class="">Flag Type</th>
+                            <th scope="col" class="">Level</th>
+                            <th scope="col" class="">Linked to</th>
+                            <th scope="col" class="">Company</th>
+                            <th scope="col" class="">Customer No</th>
+                            <th scope="col" class="">Reason For Flag</th>
+                            <th scope="col" class="">Last Comment</th>
+                            <th scope="col" class="">Created</th>
+                            <th scope="col" class="">Due Date</th>
+                            <th scope="col" class="">Responsible Person</th>
+                            <th scope="col" class="">Priority</th>
+                            <th scope="col" class="">Status</th>
+                            <th scope="col" class="">Last Viewed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A09_Flags_TypeDetailsItems)
+                        {
+                            string rowclass = "";
+                            if (item.Level.HasValue)
+                            {
+                                switch (item.Level.Value)
+                                {
+                                    case 5:
+                                        rowclass = "table-danger";
+                                        break;
+                                    case 4:
+                                        rowclass = "table-primary";
+                                        break;
+                                    case 3:
+                                        rowclass = "table-warning";
+                                        break;
+                                    case 2:
+                                        rowclass = "table-success";
+                                        break;
+                                    case 1:
+                                        rowclass = "table-info";
+                                        break;
+                                }
+                            }
+                            <tr class="@(item.Status.IsResolvedStatus.HasValue && item.Status.IsResolvedStatus.Value ? "table-success" : "table-danger")" title="@item.ReasonForFlag">
+                                <td scope="col" class="" title="Flag ID">
+                                    <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.FlagTypeID/@item.ID">@item.ID</a>
+                                </td>
+                                <td scope="col" title="Level">@(string.IsNullOrEmpty(item.Identifier) ? item.Identifier : item.A09_Flags_TypeItem.Identifier)</td>
+                                <td scope="col" class="">@item.A09_Flags_TypeItem.FlagTypeName</td>
+                                <td scope="col" class="">@item.Level</td>
+                                <td scope="col" class="">@item.LinkedObjectDBTableName - @item.LinkedObjectUniqueID</td>
+                                <td scope="col" class="">@item.CompanyName</td>
+                                <td scope="col" class="">@item.CustomerNo</td>
+                                <td scope="col">
+                                    @if (!string.IsNullOrEmpty(item.ReasonForFlag))
+                                    {
+                                        <i class="fas fa-question-circle fa-2x" title="@Html.Encode(item.ReasonForFlag)"></i>
+                                    }
+                                </td>
+                                <td scope="col">
+                                    @if (!string.IsNullOrEmpty(item.LatestComment))
+                                    {
+                                        <i class="fas fa-info-circle fa-2x" title="@Html.Encode(item.LatestComment)"></i>
+                                    }
+                                </td>
+                                <td scope="col" class="" title="Created @((DateTime.Now - item.Created).TotalDays.ToString("N")) days ago">@item.Created.ToDateShort()</td>
+                                <td scope="col" class="">@item.DueDate.ToDateShort()</td>
+                                <td scope="col" class="">@item.AssignedToUsername</td>
+                                <td scope="col" class="">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "Unknown")</td>
+                                <td scope="col" class="">@item.Status.ReportingName</td>
+                                <td scope="col" class="">@(item.DateLastViewed.HasValue ? $"{item.DateLastViewed} - {item.LastViewedBy}" : "")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <span>No results...</span>
+    }
+}
+@section Scripts {
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.js"></script>
+    <script>
+        new DataTable('#myTable', {
+            lengthMenu: [
+                [50, 100, 250, -1],
+                [50, 100, 250, 'All']
+            ]
+        });
+        function ChangeActiveMeterFromSearch(value) {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + value + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function Search(FlagType, Heading, Description, Comments, ResponsibleUser, ReportingToUser, DueDateFrom, DueDateTo, StatusGroup, DefaultStatus, Priority, FlagID, LinkedTo, Company, ResolvedStatusType) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = "/operational/A09_Flags/A09_Flags_Search?FlagType=" + encodeURIComponent(FlagType != '' ? FlagType : $("#FlagType").val())
+                + "&Heading=" + encodeURIComponent(Heading != '' ? Heading : $("#Heading").val())
+                + "&Description=" + encodeURIComponent(Description != '' ? Description : $("#Description").val())
+                + "&Comments=" + encodeURIComponent(Comments != '' ? Comments : $("#Comments").val())
+                + "&ResponsibleUser=" + encodeURIComponent(ResponsibleUser != '' ? ResponsibleUser : $("#ResponsibleUser").val())
+                + "&ReportingToUser=" + encodeURIComponent(ReportingToUser != '' ? ReportingToUser : $("#ReportingToUser").val())
+                + "&DueDateFrom=" + encodeURIComponent(DueDateFrom != '' ? DueDateFrom : $("#DueDateFrom").val())
+                + "&DueDateTo=" + encodeURIComponent(DueDateTo != '' ? DueDateTo : $("#DueDateTo").val())
+                + "&StatusGroup=" + encodeURIComponent(StatusGroup != '' ? StatusGroup : $("#StatusGroup").val())
+                + "&DefaultStatus=" + encodeURIComponent(DefaultStatus != '' ? DefaultStatus : $("#DefaultStatus").val())
+                + "&Priority=" + encodeURIComponent(Priority != '' ? Priority : $("#Priority").val())
+                + "&FlagID=" + encodeURIComponent(FlagID != '' ? FlagID : $("#FlagID").val())
+                + "&LinkedTo=" + encodeURIComponent(LinkedTo != '' ? LinkedTo : $("#LinkedTo").val())
+                + "&Company=" + encodeURIComponent(Company != '' ? Company : $("#Company").val())
+                + "&ResolvedStatusType=" + encodeURIComponent(ResolvedStatusType != '' ? ResolvedStatusType : $("#ResolvedStatusType").val())
+                ;
+        }
+        GetStatuses();
+        function GetStatuses() {
+            if ($("#StatusGroup").val() != '') {
+                $("#DefaultStatus").empty();
+                var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.StatusItems)));
+                $(companies).each(function () {
+                    if (this.StatusGroupID == $("#StatusGroup").val()) {
+                        if (this.ID.toString() == '@Model.DefaultStatusID') {
+                            $("#DefaultStatus").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                        }
+                        else {
+                            $("#DefaultStatus").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

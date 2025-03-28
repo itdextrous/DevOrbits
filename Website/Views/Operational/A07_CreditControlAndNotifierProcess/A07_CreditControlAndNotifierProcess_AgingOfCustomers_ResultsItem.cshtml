@@ -1,0 +1,36 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_AgingOfCustomers_ResultsModel
+@using MyVoltage.Extensions;
+@using MyVoltage.Data;
+@foreach (var item in Model.A07_CreditControlAndNotifierProcess_AgingOfCustomers_ResultsItems)
+{
+    if (item.TaxInvoiceItems.Count == 0)
+    {
+        continue;
+    }
+    <tr>
+        <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@item.ServiceAddress</td>
+        <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@item.CustomerNo</td>
+        <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@item.CustomerName</td>
+        <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@item.Contract_Start_Date.ToDateShort()</td>
+        <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@item.Contract_End_Date.ToDateShort()</td>
+        <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap border-table">@item.Occupancy</td>
+        @{
+            DateTime current = Model.FromDate;
+        }
+        @while (current <= Model.ToDate)
+        {
+            var taxItem = item.TaxInvoiceItems.Where(p => p.Month == current).SingleOrDefault();
+            <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap text-right border-table-left">@(taxItem != null ? taxItem.OpeningBalance.ToMoneyNoDecimal() : "-")</td>
+            <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.PaymentsAndFees.ToMoneyNoDecimal() : "-")</td>
+            <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.OutstandingBalance.ToMoneyNoDecimal() : "-")</td>
+            <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.CurrentMonthCharges.ToMoneyNoDecimal() : "-")</td>
+            <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.CreditNotes.ToMoneyNoDecimal() : "-")</td>
+            <td onclick="RedirectToDetails('@item.ServiceAddress', '@item.CustomerNo');" style="cursor:pointer;" scope="col" class="text-nowrap text-right border-table-right">@(taxItem != null ? taxItem.ClosingBalance.ToMoneyNoDecimal() : "-")</td>
+            current = current.AddMonths(1);
+        }
+    </tr>
+}
+<script>
+    $(document).ready(function () {
+    });
+</script>

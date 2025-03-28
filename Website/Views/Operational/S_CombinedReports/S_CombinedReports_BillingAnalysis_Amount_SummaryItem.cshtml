@@ -1,0 +1,32 @@
+@model MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_BillingAnalysis_Amount_SummaryModel.S_CombinedReports_BillingAnalysis_Amount_SummaryItem
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+@{string title = $"{Model.CompanyName}"; }
+@if (Model.FirstDate.HasValue && Model.LastDate.HasValue)
+{
+    title += $" - Calculated between {Model.FirstDate.ToDateShort()} and {Model.LastDate.ToDateShort()}";
+}
+<td scope="col">
+    @Model.CompanyName
+</td>
+<td scope="col">@Model.CustomerCount</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="Total Count - @Model.CompanyName">@Model.TotalCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="Total Amount - @Model.CompanyName">@Model.TotalAmount.ToString("N0")</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="Elec Count - @Model.CompanyName">@Model.ElecCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="Elec Amount - @Model.CompanyName">@Model.ElecAmount.ToString("N0")</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="Water Count - @Model.CompanyName">@Model.WaterCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="Water Amount - @Model.CompanyName">@Model.WaterAmount.ToString("N0")</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="Gas Count - @Model.CompanyName">@Model.GasCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="Gas Amount - @Model.CompanyName">@Model.GasAmount.ToString("N0")</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="GPS Count - @Model.CompanyName">@Model.GPSCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="GPS Amount - @Model.CompanyName">@Model.GPSAmount.ToString("N0")</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="Valve Count - @Model.CompanyName">@Model.ValveCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="Valve Amount - @Model.CompanyName">@Model.ValveAmount.ToString("N0")</td>
+<td scope="col" style="border-left: 2px solid black;" class="text-right" title="Other Count - @Model.CompanyName">@Model.OtherCount</td>
+<td scope="col" style="border-right: 2px solid black;" class="text-right" title="Other Amount - @Model.CompanyName">@Model.OtherAmount.ToString("N0")</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("title", '@title');
+        });
+</script>

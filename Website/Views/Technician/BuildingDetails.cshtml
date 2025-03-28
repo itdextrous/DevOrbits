@@ -1,0 +1,183 @@
+﻿@model MyVoltage.Models.BuildingDetailsViewModel
+@{
+    ViewData["Title"] = "Building Details";
+}
+
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+<form asp-action="BuildingDetails" enctype="multipart/form-data">
+    <div class="row mt-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card bg-primary text-white">
+                <div class="p-3">
+                    @if (!string.IsNullOrEmpty(Model.NoCustomerErrorMessage))
+                    {
+                        @Model.NoCustomerErrorMessage
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-12 form-group text-nowrap">
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingNo" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingNo
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingName
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingSkybillName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingSkybillName
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingAddress" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingAddress
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingPartnerName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingPartnerName
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingElectricityInstallDate" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingElectricityInstallDate
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingWaterInstallDate" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingWaterInstallDate
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingActiveFromDate" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingActiveFromDate
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingManagingAgent" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingManagingAgent
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingHasControlledAccess" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingHasControlledAccess
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerName1" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerName1
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerNo1" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerNo1
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerNotes1" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerNotes1
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerName2" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerName2
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerNo2" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerNo2
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerNotes2" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerNotes2
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerName3" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerName3
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerNo3" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerNo3
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BuildingCaretakerNotes3" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Model.BuildingCaretakerNotes3
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

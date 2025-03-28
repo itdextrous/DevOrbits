@@ -1,0 +1,446 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_VirtualMeters_EditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_VirtualMeters_Create.GetDescription()} - {Model.A10_VirtualMeter.SerialNumber} - Edit";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Month
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control" type="month" name="Month" id="Month" asp-for="Month" value="@(Model.Month.ToString("yyyy-MM"))" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @Html.DropDownList("ShowAllEntries", Model.ShowAllEntries, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                            &nbsp;
+                            <a href="/operational/A10_VirtualMeters/A10_VirtualMeters_Edit/@Model.A10_VirtualMeter.ID" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h4>
+                    @if (Model.A10_VirtualMeter.Device != null)
+                    {
+                        @switch ((MyVoltage.Data.DeviceType.DeviceTypeEnum)Model.A10_VirtualMeter.Device.type.id)
+                        {
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                <img src="~/images/elec-icon-s.png" />
+                                break;
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                <img src="~/images/water-icon-s.png" />
+                                break;
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                <img src="~/images/gas-icon-s.png" />
+                                break;
+                        }
+                    }
+                    @Model.A10_VirtualMeter.SkybillCustomer.Serial_No - Summary - @Model.Month.ToMonth()
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col border border-primary rounded p-2 m-2">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <h6>Skybill Customer Details:</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Company Name:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_VirtualMeter.Company.Name
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Customer No:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_VirtualMeter.SkybillCustomer.Customer_No
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Customer Name:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_VirtualMeter.SkybillCustomer.Customer_Name
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Account Type:
+                            </div>
+                            <div class="col-6">
+                                @Model.A10_VirtualMeter.SkybillCustomer.AccountType.GetDescription()
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col border border-primary rounded p-2 m-2">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <h6 title="Gateways and Devices Sync">Metering Database Details:</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Device ID Linked:
+                            </div>
+                            @if (Model.A10_VirtualMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @Model.A10_VirtualMeter.Device.id
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Serial:
+                            </div>
+                            @if (Model.A10_VirtualMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @Model.A10_VirtualMeter.Device.serial
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Name:
+                            </div>
+                            @if (Model.A10_VirtualMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @Model.A10_VirtualMeter.Device.name
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                Type:
+                            </div>
+                            @if (Model.A10_VirtualMeter.Device != null)
+                            {
+                                <div class="col-6">
+                                    @(((MyVoltage.Data.DeviceType.DeviceTypeEnum)Model.A10_VirtualMeter.Device.type.id).GetDescription())
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-6">
+                                    [NULL]
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @*<div class="col border border-primary rounded p-2 m-2" title="Odo and Latest Capture should be the same.">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h6>Latest Mirror Reading Summary:</h6>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    Latest Reading:
+                                </div>
+                                <div class="col-6 text-right">
+                                    @if (Model.LatestReading != null)
+                                    {
+                                        <span>@Model.LatestReading.VirtualOdoReading.ToReading()<br />@Model.LatestReading.TimeLogged.ToDateAndTimeShort()</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Unknown</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    Latest Odo:
+                                </div>
+                                <div class="col-6 text-right">
+                                    @if (Model.OdoReading != null)
+                                    {
+                                        string spanClass = "";
+                                        if (Model.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                        {
+                                            if (Model.OdoReading.OdometerReading != Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                            {
+                                                spanClass = "text-red font-weight-bold";
+                                            }
+                                        }
+                                        <span class="@Html.Raw(spanClass)">@Model.OdoReading.OdometerReading.ToReading()<br />@Model.OdoReading.TimeLogged.ToDateAndTimeShort()</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Unknown</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    Latest Capture:
+                                </div>
+                                <div class="col-6 text-right">
+                                    @if (Model.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                    {
+                                        string spanClass = "";
+                                        if (Model.OdoReading != null)
+                                        {
+                                            if (Model.OdoReading.OdometerReading != Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                            {
+                                                spanClass = "text-red font-weight-bold";
+                                            }
+                                        }
+
+                                        <span class="@Html.Raw(spanClass)">
+                                            @Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading.ToReading()
+                                            <br />
+                                            @Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.TimeLogged.ToDateAndTimeShort()
+                                            <br />
+                                            @(((MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes)Model.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusID).GetDescription())
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>Unknown</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>*@
+
+
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center border-table" rowspan="2">Service Address</th>
+                            <th scope="col" class="text-center border-table-spanned" colspan="3">Skybill Customer</th>
+                            <th scope="col" class="text-center border-table-spanned" colspan="2">Allocation</th>
+                            <th scope="col" class="text-center border-table-spanned" colspan="4">Virtual Device Setup</th>
+                            <th scope="col" class="text-center border-table-spanned" colspan="2">Skybill Device Setup</th>
+                            <th scope="col" class="text-center border-table" rowspan="2"></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="text-center border-table-left">Customer No</th>
+                            <th scope="col" class="text-center border-table">Customer Name</th>
+                            <th scope="col" class="text-center border-table-right">Serial</th>
+                            <th scope="col" class="text-center border-table-left">Calculation Basis</th>
+                            <th scope="col" class="text-center border-table-right">%</th>
+                            <th scope="col" class="text-center border-table-left">Device Serial No</th>
+                            <th scope="col" class="text-center border-table">Device Name</th>
+                            <th scope="col" class="text-center border-table">Virtual Device ID</th>
+                            <th scope="col" class="text-center border-table-right">Allocated %</th>
+                            <th scope="col" class="text-center border-table-left">Serial</th>
+                            <th scope="col" class="text-center border-table-right">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A10_VirtualMeter.A10_VirtualMeters_EditServiceAddresses)
+                        {
+                            string rowClass = "";
+                            if (!item.FoundNameInSkybill || !item.FoundSerialInSkybill)
+                            {
+                                rowClass = "table-danger";
+                            }
+                            else if ((item.A10_VirtualMeterCustomer != null && item.DeviceCorrectingFactor == null)
+                                || (item.DeviceCorrectingFactor != null && item.A10_VirtualMeterCustomer == null)
+                                || (item.DeviceCorrectingFactor != null && item.A10_VirtualMeterCustomer != null && Math.Round(item.DeviceCorrectingFactor.CorrectingFactor, 2) != Math.Round(item.A10_VirtualMeterCustomer.Perc, 2))
+                                )
+                            {
+                                rowClass = "table-warning";
+                            }
+                            else if (item.DeviceCorrectingFactor != null && item.A10_VirtualMeterCustomer != null && Math.Round(item.DeviceCorrectingFactor.CorrectingFactor, 2) == Math.Round(item.A10_VirtualMeterCustomer.Perc, 2))
+                            {
+                                rowClass = "table-success";
+                            }
+
+                            <tr class="@Html.Raw(rowClass)">
+                                <td scope="col" class="text-center border-table">@item.ServiceAddress</td>
+                                <td scope="col" class="text-center border-table-left text-nowrap">
+                                    @if (item.SkybillCustomers.Select(p => p.Customer_No).Distinct().Count() == 1)
+                                    {
+                                        @item.SkybillCustomers[0].Customer_No
+                                    }
+                                    else
+                                    {
+                                        @foreach (var sb in item.SkybillCustomers)
+                                        {
+                                            <span>@sb.Customer_No</span><br />
+                                        }
+                                    }
+                                </td>
+                                <td scope="col" class="text-center border-table text-nowrap">
+                                    @if (item.SkybillCustomers.Select(p => p.Customer_Name).Distinct().Count() == 1)
+                                    {
+                                        @item.SkybillCustomers[0].Customer_Name
+                                    }
+                                    else
+                                    {
+                                        @foreach (var sb in item.SkybillCustomers)
+                                        {
+                                            <span>@sb.Customer_Name</span><br />
+                                        }
+                                    }
+                                </td>
+                                <td scope="col" class="text-center border-table-right text-nowrap">
+                                    @foreach (var sb in item.SkybillCustomers)
+                                    {
+                                        <span>@sb.Serial_No</span><br />
+                                    }
+                                </td>
+                                <td scope="col" class="text-center border-table-left">
+                                    <div class="row flex-nowrap">
+                                        <div class="col">
+                                            @if (item.A10_VirtualMeterCustomer != null)
+                                            {
+                                                <input type="text" name="Quota_@item.ServiceAddress" id="Quota_@item.ServiceAddress" value="@item.A10_VirtualMeterCustomer.QuotaAmount.ToString("0.00")" />
+                                            }
+                                            else
+                                            {
+                                                <input type="text" name="Quota_@item.ServiceAddress" id="Quota_@item.ServiceAddress" value="0" />
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            <a id="targetDate_@item.ServiceAddress" href="#targetDate_@item.ServiceAddress" onclick="RedirectToUpdate('@Model.A10_VirtualMeter.ID', '@item.ServiceAddress', '@Model.Month.Year', '@Model.Month.Month');" title="Save @item.ServiceAddress" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i></a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td scope="col" class="text-center border-table-right">@(item.A10_VirtualMeterCustomer != null ? item.A10_VirtualMeterCustomer.Perc.ToString("0.00") + " %" : "")</td>
+                                <td scope="col" class="text-center border-table-left">@($"{Model.A10_VirtualMeter.SerialNumber}-{item.ServiceAddress}")</td>
+                                <td scope="col" class="text-center border-table">@($"{(Model.A10_VirtualMeter.Device != null ? Model.A10_VirtualMeter.Device.name : "")}-{item.ServiceAddress}")</td>
+                                @if (item.Device != null && item.Device != null)
+                                {
+                                    <td scope="col" class="text-center border-table">@item.Device.Id</td>
+                                }
+                                else
+                                {
+                                    <td scope="col" class="text-center border-table">[NULL]</td>
+                                }
+                                @if (item.DeviceCorrectingFactor != null)
+                                {
+                                    <td scope="col" class="text-center border-table-right">@item.DeviceCorrectingFactor.CorrectingFactor.ToString("0.00") %</td>
+                                }
+                                else
+                                {
+                                    <td scope="col" class="text-center border-table-right">[NULL]</td>
+                                }
+                                <td scope="col" class="text-center border-table-left">@(item.FoundSerialInSkybill ? $"{Model.A10_VirtualMeter.SerialNumber}-{item.ServiceAddress}" : "[NULL]")</td>
+                                <td scope="col" class="text-center border-table-right">@(item.FoundNameInSkybill ? $"{(Model.A10_VirtualMeter.Device != null ? Model.A10_VirtualMeter.Device.name : "")}-{item.ServiceAddress}" : "[NULL]")</td>
+                                <td scope="col" class="text-center border-table flex-nowrap text-nowrap">
+                                    @if (item.A10_VirtualMeterCustomer != null)
+                                    {
+                                        <a href="/operational/A10_VirtualMeters/A10_VirtualMeters_Review/@item.A10_VirtualMeterCustomer.ID" title="View @($"{Model.A10_VirtualMeter.SerialNumber}-{item.ServiceAddress}")" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-eye"></i></a>
+                                    }
+                                    &nbsp;
+                                    @if (item.A10_VirtualMeterCustomer != null && item.A10_VirtualMeterCustomer.Perc == 0)
+                                    {
+                                        <a href="/operational/A10_VirtualMeters/A10_VirtualMeters_Delete/@item.A10_VirtualMeterCustomer.ID" onclick="return confirm('Are you sure? This will delete the Virtual meter and all its readings.');" title="Delete @($"{Model.A10_VirtualMeter.SerialNumber}-{item.ServiceAddress}")" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td scope="col" class="text-center border-table"></td>
+                            <td scope="col" class="text-center border-table-left"></td>
+                            <td scope="col" class="text-center border-table"></td>
+                            <td scope="col" class="text-center border-table-right"></td>
+                            <td scope="col" class="text-center border-table-left">@Model.A10_VirtualMeter.TotalCalcBasis.ToMoney()</td>
+                            <td scope="col" class="text-center border-table-right"></td>
+                            <td scope="col" class="text-center border-table-left"></td>
+                            <td scope="col" class="text-center border-table"></td>
+                            <td scope="col" class="text-center border-table"></td>
+                            <td scope="col" class="text-center border-table-right"></td>
+                            <td scope="col" class="text-center border-table-left"></td>
+                            <td scope="col" class="text-center border-table-right"></td>
+                            <td scope="col" class="text-center border-table"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card-footer">
+
+                <div class="row mb-2 mt-2">
+                    <div class="col">
+                        <a href="/operational/A10_VirtualMeters/A10_VirtualMeters_Details" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to list</a>
+                    </div>
+                    <div class="col text-right">
+                        <a href="#" onclick="RedirectToSync();" class="btn btn-outline-primary-sm"><i class="fas fa-sync-alt"></i>&nbsp;Sync</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToUpdate(virtualMeterID, serial, year, month) {
+            $("#loaderContent").css("display", "block");
+            var quotaValue = $("#Quota_" + serial).val();
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/A10_VirtualMeters/A10_VirtualMeters_Update/' + virtualMeterID + '/'  + serial + '/' + year + '/' + month + '/' + quotaValue + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A10_VirtualMeters/A10_VirtualMeters_Edit/@Model.A10_VirtualMeter.ID?Month=' + $("#Month").val() + '&ShowAllEntries=' + $("#ShowAllEntries").val();
+        }
+        function RedirectToSync() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A10_VirtualMeters/A10_VirtualMeters_Sync/@Model.A10_VirtualMeter.ID?Month=' + $("#Month").val() + '&R=' + encodeURIComponent(document.location.href);
+        }
+    </script>
+}

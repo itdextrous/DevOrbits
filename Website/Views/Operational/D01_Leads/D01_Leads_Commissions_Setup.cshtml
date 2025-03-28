@@ -1,0 +1,171 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_Commissions_SetupModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Commissions_Setup.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Commissions <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Interval</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_CommissionName" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <select id="add_CommissionInterval" name="add_CommissionInterval" class="form-control">
+                                            @foreach (MyVoltage.Data.D01_Leads_Commission.IntervalEnum dt in (MyVoltage.Data.D01_Leads_Commission.IntervalEnum[])Enum.GetValues(typeof(MyVoltage.Data.D01_Leads_Commission.IntervalEnum)))
+                                            {
+                                                <option value="@((int)dt)">@dt</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td scope="col" class="text-nowrap">
+                                        <input class="form-control" id="add_CommissionPrice" type="text" placeholder="Add new item here..." />
+                                    </td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap"></td>
+                                    <td scope="col" class="text-nowrap">
+                                        <a onclick="DoAddCommission();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+                                    </td>
+                                </tr>
+                                @foreach (var item in Model.D01_Leads_Commissions_SetupItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_CommissionName@(item.ID)" type="text" value="@item.Description" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <select id="add_CommissionInterval@(item.ID)" name="add_CommissionInterval@(item.ID)" class="form-control">
+                                                @foreach (MyVoltage.Data.D01_Leads_Commission.IntervalEnum dt in (MyVoltage.Data.D01_Leads_Commission.IntervalEnum[])Enum.GetValues(typeof(MyVoltage.Data.D01_Leads_Commission.IntervalEnum)))
+                                                {
+                                                    @if (item.Interval == dt)
+                                                    {
+                                                        <option selected="selected" value="@((int)dt)">@dt</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@((int)dt)">@dt</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td scope="col" class="text-nowrap">
+                                            <input class="form-control" id="add_CommissionPrice@(item.ID)" type="text" value="@item.Price.ToMoney()" />
+                                        </td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUsername</td>
+                                        <td scope="col" class="text-nowrap">@item.CreatedByUserTimestamp.ToDateAndTimeShort()</td>
+                                        <td scope="col" class="text-nowrap">
+                                            <a onclick="DoUpdateCommission('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                                            &nbsp;
+                                            <a onclick="DoDeleteCommission('@(item.ID)');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function DoAddCommission() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Setup_Add",
+                {
+                    add_CommissionName: $("#add_CommissionName").val(),
+                    add_CommissionInterval: $("#add_CommissionInterval").val(),
+                    add_CommissionPrice: $("#add_CommissionPrice").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateCommission(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Setup_Update/" + ID,
+                {
+                    add_CommissionName: $("#add_CommissionName" + ID).val(),
+                    add_CommissionInterval: $("#add_CommissionInterval" + ID).val(),
+                    add_CommissionPrice: $("#add_CommissionPrice" + ID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteCommission(ID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/D01_Leads/D01_Leads_Commissions_Setup_Delete/" + ID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

@@ -1,0 +1,165 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@*@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledSummaryModel*@
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = "Billing Control Report - Not Billed Summary";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card rounded">
+            <div id="latestBillingSync" class="card-body">
+                <div class="text-orange">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Billing Sync Status...
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<table class="table table-responsive-xl table-striped table-hover">
+    <thead>
+        <tr>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" rowspan="2" scope="col">Company Name</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" rowspan="2" scope="col">Status</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Customer Count</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Meter Count</th>
+            <th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Meters Not Billed</th>
+            @*<th style="border-left:2px solid black;border-right:2px solid black;border-top:2px solid black;" class="text-center" colspan="@(((AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum))).Length + 1)" scope="col">Meters Checked</th>*@
+        </tr>
+        <tr>
+            @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+            {
+                <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+            }
+            <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>
+            @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+            {
+                <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+            }
+            <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>
+            @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+            {
+                <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+            }
+            <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>
+            @*@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                {
+                    <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;" scope="col">@accountType.GetDescription()</th>
+                }
+                <th style="border-left:1px solid black;border-right:2px solid black;border-top:1px solid black;" scope="col">Total</th>*@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var uC in operationalProvider.Companies.Where(p => p.IsDailyBillingStatusActive && operationalProvider.UserCompanies.Select(c => c.CompanyID).Contains(p.CompanyID)))
+        {
+            <tr id="NotBilledSummaryItem_@uC.CompanyID" style="cursor:pointer;" title="View @uC.Name" onclick="RedirectToDetails('@uC.CompanyID');">
+                <td scope="col">
+                    <div class="text-orange">
+                        @uC.Name
+                    </div>
+                </td>
+                @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                {
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                }
+                <td scope="col">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </td>
+                @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                {
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                }
+                <td scope="col">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </td>
+                @foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+                {
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                }
+                <td scope="col">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </td>
+                <td scope="col">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </td>
+            </tr>
+        }
+
+        @*@foreach (var item in Model.A06_BillingControlReport_NotBilledSummaryItems)
+            {
+                string rowclass = "";
+                string cellClass = "";
+                if (item.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledSummaryItem.StatusType.Outstanding)
+                {
+                    rowclass = " class=\"table-danger\"";
+                    cellClass = " class=\"text-red font-weight-bold\"";
+                }
+                else if (item.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledSummaryItem.StatusType.Reviewed)
+                {
+                    rowclass = " class=\"table-success\"";
+                    cellClass = " class=\"text-green font-weight-bold\"";
+                }
+                <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');" @Html.Raw(rowclass)>
+                    <td scope="col">@item.CompanyName</td>
+                    <td scope="col">@item.CustomersCount</td>
+                    <td scope="col">@item.MetersCount</td>
+                    <td scope="col">@item.MetersNotBilledCount</td>
+                    <td scope="col">@item.MetersCheckedCount</td>
+                    <td scope="col" @Html.Raw(cellClass)>@item.Status</td>
+                </tr>
+            }*@
+
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+            $("#latestBillingSync").load('@Url.Content("/operational/shared/billingsync/latestbillingsync")');
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.Companies.Where(p => p.IsDailyBillingStatusActive && operationalProvider.UserCompanies.Select(c => c.CompanyID).Contains(p.CompanyID)))));
+        $(companies).each(function() {
+            $("#NotBilledSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledSummaryItem/"))' + this.CompanyID + '/' + "NotBilledSummaryItem_" + this.CompanyID, function(response, status, xhr) {
+                    var col = $("#" + this.id + "_col");
+                    if (col.length > 0) {
+                        var text = col[0].innerHTML;
+                        if (text == 'Reviewed') {
+                            $("#" + this.id).addClass("table-success");
+                        }
+                        else if (text == 'Outstanding') {
+                            $("#" + this.id).addClass("table-danger");
+                        }
+                    }
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

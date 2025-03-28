@@ -1,0 +1,370 @@
+@model MyVoltage.Models.OperationalModels.SearchModels.SearchModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = "Site Search";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+
+            <div class="card-header">
+                Welcome to the site search tool. Enter details below and click Search to see results.
+                <br />
+                If Anything Search Term is not blank other fields will be ignored.
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mb-2 mt-2">
+                    <div class="col">Anything Search Term (System will search for this value in all fields - <span class="text-red font-weight-bold">SLOW</span>)</div>
+                    <div class="col"><input id="anythingSearchString" type="text" asp-for="AnythingSearchString" placeholder="Anything" class="form-control" /></div>
+                </div>
+
+                <div class="row mb-2 mt-2">
+                    <div class="col">Full Name Search Term</div>
+                    <div class="col"><input id="fullNameSearchString" type="text" asp-for="FullNameSearchString" placeholder="Full Name" class="form-control" /></div>
+                </div>
+
+                <div class="row mb-2 mt-2">
+                    <div class="col">Meter Serial Search Term</div>
+                    <div class="col"><input id="meterSerialSearchString" type="text" asp-for="MeterSerialSearchString" placeholder="Meter Serial" class="form-control" /></div>
+                </div>
+
+                <div class="row mb-2 mt-2">
+                    <div class="col">Cellphone Search Term</div>
+                    <div class="col"><input id="cellphoneSearchString" type="text" asp-for="CellphoneSearchString" placeholder="Cellphone" class="form-control" /></div>
+                </div>
+
+                <div class="row mb-2 mt-2">
+                    <div class="col-12 text-right">
+                        <a href="#" onclick="Search();" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+                @if (Model.SearchResultItems != null)
+                {
+                    @if (Model.SearchResultItems.Count > 0)
+                    {
+                        @foreach (var item in Model.SearchResultItems)
+                        {
+                            <div class="row">
+                                <div class="col-12">
+                                    <hr />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    @switch (item.ObjectType)
+                                    {
+                                        case "OperationalProvider.CustomerLookupResult":
+                                            MyVoltage.Services.OperationalProvider.CustomerLookupResult lookupResult = item.ObjectXML.ToObject<MyVoltage.Services.OperationalProvider.CustomerLookupResult>();
+                                            <div class="card p-md-4">
+                                                <div class="card-content">
+                                                    <div class="row">
+                                                        <h5>Customer Details</h5>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <strong>@lookupResult.CustomerDetails.CustomerName</strong>
+                                                        </div>
+                                                        <div class="col">
+                                                            @lookupResult.CustomerDetails.CustomerNo
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Address
+                                                        </div>
+                                                        <div class="col">
+                                                            @lookupResult.CustomerDetails.CustomerCompanyName
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Phone
+                                                        </div>
+                                                        <div class="col">
+                                                            @lookupResult.CustomerDetails.CustomerPhone
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Email
+                                                        </div>
+                                                        <div class="col">
+                                                            @lookupResult.CustomerDetails.CustomerEmail
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        &nbsp;
+                                                    </div>
+                                                    <div class="row">
+                                                        <h5>Usage</h5>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Balance
+                                                        </div>
+                                                        <div class="col">
+                                                            R @lookupResult.CustomerDetails.Balance.ToString("N")
+                                                        </div>
+                                                    </div>
+                                                    @{
+                                                        string lastPaymentDate = "N/A";
+                                                        string lastPaymentMethod = "N/A";
+                                                        string lastPaymentAmount = "N/A";
+                                                        if (lookupResult.PaymentInfo.Length > 0)
+                                                        {
+                                                            var latestPayment = lookupResult.PaymentInfo.OrderByDescending(p => p.PaymentDate).FirstOrDefault();
+                                                            lastPaymentDate = latestPayment.PaymentDate.ToString("yyyy/MM/dd - HH:mm");
+                                                            lastPaymentMethod = latestPayment.PaymentMethod;
+                                                            lastPaymentAmount = "R " + latestPayment.PaymentAmount.ToString("N");
+                                                        }
+                                                    }
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Last Payment
+                                                        </div>
+                                                        <div class="col">
+                                                            @lastPaymentDate
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Method
+                                                        </div>
+                                                        <div class="col">
+                                                            @lastPaymentMethod
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            Amount
+                                                        </div>
+                                                        <div class="col">
+                                                            @lastPaymentAmount
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        &nbsp;
+                                                    </div>
+                                                    <div class="row">
+                                                        <h5>Meters</h5>
+                                                    </div>
+                                                    @if (lookupResult.MetersLinked.Length > 0)
+                                                    {
+                                                        foreach (var meterInfo in lookupResult.MetersLinked)
+                                                        {
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    @switch (meterInfo.TypeName)
+                                                                    {
+                                                                        case "Electricity":
+                                                                            <img src="~/images/elec-icon-s.png" />
+                                                                            break;
+                                                                        case "Water":
+                                                                            <img src="~/images/water-icon-s.png" />
+                                                                            break;
+                                                                        case "Gas":
+                                                                            <img src="~/images/gas-icon-s.png" />
+                                                                            break;
+                                                                    }
+                                                                    <strong>@meterInfo.TypeName</strong>
+                                                                </div>
+                                                                <div class="col">
+                                                                    @meterInfo.LastCommunicated.ToString("yyyy/MM/dd - HH:mm")
+                                                                    @if (meterInfo.Status.ToUpper().Contains("ON"))
+                                                                    {
+                                                                        <i class="fas fa-lightbulb text-green"></i>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <i class="fas fa-power-off text-red"></i>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    @meterInfo.SerialNumber
+                                                                </div>
+                                                                <div class="col">
+                                                                    @meterInfo.Connected
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                &nbsp;
+                                                            </div>
+                                                        }
+                                                    }
+
+
+                                                    @*Show All*@
+                                                    @*<div>
+                                                            <h5>Customer Details</h5>
+                                                        </div>
+                                                        @foreach (System.Reflection.PropertyInfo p in lookupResult.CustomerDetails.GetType().GetProperties())
+                                                        {
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <label class="control-label">@p.Name</label>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <span>@p.GetValue(lookupResult.CustomerDetails, null)</span>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        <div>
+                                                            <h5>Meter Details</h5>
+                                                        </div>
+                                                        @if (lookupResult.MetersLinked.Length > 0)
+                                                        {
+                                                            foreach (var meterInfo in lookupResult.MetersLinked)
+                                                            {
+                                                                @foreach (System.Reflection.PropertyInfo p in meterInfo.GetType().GetProperties())
+                                                                {
+                                                                    <div class="row">
+                                                                        <div class="col">
+                                                                            <label class="control-label">@p.Name</label>
+                                                                        </div>
+                                                                        <div class="col">
+                                                                            <span>@p.GetValue(meterInfo, null)</span>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        }
+                                                        <div>
+                                                            <h5>Payment Details</h5>
+                                                        </div>
+                                                        @if (lookupResult.PaymentInfo.Length > 0)
+                                                        {
+                                                            foreach (var paymentInfo in lookupResult.PaymentInfo)
+                                                            {
+                                                                @foreach (System.Reflection.PropertyInfo p in paymentInfo.GetType().GetProperties())
+                                                                {
+                                                                    <div class="row">
+                                                                        <div class="col">
+                                                                            <label class="control-label">@p.Name</label>
+                                                                        </div>
+                                                                        <div class="col">
+                                                                            <span>@p.GetValue(paymentInfo, null)</span>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        }*@
+                                                </div>
+                                            </div>
+                                            break;
+                                        case "MyVoltage.Data.SkybillCustomer":
+                                            MyVoltage.Data.SkybillCustomer skybillCustomer = item.ObjectXML.ToObject<MyVoltage.Data.SkybillCustomer>();
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    Customer No:
+                                                </div>
+                                                <div class="col-6 text-right">
+                                                    @skybillCustomer.Customer_No
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    Customer Name:
+                                                </div>
+                                                <div class="col-6 text-right">
+                                                    @skybillCustomer.Customer_Name
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 text-center">
+                                                    <a href="#" onclick="ChangeActiveMeterFromSearch('@skybillCustomer.Serial_No');" class="btn btn-outline-primary-sm">Select Customer</a>
+                                                </div>
+                                            </div>
+                                            break;
+                                        case "MyVoltage.Data.Customer":
+                                            MyVoltage.Data.Customer customer = item.ObjectXML.ToObject<MyVoltage.Data.Customer>();
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    Customer No:
+                                                </div>
+                                                <div class="col-6 text-right">
+                                                    @customer.CustomerNumber
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    Customer Name:
+                                                </div>
+                                                <div class="col-6 text-right">
+                                                    @customer.FullName
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 text-center">
+                                                    <a href="#" onclick="ChangeActiveMeterFromSearch('@customer.MeterNumber');" class="btn btn-outline-primary-sm">Select Customer</a>
+                                                </div>
+                                            </div>
+                                            break;
+                                    }
+
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <span>No results...</span>
+                    }
+                }
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ChangeActiveMeterFromSearch(value) {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + value + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function Search() {
+            $("#loaderContent").css("display", "block");
+
+            var anythingSearchString = $("#anythingSearchString").val();
+            if (anythingSearchString != "") {
+                document.location.href = "/operational/SearchAnything?anythingSearchString=" + encodeURIComponent(anythingSearchString);
+            }
+            else {
+                var fullNameSearchString = $("#fullNameSearchString").val();
+                //if (fullNameSearchString == "") {
+                //    fullNameSearchString = "[BLANK]";
+                //}
+
+                var meterSerialSearchString = $("#meterSerialSearchString").val();
+                //if (meterSerialSearchString == "") {
+                //    meterSerialSearchString = "[BLANK]";
+                //}
+
+                var cellphoneSearchString = $("#cellphoneSearchString").val();
+                //if (cellphoneSearchString == "") {
+                //    cellphoneSearchString = "[BLANK]";
+                //}
+
+                document.location.href = "/operational/SearchDedicated?fullNameSearchString=" + encodeURIComponent(fullNameSearchString) + "&meterSerialSearchString=" + encodeURIComponent(meterSerialSearchString) + "&cellphoneSearchString=" + encodeURIComponent(cellphoneSearchString);
+            }
+        }
+    </script>
+}

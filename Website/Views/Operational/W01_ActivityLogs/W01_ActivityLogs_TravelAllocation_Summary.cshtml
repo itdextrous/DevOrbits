@@ -1,0 +1,167 @@
+@model MyVoltage.Models.OperationalModels.W01_ActivityLogsModels.W01_ActivityLogs_TravelAllocation_SummaryModel
+@using MyVoltage.Extensions;
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.W01_ActivityLogs_TravelAllocation_Summary.GetDescription()}";
+    System.DateTime current = Model.FromDate.Value;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        From Date
+                    </div>
+                    <div class="col">
+                        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        To Date
+                    </div>
+                    <div class="col">
+                        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" />
+                    </div>
+                </div>
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ActivityType" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ActivityType", Model.ActivityType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ActivityType" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Company" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Company" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ResponsibleUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="DisplayAs" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("DisplayAs", Model.DisplayAs, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="DisplayAs" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-nowrap">User Name</th>
+                    <th scope="col" class="text-nowrap">Activity Type</th>
+                    <th scope="col" class="text-nowrap">Company</th>
+                    @{
+                        current = Model.FromDate.Value;
+                    }
+                    @while (current <= Model.ToDate.Value)
+                    {
+                        string cellClass = $"";
+                        if (current.DayOfWeek == DayOfWeek.Saturday
+                        || current.DayOfWeek == DayOfWeek.Sunday)
+                        {
+                            cellClass = $"table-secondary";
+                        }
+                        <th scope="col" class="text-nowrap text-center @Html.Raw(cellClass)">@Html.Raw(current.ToString("dddd<br />dd<br />MMM<br />yyyy"))</th>
+                        current = current.AddDays(1);
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.W01_ActivityLogs_TravelAllocation_SummaryItems)
+                {
+                    <tr>
+                        <td scope="col" class="text-nowrap">@item.UserName</td>
+                        <td scope="col" class="text-nowrap">@item.ActivityType</td>
+                        <td scope="col" class="text-nowrap">@item.Company</td>
+                        @{
+                            current = Model.FromDate.Value;
+                        }
+                        @while (current <= Model.ToDate.Value)
+                        {
+                            string cellClass = $"";
+                            if (current.DayOfWeek == DayOfWeek.Saturday
+                            || current.DayOfWeek == DayOfWeek.Sunday)
+                            {
+                                cellClass = $"table-secondary";
+                            }
+                            var timeSpent = item.TravelSpent.Where(p => p.Key == current).SingleOrDefault();
+                            string displayValue = timeSpent.Value.ToMoneyNoDecimal();
+                            @*if (string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["DisplayAs"]) || ViewContext.HttpContext.Request.Query["DisplayAs"].ToString() == "1")
+                    {
+                    displayValue = $"{TimeSpan.FromMinutes(Convert.ToDouble(timeSpent.Value)).Hours:00}:{TimeSpan.FromMinutes(Convert.ToDouble(timeSpent.Value)).Minutes:00}";
+                    }*@
+                            if (timeSpent.Value == 0)
+                            {
+                                displayValue = "";
+                            }
+
+                            <td scope="col" class="text-nowrap text-right @Html.Raw(cellClass)" style="cursor:pointer;" onclick="RedirectToDetails('@current.ToDateShort()', '@current.ToDateShort()', '@item.ActivityTypeID', '@item.CompanyID', '@item.UserID')" title="@current.ToDateShort()">@displayValue</td>
+                            current = current.AddDays(1);
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = window.location.href.split('?')[0] + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&ActivityType=' + $("#ActivityType").val() + '&Company=' + $("#Company").val() + '&ResponsibleUser=' + $("#ResponsibleUser").val() + '&DisplayAs=' + $("#DisplayAs").val();
+        }
+        function RedirectToDetails(fromDate, toDate, activityType, company, responsibleUser) {
+            window.open('/operational/W01_ActivityLogs/W01_ActivityLogs_TravelAllocation_Details?from=' + fromDate + '&to=' + toDate + '&ActivityType=' + activityType + '&Company=' + company + '&ResponsibleUser=' + responsibleUser + '&DisplayAs=' + $("#DisplayAs").val());
+        }
+    </script>
+}

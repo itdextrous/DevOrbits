@@ -1,0 +1,43 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A4_031_Zendesk_Ticket_Category_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A04_Tickets_ZendeskTicketsSummary.GetDescription() Details</h5>
+</div>
+@if (Model.A4_031_Zendesk_Ticket_Category_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Ticket Category</th>
+                <th scope="col">Status</th>
+                <th scope="col">Unresolved Older Than 7 Days</th>
+                <th scope="col">Unresolved Older Than 14 Days</th>
+                <th scope="col">Unresolved Older Than 1 Month</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A4_031_Zendesk_Ticket_Category_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeZendeskCategory/{item.Zendesk_TicketField_Option.Value}?R={Html.UrlEncoder.Encode("/operational/A04_Tickets/A04_Tickets_ZendeskTicketsDetails")}";
+                <tr style="cursor:pointer;" title="View @item.Zendesk_TicketField_Option.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.Zendesk_TicketField_Option.Name</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+                    <td scope="col">@item.OlderThan7DaysCount</td>
+                    <td scope="col">@item.OlderThan14DaysCount</td>
+                    <td scope="col">@item.OlderThan1MonthCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

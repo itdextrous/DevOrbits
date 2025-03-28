@@ -1,0 +1,26 @@
+﻿{
+  "MyVoltage": [
+    {
+      "Id": 1,
+      "OS": "android",
+      "LatestVersion": "3.7.0"
+    },
+    {
+      "Id": 2,
+      "OS": "ios",
+      "LatestVersion": "3.7.0"
+    }
+  ],
+  "GasManager": [
+    {
+      "Id": 1,
+      "OS": "android",
+      "LatestVersion": "1.1.0"
+    },
+    {
+      "Id": 2,
+      "OS": "ios",
+      "LatestVersion": "3.1"
+    }
+  ]
+}

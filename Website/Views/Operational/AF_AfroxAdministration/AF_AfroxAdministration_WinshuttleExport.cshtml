@@ -1,0 +1,101 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_WinshuttleExportModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_WinshuttleExport.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h5>Export Filters:</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="FromDate"></label>
+                    </div>
+                    <div class="col">
+                        <input id="fromDate" type="date" asp-for="FromDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="ToDate"></label>
+                    </div>
+                    <div class="col">
+                        <input id="toDate" type="date" asp-for="ToDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="PartnerID"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("PartnerID", Model.PartnerID, new { @class = "form-control", @onChange = "GetCompanies();" })
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="CompanyID"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                    </div>
+                </div>
+@*                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="Customer_Purchase_Order_Number_VBKD_BSTKD"></label>
+                    </div>
+                    <div class="col">
+                        <input id="customer_Purchase_Order_Number_VBKD_BSTKD" type="text" asp-for="Customer_Purchase_Order_Number_VBKD_BSTKD" class="form-control" />
+                    </div>
+                </div>
+*@
+            </div>
+
+            <div class="card-footer">
+
+                <div class="row mt-2 mb-2">
+                    <div class="col text-right">
+                        <a href="#" onclick="RedirectToFilter();" class="btn btn-outline-primary-sm"><i class="fas fa-info-circle"></i>&nbsp;Request Meter Readings</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportRequestResult?P=' + $("#PartnerID").val() + '&F=' + $("#fromDate").val() + '&T=' + $("#toDate").val() + '&C=' + $("#CompanyID").val();
+        }
+        GetCompanies();
+        function GetCompanies() {
+            $("#CompanyID").empty();
+            $("#CompanyID").append(`<option value="0">All Companies</option>`);
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CompanyItems)));
+            $(companies).each(function() {
+                if (this.PartnerID ==  $("#PartnerID").val()) {
+                    $("#CompanyID").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+        }
+    </script>
+}

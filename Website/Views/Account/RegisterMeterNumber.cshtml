@@ -1,0 +1,110 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register Meter Number";
+    Layout = "~/Views/Shared/LayoutEmpty.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="diagonal">
+        <img src="/images/diagonal-line.png" alt="">
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-4 col-12 mx-auto">
+            <img src="/logo/white" alt="" class="login-logo my-5 d-block mx-auto logo-width">
+            <h4 class="text-white text-uppercase font-weight-bold mb-4">Welcome to My Voltage’s online platform!</h4>
+            <p class="text-white">In order to access all your information online, you will be required to register as a user online. All you need is your meter number.</p>
+            <p class="text-white">Start by entering your meter number here:</p>
+            @*<h4 class="text-white text-uppercase font-weight-bold mb-4">@ViewData["Title"]</h4>*@
+            <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-10">
+                            <input asp-for="MeterNumber" class="form-control" placeholder="Meter number" />
+                            <span asp-validation-for="MeterNumber"></span>
+                        </div>
+                        <div class="col-2">
+                            <a href="javascript:void(0)" data-toggle="modal" data-target="#meternumber"><i class="fas fa-question-circle fa-2x text-white"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-outline-default" value="Register">Next</button>
+                </div>
+                <input type="hidden" asp-for="CompanyOrIndividual" />
+                <div class="form-group text-center">
+                    <a asp-action="Login" class="btn btn-link text-white">BACK</a>
+                </div>
+            </form>
+            <h4 class="text-white text-uppercase font-weight-bold mb-4">No meter number? Don’t know what to do next?</h4>
+            <p class="text-white">You can contact our Customer Care Centre on <a class="text-light-orange" href="mailto:info@myvoltage.co.za?Subject=Registration">info@myvoltage.co.za</a> or call them on 087 057 2561. Please have the details of your property (e.g. The Towers, Units 302) available for them to find your meter number on our system.</p>
+            <h4 class="text-white text-uppercase font-weight-bold mb-4">Want to know more?</h4>
+            <p class="text-white">
+                Please visit <a class="text-light-orange" href="https://www.myvoltage.co.za/FAQ" target="_blank">My Voltage</a> for a list of Frequently Asked Questions.
+                <br />
+                We are sure we will answer any question you might have there.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Metering Number Modal -->
+<div class="modal fade" id="meternumber" tabindex="-1" role="dialog" aria-labelledby="meternumberLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p class="font-weight-bold">Metering number</p>
+                <p>The meter number can be found on the metering device or underneath its cover.</p>
+                <p class="text-muted">The numbers look similar to this: </p>
+                <img src="/images/barcodes.jpg" alt="" class="img-fluid ">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal"><b>Close</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Existing Metering Number Error -->
+<div class="modal fade" id="existingmeternumber" tabindex="-1" role="dialog" aria-labelledby="existingmeternumberLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Existing Metering Number</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>The meter has already been registered by another user, please complete the form below to contact our Customer Care consultants to assist with registration.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" onclick="CustomerCare()" class="btn btn-primary btn-primary-sm">Contact Service Provider</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script type="text/javascript">
+        $(document).ready(function ()
+        {
+            var meterExists = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(TempData["MeterExist"]));
+
+            if (meterExists == true)
+            {
+                $('#existingmeternumber').modal();
+            }
+
+        });
+
+        function CustomerCare()
+        {
+            window.location.href = "/Account/InvalidMeterContact";
+        }
+
+    </script>
+}
+

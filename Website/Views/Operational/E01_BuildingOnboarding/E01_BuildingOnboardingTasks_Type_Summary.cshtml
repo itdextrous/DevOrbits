@@ -1,0 +1,138 @@
+@model MyVoltage.Models.OperationalModels.E01_BuildingOnboardingModels.E01_BuildingOnboardingTasks_Type_SummaryModel
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E01_BuildingOnboardingTasks_Type_Summary.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-2">Due Date Between</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" /></div>
+    <div class="col-1">And</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+<div class="row mt-3">
+    <table class="table table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th rowspan="3" scope="col" class="border-table">Type Name</th>
+                <th rowspan="3" scope="col" class="border-table">Status</th>
+
+                <th rowspan="2" colspan="7" scope="col" class="border-table text-center">Unresolved Older Than Count</th>
+
+                <th colspan="@Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => !p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value).Count()" scope="col" class="border-table text-center">Unresolved</th>
+                <th colspan="@Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).Count()" scope="col" class="border-table text-center">Resolved</th>
+                <th rowspan="3" scope="col" class="border-table">Total</th>
+            </tr>
+            <tr>
+                @foreach (var sG in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    <th colspan="@Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => (!p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value) && p.StatusGroupID == sG).Count()" scope="col" class="border-table text-center">@sgName</th>
+                }
+                @foreach (var sG in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    <th colspan="@Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value && p.StatusGroupID == sG).Count()" scope="col" class="border-table text-center">@sgName</th>
+                }
+            </tr>
+            <tr>
+                <th scope="col" class="border-table text-nowrap text-center">Today Count</th>
+                <th scope="col" class="border-table text-nowrap text-center">1 Day</th>
+                <th scope="col" class="border-table text-nowrap text-center">3 Days</th>
+                <th scope="col" class="border-table text-nowrap text-center">7 Days</th>
+                <th scope="col" class="border-table text-nowrap text-center">14 Days</th>
+                <th scope="col" class="border-table text-nowrap text-center">1 Month</th>
+                <th scope="col" class="border-table text-nowrap text-center">Oldest</th>
+
+                @foreach (var sG in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    @foreach (var status in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => (!p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value) && p.StatusGroupID == sG).ToList())
+                    {
+                        <th scope="col" class="border-table text-nowrap">@status.ActionName<br />@status.ReportingName</th>
+                    }
+                }
+                @foreach (var sG in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    @foreach (var status in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value && p.StatusGroupID == sG).ToList())
+                    {
+                        <th scope="col" class="border-table text-nowrap">@status.ActionName<br />@status.ReportingName</th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var resolvedStatuses = Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).ToList();
+            }
+            @foreach (var item in Model.E01_BuildingOnboardingTasks_TypeSummaryItems)
+            {
+                string rowclass = "";
+                string cellClass = "";
+                string statusText = "";
+                if (item.E01_BuildingOnboardingTasks_Type_SummaryItemStatuses.Where(p => resolvedStatuses.Select(c => c.ID).Contains(p.StatusID)).Select(p => p.Count).Sum() == item.E01_BuildingOnboardingTasks_Type_SummaryItemStatuses.Select(p => p.Count).Sum())
+                {
+                    cellClass = "text-green font-weight-bold";
+                    rowclass = " class=\"table-success\"";
+                    statusText = "Completed";
+                }
+                else
+                {
+                    cellClass = "text-red font-weight-bold";
+                    rowclass = " class=\"table-danger\"";
+                    statusText = "Due";
+                }
+                <tr style="cursor:pointer;" title="View @item.TypeName" onclick="RedirectToDetails('@item.TypeID');" @Html.Raw(rowclass)>
+                    <td class="border-table text-nowrap" scope="col">@item.TypeName</td>
+                    <td title="@item.TypeName - Status" scope="col" class="border-table text-nowrap @Html.Raw(cellClass)">@statusText</td>
+
+                    <td class="border-table text-nowrap" title="@item.TypeName - Older Than 3 Days Count" scope="col">@item.TodayCount</td>
+                    <td class="border-table text-nowrap" title="@item.TypeName - Older Than 1 Day Count" scope="col">@item.OlderThan1DayCount</td>
+                    <td class="border-table text-nowrap" title="@item.TypeName - Older Than 3 Days Count" scope="col">@item.OlderThan3DaysCount</td>
+                    <td class="border-table text-nowrap" title="@item.TypeName - Older Than 7 Days Count" scope="col">@item.OlderThan7DaysCount</td>
+                    <td class="border-table text-nowrap" title="@item.TypeName - Older Than 14 Days Count" scope="col">@item.OlderThan14DaysCount</td>
+                    <td class="border-table text-nowrap" title="@item.TypeName - Older Than 1 Month Count" scope="col">@item.OlderThan1MonthCount</td>
+                    <td class="border-table text-nowrap" title="@item.TypeName - Oldest Unresolved Ticket" scope="col">
+                        @if (item.OldestUnresolvedTaskCreateDate.HasValue)
+                        {
+                            <span>@item.OldestUnresolvedTaskCreateDate.ToDateAndTimeShort(true) (<a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review/@item.OldestUnresolvedTaskTypeID/@item.OldestUnresolvedTaskID">@item.OldestUnresolvedTaskID</a>)</span>
+                        }
+                    </td>
+
+                    @foreach (var status in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => !p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value).ToList())
+                    {
+                        var statusItem = item.E01_BuildingOnboardingTasks_Type_SummaryItemStatuses.Where(p => p.StatusID == status.ID).SingleOrDefault();
+                        <td title="@item.TypeName - @status.GroupName - @status.ActionName - @status.ReportingName" class="border-table text-nowrap" scope="col">@(statusItem != null ? statusItem.Count.ToString() : "0")</td>
+                    }
+                    @foreach (var status in Model.E01_BuildingOnboardingTasks_Type_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).ToList())
+                    {
+                        var statusItem = item.E01_BuildingOnboardingTasks_Type_SummaryItemStatuses.Where(p => p.StatusID == status.ID).SingleOrDefault();
+                        <td title="@item.TypeName - @status.GroupName - @status.ActionName - @status.ReportingName" class="border-table text-nowrap" scope="col">@(statusItem != null ? statusItem.Count.ToString() : "0")</td>
+                    }
+                    <td title="@item.TypeName - Total Tickets" scope="col" class="border-table text-nowrap">@item.Total</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/Change_E01_TaskTypeID/' + companyID + '?R=/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTasks_Type_Details%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTasks_Type_Summary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

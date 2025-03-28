@@ -1,0 +1,137 @@
+@using Microsoft.AspNetCore.Identity
+@using MyVoltage.Models
+@using Microsoft.AspNetCore.Http
+@using MoreLinq
+
+@inject SignInManager<ApplicationUser> SignInManager;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+
+<div class="sidebar">
+    <div class="logo text-start">
+        <a href="/clientzone"><img src="~/images/Clientzone/logo.png" alt="MyVoltage"></a>
+    </div>
+
+
+    <div class="sidebar-wrapper">
+        <ul class="nav flex-column" id="sidebarMenu">
+            <li class="nav-item"><a class="nav-link parent" href="/clientzone">
+                <span class="nav_icon">
+                    <span><img src="~/images/Clientzone/icon-home-white.png" /></span>
+                </span>Home
+                </a>
+            </li>
+            <li class="nav-group-item nav-group" id="consumptionInsightsLI">
+                <a class="nav-group-link parent" data-bs-toggle="collapse" data-bs-target="#consumptionInsights_collapse" aria-expanded="false" aria-controls="consumptionInsights_collapse">
+                    <span class="nav_icon">
+                        <span><img src="~/images/Clientzone/icon-consumption-insights-whtie.png" /></span>
+                    </span>Consumption insights
+                </a>
+                <ul class="collapse accordion-collapse" id="consumptionInsights_collapse" data-bs-parent="#sidebarMenu">
+                    <li class="nav-sub-item">
+                        <a class="nav-sub-link child" href="/clientzone/consumptioninsights">
+                            -&nbsp;&nbsp;Consumption history
+                        </a>
+                    </li>
+                    <li class="nav-sub-item">
+                        <a class="nav-sub-link child" href="/clientzone/realtimeconsumption">
+                            -&nbsp;&nbsp;Real-time insights
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-group-item nav-group" id="billingLI">
+                <a class="nav-group-link parent" data-bs-toggle="collapse" data-bs-target="#Billing_collapse" aria-expanded="false" aria-controls="Billing_collapse">
+                    <span class="nav_icon">
+                        <span><img src="~/images/Clientzone/icon-billing-whtie.png" /></span>
+                    </span>Billing
+                </a>
+                <ul class="collapse accordion-collapse" id="Billing_collapse" data-bs-parent="#sidebarMenu">
+                    <li class="nav-sub-item">
+                        <a class="nav-sub-link child" href="/clientzone/billing/currentbillingcycle">
+                            -&nbsp;&nbsp;Billing cycle
+                        </a>
+                    </li>
+                    <li class="nav-sub-item">
+                        <a class="nav-sub-link child" href="/clientzone/billing/statements">
+                            -&nbsp;&nbsp;Statements
+                        </a>
+                    </li>
+                    <li class="nav-sub-item">
+                        <a class="nav-sub-link child" href="/clientzone/billing/invoices">
+                            -&nbsp;&nbsp;Tax invoices
+                        </a>
+                    </li>
+                    @if (clientzoneProvider.ShowDetailedDailyBilling)
+                    {
+                        <li class="nav-sub-item">
+                            <a class="nav-sub-link child" href="/clientzone/billing/billing">
+                                -&nbsp;&nbsp;Detailed daily billing
+                            </a>
+                        </li>
+                    }
+
+                    @*<li class="nav-sub-item">
+                    <a class="nav-sub-link child" href="/clientzone/recharge">
+                    - Recharge Options
+                    </a>
+                    </li>*@
+                </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link parent" href="/clientzone/profile">
+                    <span class="nav_icon">
+                        <span><img src="~/images/Clientzone/icon-profile-white.png" /></span>
+                    </span>Profile
+                </a>
+            </li>
+            <li class="nav-item"><a class="nav-link parent" href="/clientzone/recharge">
+                    <span class="nav_icon">
+                        <span><img src="~/images/Clientzone/icon-recharge-white.png" /></span>
+                    </span>Recharge options
+                </a>
+            </li>
+            <li class="nav-item d-block d-md-none"><a class="nav-link parent" href="/clientzone/contactus">
+                    <span class="nav_icon">
+                        <span><img src="~/images/Clientzone/icon-profile-white.png" /></span>
+                    </span>Contact us
+                </a>
+            </li>
+            <li class="nav-item d-block d-md-none">
+                <a class="nav-link parent" href="/logout">
+                    <span class="nav_icon">
+                        <span><img src="~/images/Clientzone/icon-LogOut-white.png" /></span>
+                    </span>Log off
+                </a>
+            </li>
+        </ul>
+        <div class="text-center text-white px-3">
+            <div class="company">
+                @clientzoneProvider.CompanyName
+            </div>
+            <div class="customer">
+                Customer &#35; @clientzoneProvider.CustomerNumber
+            </div>
+            <div class="d-inline-block">
+                @foreach (var m in clientzoneProvider.Meters.DistinctBy(x => x.SerialNo))
+                {
+                    <div class="meter">
+                        @switch (m.DeviceType)
+                        {
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                <img src="~/images/Clientzone/Electricity-Icon-White-Navigation-Bar.png" />
+                                break;
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                <img src="~/images/Clientzone/Water-Icon-White-Navigation-Bar.png" />
+                                break;
+                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                <img src="~/images/Clientzone/Gas-Icon-White-Navigation-Bar.png" />
+                                break;
+                        }
+                        <span>Meter &#35; @m.SerialNo</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+</div>

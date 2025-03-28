@@ -1,0 +1,42 @@
+@using Microsoft.AspNetCore.Identity
+@using MyVoltage.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<div class="sidebar sidebar-hide" id="SidebarToggle">
+    <div class="chevron">
+    <a href="javascript:void(0)" class="chevron-btn"><span class="collapsed"></span></a>
+    </div>
+    <div class="logo">
+        <a href=""><img src="~/images/myvoltage-logo.png" alt="MyVoltage"></a>
+    </div>
+	<div class="sidebar-wrapper">
+        <ul class="nav flex-column">
+
+            @if (@User.IsInRole("CompanyAdmin"))
+            {
+                <li class="nav-item"><a class="nav-link" href="/map"><i class="fas fa-plus-circle"></i>Map Overview</a></li>
+            }
+
+            <li class="nav-item"><a class="nav-link" href="/overview"><i class="fas fa-plus-circle"></i>Gateways &amp; Devices Overview</a></li>
+            <li class="nav-item"><a class="nav-link" href="/AdminDashboard"><i class="fas fa-plus-circle"></i>Dashboard</a></li>
+            @*<li class="nav-item"><a class="nav-link" href="/Mirror/Dashboard"><i class="fas fa-plus-circle"></i>Mirror Dashboard</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/mirror/mirrorauditcompleteness"><i class="fas fa-plus-circle"></i>Mirror Audit Completeness</a></li>*@
+            <li class="nav-item"><a class="nav-link" href="/userAccounts"><i class="fas fa-plus-circle"></i>User Accounts</a></li>
+            @*<li class="nav-item"><a class="nav-link" href="/billingUsage"><i class="fas fa-plus-circle"></i>Billing and Usage</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/bulkReadings"><i class="fas fa-plus-circle"></i>Bulk Readings</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/KronikaMeterBilling"><i class="fas fa-plus-circle"></i>Kronika Meter Billing</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/KronikaMeterBillingSummary"><i class="fas fa-plus-circle"></i>Kronika Monthly Reports</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/BulkDeviceUpdate"><i class="fas fa-plus-circle"></i>Device Name Bulk Update</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/Bulk433TestingUpload"><i class="fas fa-plus-circle"></i>Bulk 433 Testing Upload</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/RentalFeesUpload"><i class="fas fa-plus-circle"></i>Rental Fees Upload</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/DetectAndMove"><i class="fas fa-plus-circle"></i>Auto Device Discovery</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/SignalOptimizer"><i class="fas fa-plus-circle"></i>Wireless Signal Optimizer</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/BuildingCouncilReconReport"><i class="fas fa-plus-circle"></i>Building Council Recon Report</a></li>*@
+            @*<li class="nav-item"><a class="nav-link" href="/reports/meterreconreport"><i class="fas fa-plus-circle"></i>Meter Recon Report</a></li>*@
+            <li class="nav-item"><a class="nav-link" href="/admin/usagecalcassets"><i class="fas fa-plus-circle"></i>Usage Calc Assets</a></li>
+            <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-power-off"></i>Log Out</a></li>
+        </ul>
+	</div>
+</div>

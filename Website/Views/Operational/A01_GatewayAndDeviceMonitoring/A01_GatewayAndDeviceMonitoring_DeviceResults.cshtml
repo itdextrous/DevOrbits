@@ -1,0 +1,194 @@
+@model MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_DeviceDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.A01_GatewayAndDeviceMonitoring_DeviceResults.GetDescription();
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row">
+                    <div class="col-md-auto text-left">
+                        <a href="/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_DeviceSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("DeviceType", Model.DeviceType, new { @class = "form-control" })
+
+                    </div>
+                    <div class="col-md-auto text-right">
+                        <a onclick="RedirectToFilter(1);" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.Count == 0)
+                {
+                    <span class="text-red font-weight-bold">No results found</span>
+                }
+                else
+                {
+                    <table class="table table-sm table-striped table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Device ID</th>
+                                <th scope="col">Device Name</th>
+                                <th scope="col">Device Serial</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Since</th>
+                                <th scope="col">Offline Duration</th>
+                                <th scope="col">Signal</th>
+                                <th scope="col">SNR</th>
+                                <th scope="col">Battery</th>
+                                <th scope="col">Gateway ID</th>
+                                <th scope="col">Flag ID<span></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemC in Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems)
+                            {
+                                string rowclass = "";
+                                string cellClass = "";
+                                <tr @Html.Raw(rowclass) @*style="cursor:pointer;" title="View @itemC.CustomerMeterSerial" onclick="RedirectToVerification('@itemC.CustomerMeterSerial');"*@>
+                                    <td scope="col">@itemC.id</td>
+                                    <td scope="col">@itemC.name</td>
+                                    <td scope="col">@itemC.serial</td>
+                                    <td scope="col">
+                                        @switch ((MyVoltage.Data.DeviceType.DeviceTypeEnum)itemC.type.id)
+                                        {
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                <img src="/images/elec-icon-s.png" />
+                                                break;
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                <img src="/images/water-icon-s.png" />
+                                                break;
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                <img src="/images/gas-icon-s.png" />
+                                                break;
+                                        }
+                                        @itemC.deviceType
+                                    </td>
+                                    <td scope="col" class="font-weight-bold @((itemC.status != null && itemC.status.id == 1) ? "table-success text-green" : "table-danger text-red")">@itemC.deviceStatus</td>
+                                    <td scope="col">@itemC.status.time.ToDateAndTimeShort()</td>
+                                    <td scope="col">@itemC.OfflineDuration</td>
+                                    <td scope="col"><div id="signal_@itemC.id"><i class="fas fa-spinner"></i></div></td>
+                                    <td scope="col"><div id="snr_@itemC.id"><i class="fas fa-spinner"></i></div></td>
+                                    <td scope="col"><div id="battery_@itemC.id"><i class="fas fa-spinner"></i></div></td>
+                                    <td scope="col">@itemC.GatewayID</td>
+                                    <td scope="col">
+                                        @foreach (var flag in itemC.A09_Flags)
+                                        {
+                                            <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@flag.FlagTypeID/@flag.FlagID" title="@flag.FlagTypeName">@flag.FlagID</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="card-footer">
+                @if (true@* Model.TotalEntries > Model.EntriesPerPage *@)
+                {
+                    var prevDisabled = !Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.HasNextPage ? "disabled" : "";
+                    <div class="row mt-2">
+                        <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                            <div class="col-md-auto text-left">
+                                <a href="#" onclick="RedirectToFilter(@(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex - 1));"
+                                   class="btn btn-outline-primary-sm @prevDisabled">
+                                    <i class="fas fa-step-backward"></i>&nbsp;Previous Page
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            @for (int pageNumber = 1; pageNumber <= Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.TotalPages; pageNumber++)
+                            {
+                                var numberDisabled = Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex == pageNumber ? "btn-outline-warning disabled" : "btn-outline-primary-sm";
+                                <a href="#" onclick="RedirectToFilter(@(pageNumber));"
+                                   class="btn btn-sm @numberDisabled">
+                                    @pageNumber
+                                </a>
+                            }
+                        </div>
+                        <div class="col-md-auto">
+                            <select id="EntriesPerPage" class="form-control" onchange="RedirectToFilter(@(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex));">
+                                @if (Model.EntriesPerPage == 100)
+                                {
+                                    <option value="100" selected="selected">100</option>
+                                }
+                                else
+                                {
+                                    <option value="100">100</option>
+                                }
+                                @if (Model.EntriesPerPage == 500)
+                                {
+                                    <option value="500" selected="selected">500</option>
+                                }
+                                else
+                                {
+                                    <option value="500">500</option>
+                                }
+                                @if (Model.EntriesPerPage == 1000)
+                                {
+                                    <option value="1000" selected="selected">1000</option>
+                                }
+                                else
+                                {
+                                    <option value="1000">1000</option>
+                                }
+                                @if (Model.EntriesPerPage == Model.TotalEntries)
+                                {
+                                    <option value="@Model.TotalEntries" selected="selected">All (@(Model.TotalEntries))</option>
+                                }
+                                else
+                                {
+                                    <option value="@Model.TotalEntries">All (@(Model.TotalEntries))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-auto text-right">
+                            <a align="left" href="#" onchange="RedirectToFilter(@(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex + 1));"
+                               class="btn btn-outline-primary-sm @nextDisabled">
+                                <i class="fas fa-step-forward"></i>&nbsp;Next Page
+                            </a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?DeviceType=' + $("#DeviceType").val() + '&EntriesPerPage=' + $("#EntriesPerPage").val() + '&pageIndex=' + pageIndex;
+        }
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification';
+        }
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.Select(p => p.id).ToList())));
+        $(companies).each(function () {
+            PopulateLabelsForUpdate(this);
+        });
+        function PopulateLabelsForUpdate(itemID) {
+            $.post('/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_GetRegisters',
+                {
+                    deviceid: itemID,
+                })
+                .done(function (data) {
+                    $("#signal_" + itemID).html(data.signal);
+                    $("#snr_" + itemID).html(data.snr);
+                    $("#battery_" + itemID).html(data.battery);
+                });
+        }
+    </script>
+}

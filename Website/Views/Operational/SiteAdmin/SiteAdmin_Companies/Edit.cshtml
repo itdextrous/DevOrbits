@@ -1,0 +1,1047 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_Companies_EditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_Companies.GetDescription()} - Edit{(Model != null ? $" - {Model.Name}" : "")}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Company successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Company</a>
+                    &nbsp;
+                    <a href="/operational/SiteAdmin/SiteAdmin_Companies" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Back to List</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="SiteAdmin_Companies_Edit" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Company Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Name" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CompanyTypeID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("CompanyTypeID", Model.CompanyTypeID, new { @class = "form-control" })
+                                <span asp-validation-for="CompanyTypeID" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PartnerID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("PartnerID", Model.PartnerID, new { @class = "form-control" })
+                                <span asp-validation-for="PartnerID" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NoOfRegisteredUnits" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NoOfRegisteredUnits" />
+                                <span asp-validation-for="NoOfRegisteredUnits" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NoOfMeteringPoints" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NoOfMeteringPoints" />
+                                <span asp-validation-for="NoOfMeteringPoints" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SageAccountingLegalEntityCompanyID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("SageAccountingLegalEntityCompanyID", Model.SageAccountingLegalEntityCompanyID, new { @class = "form-control" })
+                                <span asp-validation-for="SageAccountingLegalEntityCompanyID" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="YearOfDevelopment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="YearOfDevelopment" />
+                                <span asp-validation-for="YearOfDevelopment" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="AverageValuation" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="AverageValuation" />
+                                <span asp-validation-for="AverageValuation" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="AverageLSM" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="AverageLSM" />
+                                <span asp-validation-for="AverageLSM" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Province" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Province", Model.Province, new { @class = "form-control", @onChange = "DoSelectedProvince();" })
+                                <span asp-validation-for="Province" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="TownOrCity" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("TownOrCity", Model.TownOrCity, new { @class = "form-control", @onChange = "DoSelectedTown();" })
+                                <span asp-validation-for="TownOrCity" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Suburb" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Suburb", Model.Suburb, new { @class = "form-control" })
+                                <span asp-validation-for="Suburb" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StreetAddress" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="StreetAddress" />
+                                <span asp-validation-for="StreetAddress" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LocalMunicipality" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LocalMunicipality", Model.LocalMunicipality, new { @class = "form-control" })
+                                <span asp-validation-for="LocalMunicipality" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Website" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Website" />
+                                <span asp-validation-for="Website" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="GPSLat" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="GPSLat" />
+                                <span asp-validation-for="GPSLat" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="GPSLong" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="GPSLong" />
+                                <span asp-validation-for="GPSLong" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Contract Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ContractStartDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" asp-for="ContractStartDate" />
+                                <span asp-validation-for="ContractStartDate" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ContractEndDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" asp-for="ContractEndDate" />
+                                <span asp-validation-for="ContractEndDate" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ContractAttachmentFile" class="control-label"></label>
+                                @if (!string.IsNullOrEmpty(Model.ContractAttachment))
+                                {
+                                    <a target="_blank" href="/operational/SiteAdmin/SiteAdmin_Companies_ContractAttachment/@Model.CompanyID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                }
+                            </div>
+                            <div class="col-6">
+                                <input type="file" class="form-control" asp-for="ContractAttachmentFile" />
+                                <span asp-validation-for="ContractAttachmentFile" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Operational Settings</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="IsFlagStatusActive" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("IsFlagStatusActive", Model.IsFlagStatusActive, new { @class = "form-control" })
+                                <span asp-validation-for="IsFlagStatusActive" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CalibrationValidDays" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CalibrationValidDays" />
+                                <span asp-validation-for="CalibrationValidDays" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SyncManagementAccounts" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("SyncManagementAccounts", Model.SyncManagementAccounts, new { @class = "form-control" })
+                                <span asp-validation-for="SyncManagementAccounts" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Active" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Active", Model.Active, new { @class = "form-control" })
+                                <span asp-validation-for="Active" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Priority" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Priority" />
+                                <span asp-validation-for="Priority" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Financial Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ConvenienceFeePerc" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ConvenienceFeePerc" />
+                                <span asp-validation-for="ConvenienceFeePerc" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Netcash Banking Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ServiceKey" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ServiceKey" />
+                                <span asp-validation-for="ServiceKey" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MasterServiceKey" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="MasterServiceKey" />
+                                <span asp-validation-for="MasterServiceKey" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NetcashBankName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NetcashBankName" />
+                                <span asp-validation-for="NetcashBankName" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NetcashBankAccountType" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NetcashBankAccountType" />
+                                <span asp-validation-for="NetcashBankAccountType" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NetcashBankAccountNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NetcashBankAccountNo" />
+                                <span asp-validation-for="NetcashBankAccountNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="NetcashBankBranchCode" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="NetcashBankBranchCode" />
+                                <span asp-validation-for="NetcashBankBranchCode" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Sage Accounting Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SageAccountingCompanyID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("SageAccountingCompanyID", Model.SageAccountingCompanyID, new { @class = "form-control" })
+                                <span asp-validation-for="SageAccountingCompanyID" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Operational Banking Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OperationalBankName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="OperationalBankName" />
+                                <span asp-validation-for="OperationalBankName" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OperationalBankAccountType" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="OperationalBankAccountType" />
+                                <span asp-validation-for="OperationalBankAccountType" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OperationalBankAccountNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="OperationalBankAccountNo" />
+                                <span asp-validation-for="OperationalBankAccountNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OperationalBankBranchCode" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="OperationalBankBranchCode" />
+                                <span asp-validation-for="OperationalBankBranchCode" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Custom Banking Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomBankName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CustomBankName" />
+                                <span asp-validation-for="CustomBankName" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomBankAccountType" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CustomBankAccountType" />
+                                <span asp-validation-for="CustomBankAccountType" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomBankAccountNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CustomBankAccountNo" />
+                                <span asp-validation-for="CustomBankAccountNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomBankBranchCode" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="CustomBankBranchCode" />
+                                <span asp-validation-for="CustomBankBranchCode" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Skybill Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BalanceMustBeAbove" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="BalanceMustBeAbove" />
+                                <span asp-validation-for="BalanceMustBeAbove" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BalanceCheckSkybillCustomerNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="BalanceCheckSkybillCustomerNo" />
+                                <span asp-validation-for="BalanceCheckSkybillCustomerNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Registrable" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Registrable", Model.Registrable, new { @class = "form-control" })
+                                <span asp-validation-for="Registrable" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ExistsInSkybill" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ExistsInSkybill", Model.ExistsInSkybill, new { @class = "form-control" })
+                                <span asp-validation-for="ExistsInSkybill" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="IsDailyBillingStatusActive" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("IsDailyBillingStatusActive", Model.IsDailyBillingStatusActive, new { @class = "form-control" })
+                                <span asp-validation-for="IsDailyBillingStatusActive" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="IsCeilingActiveOnMidnightSync" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("IsCeilingActiveOnMidnightSync", Model.IsCeilingActiveOnMidnightSync, new { @class = "form-control" })
+                                <span asp-validation-for="IsCeilingActiveOnMidnightSync" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Tax Invoice Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplierName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplierName" />
+                                <span asp-validation-for="SupplierName" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplierAddress" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplierAddress" />
+                                <span asp-validation-for="SupplierAddress" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplierVATNumber" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplierVATNumber" />
+                                <span asp-validation-for="SupplierVATNumber" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplierPostal" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplierPostal" />
+                                <span asp-validation-for="SupplierPostal" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplierPhone" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplierPhone" />
+                                <span asp-validation-for="SupplierPhone" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplierURL" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplierURL" />
+                                <span asp-validation-for="SupplierURL" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Afrox Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ConvFactor" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ConvFactor" />
+                                <span asp-validation-for="ConvFactor" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Batch" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Batch" />
+                                <span asp-validation-for="Batch" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SupplyPerCycle" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SupplyPerCycle" />
+                                <span asp-validation-for="SupplyPerCycle" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PlantNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="PlantNo" />
+                                <span asp-validation-for="PlantNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StockRefNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="StockRefNo" />
+                                <span asp-validation-for="StockRefNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Sales_Document_Type_VBAK_AUART" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Sales_Document_Type_VBAK_AUART" />
+                                <span asp-validation-for="Sales_Document_Type_VBAK_AUART" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Sales_Organization_VBAK_VKORG" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Sales_Organization_VBAK_VKORG" />
+                                <span asp-validation-for="Sales_Organization_VBAK_VKORG" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Distribution_Channel_VBAK_VTWEG" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Distribution_Channel_VBAK_VTWEG" />
+                                <span asp-validation-for="Distribution_Channel_VBAK_VTWEG" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Division_VBAK_SPART" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Division_VBAK_SPART" />
+                                <span asp-validation-for="Division_VBAK_SPART" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Sales_Office_VBAK_VKBUR" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Sales_Office_VBAK_VKBUR" />
+                                <span asp-validation-for="Sales_Office_VBAK_VKBUR" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ItemID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ItemID" />
+                                <span asp-validation-for="ItemID" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Shipping_Point_Or_Receiving_Point_VBAP_VSTEL_01" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Shipping_Point_Or_Receiving_Point_VBAP_VSTEL_01" />
+                                <span asp-validation-for="Shipping_Point_Or_Receiving_Point_VBAP_VSTEL_01" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Route_VBAP_ROUTE_01" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Route_VBAP_ROUTE_01" />
+                                <span asp-validation-for="Route_VBAP_ROUTE_01" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ACORegulatorSerialNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ACORegulatorSerialNo" />
+                                <span asp-validation-for="ACORegulatorSerialNo" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ManifoldSupply_Left_Units" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ManifoldSupply_Left_Units" />
+                                <span asp-validation-for="ManifoldSupply_Left_Units" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ManifoldSupply_Left_KG" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ManifoldSupply_Left_KG" />
+                                <span asp-validation-for="ManifoldSupply_Left_KG" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ManifoldSupply_Right_Units" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ManifoldSupply_Right_Units" />
+                                <span asp-validation-for="ManifoldSupply_Right_Units" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ManifoldSupply_Right_KG" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ManifoldSupply_Right_KG" />
+                                <span asp-validation-for="ManifoldSupply_Right_KG" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Skin Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Url" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Model.Url
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PrimaryColor" class="control-label"></label>
+                            </div>
+                            <div class="col-6" style="background-color: @Model.PrimaryColor;">
+                                <span style="background-color: @Model.PrimaryColor;">&nbsp;</span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SecondaryColor" class="control-label"></label>
+                            </div>
+                            <div class="col-6" style="background-color: @Model.SecondaryColor;">
+                                <span style="background-color: @Model.SecondaryColor;">&nbsp;</span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Logo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <img src="/images/@Model.Logo" />
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LogoWhite" class="control-label"></label>
+                            </div>
+                            <div class="col-6 bg-dark">
+                                <img src="/images/@Model.LogoWhite" />
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Device API Details</h4>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DeviceAPIID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DeviceAPIID", Model.DeviceAPIID, new { @class = "form-control" })
+                                <span asp-validation-for="DeviceAPIID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-4">
+                                <a href="/operational/SiteAdmin/SiteAdmin_Companies" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Companies</a>
+                            </div>
+                            <div class="col-4 text-center">
+                                <a href="/operational/SiteAdmin/SiteAdmin_Companies_EditSkin/@Model.CompanyID" class="btn btn-outline-primary-sm"><i class="fas fa-palette"></i>&nbsp;Edit Skin</a>
+                            </div>
+                            <div class="col-4 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card-body">
+                    <div class="row col-12 mb-md-2">
+                        <h6>Meter Exclusions (Meters that gets excluded from flagging)</h6>
+                    </div>
+                    <div class="row col-12 mb-md-2">
+                        @foreach (var userMeter in Model.Company_BlockedMeterExclusions)
+                        {
+                            <div class="border border-primary rounded p-2 m-1">
+                                @userMeter.MeterSerial
+                                <text>&nbsp;</text>
+                                <a href="/operational/siteadmin/SiteAdmin_Companies_Edit_DeleteMeter/@userMeter.CompanyID/@userMeter.MeterSerial" title="Remove @userMeter.MeterSerial from @Model.Name"><i class="fas fa-trash-alt"></i></a>
+                            </div>
+                        }
+                    </div>
+                    <div class="row mb-md-2">
+                        @*<div class="col-2">Add Meter:</div>*@
+                        <div class="col-5 text-center">
+                            <select id="addMeterDropDown" class="form-control">
+                                @foreach (var meter in Model.MeterSerials)
+                                {
+                                    if (Model.Company_BlockedMeterExclusions.Where(p => p.MeterSerial == meter.Key).Count() == 0)
+                                    {
+                                        <option value="@meter.Key">@meter.Value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col"><a href="#" onclick="AddMeter('@Model.CompanyID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Meter</a></div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Edit History</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changes</th>
+                            </tr>
+
+                            @foreach (var item in Model.SiteAdmin_Company_LogItems)
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>
+                                        @(Html.Raw(item.SystemDescription))
+                                    </td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+
+                </div>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('a[rel=popover]').popover({
+            html: true,
+            trigger: 'hover',
+            placement: 'bottom',
+            content: function () { return '<img height="40px;" src="' + $(this).data('img') + '" />'; }
+        });
+        function AddMeter(userID) {
+            var companyID = $("#addMeterDropDown").val();
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_Companies_Edit_AddMeter/' + userID + '/' + companyID;
+        }
+        if ('@(Model.SuburbID.HasValue)' == 'True') {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+            var provinces = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Provinces)));
+            var municipalities = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Municipalities)));
+
+            $("#Province").empty();
+            $("#Province").append(`<option value="">[--Select Province--]</option>`);
+            $(provinces).each(function () {
+                if (this.Value == '@Model.ProvinceID') {
+                    $("#Province").append(`<option selected="selected" value="${this.Value}">${this.Text}</option>`);
+                }
+                else {
+                    $("#Province").append(`<option value="${this.Value}">${this.Text}</option>`);
+                }
+            });
+            $("#Province").val('@(Model.ProvinceID)');
+
+            $("#Municipality").empty();
+            $(municipalities).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    if (this.ID.toString() == '@Model.MunicipalityID') {
+                        $("#Municipality").append(`<option selected="selected" value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                    else {
+                        $("#Municipality").append(`<option value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                }
+            });
+            $("#Municipality").val('@(Model.MunicipalityID)');
+
+            $("#TownOrCity").empty();
+            $(towns).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    if (this.ID.toString() == '@Model.TownID') {
+                        $("#TownOrCity").append(`<option selected="selected" value="${this.ID}">${this.TownName}</option>`);
+                    }
+                    else {
+                        $("#TownOrCity").append(`<option value="${this.ID}">${this.TownName}</option>`);
+                    }
+                }
+            });
+            $("#TownOrCity").val('@(Model.TownID)');
+
+            $("#Suburb").empty();
+            $(suburbs).each(function () {
+                if (this.TownID == $("#TownOrCity").val()) {
+                    if (this.ID.toString() == '@Model.SuburbID') {
+                        $("#Suburb").append(`<option selected="selected" value="${this.ID}">${this.SuburbName}</option>`);
+                    }
+                    else {
+                        $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                    }
+                }
+            });
+            $("#Suburb").val('@(Model.SuburbID)');
+        }
+        else {
+            var provinces = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Provinces)));
+
+            $("#Province").empty();
+            $("#Province").append(`<option value="">[--Select Province--]</option>`);
+            $(provinces).each(function () {
+                $("#Province").append(`<option value="${this.Value}">${this.Text}</option>`);
+            });
+            $("#Province").val('@(Model.ProvinceID)');
+
+            $("#LocalMunicipality").empty();
+            $("#LocalMunicipality").append(`<option value="">[--Select Province--]</option>`);
+            $('#LocalMunicipality').prop('disabled', 'disabled');
+
+            $("#TownOrCity").empty();
+            $("#TownOrCity").append(`<option value="">[--Select Province--]</option>`);
+            $('#TownOrCity').prop('disabled', 'disabled');
+
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[--Select Province--]</option>`);
+            $('#Suburb').prop('disabled', 'disabled');
+        }
+
+        function DoSelectedProvince() {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+            var municipalities = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Municipalities)));
+
+            $("#LocalMunicipality").append(`<option value="">[--Select Municipality--]</option>`);
+            $('#LocalMunicipality').prop('disabled', false);
+            $("#LocalMunicipality").empty();
+            $(municipalities).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    if (this.ID.toString() == '@Model.MunicipalityID') {
+                        $("#LocalMunicipality").append(`<option selected="selected" value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                    else {
+                        $("#LocalMunicipality").append(`<option value="${this.ID}">${this.MunicipalityName}</option>`);
+                    }
+                }
+            });
+
+            $('#TownOrCity').prop('disabled', false);
+            $("#TownOrCity").empty();
+            $("#TownOrCity").append(`<option value="">[--Select Town--]</option>`);
+            $(towns).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    $("#TownOrCity").append(`<option value="${this.ID}">${this.TownName}</option>`);
+                }
+            });
+
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[--Select Town--]</option>`);
+            $('#Suburb').prop('disabled', 'disabled');
+            $(suburbs).each(function () {
+                if (this.TownID == $("#TownOrCity").val()) {
+                    $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                }
+            });
+        }
+
+        function DoSelectedTown() {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+
+            $('#Suburb').prop('disabled', false);
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[--Select Suburb--]</option>`);
+            $(suburbs).each(function () {
+                if (this.TownID == $("#TownOrCity").val()) {
+                    $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                }
+            });
+        }
+
+    </script>
+}

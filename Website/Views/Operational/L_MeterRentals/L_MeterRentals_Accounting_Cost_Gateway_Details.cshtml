@@ -1,0 +1,144 @@
+@model MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Accounting_Cost_Gateway_Details.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.L_MeterRentals_Accounting_Cost_Gateway_Details.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <span>Select company to view report</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header text-left">
+
+                    <div class="row mb-md-2">
+                        <div class="col">
+                            <label asp-for="RentalMonth" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            @Html.DropDownList("RentalMonth", Model.RentalMonth, new { @class = "form-control" })
+                            <span asp-validation-for="RentalMonth" class="text-red"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer">
+                    <div class="row mb-md-2">
+                        <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <table class="table table-responsive-xl table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap text-center">GW ID</th>
+                        <th scope="col" class="text-nowrap text-center">Name</th>
+                        <th scope="col" class="text-nowrap text-center">Owner</th>
+                        <th scope="col" class="text-nowrap text-center">Manufacturer</th>
+                        <th scope="col" class="text-nowrap text-center">Rental Month</th>
+                        <th scope="col" class="text-center">Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Labour And Consumables Cost  (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Preparation Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Antenna Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-center">Sundy Cost (Excl. VAT)</th>
+                        <th scope="col" class="text-nowrap text-center">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems)
+                    {
+                        <tr>
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.RentalDataDump.GWIDLinked) ? "" : " table-danger")" title="@item.RentalDataDump.Name">@item.RentalDataDump.GWIDLinked</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.RentalDataDump.Name) ? "" : " table-danger")" title="@item.RentalDataDump.Name">@item.RentalDataDump.Name</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.RentalDataDump.Owner) ? "" : " table-danger")" title="@item.RentalDataDump.Name">@item.RentalDataDump.Owner</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.RentalDataDump.Manufacturer) ? "" : " table-danger")" title="@item.RentalDataDump.Name">@item.RentalDataDump.Manufacturer</td>
+
+                            <td scope="col" class="text-nowrap @(!string.IsNullOrEmpty(item.RentalDataDump.Manufacturer) ? "" : " table-danger")" title="@item.RentalDataDump.Name">@item.RentalDataDump.RentalMonth.ToDateShort()</td>
+
+
+                            <td scope="col" style="border-left: 3px solid black;" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(item.GatewayCost, true)) title="@item.RentalDataDump.Name - Cost (Excl. VAT)">@item.GatewayCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(item.GatewayLabourAndConsumablesCost)) title="@item.RentalDataDump.Name - Labour And Consumables Cost  (Excl. VAT)">@item.GatewayLabourAndConsumablesCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(item.GatewayPreparationCost)) title="@item.RentalDataDump.Name - Preparation Cost (Excl. VAT)">@item.GatewayPreparationCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(item.GatewayAntennaCost)) title="@item.RentalDataDump.Name - Antenna Cost (Excl. VAT)">@item.GatewayAntennaCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(item.GatewaySundyCost)) title="@item.RentalDataDump.Name - Sundy cost  (Excl. VAT)">@item.GatewaySundyCost.ToMoneyNoDecimal("R", "-")</td>
+
+                            <td scope="col" style="border-left: 3px solid black;border-right: 3px solid black;" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(item.TotalCost)) title="@item.RentalDataDump.Name - Total cost  (Excl. VAT)">@item.TotalCost.ToMoneyNoDecimal("R")</td>
+
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col" colspan="5" class="text-nowrap text-left" style="border-top:3px double black;border-bottom:3px double black;">Total</td>
+
+                        <td style="border-left: 3px solid black;border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayCost).Sum(), true))>@Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayLabourAndConsumablesCost).Sum(), true))>@Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayLabourAndConsumablesCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayPreparationCost).Sum(), true))>@Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayPreparationCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayAntennaCost).Sum(), true))>@Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewayAntennaCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewaySundyCost).Sum(), true))>@Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.GatewaySundyCost).Sum().ToMoneyNoDecimal("R", "-")</td>
+
+                        <td style="border-left: 3px solid black;border-right: 3px solid black;border-top:3px double black;border-bottom:3px double black;" scope="col" @Html.Raw(MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_Cost_Gateway_DetailsModel.GetCellClass(Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.TotalCost).Sum(), true))>@Model.L_MeterRentals_Accounting_Cost_Gateway_DetailsItems.Select(p => p.TotalCost).Sum().ToMoneyNoDecimal("R")</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+<script>
+    $('a[rel=popover]').popover({
+    html: true,
+    trigger: 'hover',
+    placement: 'bottom',
+    content: function(){return '<img height="100px;" src="'+$(this).data('img') + '" />';}
+    });
+    function RedirectToCustomer(serial) {
+        document.location.href = '/operational/changeActiveMeter/' + serial + '?R=' + encodeURIComponent(window.location.href);
+    }
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = window.location.href.split('?')[0] + '?RentalMonth=' + $("#RentalMonth").val();
+    }
+</script>
+}

@@ -1,0 +1,129 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_DailyBillingOverview_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_DailyBillingOverview_Summary.GetDescription();
+}
+@{
+    DateTime currentDate = DateTime.Now.AddDays(-1).Date;
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header text-left">
+                Note: Blanks could mean billing failed OR billing sync failed. Please confirm in Skybill.
+                <br />
+                Zero's means billing did take place with an amount of 0 (Periods are used)
+                @*<a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails" class="btn btn-outline-primary">More Details&nbsp;<i class="fas fa-chevron-right"></i></a>*@
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" scope="col">Company Name</th>
+                            <th rowspan="2" scope="col">Status</th>
+                            <th colspan="4" scope="col" class="text-center"><h5>Currency</h5></th>
+                            <th rowspan="2" scope="col">&nbsp;</th>
+                            <th colspan="4" scope="col" class="text-center"><h5>Units</h5></th>
+                            <th rowspan="2" scope="col">&nbsp;</th>
+                            <th rowspan="2" scope="col">Daily Billing Status</th>
+                            <th rowspan="2" scope="col">Meter Count</th>
+                        </tr>
+                        <tr>
+                            @{
+                                currentDate = DateTime.Now.AddDays(-1).Date;
+                            }
+                            @while (currentDate >= DateTime.Now.AddDays(-4).Date)
+                            {
+                                <th scope="col" class="text-center">@Html.Raw(currentDate.ToString("yyyy<br />MMM<br />dd"))</th>
+                                currentDate = currentDate.AddDays(-1);
+                            }
+                            @{
+                                currentDate = DateTime.Now.AddDays(-1).Date;
+                            }
+                            @while (currentDate >= DateTime.Now.AddDays(-4).Date)
+                            {
+                                <th scope="col" class="text-center">@Html.Raw(currentDate.ToString("yyyy<br />MMM<br />dd"))</th>
+                                currentDate = currentDate.AddDays(-1);
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A06_BillingControlReport_DailyBillingOverview_SummaryItems)
+                        {
+                            string rowclass = "";
+                            string cellClass = "";
+                            if (item.Status == "Ok")
+                            {
+                                rowclass = " class=\"table-success\"";
+                                cellClass = " class=\"text-green font-weight-bold\"";
+                            }
+                            else
+                            {
+                                rowclass = " class=\"table-danger\"";
+                                cellClass = " class=\"text-red font-weight-bold\"";
+                            }
+                            <tr title="View @item.CompanyName" @Html.Raw(rowclass)>
+                                <td scope="col">@item.CompanyName</td>
+                                <td scope="col" @Html.Raw(cellClass)>@item.Status</td>
+                                @{
+                                    currentDate = DateTime.Now.AddDays(-1).Date;
+                                }
+                                @while (currentDate >= DateTime.Now.AddDays(-4).Date)
+                                {
+                                    decimal? amount = null;
+                                    if (item.BilledAmounts.Where(p => p.Key == currentDate).Count() > 0)
+                                    {
+                                        amount = item.BilledAmounts.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                                    }
+                                    <td title="@item.CompanyName - @currentDate.ToDateShort() Currency" class="text-right" scope="col">@amount.ToMoneyNoDecimal("R")</td>
+                                    currentDate = currentDate.AddDays(-1);
+                                }
+                                <td scope="col">&nbsp;</td>
+                                @{
+                                    currentDate = DateTime.Now.AddDays(-1).Date;
+                                }
+                                @while (currentDate >= DateTime.Now.AddDays(-4).Date)
+                                {
+                                    decimal? amount = null;
+                                    if (item.BilledUnits.Where(p => p.Key == currentDate).Count() > 0)
+                                    {
+                                        amount = item.BilledUnits.Where(p => p.Key == currentDate).SingleOrDefault().Value;
+                                    }
+                                    <td title="@item.CompanyName - @currentDate.ToDateShort() Units" class="text-right" scope="col">@amount.ToReading()</td>
+                                    currentDate = currentDate.AddDays(-1);
+                                }
+                                <td scope="col">&nbsp;</td>
+                                <td scope="col">
+                                    @if (item.IsDailyBillingStatusActive)
+                                    {
+                                        <span class="text-green">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red">Inactive</span>
+                                    }
+                                </td>
+                                <td scope="col">@item.MeterCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

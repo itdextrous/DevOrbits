@@ -1,0 +1,134 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.MirrorDeviceOdoReadingsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+<table class="table table-sm table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Time Logged</th>
+            <th scope="col" class="text-right">Odometer Reading</th>
+            <th scope="col" class="text-right">Create Date</th>
+            <th scope="col" class="text-center">Uploaded By</th>
+            <th scope="col" class="text-center">Verified By</th>
+            <th scope="col" class="text-right">Actual Reading</th>
+            <th scope="col" class="text-center">Requires Recalc</th>
+            <th scope="col" class="text-center">Photo</th>
+            <th scope="col" class="text-center"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.DeviceOdoReadings)
+        {
+            <tr>
+                <td scope="col">@item.TimeLogged.ToDateAndTimeShort()</td>
+                <td scope="col" class="text-right" title="@item.OdometerReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Odometer Reading">
+                    @if (opProv.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                    {
+                        <span>@item.OdometerReading.ToDecimal(3)</span>
+                    }
+                    else
+                    {
+                        <span>@item.OdometerReading.ToReading()</span>
+                    }
+                </td>
+                <td scope="col" class="text-right" title="@item.CreateDate.ToDateAndTimeShort() - @item.TimeLogged.ToDateAndTimeShort() Create Date">@item.CreateDate.ToDateAndTimeShort()</td>
+                <td scope="col" class="text-center" title="@item.UploadedBy - @item.TimeLogged.ToDateAndTimeShort() Uploaded By">@item.UploadedBy</td>
+                <td scope="col" class="text-center" title="@item.VerifiedBy - @item.TimeLogged.ToDateAndTimeShort() Verified By">@item.VerifiedBy</td>
+                @if (item.DeviceReading != null)
+                {
+                    string cellClass = "";
+                    if (item.DeviceReading.VirtualOdometerReading != item.OdometerReading)
+                    {
+                        cellClass = "text-red font-weight-bold";
+                    }
+                    <td scope="col" class="text-right @Html.Raw(cellClass)" title="@item.DeviceReading.VirtualOdometerReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort() Actual Reading">
+                        @if (opProv.CustomerMeterDeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                        {
+                            <span>@item.DeviceReading.VirtualOdometerReading.ToDecimal(3)</span>
+                        }
+                        else
+                        {
+                            <span>@item.DeviceReading.VirtualOdometerReading.ToReading()</span>
+                        }
+                    </td>
+                }
+                else
+                {
+                    <td scope="col" class="text-right text-red font-weight-bold">Missing</td>
+
+                }
+                <td scope="col" class="text-center" title="@item.VerifiedBy - @item.TimeLogged.ToDateAndTimeShort() Requires Recalc">@item.RequiresRecalc.ToBoolean()</td>
+                <td scope="col" class="text-center" title="@item.TimeLogged.ToDateAndTimeShort() Photo">
+                    @if (!string.IsNullOrEmpty(item.PhotoURL))
+                    {
+                        <a rel="popover" href="@item.PhotoURL" data-img="@item.PhotoURL" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-search-plus"></i>&nbsp;Show Photo</a>
+                    }
+                </td>
+                <td scope="col" class="text-right" title="@item.TimeLogged.ToDateAndTimeShort() Photo">
+                    @if (item.CreateDate.Date >= DateTime.Now.AddMonths(-2).Date && !item.RequiresRecalc)
+                    {
+                        <a href="#" onclick="DoRecalc('@item.Id', '@item.OdometerReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort()')" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Recalc</a>
+                    }
+                    &nbsp;
+                    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MirrorDeviceReview, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                    {
+                        <a href="#" onclick="DoDelete('@item.Id', '@item.OdometerReading.ToReading() - @item.TimeLogged.ToDateAndTimeShort()')" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    $('a[rel=popover]').popover({
+        html: true,
+        trigger: 'hover',
+        placement: 'bottom',
+        content: function () { return '<img height="100px;" src="' + $(this).data('img') + '" />'; }
+    });
+
+    function DoDelete(ItemID, infoMessage) {
+        if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+            $("#loaderContent").css("display", "block");
+
+
+            $.post("/operational/shared/meter/MirrorDeviceOdoReadings_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    }
+
+
+    function DoRecalc(ItemID, infoMessage) {
+        if (confirm('Are you sure you want to Recalc ' + infoMessage + '?')) {
+            $("#loaderContent").css("display", "block");
+
+
+            $.post("/operational/shared/meter/MirrorDeviceOdoReadings_Recalc/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    }
+
+</script>

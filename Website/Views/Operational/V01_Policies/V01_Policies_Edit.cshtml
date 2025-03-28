@@ -1,0 +1,257 @@
+@model MyVoltage.Models.OperationalModels.V01_Policies.V01_PoliciesModels.V01_Policies_EditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V01_Policies_All.GetDescription()} - Edit";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Policy successfully updated.<br />
+                    Dont forget to add the users this policy applies to.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/V01_Policies/V01_Policies_Edit" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    Policy Details:
+                </div>
+                <form asp-action="V01_Policies_Edit" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Heading" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Heading" />
+                                <span asp-validation-for="Heading" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="Description"></textarea>
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LinkedSecureAreaID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LinkedSecureAreaID", Model.LinkedSecureAreaID, new { @class = "form-control" })
+                                <span asp-validation-for="LinkedSecureAreaID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PolicyTypeID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("PolicyTypeID", Model.PolicyTypeID, new { @class = "form-control" })
+                                <span asp-validation-for="PolicyTypeID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ActiveFromDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="ActiveFromDate" type="date" />
+                                <span asp-validation-for="ActiveFromDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ActiveToDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="ActiveToDate" type="date" />
+                                <span asp-validation-for="ActiveToDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/V01_Policies/V01_Policies_All" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Policies</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-6 text-left">
+                                <h5 class="text-orange">Policy Attachments</h5>
+                            </div>
+                            <div class="col-6 text-right">
+                                <a href="/operational/V01_Policies/V01_Policies_AddAttachment" class="btn btn-outline-primary-sm"><i class="fas fa-upload"></i>&nbsp;Add Attachment</a>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12">
+                                <table class="table table-responsive-xl table-striped table-hover">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>File Type</th>
+                                        <th>User</th>
+                                        <th></th>
+                                    </tr>
+
+                                    @foreach (var item in Model.V01_Policy.V01_Policies_AttachmentItems)
+                                    {
+                                        string aClass = "";
+                                        if (item.IsDeleted)
+                                        {
+                                            aClass = "table-danger";
+                                        }
+                                        <tr class="@Html.Raw(aClass)">
+                                            <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                            <td>@item.Description</td>
+                                            <td>@item.AttachmentType.GetDescription()</td>
+                                            <td>@item.Username</td>
+                                            <td class="text-right">
+                                                <a href="/operational/V01_Policies/V01_Policies_All_GetAttachment/@item.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                                &nbsp;
+                                                @if (!item.IsDeleted)
+                                                {
+                                                    <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteAttachment('@item.ID', '@item.Description (@item.AttachmentType.GetDescription()) - Added by @item.Username on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                                }
+                                                else
+                                                {
+                                                    <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-6 text-left">
+                                <h5 class="text-orange">Policy Responsible Users</h5>
+                            </div>
+                            <div class="col-6 text-right">
+                                <a href="/operational/V01_Policies/V01_Policies_AddResponsibleUser" class="btn btn-outline-primary-sm"><i class="fas fa-user-circle"></i>&nbsp;Add Responsible User</a>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12">
+                                <table class="table table-responsive-xl table-striped table-hover">
+                                    <tr>
+                                        <th>Date Added</th>
+                                        <th>User</th>
+                                        <th>Date Approved</th>
+                                        <th></th>
+                                    </tr>
+
+                                    @foreach (var item in Model.V01_Policy.V01_Policies_ResponsibleUserItems)
+                                    {
+                                        string aClass = "";
+                                        if (!item.DateApproved.HasValue)
+                                        {
+                                            aClass = "table-danger";
+                                        }
+                                        <tr class="@Html.Raw(aClass)">
+                                            <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                            <td>@item.Username</td>
+                                            <td>@(item.DateApproved.HasValue ? item.DateApproved.ToDateAndTimeShort() : "Not Approved")</td>
+                                            <td class="text-right">
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteResponsibleUser('@item.ID', '@item.Username');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer">
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12 text-left">
+                                <h5 class="text-orange">Policy Log</h5>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12">
+                                <table class="table table-responsive-xl table-striped table-hover">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Changes</th>
+                                    </tr>
+
+                                    @foreach (var item in Model.V01_Policy.V01_PoliciesLogItems.OrderByDescending(p => p.DateCreated))
+                                    {
+                                        <tr>
+                                            <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                            <td>@item.Username</td>
+                                            <td>@Html.Raw(item.SystemDescription)</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td>@Model.V01_Policy.DateCreated.ToDateAndTimeShort()</td>
+                                        <td>@Model.V01_Policy.Username</td>
+                                        <td>Created</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ConfirmDeleteAttachment(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/V01_Policies/V01_Policies_All_DeleteAttachment/' + id;
+            }
+        }
+        function ConfirmDeleteResponsibleUser(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/V01_Policies/V01_Policies_All_DeleteResponsibleUser/' + id;
+            }
+        }
+    </script>
+}

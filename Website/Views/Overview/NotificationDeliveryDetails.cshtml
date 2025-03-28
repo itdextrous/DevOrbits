@@ -1,0 +1,212 @@
+﻿@model MyVoltage.Models.OverviewViewModels.NotificationDeliveryViewModel
+@inject MyVoltage.Services.CustomerProvider customerProvider
+@{
+    ViewData["Title"] = "Notification Delivery Details";
+}
+
+@{
+    await Html.RenderPartialAsync("customerRecharge");
+}
+
+<div class="row mt-4 balance">
+    <div class="col-md-12 col-lg-9 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h4>Balance: <span class="text-primary">R @Newtonsoft.Json.JsonConvert.SerializeObject(Model.CurrentBalance)</span></h4>
+                <span>Email:</span><span><b>@(Model.Email == null ? "-" : Model.Email)</b></span><br />
+                <span>Phone number: </span><span><b>@(Model.PhoneNumber == null ? "-" : Model.PhoneNumber)</b></span><br />
+                <span>Low Balance Notification 1:</span><span><b>R  @(Model.DisconnectionLowBalanceNotification1 == null ? "-" : Model.DisconnectionLowBalanceNotification1)</b></span><br />
+
+                @if (Model.Ledgers != null)
+                {
+                    <span class="w-100"><img src="/images/notification-delivery-graph.png" width="80" alt=""><b>Click on the data points to see detail</b></span>
+
+                    <div class="tab-content" id="pills-tabContent-overall">
+                        <div class="tab-pane fade show active" id="overall-monthly" role="tabpanel" aria-labelledby="overall-monthly">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="myChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="notificationDetails" hidden>
+                        <h5>Details for <span id="notificationDate"></span></h5>
+                        <h5>Balance: <span id="dailyBalance"></span></h5>
+                        <br />
+                        <div id="mailGunDetails"></div>
+                        <br />
+                        @*<div id="bulkSMSDetails"></div>*@
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/chart.bundle.min.js"></script>
+    <script src="~/js/chart.utils.js"></script>
+    <!--Temporary solution to remove the gradient bg after logged in. -->
+    <script>
+        var Color = 'rgb(65,105,225)'
+
+        var dataModel = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));   
+        const dates = [];
+
+        for (var i = 0; i < dataModel.Ledgers.length; i++)
+        {
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var d = new Date(dataModel.Ledgers[i].Posting_Date);
+            dates.push(d.getDate()+ " " + monthNames[d.getMonth()]+" "+ d.getFullYear());
+        }
+       
+        var config = {
+            type: 'line',
+            stacked: false,
+            data: {
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderWidth: 0,
+                }]
+                ,
+                labels: null
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false,
+                    text: 'Main Colours'
+                },
+                onClick: function (e, item)
+                {
+                    if (item.length > 0)
+                    {
+                         GetNotificationData(item[0]._index);
+                    }                  
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        ticks: {
+                            beginAtZero: true,
+                            fontColor: 'rgba(0,0,0, 0.7)'
+                        },
+                        position: 'right',
+                        autoSkip: false,
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 1,
+                            zeroLineWidth: 0
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            beginAtZero: true,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: function (label, index, labels)
+                            {
+                                label = parseFloat(label)
+
+                                if (Math.max.apply(Math, this.ticks) <= 5)
+                                {
+                                    label = toFixed(label, 2)
+                                }
+                                else
+                                {
+                                    label = toFixed(label, 0)
+                                }
+
+                                return numberWithCommas(label)
+                            },
+                        },
+                        position: 'right',
+                        id: "y-axis-0",
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    }]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        };
+
+        function loadBalance()
+        {
+             var balanceConfig = $.extend(true, {}, config);
+             var balancelabels = dates
+             balanceConfig.data.datasets = [];
+             var dataSetCount = 0;
+
+             balanceConfig.data.datasets.push({
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 0,
+                            label: ''
+                        });
+
+             balanceConfig.data.datasets[dataSetCount].pointBackgroundColor = [];
+
+             for (var i = 0; i < dataModel.Ledgers.length; i++)
+             {
+                 balanceConfig.data.datasets[dataSetCount].data.push(toFixed(dataModel.Ledgers[i].Balance, 2));
+                 balanceConfig.data.datasets[dataSetCount].backgroundColor.push(Color);
+                 balanceConfig.data.datasets[dataSetCount].pointBackgroundColor.push(Color);
+             }
+
+             balanceConfig.data.datasets[dataSetCount].yAxisID = "y-axis-" + dataSetCount;
+             balanceConfig.data.datasets[dataSetCount].borderColor = Color;
+
+             dataSetCount++;
+
+             balanceConfig.data.labels = balancelabels;
+             var ctx = document.getElementById('myChart').getContext("2d");
+             new Chart(ctx, balanceConfig);
+        }
+
+        loadBalance();
+
+        function numberWithCommas(number)
+        {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function toFixed(number, decimals)
+        {
+            var x = Math.pow(10, Number(decimals) + 1);
+            return (Number(number) + (1 / x)).toFixed(decimals)
+        }
+
+        function GetNotificationData(id)
+        {
+            const fullMonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var postingDate = dataModel.Ledgers[id].Posting_Date;
+
+            var postingDateLable = new Date(dataModel.Ledgers[id].Posting_Date);
+            var balance = dataModel.Ledgers[id].Balance;
+
+            $('#notificationDate').text(postingDateLable.getDate()+ " " + fullMonthNames[postingDateLable.getMonth()]+" "+ postingDateLable.getFullYear())
+            $('#dailyBalance').text("R " + balance);
+           
+            $('#mailGunDetails').load("/getMailGunData", { postingDate: postingDate, email: dataModel.Email });
+            //$('#bulkSMSDetails').load("/getBulkSMSData", { postingDate: postingDate, phoneNumber: dataModel.PhoneNumber });
+            $('#notificationDetails').removeAttr("hidden");
+        }
+
+    </script>
+}
+
+

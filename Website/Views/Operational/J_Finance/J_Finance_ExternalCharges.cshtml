@@ -1,0 +1,128 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ExternalChargesModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_ExternalCharges.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <span>Select a company to start...</span>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/operational/J_Finance/J_Finance_ExternalChargesDownload" class="btn btn-outline-primary-sm">Download Scheduled &amp; Processed</a>
+            &nbsp;
+            <a href="/Operational/J_Finance/J_Finance_ExternalChargesReverse" class="btn btn-outline-primary-sm">Reverse Scheduled &amp; Processed</a>
+        </div>
+    </div>
+    <form asp-action="J_Finance_ExternalCharges" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-4">
+                    <div class="card-content">
+                        @if (Model == null || !Model.IsSuccess)
+                        {
+                            <div class="row">
+                                <div class="col"><label asp-for="SkybillCustomerNos" class="control-label"></label>:</div>
+                                <div class="col">
+                                    @foreach (var item in Model.SkybillCustomerNos)
+                                    {
+                                        <div class="checkbox">
+                                            <input type="checkbox" name="selectedSkybillCustomerNos" value="@item.Value" @(item.Selected ? "checked" : "") /> @item.Text
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="PostingDate" class="control-label"></label>&nbsp;(eg. @DateTime.Now.ToString("yyyy-MM-dd HH:00")):</div>
+                                <div class="col">
+                                    <input class="form-group" asp-for="PostingDate" value="@(Model.PostingDate != DateTime.MinValue ? Model.PostingDate.ToString("yyyy-MM-dd HH:00") : "")" />
+                                    <span asp-validation-for="PostingDate" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="ReferenceNumber" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" asp-for="ReferenceNumber" />
+                                    <span asp-validation-for="ReferenceNumber" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="Amount" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" asp-for="Amount" />
+                                    <span asp-validation-for="Amount" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="UploadConfirmationEmail" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" asp-for="UploadConfirmationEmail" />
+                                    <span asp-validation-for="UploadConfirmationEmail" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="file" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" asp-for="file" />
+                                    <span asp-validation-for="file" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><label asp-for="NotifyClient" class="control-label"></label>:</div>
+                                <div class="col">
+                                    <input class="form-group" asp-for="NotifyClient" />
+                                    <span asp-validation-for="NotifyClient" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 text-right">
+                                    <input type="submit" value="Create" class="btn btn-outline-primary-sm" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                Your External Charges has been added to the schedule successfully.
+                            </div>
+                            <div class="row">
+                                <a href="/operational/J_Finance/J_Finance_ExternalCharges" class="btn btn-default">Ok</a>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#SkybillCustomerNo_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/J_Finance/J_Finance_ExternalCharges/CustomerSearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

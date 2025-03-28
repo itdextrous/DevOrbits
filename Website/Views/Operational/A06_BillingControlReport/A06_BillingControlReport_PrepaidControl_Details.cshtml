@@ -1,0 +1,63 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_PrepaidControl_DetailsModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_PrepaidControl_Details.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+<div class="row mb-4">
+    <div class="col">
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Select a company to start...</span>
+        }
+        else
+        {
+            <table class="table table-responsive-xl">
+                <thead>
+                    <tr>
+                        <th scope="col">Customer No</th>
+                        <th scope="col">Balance</th>
+                        <th scope="col">Account</th>
+                        <th scope="col">Meter Description</th>
+                        <th scope="col">Serial Number</th>
+                        <th scope="col">Meter Type</th>
+                        <th scope="col">Meter Status</th>
+                        <th scope="col">Disconnection Type</th>
+                        <th scope="col">Contactor state</th>
+                        <th scope="col">Remaining Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.A06_BillingControlReport_PrepaidControl_DetailsItems)
+                    {
+                        <tr>
+                            <td scope="col">@entry.CustomerNo</td>
+                            <td scope="col" class="text-right">@entry.Balance</td>
+                            <td scope="col">@entry.AccountType.GetDescription()</td>
+                            <td scope="col">@entry.MeterDescription</td>
+                            <td scope="col">@entry.SerialNo</td>
+                            <td scope="col">@entry.DeviceType.GetDescription()</td>
+                            <td scope="col" class="status @entry.OnlineStatus.ToUpper()">@entry.OnlineStatus</td>
+                            <td scope="col" class="disconnectionType @entry.DisconnectionType.ToUpper()">@entry.DisconnectionType</td>
+                            <td scope="col" class="contactorState @entry.ContactorState.ToUpper()">@entry.ContactorState</td>
+                            <td scope="col">@entry.RemainingCredit</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+
+        }
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function ()
+        {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+            $(".disconnectionType:contains('Auto')").addClass("text-green");
+            $(".disconnectionType:contains('Manual')").addClass("text-red");
+        });
+    </script>
+}

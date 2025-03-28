@@ -1,0 +1,208 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_CompaniesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_Companies.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <a href="/operational/SiteAdmin/SiteAdmin_Companies_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Company</a>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th rowspan="2" scope="col" class="border-table">Name</th>
+                    <th colspan="11" scope="col" class="border-table-spanned text-center">Company Details</th>
+                    <th colspan="5" scope="col" class="border-table-spanned text-center">Operational Settings</th>
+                    <th rowspan="2" class="border-table" scope="col"></th>
+                </tr>
+                <tr>
+                    <th class="border-table-left" scope="col">Type</th>
+                    <th class="border-table" scope="col">Partner</th>
+                    <th class="border-table" scope="col">No Of Registered Units</th>
+                    <th class="border-table" scope="col">No Of Metering Points</th>
+                    <th class="border-table" scope="col">Legal Entity</th>
+                    <th class="border-table" scope="col">Year Of Development</th>
+                    <th class="border-table" scope="col">Average Valuation</th>
+                    <th class="border-table" scope="col">Average LSM</th>
+                    <th class="border-table" scope="col">Province</th>
+                    <th class="border-table" scope="col">Town</th>
+                    <th class="border-table-right" scope="col">Suburb</th>
+
+                    <th class="border-table-left" scope="col">Monitoring (Flag/Dashboard) Status</th>
+                    <th class="border-table" scope="col">Daily Billing Status</th>
+                    <th class="border-table" scope="col">Midnight Sync Ceiling Status</th>
+                    <th class="border-table" scope="col">Sync Management Accounts</th>
+                    <th class="border-table-right" scope="col">Calibration Valid Days</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SiteAdmin_CompaniesItems)
+                {
+                    string rowClass = "";
+                    string title = $"{item.Name}";
+                    @*                    if (!item.PartnerID.HasValue)
+                {
+                rowClass = "table-danger";
+                title = $"{item.Name} - Missing Partner";
+                }
+                else if (!item.NoOfRegisteredUnits.HasValue || !item.NoOfMeteringPoints.HasValue)
+                {
+                rowClass = "table-warning";
+                title = $"{item.Name} - Missing No Of Registered Units and/or Metering Points";
+                }
+                else if (!item.CompanyTypeID.HasValue)
+                {
+                rowClass = "table-warning";
+                title = $"{item.Name} - Missing Company Type";
+                }
+                *@
+                    <tr class="@Html.Raw(rowClass)" title="@title">
+                        <td scope="col" class="text-nowrap border-table">
+                            @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.SiteAdmin_Companies, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                            {
+                                <a href="/operational/SiteAdmin/SiteAdmin_Companies_Edit/@item.CompanyID" class="link-primary">@item.Name</a>
+                            }
+                            else
+                            {
+                                <text>@item.Name</text>
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap border-table-left @(!item.CompanyTypeID.HasValue ? "table-danger" : "")">
+                            @item.CompanyTypeName
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(!item.PartnerID.HasValue ? "table-danger" : "")">
+                            @item.PartnerName
+                        </td>
+                        <td scope="col" class="text-nowrap text-right border-table @(!item.NoOfRegisteredUnits.HasValue ? "table-danger" : "")">
+                            @item.NoOfRegisteredUnits
+                        </td>
+                        <td scope="col" class="text-nowrap text-right border-table @(!item.NoOfMeteringPoints.HasValue ? "table-danger" : "")">
+                            @item.NoOfMeteringPoints
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(!item.LegalEntityID.HasValue ? "table-danger" : "")">
+                            @item.LegalEntity
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(!item.YearOfDevelopment.HasValue ? "table-danger" : "")">
+                            @item.YearOfDevelopment
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(!item.AverageValuation.HasValue ? "table-danger" : "")">
+                            @item.AverageValuation
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(string.IsNullOrEmpty(item.AverageLSM) ? "table-danger" : "")">
+                            @item.AverageLSM
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(string.IsNullOrEmpty(item.ProvinceName) ? "table-danger" : "")">
+                            @item.ProvinceName
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(string.IsNullOrEmpty(item.TownName) ? "table-danger" : "")">
+                            @item.TownName
+                        </td>
+                        <td scope="col" class="text-nowrap border-table-right @(!item.SuburbID.HasValue ? "table-danger" : "")">
+                            @item.SuburbName
+                        </td>
+                        <td scope="col" class="text-nowrap border-table-left">
+                            @item.IsFlagStatusActive.ToActiveStatus()
+                        </td>
+                        <td scope="col" class="text-nowrap border-table">
+                            @item.IsDailyBillingStatusActive.ToActiveStatus()
+                        </td>
+                        <td scope="col" class="text-nowrap border-table">
+                            @item.IsCeilingActiveOnMidnightSync.ToActiveStatus()
+                        </td>
+                        <td scope="col" class="text-nowrap border-table @(!item.SyncManagementAccounts.HasValue ? "table-danger" : "")">
+                            @item.SyncManagementAccounts.ToActiveStatus()
+                        </td>
+                        <td scope="col" class="text-nowrap text-right border-table-right @(!item.CalibrationValidDays.HasValue ? "table-danger" : "")">
+                            @item.CalibrationValidDays
+                        </td>
+                        <td scope="col" class="border-table">
+                            @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.SiteAdmin_Companies, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                            {
+                                <a href="/operational/SiteAdmin/SiteAdmin_Companies_Edit/@item.CompanyID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        function DoUpdatePartner(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Companies_ItemUpdatePartner/" + ItemID,
+                {
+                    partner: $("#partner_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateFlagStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Companies_ItemUpdateFlagStatus/" + ItemID,
+                {
+                    isFlagStatusActive: $("#status_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateDailyBillingStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Companies_ItemUpdateDailyBillingStatus/" + ItemID,
+                {
+                    isDailyBillingStatusActive: $("#dailybillingstatus_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    </script>
+}

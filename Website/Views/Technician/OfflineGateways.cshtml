@@ -1,0 +1,73 @@
+﻿@model MyVoltage.Models.TechnicianViewModels.OfflineGatewaysViewModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = $"Communication Gateways - {Model.CompanyName}";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-12">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <td>Gateway ID</td>
+                <td>Name</td>
+                <td>Status</td>
+                <td>Since</td>
+                <td>Sim</td>
+                <td>Network</td>
+                <td>GIS Location</td>
+                <td>Signal</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.OfflineGateways.Count == 0)
+            {
+                <tr>
+                    <td colspan="7">Hooray! No offline gateways for @Model.CompanyName</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var device in Model.OfflineGateways)
+                {
+                    <tr>
+                        <td>@device.GatewayID</td>
+                        <td>@device.Name</td>
+                        <td class="status font-weight-bold">@device.Status</td>
+                        <td>@device.Since</td>
+                        <td>@device.Sim</td>
+                        <td>@device.Network</td>
+                        <td>@device.GISLocation</td>
+                        <td>@device.Signal</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(device.Sim) && device.Sim.StartsWith('+'))
+                            {
+                                <a href="/technician/SendGatewayResetSMS/@device.GatewayID/@device.Sim.Replace("+", string.Empty)" class="btn btn-link">Reset</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <script src="~/js/knockout.js"></script>
+    <script src="~/js/markerclusterer.js"></script>
+    <script src="~/js/date.format.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk"></script>
+    <script>
+        $(document).ready(function () {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+        });
+    </script>
+}

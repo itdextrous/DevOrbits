@@ -1,0 +1,118 @@
+@model MyVoltage.Models.OperationalModels.A04_Tickets.A04_TicketsModels.A04_Tickets_ZendeskTicketCategoryDetailsModel
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row">
+                    <div class="col-2">Created Between</div>
+                    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" /></div>
+                    <div class="col-1">And</div>
+                    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" /></div>
+                    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+                (Tip: Use Ctrl + F to search)<br />
+                Click on a Ticket ID to view details
+            </div>
+            <div class="card-body" style="overflow-x:scroll;">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ticket ID</th>
+                            <th scope="col">Subject</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Updated</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Priority</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Requester</th>
+                            <th scope="col">Assignee</th>
+                            <th scope="col">Flag ID</th>
+                            @*<th scope="col">Tags</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A04_Tickets_ZendeskTicketCategoryDetailsItems)
+                        {
+                            string rowclass = "";
+                            string cellClass = "";
+                            if (item.Status == "open")
+                            {
+                                cellClass = " class=\"text-red font-weight-bold\"";
+                                rowclass = " class=\"table-danger\"";
+                            }
+                            else if (item.Status == "pending" || item.Status == "hold")
+                            {
+                                cellClass = " class=\"text-orange font-weight-bold\"";
+                                rowclass = " class=\"table-warning\"";
+                            }
+                            else if (item.Status == "closed" || item.Status == "solved")
+                            {
+                                cellClass = " class=\"text-green font-weight-bold\"";
+                                rowclass = " class=\"table-success\"";
+                            }
+                            <tr @Html.Raw(rowclass)>
+                                <td scope="col" title="Ticket ID" style="max-width:150px;"><a href="https://myvoltagehelp.zendesk.com/agent/tickets/@item.ID" target="_blank">@item.ID</a></td>
+                                <td scope="col" style="max-width:150px;">
+                                    @if (string.IsNullOrEmpty(item.SerialNo))
+                                    {
+                                        @item.Subject
+                                    }
+                                    else
+                                    {
+                                        <a title="Click here to view all for @item.SerialNo" href="#" onclick="RedirectToCustomer('@item.SerialNo');">@item.Subject</a>
+                                    }
+                                </td>
+                                <td scope="col" title="Created @((DateTime.Now - item.CreatedAt).TotalDays.ToString("N")) days ago" style="max-width:150px;">@item.CreatedAt.ToDateAndTimeShort()</td>
+                                <td scope="col" title="Updated @((DateTime.Now - item.UpdatedAt).TotalDays.ToString("N")) days ago" style="max-width:150px;">@item.UpdatedAt.ToDateAndTimeShort()</td>
+                                <td scope="col" title="Description" style="max-width:600px;">
+                                    @item.Description
+                                    <br />
+                                    <strong>
+                                        TAGS: @(!string.IsNullOrEmpty(item.Tags) ? string.Join(";", item.Tags.ToObject<string[]>()) : "")
+                                        <br />
+                                        Custom Fields:
+                                        @foreach (var field in item.MyCustomFields)
+                                        {
+                                            <span><br />@(field.Key)&nbsp;:&nbsp;@(field.Value)</span>
+                                        }
+                                    </strong>
+                                </td>
+                                <td scope="col" title="Priority" class="text-uppercase" style="max-width:150px;">@item.Priority</td>
+                                <td scope="col" title="Status" class="text-uppercase" style="max-width:150px;">@item.Status</td>
+                                <td scope="col" title="@(item.Requester != null ? item.Requester.Email: "No Email")" style="max-width:150px;">@(item.Requester != null ? item.Requester.Name : "")</td>
+                                <td scope="col" title="@(item.Asignee != null ? item.Asignee.Email: "No Email")" style="max-width:150px;">@(item.Asignee != null ? item.Asignee.Name : "")</td>
+                                <td scope="col">
+                                    @if (item.A09_Flag != null)
+                                    {
+                                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.A09_Flag.FlagTypeID/@item.A09_Flag.ID">@item.A09_Flag.ID</a>
+                                    }
+                                </td>
+                                @*<td scope="col" title="Tags" style="max-width:150px;">@(!string.IsNullOrEmpty(item.Tags) ? string.Join(" , ", item.Tags.ToObject<string[]>()) : "")</td>*@
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToCustomer(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A04_Tickets/A04_Tickets_ZendeskTicketsReview%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/A04_Tickets/A04_Tickets_ZendeskTicketCategoryDetails?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

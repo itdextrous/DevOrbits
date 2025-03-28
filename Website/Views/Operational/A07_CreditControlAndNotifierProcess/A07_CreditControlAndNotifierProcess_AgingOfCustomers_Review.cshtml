@@ -1,0 +1,149 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_AgingOfCustomers_ReviewModel;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_AgingOfCustomers_Results.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col text-left">Between</div>
+                                    <div class="col"><input class="form-control" type="month" name="fromDate" id="fromDate" value="@(Model.FromDate.ToString("yyyy-MM"))" /></div>
+                                    <div class="col text-center">And</div>
+                                    <div class="col"><input class="form-control" type="month" name="toDate" id="toDate" value="@(Model.ToDate.ToString("yyyy-MM"))" /></div>
+                                </div>
+                            </div>
+                        </div>
+@*                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                @Html.DropDownList("ServiceAddress", Model.ServiceAddress, new { @class = "form-control" })
+                            </div>
+                        </div>
+*@                        <div class="row mt-2 mb-2">
+                            <div class="col text-left"><a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_AgingOfCustomers_Results" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a></div>
+                            <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        Service Address
+                    </div>
+                    <div class="col">
+                        @Model.SelectedServiceAddress
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        Customer No
+                    </div>
+                    <div class="col">
+                        @Model.CustomerNo
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        Customer Name
+                    </div>
+                    <div class="col">
+                        @Model.CustomerName
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        Contract Start Date
+                    </div>
+                    <div class="col">
+                        @Model.Contract_Start_Date.ToDateShort()
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        Contract End Date
+                    </div>
+                    <div class="col">
+                        @Model.Contract_End_Date.ToDateShort()
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        Occupancy
+                    </div>
+                    <div class="col">
+                        @Model.Occupancy
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="border-table">Month</th>
+                    <th scope="col" class="border-table">Opening Balance</th>
+                    <th scope="col" class="border-table">Payments made And Convenience Fees charged</th>
+                    <th scope="col" class="border-table">Outstanding balance</th>
+                    <th scope="col" class="border-table">Curent Month Charges</th>
+                    <th scope="col" class="border-table">Credit Memo's</th>
+                    <th scope="col" class="border-table">Closing Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var taxItem in Model.TaxInvoiceItems.OrderByDescending(p => p.Month))
+                {
+                    <tr>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.Month.ToMonth() : "-")</td>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.OpeningBalance.ToMoneyNoDecimal() : "-")</td>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.PaymentsAndFees.ToMoneyNoDecimal() : "-")</td>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.OutstandingBalance.ToMoneyNoDecimal() : "-")</td>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.CurrentMonthCharges.ToMoneyNoDecimal() : "-")</td>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.CreditNotes.ToMoneyNoDecimal() : "-")</td>
+                        <td scope="col" class="text-nowrap text-right border-table">@(taxItem != null ? taxItem.ClosingBalance.ToMoneyNoDecimal() : "-")</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+
+@section Scripts {
+<script>
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = window.location.href.split('?')[0] + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+    }
+    $(document).ready(function () {
+    });
+</script>
+}

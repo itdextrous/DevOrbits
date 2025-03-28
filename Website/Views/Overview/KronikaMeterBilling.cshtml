@@ -1,0 +1,40 @@
+﻿@model MyVoltage.Models.MeterViewModels.KronikaMeterBillingModel
+
+@{
+    ViewData["Title"] = "Kronika Meter Billing";
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>Serial Numbers&nbsp;<a href="#" title="Meter Serial Numbers">?</a></span>
+                <textarea asp-for="MeterSerials" class="form-control" type="" title="Meter Serial Numbers"></textarea>
+            </div>
+            <div class="col">
+                <span asp-validation-for="StartDate">Start Date</span>
+                <input asp-for="StartDate" class="form-control" placeholder="yyyy/MM/dd" type="date" />
+            </div>
+            <div class="col">
+                <span asp-validation-for="EndDate">End Date</span>
+                <input asp-for="EndDate" class="form-control" placeholder="yyyy/MM/dd" type="date" />
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Get Results</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                <span class="text-red">@Model.ErrorMessage</span>
+            </div>
+        }
+    </div>
+
+}

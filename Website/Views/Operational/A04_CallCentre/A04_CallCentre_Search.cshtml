@@ -1,0 +1,324 @@
+@model MyVoltage.Models.OperationalModels.A04_CallCentre.A04_CallCentre_SearchModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A04_CallCentre_Search.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+
+            <div class="card-header">
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="TaskID" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control" asp-for="TaskID" />
+                        <span asp-validation-for="TaskID" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="Company" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Company" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="CustomerNo" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control" asp-for="CustomerNo" />
+                        <span asp-validation-for="CustomerNo" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="FromOperator" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("FromOperator", Model.FromOperator, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="FromOperator" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="ToOperator" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("ToOperator", Model.ToOperator, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ToOperator" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DueDateFrom" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" asp-for="DueDateFrom" value="@(Model.DueDateFrom.ToDateShort(true))" />
+                        <span asp-validation-for="DueDateFrom" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="DueDateTo" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" asp-for="DueDateTo" value="@(Model.DueDateTo.ToDateShort(true))" />
+                        <span asp-validation-for="DueDateTo" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        <label asp-for="ResolvedStatusType" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                        @Html.DropDownList("ResolvedStatusType", Model.ResolvedStatusType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ResolvedStatusType" class="text-red"></span>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-12 text-right">
+                        <a href="#" onclick="Search('', '', '', '', '', '', '', '');" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+@if (Model.A04_CallCentreLogItems != null)
+{
+    @if (Model.A04_CallCentreLogItems.Count > 0)
+    {
+        <audio class="w-100" id="audioPlayer" controls hidden></audio>
+        <div class="row mb-4">
+            <div class="col">
+                <table id="myTable" class="display compact table table-sm table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="cursor:pointer;" scope="col" class="text-left">Time Ended<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">ID<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">Zendesk Category<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">Flag ID<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left"></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">Duration<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">Company<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">From No<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">From User<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">To No<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">To User<span></span></th>
+                            <th style="cursor:pointer;" scope="col" class="text-left">Call Type<span></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A04_CallCentreLogItems)
+                        {
+                            string rowclass = "";
+                            if (item.CompanyID.HasValue && item.CustomerNo.HasValue && item.Zendesk_TicketField_OptionID.HasValue)
+                            {
+                                rowclass = "table-success";
+                            }
+                            else
+                            {
+                                rowclass = "table-danger";
+                            }
+                            <tr class="@Html.Raw(rowclass)">
+                                <td scope="col" class="text-nowrap text-left">
+                                    @item.timeend.ToDateAndTimeShort()
+                                </td>
+                                <td scope="col">
+                                    @item.ID
+                                </td>
+                                <td scope="col">
+                                    <select style="min-width:250px;" id="zLink_@item.ID" onchange="DoUpdateZ('@item.ID');" class="browser-default custom-select form-control-trim js-select">
+                                        @if (!item.Zendesk_TicketField_OptionID.HasValue || Model.Zendesk_TicketField_Options.Where(p => p.Value == item.Zendesk_TicketField_OptionID.ToString()).Count() == 0)
+                                        {
+                                            <option value="" selected="selected">[--None--]</option>
+                                        }
+                                        @foreach (var selectListItem in Model.Zendesk_TicketField_Options)
+                                        {
+                                            if (item.Zendesk_TicketField_OptionID.HasValue && item.Zendesk_TicketField_OptionID.Value == Convert.ToInt64(selectListItem.Value))
+                                            {
+                                                <option value="@selectListItem.Value" selected="selected">@selectListItem.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@selectListItem.Value">@selectListItem.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td scope="col">
+                                    @if (item.FlagID.HasValue)
+                                    {
+                                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/21/@item.FlagID">@item.FlagID</a>
+                                    }
+                                    else
+                                    {
+                                        <text>@item.callid</text>
+                                    }
+                                </td>
+                                <td scope="col" class="text-nowrap">
+                                    @foreach (var rec in item.A09_Flags_AttachmentsIDs)
+                                    {
+                                        <button onclick="playRecording('@rec');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-play"></i></button>
+                                    }
+                                </td>
+                                <td scope="col">
+                                    @(item.duration.HasValue ? $"{TimeSpan.FromSeconds(item.duration.Value).Minutes:00}:{TimeSpan.FromSeconds(item.duration.Value).Seconds:00}" : "")
+                                </td>
+                                <td scope="col">
+                                    @item.CompanyName
+                                </td>
+                                <td scope="col">
+                                    @item.fromno
+                                </td>
+                                <td scope="col">
+                                    @item.FromUser
+                                </td>
+                                <td scope="col">
+                                    @item.tono
+                                </td>
+                                <td scope="col">
+                                    @item.ToUser
+                                </td>
+                                <td scope="col">
+                                    @item.CallType
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <span>No results...</span>
+    }
+}
+
+@section Scripts {
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.js"></script>
+    <script>
+        async function playRecording(recordingId) {
+            $("#loaderContent").css("display", "block");
+            try {
+                const response = await fetch(`/operational/A09_Flags/A09_Flags_CompanyReview_GetAttachment/${recordingId}`);
+
+                const blob = await response.blob();
+                const audioPlayer = document.getElementById('audioPlayer');
+                const url = URL.createObjectURL(blob);
+
+                // Debug: log the blob type
+                console.log('Blob type:', blob.type);
+
+                // Debug: check if the browser can play this type
+                if (!audioPlayer.canPlayType(blob.type)) {
+                    console.error(`Cannot play type: ${blob.type}`);
+                }
+
+                audioPlayer.src = url;
+                audioPlayer.hidden = false;
+                audioPlayer.play();
+            } catch (error) {
+                console.error('Error playing recording:', error);
+            }
+            $("#loaderContent").css("display", "none");
+        }
+        new DataTable('#myTable', {
+            lengthMenu: [
+                [50, 100, 250, -1],
+                [50, 100, 250, 'All']
+            ]
+        });
+        $(document).ready(function () {
+            $("#CustomerNo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/A04_CallCentre/A04_CallCentre_Search/searchcustomers",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        });
+        function ChangeActiveMeterFromSearch(value) {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + value + '?R=' + encodeURIComponent(returnUrl);
+        }
+        function Search(Company, CustomerNo, TaskID, FromOperator, ToOperator, DueDateFrom, DueDateTo, ResolvedStatusType) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = "/operational/A04_CallCentre/A04_CallCentre_Search?Company=" + encodeURIComponent(Company != '' ? Company : $("#Company").val())
+                + "&CustomerNo=" + encodeURIComponent(CustomerNo != '' ? CustomerNo : $("#CustomerNo").val())
+                + "&TaskID=" + encodeURIComponent(TaskID != '' ? TaskID : $("#TaskID").val())
+                + "&FromOperator=" + encodeURIComponent(FromOperator != '' ? FromOperator : $("#FromOperator").val())
+                + "&ToOperator=" + encodeURIComponent(ToOperator != '' ? ToOperator : $("#ToOperator").val())
+                + "&DueDateFrom=" + encodeURIComponent(DueDateFrom != '' ? DueDateFrom : $("#DueDateFrom").val())
+                + "&DueDateTo=" + encodeURIComponent(DueDateTo != '' ? DueDateTo : $("#DueDateTo").val())
+                + "&ResolvedStatusType=" + encodeURIComponent(ResolvedStatusType != '' ? ResolvedStatusType : $("#ResolvedStatusType").val())
+                ;
+        }
+        function DoUpdateZ(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/A04_CallCentre/A04_CallCentre_CallLogImport_ItemUpdateZ/" + ItemID,
+                {
+                    zLink: $("#zLink_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    </script>
+}

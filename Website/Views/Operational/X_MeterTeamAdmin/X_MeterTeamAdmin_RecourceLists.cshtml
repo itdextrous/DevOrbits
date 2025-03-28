@@ -1,0 +1,134 @@
+@model MyVoltage.Models.OperationalModels.X_MeterTeamAdmin.X_MeterTeamAdmin_RecourceListsModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_RecourceLists.GetDescription()} - {operationalProvider.CompanyName}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <span>Select a company to begin</span>
+        </div>
+    </div>
+}
+else if (Model.X_MeterTeamAdmin_RecourceListsItems.Count == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <span>There are no customers for @operationalProvider.CompanyName</span>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_RecourceLists_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Resource List</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_RecourceLists_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Resource List</a>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Base_Unit_Of_Measure</th>
+                        <th scope="col">County</th>
+                        <th scope="col">DateUpdated</th>
+                        <th scope="col">Default_Deferral_Template_Code</th>
+                        <th scope="col">Direct_Unit_Cost</th>
+                        <th scope="col">ETag</th>
+                        <th scope="col">ExcludeUnitsFromBilling</th>
+                        <th scope="col">Gen_Prod_Posting_Group</th>
+                        <th scope="col">Indirect_Cost_Percent</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">No</th>
+                        <th scope="col">Price_Profit_Calculation</th>
+                        <th scope="col">ProductID</th>
+                        <th scope="col">Profit_Percent</th>
+                        <th scope="col">Resource_Group_No</th>
+                        <th scope="col">Search_Name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Unit_Cost</th>
+                        <th scope="col">Unit_Price</th>
+                        <th scope="col">Usage_Calculation_Type</th>
+                        <th scope="col">VAT_Prod_Posting_Group</th>
+                        <th scope="col">UpdatedByID</th>
+                        <th scope="col">CreatedBySync</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var itemC in Model.X_MeterTeamAdmin_RecourceListsItems)
+                    {
+                        string rowclass = "";
+                        string cellClass = "";
+@*                        if (string.IsNullOrEmpty(itemC.Blocked))
+                        {
+                            rowclass = " class=\"table-success\"";
+                            cellClass = " class=\"text-green font-weight-bold\"";
+                        }
+                        else
+                        {
+                            rowclass = " class=\"table-danger\"";
+                            cellClass = " class=\"text-red font-weight-bold\"";
+                        }
+*@                        <tr @Html.Raw(rowclass)>
+                            <td scope="col">@itemC.Base_Unit_Of_Measure</td>
+                            <td scope="col">@itemC.County</td>
+                            <td scope="col">@itemC.DateUpdated</td>
+                            <td scope="col">@itemC.Default_Deferral_Template_Code</td>
+                            <td scope="col">@itemC.Direct_Unit_Cost</td>
+                            <td scope="col">@itemC.ETag</td>
+                            <td scope="col">@itemC.ExcludeUnitsFromBilling</td>
+                            <td scope="col">@itemC.Gen_Prod_Posting_Group</td>
+                            <td scope="col">@itemC.Indirect_Cost_Percent</td>
+                            <td scope="col">@itemC.Name</td>
+                            <td scope="col">@itemC.No</td>
+                            <td scope="col">@itemC.Price_Profit_Calculation</td>
+                            <td scope="col">@itemC.ProductName</td>
+                            <td scope="col">@itemC.Profit_Percent</td>
+                            <td scope="col">@itemC.Resource_Group_No</td>
+                            <td scope="col">@itemC.Search_Name</td>
+                            <td scope="col">@itemC.Type</td>
+                            <td scope="col">@itemC.Unit_Cost</td>
+                            <td scope="col">@itemC.Unit_Price</td>
+                            <td scope="col">@itemC.Usage_Calculation_Type</td>
+                            <td scope="col">@itemC.VAT_Prod_Posting_Group</td>
+                            <td scope="col">@itemC.UpdatedBy</td>
+                            <td scope="col">@itemC.CreatedBySync</td>
+                            <td scope="col">
+                                @if (itemC.CreatedBySync.HasValue && !itemC.CreatedBySync.Value)
+                                {
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_RecourceLists, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                    {
+                                        <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_RecourceLists_Edit/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                    }
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_RecourceLists, MyVoltage.Data.SecureAreaActionEnum.Delete))
+                                    {
+                                        <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_RecourceLists_Delete/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification';
+        }
+    </script>
+}

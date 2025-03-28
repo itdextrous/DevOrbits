@@ -1,0 +1,97 @@
+﻿@model MyVoltage.Models.LeaduserModels.Properties_EditModel
+
+<form class="form-submit" autocomplete="off" id="contactDetails" method="post" asp-action="D01_Leads_Properties_Edit_ContactDetails" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+    <p>Obtain the contact full name, job title, email address, phone number, and any other relevant contact information. Link it to the property that is the ultimate goal of making a sale.</p>
+    <div class="form_style">
+
+        <input asp-for="ContactID" hidden />
+
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Contact_FullName" class="control-label required"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="text" class="form-control-trim" asp-for="Contact_FullName" />
+                <span asp-validation-for="Contact_FullName" class="text-red"></span>
+            </div>
+        </div>
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Contact_Surname" class="control-label"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="text" class="form-control-trim" asp-for="Contact_Surname" />
+                <span asp-validation-for="Contact_Surname" class="text-red"></span>
+            </div>
+        </div>
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label class="control-label required">Role Description</label>
+            </div>
+            <div class="col-sm-7">
+                <select class="form-control-trim">
+                    <option>Select Role</option>
+                    <option>Property Manager</option>
+                    <option>Chairperson</option>
+                    <option>HOA</option>
+                    <option>Caretaker</option>
+                    <option>Resident</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Contact_PhoneNumber" class="control-label required"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="text" class="form-control-trim" asp-for="Contact_PhoneNumber" />
+                <span asp-validation-for="Contact_PhoneNumber" class="text-red"></span>
+            </div>
+        </div>
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Contact_Email" class="control-label required"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="email" class="form-control-trim" asp-for="Contact_Email" />
+                <span asp-validation-for="Contact_Email" class="text-red"></span>
+            </div>
+        </div>
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Contact_AltPhoneNumber" class="control-label"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="text" class="form-control-trim" asp-for="Contact_AltPhoneNumber" />
+                <span asp-validation-for="Contact_AltPhoneNumber" class="text-red"></span>
+            </div>
+        </div>
+
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Name" class="control-label required"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="text" class="form-control-trim" id="contactPropName" disabled />
+                @*<span asp-validation-for="Contact_ComplexName" class="text-red"></span>*@
+            </div>
+        </div>
+        <div class="row mb-10">
+            <div class="col-sm-5">
+                <label asp-for="Contact_IDNumberOrCompanyReg" class="control-label"></label>
+            </div>
+            <div class="col-sm-7">
+                <input type="text" class="form-control-trim" asp-for="Contact_IDNumberOrCompanyReg" />
+                <span asp-validation-for="Contact_IDNumberOrCompanyReg" class="text-red"></span>
+            </div>
+        </div>
+
+        <div class="text-end mt-30 d-flex align-items-center justify-content-end mb-15">
+            @*<a type="button" href="/leaduser/D01_Leads_Contacts_AddToProperty?PropertyID=@Model.PropertyID&R=Property" class="btn btn-grape me-2">Add Another Contact</a>*@
+            @*<a type="button" href="/leaduser/D01_Leads_Contacts_Add?P=t&PropertyID=@Model.PropertyID" class="btn btn-grape me-2" data-bs-toggle="modal" data-bs-target="#addAnotherContactID">Add Another Contact</a>*@
+            <a type="button" href="#" class="btn btn-grape me-2 add-ano-cont bg-greenapple" data-bs-toggle="modal" data-bs-target="#addAnotherContactID">Add Another Contact</a>
+            <button class="btn btn-grape">Save Changes</button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,182 @@
+@model MyVoltage.Models.OperationalModels.Z_BugsModels.Z_Bugs_BugAdminModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userMan;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Z_Bugs_BugAdmin.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Bug successfully reported.
+                    <br />Thank you for taking the time to report a problem on the system. If there is any progress you will be updated on your registered email.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/Z_Bugs/Z_Bugs_BugDetail" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    Bug Details:
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Reported By</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.Username
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Date Reported</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.DateCreated.ToDateAndTimeShort()
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">User Description</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.UserDescription
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Screenshot</label>
+                        </div>
+                        <div class="col-6">
+                            <a href="/operational/Z_Bugs/Z_Bugs_BugDetail_Screenshot/@Model.ReportedBug.ID" class="btn btn-outline-primary-sm" target="_blank"><i class="fas fa-download"></i>&nbsp;Download</a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Company</label>
+                        </div>
+                        <div class="col-6">
+                            @(Model.ReportedBug.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == Model.ReportedBug.CompanyID.Value).SingleOrDefault().Name : "[Not Linked]")
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Customer No</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.CustomerNo
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Meter Serial</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.MeterSerial
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Priority</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.Priority.GetDescription()
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-6">
+                            <label class="control-label font-weight-bold text-uppercase">Priority Reason</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.ReportedBug.PriorityReason
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <form asp-action="Z_Bugs_BugAdmin" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="StatusID" class="control-label font-weight-bold text-uppercase"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("StatusID", Model.StatusID, new { @class = "form-control" })
+                                <span asp-validation-for="StatusID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="UserDescription" class="control-label font-weight-bold text-uppercase"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="UserDescription"></textarea>
+                                <span asp-validation-for="UserDescription" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 mt-2">
+                            <div class="col-6">
+                                <label asp-for="Screenshot" class="control-label font-weight-bold text-uppercase"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="file" class="form-control" asp-for="Screenshot" />
+                                <span asp-validation-for="Screenshot" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6 text-left">
+                                <a href="/operational/Z_Bugs/Z_Bugs_MyBugs" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to My Bugs</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

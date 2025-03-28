@@ -1,0 +1,76 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+@{
+    ViewData["Title"] = "Network Balancing - Summary";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Latest Report Month</th>
+                            <th scope="col">No Of Reports</th>
+                            <th scope="col">Problematic Reports</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var uC in operationalProvider.UserCompanies)
+                        {
+                            var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                            <tr id="NotBilledSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        @company.Name
+                                    </div>
+                                </td>
+                                <td scope="col" colspan="4">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function() {
+            $("#NotBilledSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A03_NetworkBalancing/A03_NetworkBalancing_SummaryItem/"))' + this.CompanyID + '/' + "NotBilledSummaryItem_" + this.CompanyID, function(response, status, xhr) {
+                    var col = $("#" + this.id + "_col");
+                    if (col.length > 0) {
+                        var text = col[0].innerHTML;
+                        if (text == 'Reviewed') {
+                            $("#" + this.id).addClass("table-success");
+                        }
+                        else if (text == 'Outstanding') {
+                            $("#" + this.id).addClass("table-danger");
+                        }
+                    }
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A03_NetworkBalancing/A03_NetworkBalancing_Details';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

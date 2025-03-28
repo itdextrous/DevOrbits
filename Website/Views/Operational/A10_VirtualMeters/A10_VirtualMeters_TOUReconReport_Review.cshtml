@@ -1,0 +1,174 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_VirtualMeters_TOUReconReport_ReviewModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_VirtualMeters_TOUReconReport_Review.GetDescription()} - {opProv.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (string.IsNullOrEmpty(opProv.CustomerMeterSerial))
+{
+    <span>Select meter to start...</span>
+}
+else if (Model.MirrorDevice == null)
+{
+    <span>Serial '@opProv.CustomerMeterSerial' not found on mirror</span>
+}
+else if (Model.LinkedSerials.Count == 0)
+{
+    <span>Could not locate any meters linked</span>
+}
+else if (Model.A10_VirtualMeters_TOUReconReport_ReviewItems.Count == 0)
+{
+    <span>No results found for @opProv.CustomerMeterSerial</span>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header text-left">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @if (!string.IsNullOrEmpty(opProv.CustomerMeterSerial))
+                            {
+                                <h4 class="text-orange">@opProv.CustomerMeterSerial - @opProv.CustomerNumber</h4>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col">Reading From</div>
+                                <div class="col"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />&nbsp;00:00 (Midnight)</div>
+                                <div class="col">To</div>
+                                <div class="col"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />&nbsp;00:00 (Midnight)</div>
+                                <div class="col"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <table class="table table-sm table-hover table-responsive-xl table-bordered">
+                <tbody>
+                    <tr>
+                        <td class="text-center font-weight-bold">Bold: Selected Meter Readings</td>
+                        <td class="text-center font-weight-bold text-red">Red: Missing Readings</td>
+                        <td class="text-center table-success">Green: Off Peak Readings</td>
+                        <td class="text-center table-warning">Yellow: Standard Readings</td>
+                        <td class="text-center table-danger">Red: Peak Readings</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <table class="table table-sm table-hover table-responsive-xl table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th rowspan="2" scope="col" class="border-table">Time Logged</th>
+                        <th rowspan="2" scope="col" class="border-table">Day Of The Week</th>
+                        <th rowspan="2" scope="col" class="border-table">Demand Type</th>
+                        <th rowspan="2" scope="col" class="border-table">TOU Holiday</th>
+                        <th rowspan="2" scope="col" class="border-table">Day Type</th>
+                        <th rowspan="2" scope="col" class="border-table">Classification</th>
+                        <th rowspan="2" scope="col" class="border-table">Tariff</th>
+                        @foreach (var serial in Model.LinkedSerials)
+                        {
+                            <th scope="col" colspan="3" class="text-center border-table-spanned">@serial</th>
+                        }
+                        <th rowspan="2" scope="col" class="border-table">Total</th>
+                        <th rowspan="2" scope="col" class="border-table">Counter</th>
+                        <th rowspan="2" scope="col" class="border-table">Difference</th>
+                    </tr>
+                    <tr>
+                        @foreach (var serial in Model.LinkedSerials)
+                        {
+                            <th scope="col" class="text-center text-nowrap border-table-left">Virtual Odo</th>
+                            <th scope="col" class="text-center text-nowrap border-table">Difference</th>
+                            <th scope="col" class="text-center text-nowrap border-table-right">Cost</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A10_VirtualMeters_TOUReconReport_ReviewItems)
+                    {
+                        string rowclass = "";
+                        if (item.HasMissingEntries)
+                        {
+                            rowclass = "text-red font-weight-bold";
+                        }
+                        //if (
+                        //    (item.TOUPeakType == MyVoltageApi.Data.TOU.TOUPeakType.OffPeak && opProv.CustomerMeterSerial.ToUpper().Contains("-OffPeak".ToUpper()))
+                        //    || (item.TOUPeakType == MyVoltageApi.Data.TOU.TOUPeakType.Standard && opProv.CustomerMeterSerial.ToUpper().Contains("-Standard".ToUpper()))
+                        //    || (item.TOUPeakType == MyVoltageApi.Data.TOU.TOUPeakType.Peak && opProv.CustomerMeterSerial.ToUpper().Contains("-Peak".ToUpper()))
+                        //    )
+                        //{
+                        //    rowclass = "font-weight-bold";
+                        //}
+                        if (item.TOUPeakType == MyVoltageApi.Data.TOU.TOUPeakType.OffPeak)
+                        {
+                            rowclass += " table-success";
+                        }
+                        if (item.TOUPeakType == MyVoltageApi.Data.TOU.TOUPeakType.Standard)
+                        {
+                            rowclass += " table-warning";
+                        }
+                        if (item.TOUPeakType == MyVoltageApi.Data.TOU.TOUPeakType.Peak)
+                        {
+                            rowclass += " table-danger";
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" class="border-table">@item.TimeLogged.ToDateAndTimeShort()</td>
+                            <td scope="col" class="border-table">@(item.TimeLogged.DayOfWeek.GetDescription())</td>
+                            <td scope="col" class="border-table">@(item.TOUDemandType.HasValue ? item.TOUDemandType.Value.GetDescription() : "")</td>
+                            <td scope="col" class="border-table">@(item.TOU_Holiday != null ? item.TOU_Holiday.HolidayName : "No")</td>
+                            <td scope="col" class="border-table">@(item.TOUDayType.HasValue ? item.TOUDayType.Value.GetDescription() : "")</td>
+                            <td scope="col" class="border-table">@(item.TOUPeakType.HasValue ? item.TOUPeakType.Value.GetDescription() : "")</td>
+                            <td scope="col" class="text-nowrap border-table" title="@(item.TenantConsumptionStatementItem != null ? $"{item.TenantConsumptionStatementItem.Description}" : "")">@(item.TenantConsumptionStatementItem != null ? $"{item.TenantConsumptionStatementItem.Tariff.ToMoney("R")}" : "")</td>
+                            @foreach (var serial in Model.LinkedSerials)
+                            {
+                                var virtualOdo = item.A10_VirtualMeters_TOUReconReport_ReviewItem_Meters.Where(p => p.Serial == serial).SingleOrDefault();
+                                <td scope="col" class="text-right border-table-left" title="@serial - @item.TimeLogged.ToDateAndTimeShort()">@(virtualOdo != null ? virtualOdo.VirtualOdoReading.ToReading() : "Missing")</td>
+                                <td scope="col" class="text-right border-table" title="@serial - @item.TimeLogged.ToDateAndTimeShort()">@(virtualOdo != null ? virtualOdo.Difference.ToReading() : "Missing")</td>
+                                <td scope="col" class="text-right text-nowrap border-table-right" title="@serial - @item.TimeLogged.ToDateAndTimeShort()">@(virtualOdo != null && item.TenantConsumptionStatementItem != null ? (virtualOdo.Difference * item.TenantConsumptionStatementItem.Tariff).ToMoney("R") : "Missing")</td>
+                            }
+                            <td scope="col" class="text-right border-table">@item.VirtualOdoTotal.ToReading()</td>
+                            <td scope="col" class="text-right border-table">@item.Counter.ToReading()</td>
+                            <td scope="col" class="text-right border-table">@item.CounterDiff.ToReading()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A10_VirtualMeters/A10_VirtualMeters_TOUReconReport_Review?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

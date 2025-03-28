@@ -1,0 +1,502 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_A09_FlagTypesModels.SiteAdmin_A09_FlagTypesEditModel
+@{
+    ViewData["Title"] = "System Admin - Edit Flag Type";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    @Model.FlagTypeName successfully updated.
+                </div>
+                <div class="card-body">
+                    <a href="/operational/SiteAdmin/SiteAdmin_A09_FlagTypes/Edit/@Model.FlagTypeID" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <h5>Currently Editing "@(Model.FlagTypeName)"</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="SiteAdmin_SiteAdmin_A09_FlagTypes_Edit" enctype="multipart/form-data">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Identifier" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Identifier" />
+                                <span asp-validation-for="Identifier" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="FlagTypeName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="FlagTypeName" />
+                                <span asp-validation-for="FlagTypeName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PolicyDocument" class="control-label"></label>
+                                @if (!string.IsNullOrEmpty(Model.PolicyDocumentURL))
+                                {
+                                    <a href="/operational/A09_Flags/GetFlagTypePolicyDocument/@Model.FlagTypeID" target="_blank">View Current Document</a>
+                                }
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="PolicyDocument" />
+                                <span asp-validation-for="PolicyDocument" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                Linked to Secure Area
+                            </div>
+                            <div class="col-6">
+                                <select id="addLinkedSecureAreaID" name="addLinkedSecureAreaID" class="form-control">
+                                    @if (string.IsNullOrEmpty(Model.LinkedToSecureAreaID))
+                                    {
+                                        <option selected="selected" value="">Not linked</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="">Not linked</option>
+                                    }
+
+
+                                    @foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                                    {
+                                        foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                                        {
+                                            string desc = $"{psa.Key.Item3} - {dsa.Item3}";
+                                            if (Model.LinkedToSecureAreaID == ((int)dsa.Item1).ToString())
+                                            {
+                                                <option selected="selected" value="@(((int)dsa.Item1).ToString())">@(desc)</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@(((int)dsa.Item1).ToString())">@(desc)</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="WorkflowGroupID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("WorkflowGroupID", Model.WorkflowGroupID, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetWorkflow();" })
+                                <span asp-validation-for="WorkflowGroupID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessPillar" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessPillar", Model.BusinessPillar, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                <span asp-validation-for="BusinessPillar" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BusinessDepartment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("BusinessDepartment", Model.BusinessDepartment, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                <span asp-validation-for="BusinessDepartment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label" asp-for="AvailableUsers"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("AvailableUsers", Model.AvailableUsers, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="AvailableUsers" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label" asp-for="ReportingToUsers"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUsers", Model.ReportingToUsers, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ReportingToUsers" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ReportingToUserRequiresCompletedState" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUserRequiresCompletedState", Model.ReportingToUserRequiresCompletedState, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="ReportingToUserRequiresCompletedState" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label class="control-label" asp-for="Priority"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("Priority", Model.Priority, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="Priority" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StatusGroup" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("StatusGroup", Model.StatusGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetStatuses();"  })
+                                <span asp-validation-for="StatusGroup" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultStatus" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultStatus", Model.DefaultStatus, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultStatus" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MeetingAgendaGroup" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("MeetingAgendaGroup", Model.MeetingAgendaGroup, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetMeetingAgendaes();" })
+                                <span asp-validation-for="MeetingAgendaGroup" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultMeetingAgenda" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultMeetingAgenda", Model.DefaultMeetingAgenda, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultMeetingAgenda" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefautlMinPlanned" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="DefautlMinPlanned" />
+                                <span asp-validation-for="DefautlMinPlanned" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="HasComplianceCheck" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("HasComplianceCheck", Model.HasComplianceCheck, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="HasComplianceCheck" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/SiteAdmin/SiteAdmin_A09_FlagTypes" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Flag Types</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+                @*<div class="card-body">
+                        <div class="row col-12 mb-md-2">
+                            <h6>Responsible Users:</h6>
+                        </div>
+                        <div class="row col-12 mb-md-2">
+                            @if (Model.A09_Flags_ResponsiblePeople.Count > 0)
+                            {
+                                foreach (var person in Model.A09_Flags_ResponsiblePeople)
+                                {
+                                    <div class="border border-primary rounded p-2 m-1">
+                                        @person.PersonUsername
+                                        @if (Model.A09_Flags_ResponsiblePeople.Count > 1)
+                                        {
+                                            <text>&nbsp;</text>
+                                            <a href="/operational/SiteAdmin/SiteAdmin_A09_FlagTypes/DeleteResponsiblePerson/@Model.FlagTypeID/@person.UserID" title="Remove @person.PersonUsername from @Model.FlagTypeName"><i class="fas fa-trash-alt"></i></a>
+                                        }
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <span class="font-weight-bold text-red">No responsible users linked.</span>
+                            }
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-3 text-right">
+                                @if (Model.AvailableUsers.Count > 0)
+                                {
+                                    <select id="addResponsiblePersonDropDown" class="dropdown">
+                                        @foreach (var user in Model.AvailableUsers)
+                                        {
+                                            <option value="@user.Key">@user.Value</option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <span>Looks like you've added everyone you can...</span>
+                                }
+                            </div>
+                            <div class="col">
+                                @if (Model.AvailableUsers.Count > 0)
+                                {
+                                    <a href="#" onclick="AddResponsiblePerson();" class="btn btn-sm btn-outline-primary"><i class="fas fa-plus-circle"></i>&nbsp;Add Responsible User</a>
+                                }
+                            </div>
+                        </div>
+                    </div>*@
+
+                <div class="card-body">
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <h6>Serials To Exclude:</h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <table class="table table-responsive-xl table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Serial</th>
+                                        <th scope="col">Customer</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td scope="col"><input id="add_code" type="text" /></td>
+                                        <td scope="col"></td>
+                                        <td scope="col"><a onclick="DoAdd();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a></td>
+                                    </tr>
+                                    @foreach (var item in Model.A09_Flags_Types_SerialsToExcludes)
+                                    {
+                                        var sbCustomer = Model.SkybillCustomers.Where(p => p.Serial_No == item.SerialToExclude).FirstOrDefault();
+                                        if (sbCustomer == null)
+                                        {
+                                            continue;
+                                        }
+                                        var company = operationalProvider.Companies.Where(p => p.CompanyID == sbCustomer.CompanyID).SingleOrDefault();
+                                        <tr>
+                                            <td scope="col">@item.SerialToExclude </td>
+                                            <td scope="col">@sbCustomer.Customer_No - @sbCustomer.Customer_Name - @company.Name</td>
+                                            <td scope="col">
+                                                <a onclick="DoDelete('@item.ID', '@item.SerialToExclude');" href="#" class="btn-sm btn-outline-primary"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Edit History</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changes</th>
+                            </tr>
+
+                            @foreach (var item in Model.A09_Flag_Type_LogItems)
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>
+                                        @(Html.Raw(item.SystemDescription))
+                                    </td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        GetWorkflow();
+        function GetWorkflow() {
+            $("#BusinessPillar").val('');
+            var departmentID = 0;
+            var workflowGroupItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.WorkflowGroupItems)));
+            $(workflowGroupItems).each(function () {
+                if (this.ID == $("#WorkflowGroupID").val()) {
+                    departmentID = this.BusinessDepartmentID;
+                }
+            });
+
+            $("#BusinessDepartment").empty();
+            $("#BusinessDepartment").append(`<option value="0">00 - NONE</option>`);
+            var businessDepartmentItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BusinessDepartmentItems)));
+            $(businessDepartmentItems).each(function () {
+                if (this.ID == departmentID) {
+                    $("#BusinessDepartment").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    $("#BusinessPillar").val(this.BusinessPillarID);
+                }
+                else {
+                    $("#BusinessDepartment").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                }
+            });
+
+        }
+
+        $(document).ready(function () {
+            $("#add_code").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/SiteAdmin/SiteAdmin_A09_FlagTypes_SerialToExclude/searchmeters",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+        function AddResponsiblePerson() {
+            var userID = $("#addResponsiblePersonDropDown").val();
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_A09_FlagTypes/AddResponsiblePerson/@Model.FlagTypeID/' + userID;
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_code").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter code');
+                $("#add_code").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_A09_FlagTypes_SerialToExcludeAdd/@Model.FlagTypeID",
+                {
+                    add_code: $("#add_code").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/SiteAdmin/SiteAdmin_A09_FlagTypes_SerialToExcludeDelete/" + ItemID,
+                    {
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+        GetStatuses();
+        function GetStatuses() {
+            $("#DefaultStatus").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.StatusItems)));
+            $(companies).each(function() {
+                if (this.StatusGroupID ==  $("#StatusGroup").val()) {
+                    if (this.ID.toString() ==  '@Model.DefaultStatusID') {
+                        $("#DefaultStatus").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                    else {
+                        $("#DefaultStatus").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+
+        }
+        GetMeetingAgendaes();
+        function GetMeetingAgendaes() {
+            $("#DefaultMeetingAgenda").empty();
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.MeetingAgendaItems)));
+            $(companies).each(function() {
+                if (this.MeetingAgendaGroupID ==  $("#MeetingAgendaGroup").val()) {
+                    if (this.ID.toString() ==  '@Model.DefaultMeetingAgendaID') {
+                        $("#DefaultMeetingAgenda").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                    else {
+                        $("#DefaultMeetingAgenda").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+
+        }
+    </script>
+}

@@ -1,0 +1,421 @@
+@model MyVoltage.Models.OperationalModels.C08_Forecasting.C08_Forecasting_BaselinesModel
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C08_Forecasting_Baselines.GetDescription() + " - " + opProv.CompanyName;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (opProv.CompanyID == 0)
+{
+    <div class="row col-12">
+        Select company to see results...
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body text-left">
+                    <div class="row mt-2 mb-2">
+                        <div class="col">
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col text-left">Between</div>
+                                        <div class="col"><input class="form-control" type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                                        <div class="col text-center">And</div>
+                                        <div class="col"><input class="form-control" type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    @Html.DropDownList("DeviceType", Model.DeviceType, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    Admin Tasks
+                </div>
+                <div class="card-footer text-left">
+                    <div class="row mt-2 mb-2">
+                        <div class="col border-right border-dark">
+                            Sync Actuals<br />
+                            Same concept as management accounts. Request report and scheduler executes sync<br />
+                            Puts all figures from C01 Units billed reports into Actuals
+                        </div>
+                        <div class="col border-right border-dark">
+                            Calculate Baseline from Actuals <br />
+                            iframe style loader (like summary pages) <br />
+                            Uses synced Actuals to calculate a baseline<br />
+                            Calc details:
+                        </div>
+                        <div class="col">
+                            Use baseline to calculate forecasts<br />
+                            Redirects to a page to preview the calculated results with a submit button<br />
+                            Returns back here when updated
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <table class="table table-bordered table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th rowspan="2" scope="col" class="">Company</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Device Type ID</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Month</th>
+                        <th colspan="5" scope="col" class="">Actual Units</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Date Actual Synced</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Forecast Perc</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Forecast Units</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Forecast Baseline</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Date Forecast Synced</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Date Created</th>
+                        <th rowspan="2" scope="col" class="" style="width:150px;">Date Updated</th>
+                        <th rowspan="2" scope="col" class=""></th>
+                        <th rowspan="2" scope="col" class=""></th>
+                        <th rowspan="2" scope="col" class=""></th>
+                    </tr>
+                    <tr>
+                        <th scope="col" class="">Forecast (-3yr)</th>
+                        <th scope="col" class="">Forecast (-2yr)</th>
+                        <th scope="col" class="">Forecast (-1yr)</th>
+                        <th scope="col" class="">Forecast Average</th>
+                        <th scope="col" class="">Actual</th>
+                    </tr>
+                    <tr>
+                        <td title="Company" scope="col">
+                            <input type="text" readonly="readonly" class="form-control" value="@opProv.CompanyName" />
+                        </td>
+                        <td title="Device Type" scope="col">
+                            <select id="deviceType_" class="form-control" onchange="GetYearly('');">
+                                <option value="">[Select Device Type]</option>
+                                @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                                {
+                                    if (dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Unknown
+                                    || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.GPS
+                                    || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Valve)
+                                    {
+                                        continue;
+                                    }
+                                    <option value="@((int)dt)">@dt.GetDescription()</option>
+                                }
+                            </select>
+                        </td>
+                        <td title="Month" scope="col">
+                            <input id="month_" type="month" class="form-control" onchange="GetYearly('');" />
+                        </td>
+                        <td title="Forecast Units 1 Year Ago" scope="col" class="text-nowrap">
+                            <label id="forecastUnits1YearAgo_" type="text" class="form-control"></label>
+                        </td>
+                        <td title="Forecast Units 2 Year Ago" scope="col" class="text-nowrap">
+                            <label id="forecastUnits2YearAgo_" type="text" class="form-control"></label>
+                        </td>
+                        <td title="Forecast Units 3 Year Ago" scope="col" class="text-nowrap">
+                            <label id="forecastUnits3YearAgo_" type="text" class="form-control"></label>
+                        </td>
+                        <td title="Forecast Units Average" scope="col" class="text-nowrap">
+                            <label id="forecastUnitsAverage_" type="text" class="form-control"></label>
+                        </td>
+                        <td scope="col">
+                        </td>
+                        <td title="Date Actual Synced" scope="col">
+                        </td>
+                        <td title="Forecast Perc" scope="col" class="text-nowrap text-right">
+                            <input id="forecastPerc_" type="text" class="form-control" oninput="CalculateBaseline('')" value="100" />
+                        </td>
+                        <td title="Forecast Units" scope="col" class="text-nowrap text-right">
+                            <input id="forecastUnits_" type="text" class="form-control" oninput="CalculateBaseline('')" />
+                        </td>
+                        <td title="Forecast Baseline" scope="col" class="text-nowrap text-right">
+                            <input id="forecastBaseline_" type="text" class="form-control" oninput="CalculateBaseline('')" disabled="disabled" readonly="readonly" />
+                        </td>
+                        <td title="" scope="col">
+                        </td>
+                        <td title="" scope="col">
+                        </td>
+                        <td title="" scope="col">
+                        </td>
+                        <td title="" scope="col" class="text-center">
+                            <a onclick="DoAdd();" href="#month_" class="btn btn-sm btn-outline-primary-sm" title="Add"><i class="fas fa-plus-circle"></i></a>
+                        </td>
+                        <td title="" scope="col"></td>
+                        <td title="" scope="col"></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        string rowClass = "";
+                        DateTime? previousDate = null;
+                    }
+                    @foreach (var item in Model.C08_Forecasting_Baselines)
+                    {
+                        if (previousDate.HasValue && previousDate.Value != item.Month)
+                        {
+                            if (string.IsNullOrEmpty(rowClass))
+                            {
+                                rowClass = "table-primary";
+                            }
+                            else
+                            {
+                                rowClass = "";
+                            }
+                        }
+                        <tr class="@Html.Raw(rowClass)">
+                            <td title="Company" scope="col" class="text-nowrap">@opProv.CompanyName</td>
+                            <td title="Device Type" scope="col" class="text-nowrap">
+                                <select id="deviceType_@item.ID" class="form-control" onchange="GetYearly('@item.ID');">
+                                    @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                                    {
+                                        if (dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Unknown
+                                        || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.GPS
+                                        || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Valve)
+                                        {
+                                            continue;
+                                        }
+                                        if (item.DeviceType == dt)
+                                        {
+                                            <option selected="selected" value="@((int)dt)">@dt.GetDescription()</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)dt)">@dt.GetDescription()</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td title="Month" scope="col" class="text-nowrap">
+                                <input id="month_@item.ID" type="month" class="form-control" value="@item.Month.ToString("yyyy-MM")" onchange="GetYearly('@item.ID');" />
+                            </td>
+                            <td title="Forecast Units 1 Year Ago" scope="col" class="text-nowrap">
+                                <label id="forecastUnits1YearAgo_@item.ID" type="text" class="form-control">@item.ForecastUnits1YearAgo.ToMoneyNoDecimal()</label>
+                            </td>
+                            <td title="Forecast Units 2 Year Ago" scope="col" class="text-nowrap">
+                                <label id="forecastUnits2YearAgo_@item.ID" type="text" class="form-control">@item.ForecastUnits2YearAgo.ToMoneyNoDecimal()</label>
+                            </td>
+                            <td title="Forecast Units 3 Year Ago" scope="col" class="text-nowrap">
+                                <label id="forecastUnits3YearAgo_@item.ID" type="text" class="form-control">@item.ForecastUnits3YearAgo.ToMoneyNoDecimal()</label>
+                            </td>
+                            <td title="Forecast Units Average" scope="col" class="text-nowrap">
+                                <label id="forecastUnitsAverage_@item.ID" type="text" class="form-control">@item.ForecastUnitsAverage.ToMoneyNoDecimal()</label>
+                            </td>
+                            <td title="Actual Units" scope="col" class="text-nowrap">@item.ActualUnits.ToMoneyNoDecimal()</td>
+                            <td title="Date Actual Synced" scope="col" class="text-nowrap">@item.DateActualSynced.ToDateAndTimeShort(true)</td>
+                            <td title="" scope="col" class="text-nowrap text-right">
+                                <input id="forecastPerc_@item.ID" type="text" value="@(item.ForecastPerc.ToMoneyNoDecimal())" class="form-control" oninput="CalculateBaseline('@item.ID')" />
+                            </td>
+                            <td title="" scope="col" class="text-nowrap text-right">
+                                <input id="forecastUnits_@item.ID" type="text" value="@(item.ForecastUnits.ToMoneyNoDecimal())" class="form-control" oninput="CalculateBaseline('@item.ID')" />
+                            </td>
+                            <td title="" scope="col" class="text-nowrap text-right">
+                                <input id="forecastBaseline_@item.ID" type="text" value="@(((item.ForecastPerc / 100.0m) * item.ForecastUnits).ToMoneyNoDecimal())" class="form-control" disabled="disabled" readonly="readonly" />
+                            </td>
+                            <td title="Date Forecast Synced" scope="col" class="text-nowrap">@item.DateForecastSynced.ToDateAndTimeShort(true)</td>
+                            <td title="" scope="col" class="">@item.CreatedByUsername - @item.DateCreated.ToDateAndTimeShort()</td>
+                            <td title="" scope="col" class="">@item.UpdatedByUsername - @item.DateUpdated.ToDateAndTimeShort(true)</td>
+                            <td title="" scope="col" class="text-center">
+                                <a onclick="DoUpdate('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update"><i class="fas fa-save"></i></a>
+                            </td>
+                            <td title="" scope="col" class="text-center">
+                                <a onclick="DoDelete('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                            </td>
+                        </tr>
+                        previousDate = item.Month;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+}
+
+
+@section Scripts {
+    <script>
+        function GetYearly(ID) {
+            var deviceTypeID = $("#deviceType_" + ID).val();
+            var month = $("#month_" + ID).val();
+
+            if ($("#deviceType_" + ID).val() != '' && $("#month_" + ID).val() != '') {
+                $("#loaderContent").css("display", "block");
+
+                $.get("/operational/C08_Forecasting/C08_Forecasting_Baselines_GetYearly/" + deviceTypeID + '/' + month)
+                    .done(function (data) {
+                        $("#forecastUnits1YearAgo_" + ID).html(data.forecastUnits1YearAgo);
+                        $("#forecastUnits2YearAgo_" + ID).html(data.forecastUnits2YearAgo);
+                        $("#forecastUnits3YearAgo_" + ID).html(data.forecastUnits3YearAgo);
+                        $("#forecastUnitsAverage_" + ID).html(data.forecastUnitsAverage);
+                        $("#forecastUnits_" + ID).val(data.forecastUnitsAverage);
+                        CalculateBaseline(ID);
+                        $("#loaderContent").css("display", "none");
+                    });
+            }
+        }
+
+        function CalculateBaseline(ID) {
+            var fieldValue1 = parseFloat($('#forecastPerc_' + ID).val().replace(/,/g, '')) || 0;
+            fieldValue1 = fieldValue1 / 100;
+            var fieldValue2 = parseFloat($('#forecastUnits_' + ID).val().replace(/,/g, '')) || 0;
+            var fieldValue3 = fieldValue2 * fieldValue1;
+            var formattedValue = fieldValue3.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+            $('#forecastBaseline_' + ID).val(formattedValue);
+        }
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C08_Forecasting/C08_Forecasting_Baselines?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&DeviceType=' + $("#DeviceType").val();
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#deviceType_").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Device Type');
+                $("#deviceType_").focus();
+                return;
+            }
+
+            if ($("#month_").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Month');
+                $("#month_").focus();
+                return;
+            }
+
+            if ($("#forecastPerc_").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Forecast Perc');
+                $("#forecastPerc_").focus();
+                return;
+            }
+
+            $.post("/operational/C08_Forecasting/C08_Forecasting_Baselines_ItemAdd",
+                {
+                    devicetype: $("#deviceType_").val(),
+                    month: $("#month_").val(),
+                    forecastPerc: $("#forecastPerc_").val(),
+                    forecastUnits: $("#forecastUnits_").val(),
+                    forecastBaseline: $("#forecastBaseline_").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoUpdate(itemID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#deviceType_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Device Type');
+                $("#deviceType_" + itemID).focus();
+                return;
+            }
+
+            if ($("#month_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Month');
+                $("#month_" + itemID).focus();
+                return;
+            }
+
+            if ($("#forecastPerc_" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Forecast Perc');
+                $("#forecastPerc_" + itemID).focus();
+                return;
+            }
+
+            $.post("/operational/C08_Forecasting/C08_Forecasting_Baselines_ItemUpdate",
+                {
+                    itemid: itemID,
+                    devicetype: $("#deviceType_" + itemID).val(),
+                    month: $("#month_" + itemID).val(),
+                    forecastPerc: $("#forecastPerc_" + itemID).val(),
+                    forecastUnits: $("#forecastUnits_" + itemID).val(),
+                    forecastBaseline: $("#forecastBaseline_" + itemID).val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(itemID) {
+            if (confirm('Are you sure you wish to delete this item? This action cannot be undone.')) {
+                $("#loaderContent").css("display", "block");
+
+                $.post("/operational/C08_Forecasting/C08_Forecasting_Baselines_ItemDelete",
+                    {
+                        itemid: itemID,
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                        }
+                    });
+            }
+        }
+
+    </script>
+}

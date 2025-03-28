@@ -1,0 +1,44 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MeterCalibrationSummaryItem
+
+@{
+    decimal percCompleted = 100.0m;
+    if (Model.MetersCount > 0)
+    {
+        percCompleted = ((decimal)Model.MetersCalibratedCount / (decimal)Model.MetersCount * 100.0m);
+    }
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MeterCalibrationSummaryItem.StatusType.Reviewed)
+    {
+        rowclass = "table-success";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+    else if (percCompleted >= 95)
+    {
+        rowclass = "table-warning";
+        cellClass = " class=\"text-orange font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MeterCalibrationSummaryItem.StatusType.Outstanding)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+
+}
+<td scope="col">@Model.CompanyName</td>
+<td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+<td scope="col">@Model.MetersCalibratedCount</td>
+<td scope="col">@Model.MetersNotCalibratedCount</td>
+<td scope="col">@Model.MetersThatCannotBeCalibratedCount</td>
+<td scope="col">@(percCompleted.ToString("N")) %</td>
+<td scope="col">@Model.MetersProblematicCount</td>
+<td scope="col">@Model.MetersCount</td>
+<td scope="col">@Model.CustomersCount</td>
+<script>
+    $(document).ready(function () {
+    $('#@Model.TableRowID').attr("class", '@rowclass');
+    if (@Model.MetersCount == 0) {
+    $('#@Model.TableRowID').css("display", "none");
+    }
+        });
+</script>

@@ -1,0 +1,242 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> _userManager;
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorDeviceSearchModel
+@{
+    ViewData["Title"] = "Mirror Meter Auditing - Mirror Device Search";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <form>
+            <div class="card p-md-4 mv-gradient">
+                <div class="card-header text-orange">
+                    <h5>Search:</h5>
+                </div>
+                <div class="card-body">
+                    <input id="txtSearch" name="txtSearch" type="text" class="form-control" asp-for="SearchTerm" />
+                </div>
+                <div class="card-footer">
+                    <a id="btnSearch" name="btnSearch" href="#" onclick="Search();" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Search</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@if (!string.IsNullOrEmpty(Model.SearchTerm))
+{
+    <div class="row mb-4">
+        <div class="col">
+            <h3>Results:</h3>
+            <br />
+            (Maximum of 20 results)
+        </div>
+    </div>
+    @foreach (var item in Model.A02_MirrorMeterAuditing_MirrorDeviceSearchItems)
+    {
+        <div class="row mb-4">
+            <div class="col">
+
+                <div style="cursor:pointer;" onclick="ChangeActiveMeter('@item.SkybillCustomer.Serial_No');" title="Click to view details for @item.Company.Name - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Serial_No" class="card p-md-4 mv-gradient">
+                    <div class="card-header text-orange">
+                        <h4>
+                            @switch (item.Device.MeterType)
+                            {
+                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                    <img src="~/images/elec-icon-s.png" />
+                                    break;
+                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                    <img src="~/images/water-icon-s.png" />
+                                    break;
+                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                    <img src="~/images/gas-icon-s.png" />
+                                    break;
+                            }
+                            @item.Company.Name - @item.SkybillCustomer.Customer_No - @item.SkybillCustomer.Serial_No
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+
+
+                            <div class="col border border-primary rounded p-2 m-2">
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <h6>Skybill Customer Details:</h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Company Name:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.Company.Name
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Customer No:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.SkybillCustomer.Customer_No
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Customer Name:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.SkybillCustomer.Customer_Name
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Account Type:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.SkybillCustomer.AccountType.GetDescription()
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col border border-primary rounded p-2 m-2">
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <h6 title="Gateways and Devices Sync">Metering Database Details:</h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Device ID Linked:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.Device.DeviceIDLinked
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Serial:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.Device.Serial
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Name:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.Device.Name
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Type:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.Device.MeterType.GetDescription()
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col border border-primary rounded p-2 m-2" title="Odo and Latest Capture should be the same.">
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <h6>Latest Mirror Reading Summary:</h6>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        Latest Reading:
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        @if (item.LatestReading != null)
+                                        {
+                                            <span>@item.LatestReading.VirtualOdoReading.ToReading()<br />@item.LatestReading.TimeLogged.ToDateAndTimeShort()</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Unknown</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        Latest Odo:
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        @if (item.OdoReading != null)
+                                        {
+                                            string spanClass = "";
+                                            if (item.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                            {
+                                                if (item.OdoReading.OdometerReading != item.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                                {
+                                                    spanClass = "text-red font-weight-bold";
+                                                }
+                                            }
+                                            <span class="@Html.Raw(spanClass)">@item.OdoReading.OdometerReading.ToReading()<br />@item.OdoReading.TimeLogged.ToDateAndTimeShort()</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Unknown</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        Latest Capture:
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        @if (item.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                        {
+                                                string spanClass = "";
+                                                if (item.OdoReading != null)
+                                                {
+                                                    if (item.OdoReading.OdometerReading != item.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                                    {
+                                                        spanClass = "text-red font-weight-bold";
+                                                    }
+                                                }
+
+                                                <span class="@Html.Raw(spanClass)">
+                                                    @item.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading.ToReading()
+                                                    <br />
+                                                    @item.A02_MirrorMeterAuditing_MirrorReadingUpdate.TimeLogged.ToDateAndTimeShort()
+                                                    <br />
+                                                    @(((MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes)item.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusID).GetDescription())
+                                                </span>
+                                        }
+                                        else
+                                        {
+                                            <span>Unknown</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        function Search() {
+            document.location.href = '/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorDeviceSearch?txtSearch=' + encodeURIComponent($("#txtSearch").val());
+        }
+        function ChangeActiveMeter(serial) {
+            $(".loader-overlay-sidebar").css("display", "block");
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=' + encodeURIComponent('/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorDeviceReview');
+        }
+    </script>
+}

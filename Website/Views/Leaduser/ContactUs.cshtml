@@ -1,0 +1,152 @@
+@model MyVoltage.Models.LeaduserModels.ContactUsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@inject UserManager<ApplicationUser> usermanager;
+@{
+    ViewData["Title"] = "ContactUs";
+    Layout = "LayoutLeaduser";
+}
+
+<div class="container ContactUs pt_m_45 mb-15">
+    <h3 class="text-center page_heading">Contact us</h3>
+    <div class="row gap_15 mt-50">
+        <div class="col-xxl-4 col-md-5">
+            <div class="info_box">
+                <h3 class="text-londonsky SemiBold mb-30">Get in touch</h3>
+                <div class="d-flex contact_info">
+                    <span class="info_icon"><img src="/images/icons/telephone.png" alt="TelePhone" /></span>
+                    <div>
+                        <label class="form-label">Tel</label>
+                        <label class="label-value"><a href="tel:0870572561">+27 (0)87 057 2561</a></label>
+                    </div>
+                </div>
+                <div class="d-flex contact_info">
+                    <span class="info_icon"><img src="/images/icons/telephone.png" alt="TelePhone" /></span>
+                    <div>
+                        <label class="form-label">After hours support tel</label>
+                        <label class="label-value"><a href="tel:0794925036">+27 (0)79 492 5036</a></label>
+                    </div>
+                </div>
+                <div class="d-flex contact_info">
+                    <span class="info_icon"><img src="/images/icons/Postal.png" alt="TelePhone" /></span>
+                    <div>
+                        <label class="form-label">Email</label>
+                        <label class="label-value"><a href="mailto:info@myvoltage.co.za?Subject=Website%20enquiry">info@myvoltage.co.za</a></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-8 col-md-7">
+            <div class="white-box">
+                <h3 class="text-londonsky SemiBold mb-30">Email us your queries</h3>
+                <form id="contactForm" action="ContactUs" method="post" enctype="multipart/form-data">
+                    <div class="row gap_15">
+                        <div class="col-xl-6">
+                            <div class="mb-3 position-relative">
+                                <label class="form-label text-nowrap" asp-for="Name"></label>
+                                <input onkeypress="return preventSpaces(event)" type="text" class="form-control" asp-for="Name" placeholder="Full Name" autocomplete="off" />
+                                <span asp-validation-for="Name" class="contact-us-val"></span>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="mb-3 position-relative">
+                                <label class="form-label text-nowrap" asp-for="Email"></label>
+                                <input type="text" class="form-control" asp-for="Email" onkeypress="return noSpaces(event)" placeholder="Email" autocomplete="off" />
+                                <span asp-validation-for="Email" class="contact-us-val"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label text-nowrap" asp-for="PhoneNumber"></label>
+                        <input type="number" class="form-control" asp-for="PhoneNumber" onkeypress="return noSpecialCharacter1(event)" placeholder="Cellphone Number" autocomplete="off" />
+                        <span asp-validation-for="PhoneNumber" class="contact-us-val"></span>
+                    </div>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label text-nowrap" asp-for="Message"></label>
+                        <textarea type="text" class="form-control" asp-for="Message" placeholder="Message"></textarea>
+                        <span asp-validation-for="Message" class="contact-us-val"></span>
+                    </div>
+                    <div class="custom-file mb-30 position-relative">
+                        <label class="form-label text-nowrap" asp-for="file"></label>
+                        <input type="file" class="form-control" asp-for="file">
+                    </div>
+                    <div class="text-center">
+                        <a href="#" class="btn btn-islandsunrise" onclick="ContactUs();">Submit Query</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+
+        $(document).ready(function () {
+            $("#loaderContent").css("display", "none");
+        });
+
+        if ('@Model.Sent.ToString().ToLower()' == 'true') {
+            //alert('Your email has been sent');
+            toastr.success('Your email sent successfully.');
+            document.location.href = "/leaduser";
+        }
+
+        function ContactUs() {
+            $("#contactForm").submit();
+            var valid = $("#contactForm").valid();
+            if (valid) {
+                $("#loaderContent").css("display", "block");
+            }
+            else {
+                $("#loaderContent").css("display", "none");
+            }
+        }
+
+        function noSpecialCharacter1(event) {
+            var keysToPrevent = [4, 32, 43, 45, 46, 69, 101];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function noSpaces(event) {
+            var keysToPrevent = [32];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function preventSpaces(event) {
+            var key = event.keyCode || event.which;
+            var input = event.target.value;
+
+            if (key === 32) {
+                // Prevent white space at the beginning of the field
+                if (input.length === 0 || input.trim().length === 0 || event.target.selectionStart === 0) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                // Check if there is already a white space
+                var startIndex = event.target.selectionStart - 1;
+                var endIndex = event.target.selectionStart;
+                var prevChar = input.slice(startIndex, endIndex);
+                var nextChar = input.charAt(endIndex);
+
+                if (prevChar === ' ' || nextChar === ' ') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+    </script>
+}

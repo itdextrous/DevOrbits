@@ -1,0 +1,69 @@
+@using Microsoft.AspNetCore.Identity
+@using MyVoltage.Models
+@using Microsoft.AspNetCore.Http
+
+@inject SignInManager<ApplicationUser> SignInManager;
+@inject MyVoltage.Services.LeaduserProvider leaduserProvider;
+
+<div class="sidebar">
+    <div class="logo text-start">
+        <a href="/Leaduser"><img src="~/images/leaduser/logo.svg" alt="MyVoltage Lead"></a>
+    </div>
+
+
+    <div class="sidebar-wrapper">
+        <ul class="nav flex-column" id="sidebarMenu">
+            <li class="nav-item">
+                <a class="nav-link parent" href="/leaduser">
+                    <span class="nav_icon">
+                        <span><img src="~/images/leaduser/icon-home-white.png" /></span>
+                    </span>Home
+                </a>
+             </li>
+            <li class="nav-item">
+                <a class="nav-link parent" href="/leaduser/D01_Leads_Creation">
+                    <span class="nav_icon">
+                        <span><img src="~/images/leaduser/icon-billing-white.png" /></span>
+                    </span>Lead creation
+                </a>
+            </li>
+            <li class="nav-item portfolio_link">
+                <a class="nav-link parent" href="/leaduser/D01_Leads_Properties">
+                    <span class="nav_icon">
+                        <span><img src="~/images/leaduser/icon-profile-white.png" /></span>
+                    </span>Lead portfolio
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link parent" href="#">
+                    <span class="nav_icon">
+                        <span><img src="~/images/leaduser/icon-profile-white.png" /></span>
+                    </span>Personal profile
+                </a>
+            </li>
+            <li class="nav-item d-block d-lg-none">
+                <a class="nav-link parent" href="/leaduser/contactus">
+                    <span class="nav_icon">
+                        <span><img src="~/images/leaduser/icon-profile-white.png"></span>
+                    </span>Contact us
+                </a>
+            </li>
+            <li class="nav-item d-block d-lg-none">
+                <a class="nav-link parent" href="/logout">
+                    <span class="nav_icon">
+                        <span><img src="~/images/leaduser/icon-LogOut-white.png"></span>
+                    </span>Log off
+                </a>
+            </li>
+            @*<li class="nav-item"><a class="nav-link parent" href="/leaduser/D01_Leads_Contacts"><img src="~/images/Clientzone/icon-profile-white.png" />Contacts</a></li>
+            <li class="nav-item"><a class="nav-link parent" href="/Leaduser/D01_Leads_LogLead"><img src="~/images/Clientzone/icon-profile-white.png" />Add Lead</a></li>
+            @if (leaduserProvider.SelectedLeadID != 0)
+            {
+                <li class="nav-item"><a class="nav-link parent" href="/Leaduser/D01_Leads_ViewLead"><img src="~/images/Clientzone/icon-profile-white.png" />View Lead</a></li>
+            }
+            <li class="nav-item"><a class="nav-link parent" href="/Leaduser/D01_Leads_MyLeads"><img src="~/images/Clientzone/icon-profile-white.png" />My Leads</a></li>*@
+        </ul>
+
+    </div>
+
+</div>

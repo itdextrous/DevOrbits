@@ -1,0 +1,164 @@
+@model MyVoltage.Models.BillingViewModels.BillingViewModel
+@inject MyVoltage.Services.CustomerProvider customerProvider
+@{
+    ViewData["Title"] = "Billing";
+}
+
+@{
+    await Html.RenderPartialAsync("customerRecharge");
+}
+
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+    <div class="col-12 col-md-6 text-md-right balance">
+        <h4>Balance: <span class="text-primary">@customerProvider.GetBalance()</span></h4>
+
+    </div>
+</div>
+
+<div class="dash-block billing mt-4 mb-5">
+    <div class="row">
+        <div class="col-12 col-md-6 pt-4 px-4">
+            <p class="billing-address">ADDRESS</p>
+            <p class="billing-details">
+                @(Model.Customer != null ? Model.Customer.Address : "")
+            </p>
+        </div>
+        <div class="col-12 col-md-6 pt-4">
+            @{
+                var url = @Model.CurrentBilling.Document_No != null && @Model.CurrentBilling.Document_No != String.Empty ? "/Invoice/" + Model.CurrentBilling.Document_No.Replace("/", "[slash]") : "";
+
+                <button type="submit" class="btn btn-outline-primary d-block mx-auto float-md-right float-sm-none"><i class="fas fa-download"></i><a href="#" onclick="downloadPDF('@url')"> DOWNLOAD INVOICE</a></button>
+            }
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p class="text-muted text-center text-md-right float-md-right float-sm-none">The PDF invoice can be used as proof of residency.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <p class="text-muted">Statement</p>
+        </div>
+        <div class="card-body">
+            <table class="table table-responsive-xl">
+                <thead>
+                    <tr>
+                        <th scope="col">Posting Date</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Document No</th>
+                        @*  <th scope="col">Due Date</th>*@
+                        <th scope="col" style="text-align:right">Amount</th>
+                        <!--   <th scope="col">Remaining Amount</th> -->
+                        <th scope="col" style="text-align:right">Balance</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.AllEntries)
+                    {
+                        var externalChargeItem = Model.ExternalChargesSchedulingImports != null ? Model.ExternalChargesSchedulingImports.Where(p => p.ReferenceNumber == entry.Description).FirstOrDefault() : null;
+                        <tr>
+                            <td scope="row">@entry.Posting_Date.ToString("yyyy/MM/dd")</td>
+                            <td>@entry.Description</td>
+                            <td>@entry.Document_No</td>
+                            @* <td>@entry.Due_Date</td>*@
+                            <td align="right">@entry.Original_Amount.ToString("R #.00").Replace(",", ".")</td>
+                            <td align="right">@entry.Balance.ToString("R #.00").Replace(",", ".")</td>
+                            <td width="1%">
+                                @if (externalChargeItem != null)
+                                {
+                                    <a href="/billing/getexternalchargesschedulingimportphoto/@externalChargeItem.ID" target="_blank" class="btn-action" data-toggle="tooltip" data-placement="top" title="Download Invoice"><i class="fas fa-file-pdf"></i></a>
+                                }
+                                else
+                                {
+                                    @if (@entry.Document_Type == "Invoice")
+                                    {
+                                        <a href="/Invoice/@System.Net.WebUtility.UrlEncode(entry.Document_No.Replace("/", "[slash]"))" target="_blank" class="btn-action" data-toggle="tooltip" data-placement="top" title="Download Invoice"><i class="fas fa-file-pdf"></i></a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                    <!-- <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <th>Total ZAR</th>
+                        <th>@Model.Total</th>
+                    </tr> -->
+                </tbody>
+            </table>
+
+            @if (Model.TotalEntries > 10)
+            {
+                var prevDisabled = !Model.AllEntries.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.AllEntries.HasNextPage ? "disabled" : "";
+                <div width="" 100%">
+                    <div style="float: left;">
+                        <a asp-route-pageIndex="@(Model.AllEntries.PageIndex - 1)"
+                           class="btn btn-default @prevDisabled">
+
+
+                            Previous
+                        </a>
+                    </div>
+                    <div style="float: right;">
+                        <a align="left" asp-route-pageIndex="@(Model.AllEntries.PageIndex + 1)"
+                           class="btn btn-default @nextDisabled">
+                            Next
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<a href="/recharge">
+    <div class="top-up-mobile d-block d-md-none">
+        <span><i class="fas fa-plus-circle"></i> Recharge</span>
+    </div>
+</a>
+
+@section Scripts {
+    <script>
+        function downloadPDF(url) {
+            if (url != "") {
+                $(".loader-overlay").css("display", "block");
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+                        var a = document.createElement('a');
+                        var url = window.URL.createObjectURL(data);
+                        a.href = url;
+                        a.download = 'invoice.pdf';
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+
+                        var delayInMilliseconds = 5000;
+
+                        setTimeout(function () {
+                            $(".loader-overlay").css("display", "none");
+                        }, delayInMilliseconds);
+                    }
+                });
+            }
+        }
+    </script>
+}

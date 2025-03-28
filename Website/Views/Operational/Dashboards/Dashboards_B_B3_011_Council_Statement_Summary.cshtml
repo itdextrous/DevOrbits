@@ -1,0 +1,60 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_BModels.B3_011_Council_Statement_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.B03_SupplyCouncilStatements_CouncilStatementSummary.GetDescription() Details</h5>
+</div>
+@if (Model.B03_SupplyCouncilStatements_CouncilStatementSummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th class="text-center" rowspan="2" scope="col">Company Name</th>
+                <th class="text-center" rowspan="2" scope="col">Status</th>
+                <th class="text-center" rowspan="2" scope="col">Payment Type</th>
+                <th class="text-center" rowspan="2" scope="col">Council Account No</th>
+                <th class="text-center" rowspan="2" scope="col">Council Invoices Loaded</th>
+                <th class="text-center" rowspan="2" scope="col">Council Billing Date</th>
+                <th class="text-center" colspan="6">Latest Invoice</th>
+            </tr>
+            <tr>
+                <th class="text-center">Status</th>
+                <th class="text-center">Tax Invoice No</th>
+                <th class="text-center">Tax Invoice Date</th>
+                <th class="text-center">Final Date For Payment</th>
+                <th class="text-center">Amount Incl</th>
+                <th class="text-center">Amount Due By Service Provider</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.B03_SupplyCouncilStatements_CouncilStatementSummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementDetails")}";
+                <tr style="cursor:pointer;" title="View @item.PropertyLinked" onclick="RedirectToDetails('@fixitURL');">
+                    <td title="@item.PropertyLinked - Company Name" scope="col">@item.PropertyLinked</td>
+                    <td title="@item.PropertyLinked - Status" scope="col">@item.Status.GetDescription()</td>
+                    <td title="@item.PropertyLinked - Payment Type" scope="col">@(item.BuildingCouncilDetail != null && item.BuildingCouncilDetail.PaymentType.HasValue ? item.BuildingCouncilDetail.PaymentType.Value.GetDescription() : "")</td>
+                    <td title="@item.PropertyLinked - Council Details Loaded" scope="col">@item.BuildingCouncilDetail.CouncilElecAccNo</td>
+                    <td title="@item.PropertyLinked - Council Invoices Loaded" scope="col">@item.CouncilInvoicesLoaded</td>
+                    <td title="@item.PropertyLinked - Council Billing Date" class="text-right">@(item.CurrentCycleBillingDate.ToDateShort(true))</td>
+                    <td title="@item.PropertyLinked - Latest Invoice - Status" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.Status.GetDescription() : "")</td>
+                    <td title="@item.PropertyLinked - Latest Invoice - Tax Invoice No" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.TAXInvoiceNo : "")</td>
+                    <td title="@item.PropertyLinked - Latest Invoice - Tax Invoice Date" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.TAXInvoiceDate.ToDateShort() : "")</td>
+                    <td title="@item.PropertyLinked - Latest Invoice - Final Date For Payment" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.FinalDateForPayment.ToDateShort() : "")</td>
+                    <td title="@item.PropertyLinked - Latest Invoice - Amount Incl" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.BuildingCouncilDetails_InvoiceItems.Select(p => p.AmountInclVAT).Sum().ToMoneyNoDecimal() : "")</td>
+                    <td title="@item.PropertyLinked - Latest Invoice - Amount Due By Service Provider" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.BuildingCouncilDetails_InvoiceItems.Select(p => p.PayableByServiceProvider).Sum().ToMoneyNoDecimal() : "")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

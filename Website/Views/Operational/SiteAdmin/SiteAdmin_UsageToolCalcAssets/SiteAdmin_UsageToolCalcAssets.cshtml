@@ -1,0 +1,86 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_UsageToolCalcAssetsModels.SiteAdmin_UsageToolCalcAssetsModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_UsageToolCalcAssets.GetDescription()}";
+}
+
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+
+                <div class="row mt-0 mt-md-5 mb-4">
+                    <div class="col-12">
+                        <a href="/operational/SiteAdmin/SiteAdmin_UsageToolCalcAssets/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;ADD NEW USAGE CALCULATOR ASSET</a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Icon</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Average kWh</th>
+                            <th scope="col">Date Created</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var asset in Model.UsageCalc_Assets)
+                        {
+                            <tr @if (asset.IsDeleted) { <text> style="color:red;text-decoration:line-through;" </text> }>
+                                <td scope="col">@asset.UsageCalc_AssetID</td>
+                                <td scope="col"><i class="fas fa-@asset.AssetIcon"></i></td>
+                                <td scope="col">@asset.AssetName</td>
+                                <td scope="col">
+                                    @switch (asset.AssetTypeID)
+                                    {
+                                        case (int)MyVoltage.Controllers.AccountController.DeviceType.Electricity:
+                                            <img src="~/images/elec-icon-s.png" /> <text>Electricity</text>
+                                            break;
+                                        case (int)MyVoltage.Controllers.AccountController.DeviceType.Water:
+                                            <img src="~/images/water-icon-s.png" /> <text>Water</text>
+                                            break;
+                                        case (int)MyVoltage.Controllers.AccountController.DeviceType.Gas:
+                                            <img src="~/images/gas-icon-s.png" /> <text>Gas</text>
+                                            break;
+                                    }
+                                </td>
+                                <td scope="col">@(asset.AverageKWH.ToReading())</td>
+                                <td scope="col">@(asset.CreatedDate.ToDateAndTimeShort())</td>
+                                <td scope="col">
+                                    <a class="btn btn-sm btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_UsageToolCalcAssets/Edit/@asset.UsageCalc_AssetID" title="Edit"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                    &nbsp;
+                                    @if (!asset.IsDeleted)
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_UsageToolCalcAssets/delete/@asset.UsageCalc_AssetID" title="Delete"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_UsageToolCalcAssets/restore/@asset.UsageCalc_AssetID" title="Restore"><i class="fas fa-reply"></i>&nbsp;Restore</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                Total Entries: @Model.UsageCalc_Assets.Count
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

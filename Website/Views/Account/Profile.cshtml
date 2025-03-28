@@ -1,0 +1,481 @@
+﻿@model MyVoltage.Models.AccountViewModels.ProfileViewModel
+@inject MyVoltage.Services.CustomerProvider cProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+@{
+    await Html.RenderPartialAsync("customerRecharge");
+}
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+<form asp-action="Profile" enctype="multipart/form-data">
+    @if (Model.IsSuccessfull)
+    {
+        <div class="row mb-4 mt-4">
+            <div class="col">
+
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body bg-white">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/Profile" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(cProvider.CustomerNumber))
+        {
+            <div class="row mb-4 mt-4">
+                <div class="col">
+                    <div class="card p-md-1 mv-gradient">
+                        <div class="card-header text-left">
+                            <h3 class="text-orange">Customer Profile:</h3>
+                        </div>
+
+                        <div class="card-body bg-white">
+                            @if (Model.SelectedCustomer == null)
+                            {
+                                <span>Customer has not registered.</span>
+                            }
+                            else
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="CompanyName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-control" asp-for="CompanyName" disabled="disabled" />
+                                        <span asp-validation-for="CompanyName" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="CustomerNumber" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-control" asp-for="CustomerNumber" disabled="disabled" />
+                                        <span asp-validation-for="CustomerNumber" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="Email" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-control" asp-for="Email" disabled="disabled" />
+                                        <span asp-validation-for="Email" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="AccountType" class="control-label"></label>
+                                        @if (Model.SkybillCustomer != null)
+                                        {
+                                            <span>(@Model.SkybillCustomer.AccountType.GetDescription())</span>
+                                        }
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("AccountType", Model.AccountType, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("AccountType", Model.AccountType, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="AccountType" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="OccupancyDate" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="OccupancyDate" type="date" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="OccupancyDate" type="date" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="OccupancyDate" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                @if (Model.SelectedCustomer.AccountTypeID == (int)MyVoltage.Data.AccountTypeEnum.PrepaidCredit)
+                                {
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="AutoConvertBalanceToUnits" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @if (Model.AllowCustomerEdit)
+                                            {
+                                                <input class="form-control" asp-for="AutoConvertBalanceToUnits" />
+                                            }
+                                            else
+                                            {
+                                                <input class="form-control" asp-for="AutoConvertBalanceToUnits" disabled="disabled" />
+                                            }
+                                            <span asp-validation-for="AutoConvertBalanceToUnits" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="FullName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="FullName" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="FullName" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="FullName" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="PhoneNumber" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="PhoneNumber" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="PhoneNumber" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="PhoneNumber" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="NotificationEMail" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="NotificationEMail" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="NotificationEMail" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="NotificationEMail" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4 text-nowrap">
+                                        <h4>Notification Settings</h4>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="BalanceNotificationSMSType" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("BalanceNotificationSMSType", Model.BalanceNotificationSMSType, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("BalanceNotificationSMSType", Model.BalanceNotificationSMSType, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="BalanceNotificationSMSType" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="LowBalanceNotification" class="control-label"></label>@(Model.SelectedCustomer.AccountTypeID == (int)MyVoltage.Data.AccountTypeEnum.MyWallet ? " (R)" : " (kWh)")
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input type="text" class="form-control" asp-for="LowBalanceNotification" />
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control" asp-for="LowBalanceNotification" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="LowBalanceNotification" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="LowBalanceNotifications" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("LowBalanceNotifications", Model.LowBalanceNotifications, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("LowBalanceNotifications", Model.LowBalanceNotifications, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="LowBalanceNotifications" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="HighUsageNotifications" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("HighUsageNotifications", Model.HighUsageNotifications, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("HighUsageNotifications", Model.HighUsageNotifications, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="HighUsageNotifications" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="LeakNotifications" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("LeakNotifications", Model.LeakNotifications, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("LeakNotifications", Model.LeakNotifications, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="LeakNotifications" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="NewsLetters" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("NewsLetters", Model.NewsLetters, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("NewsLetters", Model.NewsLetters, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="NewsLetters" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4 text-nowrap">
+                                        <h4>Usage Display Settings</h4>
+                                    </div>
+                                </div>
+
+                                @foreach (var c in @Model.CustomerMeterTypes)
+                                {
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            @c.MeterSerial
+                                        </div>
+                                        <div class="col">
+                                            @if (Model.AllowCustomerEdit)
+                                            {
+                                                @Html.DropDownList("CustomerMeterTypes_" + c.MeterSerial, c.selectList, new { @class = "form-control" })
+                                            }
+                                            else
+                                            {
+                                                @Html.DropDownList("CustomerMeterTypes_" + c.MeterSerial, c.selectList, new { @disabled = "disabled", @class = "form-control" })
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="ShowHourlyUsage" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("ShowHourlyUsage", Model.ShowHourlyUsage, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("ShowHourlyUsage", Model.ShowHourlyUsage, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="ShowHourlyUsage" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="ShowCostInclVAT" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("ShowCostInclVAT", Model.ShowCostInclVAT, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("ShowCostInclVAT", Model.ShowCostInclVAT, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="ShowCostInclVAT" class="text-red"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4 text-nowrap">
+                                        <h4>Tax Invoice Settings</h4>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="ActivateTaxInvoice" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            @Html.DropDownList("ActivateTaxInvoice", Model.ActivateTaxInvoice, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("ActivateTaxInvoice", Model.ActivateTaxInvoice, new { @disabled = "disabled", @class = "form-control" })
+                                        }
+                                        <span asp-validation-for="ActivateTaxInvoice" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RecipientName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="RecipientName" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="RecipientName" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="RecipientName" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RecipientAddress" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="RecipientAddress" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="RecipientAddress" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="RecipientAddress" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RecipientVATNumber" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="RecipientVATNumber" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="RecipientVATNumber" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="RecipientVATNumber" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RecipientReferenceNumber" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @if (Model.AllowCustomerEdit)
+                                        {
+                                            <input class="form-control" asp-for="RecipientReferenceNumber" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" asp-for="RecipientReferenceNumber" disabled="disabled" />
+                                        }
+                                        <span asp-validation-for="RecipientReferenceNumber" class="text-red"></span>
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <div class="row mt-2">
+                                @*<div class="col-4 text-left">
+                                        @if (Model.SelectedCustomer != null && opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.Customer_Profile, MyVoltage.Data.SecureAreaActionEnum.Delete))
+                                        {
+                                            <a href="#" onclick="DoDelete('@Model.SelectedCustomer.UserID', '@Model.SelectedCustomer.CustomerNumber - @Model.SelectedCustomer.FullName');" class="btn btn-outline-primary-sm text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        }
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        @if (Model.SelectedCustomer != null && opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.Customer_Profile, MyVoltage.Data.SecureAreaActionEnum.Approval) && !Model.IsConfirmed)
+                                        {
+                                            <a href="#" onclick="DoActivate('@Model.SelectedCustomer.UserID', '@Model.SelectedCustomer.CustomerNumber - @Model.SelectedCustomer.FullName');" class="btn btn-outline-primary-sm text-green"><i class="fas fa-check-circle"></i>&nbsp;Activate</a>
+                                        }
+                                    </div>*@
+                                <div class="col text-right">
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</form>
+
+@section Scripts {
+    <script>
+    </script>
+}

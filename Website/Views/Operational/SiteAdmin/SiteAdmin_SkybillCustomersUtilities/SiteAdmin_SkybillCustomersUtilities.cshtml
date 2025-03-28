@@ -1,0 +1,146 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_SkybillCustomersUtilitiesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_SkybillCustomersUtilities.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Customer No</th>
+                    <th scope="col">Service Address No</th>
+                    <th scope="col">Contract Start Date</th>
+                    <th scope="col">Contract End Date</th>
+                    <th scope="col">Meter Point Code</th>
+                    <th scope="col">Code</th>
+                    <th scope="col">Start Date</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Meter No</th>
+                    <th scope="col">Previous Reading</th>
+                    <th scope="col">Previous Reading Date</th>
+                    <th scope="col">Current Reading</th>
+                    <th scope="col">Current Reading Date</th>
+                    <th scope="col">Blocked</th>
+                    <th scope="col">Is Deleted</th>
+                    <th scope="col">Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SkybillCustomersUtilitiesItems)
+                {
+                    string rowClass = "";
+                    string title = $"{item.Description}";
+                    if (!item.ProductID.HasValue)
+                    {
+                        rowClass = "table-danger";
+                        title = $"{item.Description} - Missing Product";
+                    }
+                    <tr class="@Html.Raw(rowClass)" title="@title">
+                        <td scope="col" class="text-nowrap">
+                            @item.Customer_No
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Service_Address_No
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Contract_Start_Date.ToDateShort()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Contract_End_Date.ToDateShort(true)
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Meter_Point_Code
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Code
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Start_Date.ToDateShort()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Description
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Meter_No
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Previous_Reading.ToReading()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Previous_Reading_Date.ToDateShort()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Current_Reading.ToReading()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Current_Reading_Date.ToDateShort()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.Blocked.ToBoolean()
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.IsDeleted.ToBoolean()
+                        </td>
+                        <td scope="col">
+                            <select id="group_@item.ID" onchange="DoUpdatePartner('@item.ID');" class="form-control">
+
+                                @if (!item.ProductID.HasValue)
+                                {
+                                    <option value="" selected="selected">[Not Linked]</option>
+                                }
+                                @foreach (var prod in Model.Products)
+                                {
+                                    @if (item.ProductID.HasValue && item.ProductID.Value == prod.ID)
+                                    {
+                                        <option value="@prod.ID" selected="selected">@prod.ProductName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@prod.ID">@prod.ProductName</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+<script>
+
+    function DoUpdatePartner(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_SkybillCustomersUtilities_UpdatePartner/" + ItemID,
+            {
+                group: $("#group_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+</script>
+}

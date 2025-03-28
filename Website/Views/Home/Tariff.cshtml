@@ -1,0 +1,549 @@
+﻿@model MyVoltage.Models.HomeViewModels.Customer_TariffModel
+@inject MyVoltage.Services.CustomerProvider customerProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"Tariffs";
+}
+@*<div id="loaderContent" class="loader-overlay-content">
+        <div class="loader">
+            <div class="text-orange text-center">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+            </div>
+        </div>
+    </div>*@
+
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h4>UNDERSTAND YOUR TARIFFS</h4>
+            </div>
+            <div class="card-body bg-white">
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        <h5>
+                            MY ELECTRICITY TARIFFS
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        1.	HOW ARE TARIFFS REGULATED?
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p>
+                            Electricity tariffs are regulated by the National Energy Regulatory of South Africa (NERSA).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        2.	IS THE COST OF ELECTRICITY THE SAME EVERYWHERE IN SOUTH AFRICA?
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p>
+                            No. Tariffs differ from region to region, and from city to city. The rate is also determined by NERSA.
+                        </p>
+                        <p>
+                            For example, if you relocate within Gauteng, you will  be billed at a different rate in the city of Tshwane compared to the city of Johannesburg or Ekurhuleni.
+                        </p>
+                        <p>
+                            Locality based tariffs are influenced by a number of factors and availability of resources.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        3.	DO I PAY MORE FOR MY ELECTRICITY WHEN I USE A METERING SYSTEM FROM MY VOLTAGE?
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p>
+                            No. My Voltage has a legal obligation to strictly adhere to the approved tariffs as set out by NERSA.
+                        </p>
+                        <p>
+                            *Charges for Eskom authorities are effective from 1 April to 21 March.
+                        </p>
+                        <p>
+                            *Charges for Municipality authorities are effective from 1 July – 30 June.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        <h5>
+                            MY WATER AND SANITATION TARIFFS
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        4.	DO I PAY MORE FOR MY WATER AND SANITATION USAGE WHEN I USE A METERING SYSTEM FROM MY VOLTAGE?
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p>
+                            You can be rest assured that you are billed according to the tariffs as determined by your local municipality by-laws. These tariffs are published annually. This means that <strong>My Voltage is legally obligated</strong> to bill you at the this set tariff.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        <h5>
+                            MY GAS TARIFFS
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        5.	DO I PAY MORE FOR MY GAS USAGE WHEN I USE A METERING SYSTEM FROM MY VOLTAGE?
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p>
+                            The gas charges are prescribed by the Department of Energy and are updated and published regularly.
+                            <br />
+                            Therefore you will not be billed more for using one of our metering systems.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        <h5>
+                            FACTORS THAT MAY INFLUENCE THE RATE AT WHICH I AM BILLED
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        1.	REASONS WHY THE UNIT PRICE OF YOUR ELECTRICITY AND WATER IS NOT CONSISTENT
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p class="text-orange font-weight-bold">
+                            There is a simple rule to remember:
+                            <br />
+                            The more you use, the higher the unit price.
+                        </p>
+                        <p>
+                            Your cost per unit is determined by an INCLINE BLOCK TARIFF SYSTEM.
+                        </p>
+                        <p>
+                            Inclining Block Tariffs <strong>divide the electricity and water prices into different blocks/segments</strong>. The first block is at the lowest price. As you consume more electricity and water you automatically move into the next block which is gets more expensive per unit.
+                        </p>
+                        <p>
+                            TIP: Save water and electricity where possible so that you remain in the lowest block for as long as possible.
+                        </p>
+                        <p class="font-weight-bold">
+                            This cycle automatically resets at the start of every month.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col text-orange font-weight-bold">
+                        2.	HOW DO I KNOW I AM BEING CHARGED THE CORRECT AMOUNT?
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <p class="text-orange font-weight-bold">
+                            Data is what drives us at My Voltage. WE DON’T ASSUME, WE KNOW.
+                        </p>
+                        <p>
+                            This means that your daily invoice is fed by your actual consumption. We provide opening and closing readings for every meter (electricity and water) that is connected to your unit.
+                        </p>
+                        <p>
+                            Readings take place every day at midnight.
+                        </p>
+                        <p>
+                            Charges are calculated as follow:
+                        </p>
+                        <p>
+                            <div class="row mb-4">
+                                <div class="col">
+                                    <table class="table table-sm table-striped table-hover table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>NUMBER OF UNITS USED</th>
+                                                <th>X</th>
+                                                <th>THE APPLICABLE TARIFF</th>
+                                                <th>= COST</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Consumption metered on meter</td>
+                                                <td>X</td>
+                                                <td>Determined by the current Inclined Block Tarrif</td>
+                                                <td>= COST</td>
+                                            </tr>
+                                            <tr>
+                                                <td>(e.g. 10kwh)</td>
+                                                <td>X</td>
+                                                <td>R2.00</td>
+                                                <td>= R20.00 + VAT</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1">
+            @if (string.IsNullOrEmpty(customerProvider.CustomerNumber))
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select customer to start...
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">Showing Details For:</div>
+                        <div class="col">
+                            <select id="invoiceYear" class="form-control">
+                                @{
+                                    DateTime invoiceSelectionStartDate = new DateTime(2017, 01, 01);
+                                }
+                                @while (invoiceSelectionStartDate <= DateTime.Now)
+                                {
+                                    @if (Model.InvoiceMonth.Year == invoiceSelectionStartDate.Year)
+                                    {
+                                        <option value="@(invoiceSelectionStartDate.ToString("yyyy"))" selected="selected">@invoiceSelectionStartDate.ToString("yyyy")</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@(invoiceSelectionStartDate.ToString("yyyy"))">@invoiceSelectionStartDate.ToString("yyyy")</option>
+                                    }
+                                    invoiceSelectionStartDate = invoiceSelectionStartDate.AddYears(1);
+                                }
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select id="invoiceMonth" class="form-control">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    DateTime tempDate = new DateTime(DateTime.Now.Year, i, 1);
+                                    @if (Model.InvoiceMonth.Month == tempDate.Month)
+                                    {
+                                        <option value="@(i)" selected="selected">@tempDate.ToString("MMMM")</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@(i)">@tempDate.ToString("MMMM")</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col">
+                            <a id="btnSearch" name="btnSearch" href="#" onclick="Filter();" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                        </div>
+                    </div>
+                </div>
+                @foreach (var item in Model.Customer_TariffItems)
+                {
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col border border-primary rounded p-2 m-2">
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h4 class="text-orange">
+                                            @item.MeterSerial
+                                            @if (item.Device != null)
+                                            {
+                                                @switch (item.Device.MeterType)
+                                                {
+                                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                        <img src="~/images/elec-icon-s.png" />
+                                                        break;
+                                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                        <img src="~/images/water-icon-s.png" />
+                                                        break;
+                                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                        <img src="~/images/gas-icon-s.png" />
+                                                        break;
+                                                }
+                                            }
+
+                                        </h4>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        Current Tarrif:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.TarrifUsed.Resource_Name
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        Starting Date:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.TarrifUsed.Starting_Date.ToDateShort()
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        Ending Date:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.TarrifUsed.End_Date.ToDateShort()
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        Units:
+                                    </div>
+                                    <div class="col-6">
+                                        @item.Consumption.ToMoney()
+                                    </div>
+                                </div>
+
+                                @if (Model.ShowIncVAT)
+                                {
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Amount In VAT:
+                                        </div>
+                                        <div class="col-6">
+                                            @((item.TotalExVAT * 1.15m).ToMoney())
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Amount Display:
+                                        </div>
+                                        <div class="col-6 text-red font-weight-bold">
+                                            Including VAT
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Amount Ex VAT:
+                                        </div>
+                                        <div class="col-6">
+                                            @item.TotalExVAT.ToMoney()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Amount Display:
+                                        </div>
+                                        <div class="col-6 text-green font-weight-bold">
+                                            Excluding VAT
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (item.Device != null)
+                                {
+                                    @if (item.SkybillTariffItems.Count > 0)
+                                    {
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <hr />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <h6 class="text-orange">Current Tariff Steps:</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <table class="table table-sm table-responsive table-hover table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sliding Scale of blocks</th>
+                                                            @if (item.Device != null)
+                                                            {
+                                                                <th>Units Billed</th>
+                                                            }
+                                                            @if (Model.ShowIncVAT)
+                                                            {
+                                                                <th>Tariff (Incl. VAT)</th>
+                                                                @if (item.Device != null)
+                                                                {
+                                                                    <th>Billed (Incl. VAT)</th>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <th>Tariff (Excl. VAT)</th>
+                                                                @if (item.Device != null)
+                                                                {
+                                                                    <th>Billed (Excl. VAT)</th>
+                                                                }
+                                                            }
+                                                            <th>Activation Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var tItem in item.SkybillTariffItems)
+                                                        {
+                                                            <tr class="@Html.Raw(tItem.RowClass)">
+                                                                <td class="text-left">@tItem.Quantity_From - @tItem.QuantityTo</td>
+                                                                @if (item.Device != null)
+                                                                {
+                                                                    <td class="text-right">@Convert.ToDecimal(tItem.UnitsBilled).ToMoneyNoDecimal()</td>
+                                                                }
+                                                                @if (Model.ShowIncVAT)
+                                                                {
+                                                                    <td class="text-right" title="@Convert.ToDecimal(tItem.Unit_Price).ToMoney() Excl VAT">@((Convert.ToDecimal(tItem.Unit_Price) * 1.15m).ToMoney())</td>
+                                                                    @if (item.Device != null)
+                                                                    {
+                                                                        <td class="text-right" title="@tItem.AmountBilled.ToMoney() Excl VAT">
+                                                                            @((tItem.AmountBilled * 1.15m).ToMoney())
+                                                                        </td>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td class="text-right">@Convert.ToDecimal(tItem.Unit_Price).ToMoney()</td>
+                                                                    @if (item.Device != null)
+                                                                    {
+                                                                        <td class="text-right">@tItem.AmountBilled.ToMoney()</td>
+                                                                    }
+                                                                }
+                                                                <td class="text-right">@tItem.ActivationDate.ToDateShort(true)</td>
+                                                            </tr>
+                                                        }
+                                                        <tr class="table-secondary">
+                                                            <td class="text-left">Total</td>
+                                                            @if (item.Device != null)
+                                                            {
+                                                                <td class="text-right">@Convert.ToDecimal(item.UnitsBilled).ToMoneyNoDecimal()</td>
+                                                            }
+                                                            @if (Model.ShowIncVAT)
+                                                            {
+                                                                <td class="text-left"></td>
+                                                                @if (item.Device != null)
+                                                                {
+
+                                                                    <td class="text-right" title="@((Convert.ToDecimal(item.AmountBilled)).ToMoney()) Excl VAT">
+                                                                        @((Convert.ToDecimal(item.AmountBilled) * 1.15m).ToMoney())
+                                                                    </td>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <td class="text-left"></td>
+                                                                @if (item.Device != null)
+                                                                {
+                                                                    <td class="text-right">@Convert.ToDecimal(item.AmountBilled).ToMoney()</td>
+                                                                }
+                                                            }
+                                                            <td class="text-left"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <hr />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <h6 class="text-red">SALES JOURNALS NOT FOUND FOR '@item.Description'</h6>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                This could be due to 'sales journal entry description' and 'tarrif resource name' not being the same.
+                                            </div>
+                                        </div>
+
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <hr />
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function Filter() {
+            document.location.href = "/Customer_Tariff/" + $("#invoiceYear").val() + "/" + $("#invoiceMonth").val();
+        }
+    </script>
+}

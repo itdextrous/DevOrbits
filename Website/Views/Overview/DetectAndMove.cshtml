@@ -1,0 +1,40 @@
+﻿@model MyVoltage.Models.MeterViewModels.DetectAndMoveModel
+
+@{
+    ViewData["Title"] = "Auto Device Discovery";
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>
+                    Gateway IDs
+                </span>
+                <textarea asp-for="GatewayIDs" class="form-control" type="" title="Gateway IDs"></textarea>
+            </div>
+            <div class="col">
+                <span>
+                    Emails To Send Report To
+                </span>
+                <textarea asp-for="ToSendTo" class="form-control" type="" title="Device IDs"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Start</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                @Html.Raw(Model.ErrorMessage)
+            </div>
+        }
+    </div>
+
+}

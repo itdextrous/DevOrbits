@@ -1,0 +1,31 @@
+@model MyVoltage.Models.ClientzoneModels.RealTimeConsumptionModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@{
+    ViewData["Title"] = "Real-Time Consumption";
+}
+
+<div class="container realConsumption custom_container">
+    <div class="pt_m_45 mb-m25">
+        <h3 class="text-center page_heading">Consumption insights</h3>
+        <h4 class="text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">Real-time insights</h4>
+    </div>
+
+    <div class="mt-85 pt-45 max_w_1140" id="divResult" style="display:none;">
+        <div id="consumptionInsightsDiv"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#loaderContent").css("display", "block");
+        $('#consumptionInsightsLI').addClass("active");
+        $('#consumptionInsights_collapse').addClass("show");
+
+        $("#consumptionInsightsDiv").load('@Url.Content("/clientzone/realtimeconsumption")/@(DateTime.Now.Year)/@(DateTime.Now.Month)?showmirrorkgreading=@(Model.ShowMirrorKGReading)', function () {
+            $("#divResult").fadeIn();
+            $("#loaderContent").css("display", "none");
+        });
+
+    </script>
+}

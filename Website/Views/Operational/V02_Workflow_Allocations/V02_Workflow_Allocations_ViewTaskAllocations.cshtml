@@ -1,0 +1,213 @@
+@model MyVoltage.Models.OperationalModels.V02_Workflow_Allocations.V02_Workflow_AllocationsModels.V02_Workflow_Allocations_ViewTaskAllocationsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V02_Workflow_Allocations_ViewTaskAllocations.GetDescription()}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                Policy Details:
+            </div>
+            <div class="card-body">
+
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <h5>Responsibility</h5>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Responsible User
+                        @if (Model.A08_Task_Type.ResponsibleUserAccepted.HasValue)
+                        {
+                            @if (Model.A08_Task_Type.ResponsibleUserAccepted.Value)
+                            {
+                                <span class="text-green text-nowrap"><i class="fas fa-check-circle"></i>&nbsp;Approved @Model.A08_Task_Type.ResponsibleUserAcceptedDate.ToDateAndTimeShort()</span>
+                            }
+                            else
+                            {
+                                <span class="text-red text-nowrap"><i class="fas fa-times-circle"></i>&nbsp;Rejectd @Model.A08_Task_Type.ResponsibleUserAcceptedDate.ToDateAndTimeShort()</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-orange"><i class="fas fa-hourglass-half"></i>&nbsp;Pending</span>
+                        }
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.ResponsibleUsername
+                        @if (!Model.A08_Task_Type.ResponsibleUserAccepted.HasValue && Model.A08_Task_Type.ResponsibleUserID == userManager.GetUserId(User))
+                        {
+                            <a href="#" onclick="ConfirmAcceptResponsible();" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Accept Responsiblity</a>
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Reporting To User
+                        @if (Model.A08_Task_Type.ReportingToUserAccepted.HasValue)
+                        {
+                            @if (Model.A08_Task_Type.ReportingToUserAccepted.Value)
+                            {
+                                <span class="text-green text-nowrap"><i class="fas fa-check-circle"></i>&nbsp;Approved @Model.A08_Task_Type.ReportingToUserAcceptedDate.ToDateAndTimeShort()</span>
+                            }
+                            else
+                            {
+                                <span class="text-red text-nowrap"><i class="fas fa-times-circle"></i>&nbsp;Rejectd @Model.A08_Task_Type.ReportingToUserAcceptedDate.ToDateAndTimeShort()</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-orange"><i class="fas fa-hourglass-half"></i>&nbsp;Pending</span>
+                        }
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.ReportingToUsername
+                        @if (!Model.A08_Task_Type.ReportingToUserAccepted.HasValue && Model.A08_Task_Type.ReportingToUserID == userManager.GetUserId(User))
+                        {
+                            <a href="#" onclick="ConfirmAcceptReportingTo();" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Accept Responsiblity</a>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        <h5>Details of Task</h5>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Template No
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.TemplateNo
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        TaskClassification
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.TaskClassification.GetDescription()
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Workflow Group
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.WorkflowGroupName
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Business Pillar
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.BusinessPillarName
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Business Department
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.BusinessDepartmentName
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Identifier
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.Identifier
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Heading
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.Heading
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Description
+                    </div>
+                    <div class="col-6">
+                        @Model.A08_Task_Type.Description
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Linked Secure Area
+                    </div>
+                    <div class="col-6">
+                        @{
+                            string dashboardURL = "";
+                            string desc = "";
+                            if (Model.A08_Task_Type.LinkedSecureAreaID.HasValue)
+                            {
+                                var sa = (MyVoltage.Data.SecureAreaEnum)Model.A08_Task_Type.LinkedSecureAreaID.Value;
+                                foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                                {
+                                    foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                                    {
+                                        if (sa == dsa.Item1)
+                                        {
+                                            desc = $"{psa.Key.Item3} - {dsa.Item3}";
+                                            dashboardURL = $"/operational/{psa.Key.Item1}/{dsa.Item1}";
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        @if (!string.IsNullOrEmpty(dashboardURL))
+                        {
+                            <a class="btn btn-sm btn-outline-primary-sm" href="@dashboardURL">@(desc)</a>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ConfirmAcceptResponsible() {
+            if (confirm('By clicking this button you agree that you have read and understand the "@Model.A08_Task_Type.Heading" task. This action cannot be undone. Are you sure you wish to continue?')) {
+                document.location.href = '/operational/V02_Workflow_Allocations/V02_Workflow_Allocations_ResponsibleUserAccept';
+            }
+        }
+        function ConfirmAcceptReportingTo() {
+            if (confirm('By clicking this button you agree that you have read and understand the "@Model.A08_Task_Type.Heading" task. This action cannot be undone. Are you sure you wish to continue?')) {
+                document.location.href = '/operational/V02_Workflow_Allocations/V02_Workflow_Allocations_ReportingToUserAccept';
+            }
+        }
+    </script>
+}

@@ -1,0 +1,301 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_NetcashMissingSkybillJournals_UpdatePaymentIDModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_NetcashMissingSkybillJournals.GetDescription()} - {operationalProvider.CompanyName} - Create Entry";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Skybill Journal successfully created.
+                </div>
+                <div class="card-footer">
+                    <a href="@Model.BackURL" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-12">
+                            <h4>Netcash Statement Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Date
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.Date.ToDateShort()
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Transaction Code
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.TransactionCode - @Model.NetcashStatement.TransactionCodeDescription
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Internal DBID
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.InternalDBID
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Description
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.Description
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Amount
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.Amount.ToMoney("R")
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Internal Indicator
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.InternalIndicator
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Ledger Account Affected
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.LedgerAccountAffected
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Date Synced
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.DateSynced.ToDateAndTimeShort()
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+                    <div>
+                        <form asp-action="J_Finance_NetcashMissingSkybillJournals_UpdatePaymentID" enctype="multipart/form-data">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="PaymentID" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    @if (Model.AllowEdit)
+                                    {
+                                        <input type="text" class="form-control" asp-for="PaymentID" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" asp-for="PaymentID" readonly="readonly" />
+                                    }
+                                    <span asp-validation-for="PaymentID" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                </div>
+                                <div class="col">
+                                    <a href="#" onclick="SystemCheck();" class="btn btn-outline-primary-sm"><i class="fas fa-check"></i>&nbsp;System Check</a>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    Description Exact Match
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="description" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                </div>
+                                <div class="col">
+                                    <a href="#" onclick="SystemCheckDescription();" class="btn btn-outline-primary-sm"><i class="fas fa-check"></i>&nbsp;System Check</a>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="SkybillDocumentNo" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" asp-for="SkybillDocumentNo" readonly="readonly" />
+                                    <span asp-validation-for="SkybillDocumentNo" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Amount</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Amount" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Company</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Company" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Customer</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Customer" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Date</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Date" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Description</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Description" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-6 text-left">
+                                    <a href="@Model.BackURL" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button class="btn btn-outline-primary-sm" disabled id="formBtn"><i class="fas fa-plus-circle"></i>&nbsp;Update Payment ID</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+<script>
+
+    function SystemCheck() {
+        if ($("#PaymentID").val() != '') {
+            $("#loaderContent").css("display", "block");
+            $.get('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_UpdatePaymentID_SystemCheck/' + $("#PaymentID").val() + '/@Model.NetcashStatement.ID', function (data, status) {
+                if (data.result) {
+                    $("#SkybillDocumentNo").val(data.documentNo);
+                    $("#Amount").val(data.amount);
+                    $("#Customer").val(data.customer);
+                    $("#Company").val(data.company);
+                    $("#Date").val(data.date);
+                    $("#Description").val(data.description);
+                    if (data.amount == '@Model.NetcashStatement.Amount') {
+                        $("#formBtn").removeAttr('disabled');
+                    }
+                }
+                else {
+                    $("#SkybillDocumentNo").val("System check failed.");
+                    $("#Amount").val("System check failed.");
+                    $("#Customer").val("System check failed.");
+                    $("#Company").val("System check failed.");
+                    $("#Date").val("System check failed.");
+                    $("#Description").val("System check failed.");
+                    $("#formBtn").attr('disabled', 'disabled');
+                }
+            }).done(function () {
+                $("#loaderContent").css("display", "none");
+            });
+        }
+    }
+
+    function SystemCheckDescription() {
+        if ($("#description").val() != '') {
+            $("#loaderContent").css("display", "block");
+            $.get('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_SystemCheck_ExactMatch/@Model.NetcashStatement.ID/' + $("#description").val(), function (data, status) {
+                if (data.result) {
+                    $("#SkybillDocumentNo").val(data.documentNo);
+                    $("#Amount").val(data.amount);
+                    $("#Customer").val(data.customer);
+                    $("#Company").val(data.company);
+                    $("#Date").val(data.date);
+                    $("#Description").val(data.description);
+                    if (data.amount == '@Model.NetcashStatement.Amount') {
+                        $("#formBtn").removeAttr('disabled');
+                    }
+                }
+                else {
+                    $("#SkybillDocumentNo").val("System check failed.");
+                    $("#Amount").val("System check failed.");
+                    $("#Customer").val("System check failed.");
+                    $("#Company").val("System check failed.");
+                    $("#Date").val("System check failed.");
+                    $("#Description").val("System check failed.");
+                    $("#formBtn").attr('disabled', 'disabled');
+                }
+            }).done(function () {
+                $("#loaderContent").css("display", "none");
+            });
+        }
+    }
+
+</script>
+}

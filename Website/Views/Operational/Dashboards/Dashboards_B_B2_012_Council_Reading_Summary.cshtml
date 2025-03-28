@@ -1,0 +1,47 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_BModels.B2_012_Council_Reading_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.B02_CouncilReadings_CouncilReadingSummary.GetDescription() Details</h5>
+</div>
+@if (Model.B02_CouncilReadings_CouncilReadingSummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+            <th scope="col">Company Name</th>
+            <th scope="col">Payment Types</th>
+            <th scope="col">Council Meter Count</th>
+            <th scope="col">Readings Uploaded</th>
+            <th scope="col">Readings Verified</th>
+            <th scope="col">Readings Submitted</th>
+            <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.B02_CouncilReadings_CouncilReadingSummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/B02_CouncilReadings/B02_CouncilReadings_CouncilReadingDetails")}";
+                <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@fixitURL');">
+                <td scope="col">@item.CompanyName</td>
+                <td title="@item.CompanyName - Payment Types" scope="col">@item.PaymentTypes</td>
+                <td title="@item.CompanyName - Council Meter Count" scope="col">@item.CouncilMeterCount</td>
+                <td title="@item.CompanyName - Readings Uploaded" scope="col">@item.ReadingsUploadedCount</td>
+                <td title="@item.CompanyName - Readings Verified" scope="col">@item.ReadingsVerifiedCount</td>
+                <td title="@item.CompanyName - Readings Submitted" scope="col">@item.ReadingsSubmittedCount</td>
+                <td title="@item.CompanyName - Status" scope="col">@item.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

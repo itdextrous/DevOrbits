@@ -1,0 +1,70 @@
+@model MyVoltage.Models.OperationalModels.S02_ProductCombinedReports.S02_ProductCombinedReportsModels.S02_ProductCombinedReports_MeteredAnalysis_Units_SummaryModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.S02_ProductCombinedReports_MeteredAnalysis_Units_Summary.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mt-md-2 col-12">
+    <div class="col-2">Billed Between</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+    <div class="col-1">And</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+<div class="row mt-md-2 col-12">
+
+    <table class="table table-sm table-hover table-bordered table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Customers</th>
+                <th scope="col" class="text-center font-weight-bold">Total</th>
+                @foreach (var product in Model.Products)
+                {
+                    <th scope="col" class="text-center">@product.ProductName</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var uC in operationalProvider.UserCompanies)
+            {
+                var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                <tr id="S02_ProductCombinedReports_MeteredAnalysis_Units_SummaryItem_@company.CompanyID" style="cursor:pointer;" onclick="RedirectToDetails('@company.CompanyID');">
+                    <td scope="col">
+                        <div class="text-orange">
+                            @company.Name
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col" colspan="@(Model.Products.Count == 0 ? 1 : Model.Products.Count)">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function () {
+            $("#S02_ProductCombinedReports_MeteredAnalysis_Units_SummaryItem_" + this.CompanyID).load('/operational/S02_ProductCombinedReports/S02_ProductCombinedReports_MeteredAnalysis_Units_SummaryItem/' + this.CompanyID + '/' + "S02_ProductCombinedReports_MeteredAnalysis_Units_SummaryItem_" + this.CompanyID + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val(), function () {
+            });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/S02_ProductCombinedReports/S02_ProductCombinedReports_MeteredAnalysis_Units_Monthly';
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/S02_ProductCombinedReports/S02_ProductCombinedReports_MeteredAnalysis_Units_Summary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

@@ -1,0 +1,55 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_StatusGroups_AddModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_StatusGroups.GetDescription();
+}
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_StatusGroups" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to List</a>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <form asp-action="SiteAdmin_StatusGroups_Add" enctype="multipart/form-data">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="row mb-2 mt-2">
+                    <div class="col">
+                        @Model.StatusGroupName successfully created.
+                    </div>
+                </div>
+                <div class="row mb-2 mt-2">
+                    <div class="col">
+                        <a href="/operational/SiteAdmin/SiteAdmin_StatusGroups" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row mb-2 mt-2">
+                    <div class="col">
+                        <label asp-for="StatusGroupName" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        <input class="form-group" type="text" asp-for="StatusGroupName" />
+                        <span asp-validation-for="StatusGroupName" class="text-red"></span>
+                    </div>
+                </div>
+                @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            @Model.ErrorMessage
+                        </div>
+                    </div>
+                }
+                <div class="row mb-2 mt-2">
+                    <div class="col-12 text-right">
+                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                    </div>
+                </div>
+
+            }
+        </form>
+    </div>
+</div>

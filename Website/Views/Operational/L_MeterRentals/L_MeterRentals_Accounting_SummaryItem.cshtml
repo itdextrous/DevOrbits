@@ -1,0 +1,25 @@
+@model MyVoltage.Models.OperationalModels.L_MeterRentals.L_MeterRentalsModels.L_MeterRentals_Accounting_SummaryModel.L_MeterRentals_Accounting_SummaryItem
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+@{string title = $"{Model.CompanyName}"; }
+<td scope="col" class="text-nowrap">@Model.CompanyName</td>
+@{ DateTime currentDate = new DateTime(Model.FromDate.Year, Model.FromDate.Month, 1); }
+@while (currentDate <= Model.ToDate)
+{
+    if (Model.MonthlyRentalFigures.ContainsKey(currentDate) && Model.MonthlyRentalFigures[currentDate] > 0)
+    {
+        <td title="@Model.CompanyName - @currentDate.ToString("yyyy MMMM")" scope="col" class="text-nowrap text-right">R @Model.MonthlyRentalFigures[currentDate].ToString("N0")</td>
+    }
+    else
+    {
+        <td title="@Model.CompanyName - @currentDate.ToString("yyyy MMMM")" scope="col"></td>
+    }
+    currentDate = currentDate.AddMonths(1);
+}
+<td title="@Model.CompanyName - Total (@Model.FromDate.ToString("yyyy MMMM") - @Model.ToDate.ToString("yyyy MMMM"))" scope="col" class="text-nowrap text-right">R @Model.MonthlyRentalFigures.Select(p => p.Value).Sum().ToString("N0")</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("title", '@title');
+        });
+</script>

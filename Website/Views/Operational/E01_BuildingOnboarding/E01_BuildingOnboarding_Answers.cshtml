@@ -1,0 +1,195 @@
+@*@model MyVoltage.Models.OperationalModels.E01_BuildingOnboardingModels.E01_BuildingOnboarding_AnswersModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E01_BuildingOnboarding_Answers.GetDescription()} - {opProv.CompanyName}";
+}
+@if (opProv.CompanyID == 0)
+{
+    <span>Select company to begin...</span>
+}
+else
+{
+    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.E01_BuildingOnboarding_Answers, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+    {
+        <div class="row col-12 mt-2 mb-2">
+            <a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Logs" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;View Log</a>
+        </div>
+    }
+    <div class="row col-12">
+        <table class="table table-striped table-responsive-xl table-hover table-bordered">
+            <tbody>
+                @foreach (var distinctHeading in Model.E01_BuildingOnboarding_AnswersItems.Select(p => p.Heading).Distinct().OrderBy(p => p).ToList())
+                {
+                    <tr>
+                        <th colspan="2" class="table-primary">@distinctHeading</th>
+                    </tr>
+                    @foreach (var item in Model.E01_BuildingOnboarding_AnswersItems.Where(p => p.Heading == distinctHeading).OrderBy(p => p.Description))
+                    {
+
+                        string dashboardURL = "";
+                        string desc = "";
+                        if (item.LinkedSecureAreaID.HasValue)
+                        {
+                            var sa = (MyVoltage.Data.SecureAreaEnum)item.LinkedSecureAreaID.Value;
+                            foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                            {
+                                foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                                {
+                                    if (sa == dsa.Item1)
+                                    {
+                                        desc = $"{psa.Key.Item3} - {dsa.Item3}";
+                                        dashboardURL = $"/operational/{psa.Key.Item1}/{dsa.Item1}";
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        string editLink = "";
+                        <tr class="@(item.Answered == null ? "table-danger" : "")">
+                            <td scope="col">
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-12">
+                                        <span>@item.Description</span>
+                                    </div>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-12">
+                                        <span><span class="text-blue font-weight-bold">System Check:</span> <span id="sysCheck_@item.ID"><i class="fas fa-spinner fa-spin"></i></span></span>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(dashboardURL))
+                                {
+                                    <div class="row mt-2 mb-2">
+                                        <div class="col-12">
+                                            <span>
+                                                <span class="text-orange font-weight-bold">Dashboard Link:</span><a class="btn btn-sm btn-outline-primary-sm p-1" href="@dashboardURL">@(desc)</a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                }
+                                @switch (item.QuestionType)
+                                {
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.FileUpload:
+                                        editLink = $"/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Answers_Update_FU/{item.ID}";
+                                        @if (item.Answered != null)
+                                        {
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">File Uploaded By:</span> @item.Answered.Username - @item.Answered.DateCreated.ToDateAndTimeShort()</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">File Description:</span> @item.Answered.UserAnswer</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Answers_GetAttachment/@item.Answered.ID" target="_blank" class="btn btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download Attachment</a>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span class="text-red font-weight-bold">Not Answered</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        break;
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.Text:
+                                        editLink = $"/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Answers_Update_TXT/{item.ID}";
+                                        @if (item.Answered != null)
+                                        {
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">Answered By:</span> @item.Answered.Username - @item.Answered.DateCreated.ToDateAndTimeShort()</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">Answer:</span> @item.Answered.UserAnswer</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span class="text-red font-weight-bold">Not Answered</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        break;
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_BuildingDetails:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_FinancialDetails:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_TechnicalDetails:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_SubscribersOnSkybill:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_MetersOnSkybill:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_BlockedOnSkybill:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_DevicesOnlineElec:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_DevicesOnlineWater:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_DevicesOnAuto:
+                                    case MyVoltage.Data.BuildingOnboardingQuestion.QuestionTypeEnum.YesNo_NegativeBalanceDisconnected:
+                                        editLink = $"/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Answers_Update_YN/{item.ID}";
+                                        @if (item.Answered != null)
+                                        {
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">Answered By:</span> @item.Answered.Username - @item.Answered.DateCreated.ToDateAndTimeShort()</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">Answer:</span> @item.Answered.SystemAnswer</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span><span class="text-orange font-weight-bold">Reason for Answer:</span> @item.Answered.UserAnswer</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <span class="text-red font-weight-bold">Not Answered</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        break;
+                                }
+                            </td>
+                            <td scope="col">
+                                <a href="@Html.Raw(editLink)" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Add / Update</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/SiteAdmin/E01_BuildingOnboarding_Answers/Edit/' + flagID;
+        }
+        $(document).ready(function () {
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.E01_BuildingOnboarding_AnswersItems)));
+            $(companies).each(function() {
+                $("#sysCheck_" + this.ID).load('@(Url.Content("/operational/E01_BuildingOnboarding/E01_BuildingOnboarding_Answers_SystemCheck/"))' + this.ID, function() {
+                    });
+            });
+        });
+
+    </script>
+}*@

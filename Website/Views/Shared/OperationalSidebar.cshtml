@@ -1,0 +1,212 @@
+@using Microsoft.AspNetCore.Identity
+@using MyVoltage.Models
+@using Microsoft.AspNetCore.Http
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+
+
+<div class="sidebar">
+    <div class="loader-overlay-sidebar">
+        <div class="loader">
+            <div class="text-orange text-center">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+            </div>
+        </div>
+    </div>
+    <!--
+         <div class="logo">
+             <a href=""><img src="/logo" alt="MyVoltage"></a>
+         </div>
+     -->
+
+    <div class="sidebar-wrapper mt-3">
+        <ul class="nav flex-column">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                if (@User.IsInRole(MyVoltage.Data.UserRoleEnum.Operational.ToString()))
+                {
+                    if (operationalProvider.IsDeveloper)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/operational/developerpage"><i class="fas fa-tools"></i>Dev Page</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://myvoltagescheduler.azurewebsites.net/hangfire/" target="_blank"><i class="fas fa-desktop"></i>Hangfire Dash</a></li>
+                    }
+                    <li class="nav-item"><a class="nav-link" href="/operational/gameplan"><i class="fas fa-chess"></i>Gameplan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/operational/ActiveTimeLog"><i class="fas fa-clock"></i>Active Time Log</a></li>
+                    @if (operationalProvider.FlagSelectedFlagID != 0)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/operational/A09_Flags/A09_Flags_CompanyReview"><i class="fas fa-flag"></i>Active Flag</a></li>
+                    }
+                    @if (operationalProvider.TaskSelectedTaskID != 0)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/operational/A08_Tasks/A08_Task_Review"><i class="fas fa-clipboard"></i>Active Task</a></li>
+                    }
+                    @if (operationalProvider.E01SelectedTaskID != 0)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review"><i class="fas fa-building"></i>Active Building Onboarding Task</a></li>
+                    }
+                    <li class="nav-item"><a class="nav-link" href="/operational/search"><i class="fas fa-search"></i>Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/operational/dashboard"><i class="fas fa-desktop"></i>Smart View</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/operational/map"><i class="fas fa-map-marked-alt"></i>Map</a></li>
+                    <li class="nav-item">
+                        <div class="nav-link text-white">
+                            <i class="fas fa-user"></i>
+                            &nbsp;
+                            @if (operationalProvider.CompanyID == 0 || string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                            {
+                                <text>-----</text>
+                            }
+                            else
+                            {
+                                <text><span title="@operationalProvider.AccountTypeForSelectedCustomer">@operationalProvider.CustomerNumber</span></text>
+                            }
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="nav-link text-white">
+                            <i class="fas fa-building"></i>
+                            &nbsp;
+                            @if (operationalProvider.UserCompanies.Count == 1)
+                            {
+                                @operationalProvider.Companies.Where(p => p.CompanyID == operationalProvider.CompanyID).SingleOrDefault().Name
+                            }
+                            else
+                            {
+                                <select id="globalCompanySelector" class="nav-company-dropdown" onchange="ChangeActiveCompany();">
+                                    @foreach (var company in operationalProvider.Companies)
+                                    {
+                                        if (company.CompanyID == 0)
+                                        {
+                                            if (operationalProvider.CompanyID == company.CompanyID)
+                                            {
+                                                <option selected="selected" value="@company.CompanyID">@company.Name</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@company.CompanyID">@company.Name</option>
+                                            }
+                                        }
+                                        var uC = operationalProvider.UserCompanies.Where(p => p.CompanyID == company.CompanyID).SingleOrDefault();
+                                        if (uC != null)
+                                        {
+                                            if (operationalProvider.CompanyID == company.CompanyID)
+                                            {
+                                                <option selected="selected" value="@uC.CompanyID">@company.Name</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@uC.CompanyID">@company.Name</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            }
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="nav-link text-white">
+                            <i class="fas fa-tablet-alt"></i>
+                            &nbsp;
+                            @if (operationalProvider.UserMeterSerials.Count == 1)
+                            {
+                                @operationalProvider.MetersForSelectedCompany.Where(p => p.Key == operationalProvider.CustomerMeterSerial).SingleOrDefault().Value
+                            }
+                            else
+                            {
+                                <select id="globalMeterSelector" class="nav-company-dropdown" onchange="ChangeActiveMeter();">
+                                    @if (operationalProvider.CompanyID == 0)
+                                    {
+                                        <option selected="selected" disabled="disabled" value="0">Select Company First</option>
+                                    }
+                                    else
+                                    {
+                                        if (operationalProvider.CompanyID == 0 || string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                                        {
+                                            <option selected="selected" value="">----</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="">----</option>
+                                        }
+
+                                        @foreach (var meter in operationalProvider.MetersForSelectedCompany)
+                                        {
+                                            if (operationalProvider.CustomerMeterSerial == meter.Key)
+                                            {
+                                                <option selected="selected" value="@meter.Key">@meter.Value</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@meter.Key">@meter.Value</option>
+                                            }
+                                        }
+
+                                    }
+                                </select>
+                            }
+                        </div>
+                    </li>
+
+                    @foreach (var parentSecureArea in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                    {
+                        var parentSecureAreaDBEntry = operationalProvider.ParentSecureAreas.Where(p => p.ParentSecureAreaID == (int)parentSecureArea.Key.Item1).SingleOrDefault();
+
+                        try
+                        {
+                            if (operationalProvider.UserSecureAreaActions.Where(p => parentSecureArea.Value.Select(d => d.Item1).Contains((MyVoltage.Data.SecureAreaEnum)p.SecureAreaID)).Count() > 0)
+                            {
+                                <div class="nav-group">
+                                    <li class="nav-group-item">
+                                        <a class="nav-group-link" href="#" data-toggle="collapse" data-target="#@(parentSecureAreaDBEntry.ParentSecureAreaCodeName)_collapse" aria-expanded="false" aria-controls="@(parentSecureAreaDBEntry.ParentSecureAreaCodeName)_collapse">
+                                            @if (!string.IsNullOrEmpty(parentSecureAreaDBEntry.ParentSecureAreaDisplayIcon))
+                                            {
+                                                <i class="fas fa-@(parentSecureAreaDBEntry.ParentSecureAreaDisplayIcon)"></i>
+                                            }
+                                            @(parentSecureAreaDBEntry.ParentSecureAreaDisplayName)&nbsp;
+                                        </a>
+                                    </li>
+                                    <div class="collapse" id="@(parentSecureAreaDBEntry.ParentSecureAreaCodeName)_collapse">
+                                        @foreach (var secureArea in parentSecureArea.Value.OrderBy(p => p.Item3))
+                                        {
+                                            var secureAreaDBEntry = operationalProvider.SecureAreas.Where(p => p.SecureAreaID == (int)secureArea.Item1).SingleOrDefault();
+
+                                            if (secureAreaDBEntry == null || parentSecureAreaDBEntry.ParentSecureAreaID == 9 && secureAreaDBEntry.SecureAreaID == 223)
+                                            {
+                                                continue;
+                                            }
+
+                                            if (operationalProvider.UserSecureAreaActions.Where(p => p.SecureAreaID == (int)secureArea.Item1).Count() > 0)
+                                            {
+                                                <li class="nav-sub-item">
+                                                    <a class="nav-sub-link" href="/operational/@(parentSecureAreaDBEntry.ParentSecureAreaCodeName)/@(secureAreaDBEntry.SecureAreaCodeName)">
+                                                        @if (!string.IsNullOrEmpty(secureAreaDBEntry.SecureAreaDisplayIcon))
+                                                        {
+                                                            <text>&nbsp;<i class="fas fa-@(secureAreaDBEntry.SecureAreaDisplayIcon)"></i></text>
+                                                        }
+                                                        @(secureAreaDBEntry.SecureAreaDisplayName)
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    </div>
+                                    @*<li class="nav-divider">&nbsp;</li>*@
+                                </div>
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-power-off"></i>Log Out</a></li>
+                }
+            }
+            else
+            {
+                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Register"><i class="fas fa-plus-circle"></i>Register</a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login"><i class="fas fa-user"></i>Log in</a></li>
+            }
+        </ul>
+    </div>
+
+</div>

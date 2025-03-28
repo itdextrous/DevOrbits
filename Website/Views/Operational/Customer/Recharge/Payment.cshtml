@@ -1,0 +1,47 @@
+﻿@model MyVoltage.Models.PaymentViewModels.PaymentViewModel
+
+@{
+    ViewBag.Title = "Payment Gateway";
+}
+
+
+
+<section class="section pt-5">
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col-md-8 mx-auto text-white text-center">
+                <h1 class="">Please stand by</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mx-auto">
+                <div class="card">
+                    <div class="card-body text-center">
+
+                        <form id="formPaymentGateway" method="POST" action="https://paynow.netcash.co.za/site/paynow.aspx">
+
+                            <input name="m1" type="hidden" value="@Model.m1">
+                            <input name="m2" type="hidden" value="@Model.m2">
+                            <input name="p2" type="hidden" value="@Model.p2">
+                            <input name="p3" type="hidden" value="@Model.p3">
+                            <input name="p4" type="hidden" value="@Model.p4">
+                            <input name="Budget" type="hidden" value="@Model.Budget">
+                            <input name="m4" type="hidden" value="@Model.m4">
+                            <input name="m5" type="hidden" value="@Model.m5">
+                            <input name="m6" type="hidden" value="@Model.m6">
+                            <input name="m9" type="hidden" value="@Model.m9">
+                            <input name="m10" type="hidden" value="@Model.m10">
+
+                            <h3>Please stand by while you are being redirected to our Payment Gateway...</h3>
+                            <script>
+                                //ga('send', 'pageview', '/donate/success');
+                                document.getElementById('formPaymentGateway').submit();
+                            </script>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

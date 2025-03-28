@@ -1,0 +1,71 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@{
+    ViewData["Title"] = "Billing Control Report - Billing Blocked Summary";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Meters Blocked Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var uC in operationalProvider.Companies.Where(p => p.IsDailyBillingStatusActive && p.ExistsInSkybill.HasValue && p.ExistsInSkybill.Value && operationalProvider.UserCompanies.Select(c => c.CompanyID).Contains(p.CompanyID)))
+                        {
+                           <tr id="MeterOnManualSummaryItem_@uC.CompanyID" style="cursor:pointer;" title="View @uC.Name" onclick="RedirectToDetails('@uC.CompanyID');">
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        @uC.Name
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.Companies.Where(p => p.IsDailyBillingStatusActive && operationalProvider.UserCompanies.Select(c => c.CompanyID).Contains(p.CompanyID)))));
+        $(companies).each(function() {
+            $("#MeterOnManualSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A06_BillingControlReport/A06_BillingControlReport_BillingBlockedSummaryItem/"))' + this.CompanyID + '/' + "MeterOnManualSummaryItem_" + this.CompanyID, function() {
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_BillingBlockedDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

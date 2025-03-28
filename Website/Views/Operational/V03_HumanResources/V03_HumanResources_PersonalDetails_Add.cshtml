@@ -1,0 +1,355 @@
+@model MyVoltage.Models.OperationalModels.V03_HumanResources.V03_HumanResources_PersonalDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V03_HumanResources_PersonalDetails.GetDescription()} - Create New";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Personal Details successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/V03_HumanResources/V03_HumanResources_AllHumanResources" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Back to List</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="V03_HumanResources_PersonalDetails_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Personal Details</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EmployeeEmail" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="EmployeeEmail" />
+                                <span asp-validation-for="EmployeeEmail" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EmployeeNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="EmployeeNo" />
+                                <span asp-validation-for="EmployeeNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="FullName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="FullName" />
+                                <span asp-validation-for="FullName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="IDNumber" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="IDNumber" />
+                                <span asp-validation-for="IDNumber" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ResidentialAddress" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="ResidentialAddress"></textarea>
+                                <span asp-validation-for="ResidentialAddress" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ContactNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="ContactNo" />
+                                <span asp-validation-for="ContactNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PersonalEmail" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="PersonalEmail" />
+                                <span asp-validation-for="PersonalEmail" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="IncomeTaxNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="IncomeTaxNo" />
+                                <span asp-validation-for="IncomeTaxNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DateOfBirth" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" value="@Model.DateOfBirth.ToDateShort(true)" asp-for="DateOfBirth" />
+                                <span asp-validation-for="DateOfBirth" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MaritialStatus" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="MaritialStatus" />
+                                <span asp-validation-for="MaritialStatus" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SpouseName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SpouseName" />
+                                <span asp-validation-for="SpouseName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SpouseEmployer" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SpouseEmployer" />
+                                <span asp-validation-for="SpouseEmployer" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="SpouseContactNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="SpouseContactNo" />
+                                <span asp-validation-for="SpouseContactNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="StartDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" value="@Model.StartDate.ToDateShort(true)" asp-for="StartDate" />
+                                <span asp-validation-for="StartDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EndDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" value="@Model.EndDate.ToDateShort(true)" asp-for="EndDate" />
+                                <span asp-validation-for="EndDate" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Organizational Details</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ReportingToUserID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ReportingToUserID", Model.ReportingToUserID, new { @class = "form-control" })
+                                <span asp-validation-for="ReportingToUserID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CompanyID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                                <span asp-validation-for="CompanyID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Banking Details</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BankAccountName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="BankAccountName" />
+                                <span asp-validation-for="BankAccountName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BankName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="BankName" />
+                                <span asp-validation-for="BankName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BankBranchName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="BankBranchName" />
+                                <span asp-validation-for="BankBranchName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="BankAccountNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="BankAccountNo" />
+                                <span asp-validation-for="BankAccountNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Emercency Contact Details</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EmergencyFullName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="EmergencyFullName" />
+                                <span asp-validation-for="EmergencyFullName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EmergencyResidentialAddress" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="EmergencyResidentialAddress"></textarea>
+                                <span asp-validation-for="EmergencyResidentialAddress" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EmergencyPrimaryContactNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="EmergencyPrimaryContactNo" />
+                                <span asp-validation-for="EmergencyPrimaryContactNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="EmergencyRelationship" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="EmergencyRelationship" />
+                                <span asp-validation-for="EmergencyRelationship" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>System User Details</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OperationalUserID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("OperationalUserID", Model.OperationalUserID, new { @class = "form-control" })
+                                <span asp-validation-for="OperationalUserID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <a href="/operational/V03_HumanResources/V03_HumanResources_AllHumanResources" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to List</a>
+                            </div>
+                            <div class="col text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card-footer">
+                    <div class="row col-12">
+                    </div>
+
+                </div>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

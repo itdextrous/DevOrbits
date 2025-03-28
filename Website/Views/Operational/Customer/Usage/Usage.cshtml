@@ -1,0 +1,18 @@
+@model MyVoltage.Models.OperationalModels.Customer.CustomerUsageMainModel
+@{
+    ViewData["Title"] = "Customer - Usage";
+}
+<div id="customerUsage" class="card-body">
+    <div class="text-orange">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Usage Details...
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#customerUsage").load('@Url.Content(Model.UsageUrl)');
+        });
+    </script>
+}

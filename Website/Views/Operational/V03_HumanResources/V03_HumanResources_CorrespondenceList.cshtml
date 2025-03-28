@@ -1,0 +1,197 @@
+@model MyVoltage.Models.OperationalModels.V03_HumanResources.V03_HumanResources_CorrespondenceListModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V03_HumanResources_CorrespondenceList.GetDescription()} - {Model.V03_HumanResources_AllHumanResourcesItem.OperationalUser}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Correspondence successfully added
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col">
+                            <a href="" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Correspondence List</a>
+                            &nbsp;
+                            <a href="/operational/V03_HumanResources/V03_HumanResources_AllHumanResources" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Back to HR List</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+
+                    <div class="row mt-2">
+                        <div class="col-md-4 text-nowrap">
+                            <h4>Human Resource Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Employee Email
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.EmployeeEmail
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            First Name
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.OperationalProfile.FirstName
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Last Name
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.OperationalProfile.LastName
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Job Title
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.OperationalProfile.JobTitle
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-4 text-nowrap">
+                            <h4>Organisational Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Reporting To
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.ReportingToUser
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Company
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.CompanyName
+                        </div>
+                    </div>
+
+
+                </div>
+                <form asp-action="V03_HumanResources_CorrespondenceList" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input class="form-control" asp-for="Description" />
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="Attachment" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input class="form-control" asp-for="Attachment" />
+                                <span asp-validation-for="Attachment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="AttachmentType" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("AttachmentType", Model.AttachmentType, new { @class = "form-control" })
+                                <span asp-validation-for="AttachmentType" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <a href="/operational/V03_HumanResources/V03_HumanResources_AllHumanResources" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Back to HR List</a>
+                            </div>
+                            <div class="col text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12 text-left">
+                                <h5 class="text-orange">Correspondences</h5>
+                            </div>
+                        </div>
+
+                        <div class="row col-12">
+                            <table class="table table-sm table-striped table-hover table-bordered">
+                                <tr>
+                                    <th>Description</th>
+                                    <th>File Type</th>
+                                    <th>Uploaded By</th>
+                                    <th>Date Uploaded</th>
+                                    <th></th>
+                                </tr>
+
+                                @foreach (var item in Model.V03_CorrespondenceItems)
+                                {
+                                    string aClass = "";
+                                    if (item.IsDeleted)
+                                    {
+                                        aClass = "table-danger";
+                                        continue;
+                                    }
+                                    <tr class="@Html.Raw(aClass)">
+                                        <td>@item.Description</td>
+                                        <td>@item.AttachmentType.GetDescription()</td>
+                                        <td>@item.Username</td>
+                                        <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                        <td class="text-right">
+                                            <a href="/operational/V03_HumanResources/V03_HumanResources_Correspondence_Download/@item.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                            &nbsp;
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <a href="/operational/V03_HumanResources/V03_HumanResources_Correspondence_Delete/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+

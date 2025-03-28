@@ -1,0 +1,135 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_MeterOnManualRequestCreateModel
+@{
+    ViewData["Title"] = "Credit Control And Notifier Process - Meter Manual Request";
+}
+@using MyVoltage.Extensions;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                <div class="row mt-md-2">
+                    <div class="col-12 text-left">
+                        <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterModeDetails" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                </div>
+
+                <div class="row mt-md-2">
+                    <div class="col-12 text-left">
+                        <input id="DeviceSearch_Serial" name="DeviceSearch_Serial" onchange="AutoFillMeterDetails();" class="form-group" placeholder="Search for a meter serial number to create a request" style="width:100%;" asp-for="MeterSerial" />
+                        <br />
+                        <span>Note: Form will only show after leaving the search box. (Tip: After selecting the serial from the list press TAB on your keyboard. It will then load the meter details and show the form)</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.MeterSerial))
+                {
+                    @if (!Model.IsMeterOnAuto)
+                    {
+                        <div class="row col-12 mb-md-2 p-4 ui-state-error rounded">
+                            <div class="ui-state-error-text">
+                                <h3>Invalid Request!</h3>
+                                <br />
+                                Meter already on Manual.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="A07_CreditControlAndNotifierProcess_MeterOnManualRequestCreate" enctype="multipart/form-data">
+                            <div class="row mt-md-2">
+                                <div class="col-12 text-left text-uppercase font-weight-bold">
+                                    <label asp-for="ReasonForRequest" class="control-label"></label>
+                                </div>
+                            </div>
+
+                            <div class="row mt-md-2">
+                                <div class="col-12 text-left">
+                                    <textarea style="width:100%;" class="form-group" asp-for="ReasonForRequest"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row mt-md-2">
+                                <div class="col-12 text-left">
+                                    <span asp-validation-for="ReasonForRequest" class="text-red"></span>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                <div class="row mt-md-2">
+                                    <div class="col-12 text-left text-red">
+                                        @Html.Raw(Model.ErrorMessage)
+                                    </div>
+                                </div>
+                            }
+                            <div class="row mt-md-2">
+                                <div class="col-12 text-left text-red">
+                                    <div asp-validation-summary="All" class="text-danger"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-md-2">
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary"><i class="fas fa-save"></i>&nbsp;Create Request</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    }
+                    <div id="deviceDetails" class="card-body">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Device Details...
+                        </div>
+                    </div>
+
+                    <div id="customerDetails" class="card-body">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Details...
+                        </div>
+                    </div>
+
+                }
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+            $("#deviceDetails").load('@Url.Content("/operational/shared/meter/DeviceDetails")');
+            $("#customerDetails").load('@Url.Content("/operational/shared/customer/customerdetails")');
+
+            $("#DeviceSearch_Serial").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualRequestCreate_Search",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                }
+            });
+
+            function AutoFillMeterDetails() {
+                if ($("#DeviceSearch_Serial").val() != "") {
+                    document.location.href = '/operational/changeActiveMeter/' + $("#DeviceSearch_Serial").val() + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualRequestCreate';
+                }
+            }
+
+
+    </script>
+}

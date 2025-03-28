@@ -1,0 +1,14 @@
+@using MyVoltage.Extensions;
+@model MyVoltage.Models.OperationalModels.Shared.BillingSyncModels.LatestBillingSync
+
+<div class="row col-12">
+    <h5 class="text-orange">Latest Billing Sync:</h5>
+    &nbsp;
+    Started:
+    &nbsp;
+    @Model.StartTime.ToDateAndTimeShort()
+    &nbsp;
+    Ended:
+    @Model.EndTime.ToDateAndTimeShort()
+    &nbsp;
+</div>

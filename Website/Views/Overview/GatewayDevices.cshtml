@@ -1,0 +1,551 @@
+﻿@model MyVoltage.Api.MyVoltage.GatewayDevice
+
+
+@{
+    ViewData["Title"] = "Gateway";
+    Layout = "LayoutAdmin";
+}
+
+<div class="back-btn"><a href="/overview" class="text-black"><i class="fas fa-arrow-left"></i> Back</a></div>
+
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+
+
+<div class="row">
+    <div class="col">
+        <div class="mt-5">
+            <button type="submit" onclick="return DownloadTable()" class="btn btn-outline-primary btn-sm float-right my-4">Download as xls</button>
+        </div>
+    </div>
+</div>
+
+<div class="gateway-details my-4">
+    <div class="row">
+        <div class="col-md-12 col-lg-4">
+            <div class="row">
+                <div class="col-6">Device Id:</div>
+                <div class="col-6"><b>@Model.id</b></div>
+                <div class="col-6">Device Name:</div>
+                <div class="col-6"><b>@Model.name</b></div>
+                <div class="col-6">Device Serial</div>
+                <div class="col-6"><b>@Model.serial</b></div>
+                <div class="col-6">Device Status</div>
+                <div class="col-6"><b>@Model.deviceStatus</b></div> 
+                <div class="col-6">Device Time:</div>
+                <div class="col-6"><b>@Model.since</b></div>
+            </div>    
+        </div>
+        <div class="col-md-12 col-lg-4">
+            <div class="row">     
+                <div class="col-6">Gateway Hardware Type:</div>
+                <div class="col-6"><b>@Model.type.name</b></div>
+                <div class="col-6">Gateway Hardware ID:</div>
+                <div class="col-6"><b>@Model.type.id</b></div>
+                <div class="col-6">Sim Card Number:</div>
+                <div class="col-6"><b>@Model.network.msisdn</b></div>
+                <div class="col-6">Firmware Version: </div>
+                <div class="col-6"><b>@Model.network.version</b></div>
+                <div class="col-6">Network:</div>
+                <div class="col-6"><b>@Model.network.network</b></div>
+            </div>   
+        </div>
+        
+        <div class="col-md-12 col-lg-4">
+            <div class="row">
+                <div class="col-6">GSM Serial No:</div>
+                <div class="col-6"><b>@Model.serial</b></div>
+                <div class="col-6">GIS Location:</div>
+                <div class="col-6"><b>-</b></div>
+                <div class="col-6">Signal</div>
+                <div class="col-6"><b>@Model.network.csq</b></div>
+                <div class="col-6">Meters Online:</div>
+                <div class="col-6"><b>@Model.onlineDevices</b></div>
+                <div class="col-6">Meters Offline</div>
+                <div class="col-6"><b>@Model.offlineDevices</b> </div>
+            </div>
+        </div>
+    </div>
+</div>
+<table class="table table-repsonsive-sm table-bordered admin-table-detail mt-3 table-striped" id="MeterTable">
+    <thead>
+        <tr>
+            <td>Meter ID</td>
+            <td class="fix-col-md">Serial Number</td>
+            <td class="fix-col-md">Name</td>
+            <td>Status</td>
+            <td>Disconnect</td>
+            <td>Last Status</td>
+            <td>GW ID Linked</td>
+            <td>Type ID</td>
+            <td>Type Name</td>
+            <td>Maping Index</td>
+            <td>Port</td>
+            <td>Protocol</td>
+            <td>Remote Address</td>
+            <td>Remote Index</td>
+            <td>Process Interval</td>
+            <td class="fix-col-lg">Last Communicated</td>
+            <td class="fix-col-md">Pre-paid/Demand</td>
+            <td>Pulse Level</td>
+            <td>Output State</td>
+            <td>Water Consump.</td>
+            <td>Gas Consump.</td>
+            <td>Max Demand</td>
+            <td>Active Energy</td>
+            <td>Reactive Energy</td>
+            <td>CT Ratio</td>
+            <td class="fix-col-md">Contactor State</td>
+            <td class="fix-col-md">Internal Battery V</td>
+            <td class="fix-col-md">Signal RSSI</td>
+            <td>SNR</td>
+            <td>Temp</td>
+            <td>Remaining Credit</td>
+            <td>State</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr class="text-right">
+            <td><strong>Register</strong></td>
+            <td class="fix-col-md"></td>
+            <td class="fix-col-md"></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="fix-col-lg"></td>
+            <td class="fix-col-md" style="text-align:left">Calc</td>
+            <td>Pulse Level</td>
+            <td>Output State</td>
+            <td>80</td>
+            <td>140</td>
+            <td>29</td>
+            <td class="text-right">1</td>
+            <td class="text-right">2</td>
+            <td>70</td>
+            <td class="fix-col-md text-right">91</td>
+            <td class="fix-col-md">100</td>
+            <td class="fix-col-md">101</td>
+            <td>106</td>
+            <td>102</td>
+            <td class="text-right">90</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody data-bind="foreach:  model.Gateways">
+        <tr>
+            <td data-bind="text: ID"> </td>
+            <td class="fix-col-md text-left" data-bind="text: Serial"> </td>
+            <td class="fix-col-md text-left" data-bind="text: Name"> </td>
+            <td class="status font-weight-bold text-center" data-bind="text: DeviceStatus"> </td>
+            <td><a href="#" data-bind="text: AutoDisconnectStatus, click: ToggleDisconnect"></a></td>
+            <td>&nbsp;</td>
+            <td data-bind="text: GatewayId"> </td>
+            <td data-bind="text: DeviceTypeId"> </td>
+            <td data-bind="text: DeviceTypeName"> </td>
+            <td data-bind="text: DeviceMappingIndex"> </td>
+            <td data-bind="text: DeviceMappingPort"> </td>
+            <td data-bind="text: DeviceMappingProtocol"> </td>
+            <td data-bind="text: MappingRemoteAddress"> </td>
+            <td data-bind="text: MappingRemoteIndex"> </td>
+            <td data-bind="text: MappingProcessInterval"> </td>
+            <td class="fix-col-lg text-left" data-bind="text: MappingLastCommunicated"> </td>
+            <td class="fix-col-md text-left" data-bind="text: PrePaidOrDemnd"> </td>
+            <td data-bind="text: PulseLevel"> </td>
+            <td data-bind="text: OutputState"> </td>
+            <td data-bind="text: WaterConsumption"> </td>
+            <td class="text-right" data-bind="text: GasConsumption"> </td>
+            <td class="text-right" data-bind="text: MaxDemand"></td>
+            <td class="text-right" data-bind="text: ActiveEnergy"> </td>
+            <td class="text-right" data-bind="text: ReactiveEnergy"> </td>
+            <td class="text-right" data-bind="text: CTRatio"> </td>
+            <td class="fix-col-md text-right" data-bind="text: ContactorState"> </td>
+            <td class="fix-col-md" data-bind="text: BatteryVoltage"> </td>
+            <td class="fix-col-md" data-bind="text: RSSI"> </td>
+            <td data-bind="text: SNR"> </td>
+            <td data-bind="text: Temperature"> </td>
+            <td class="text-right" data-bind="text: RemainingCredit"> </td>
+            <td><a data-bind="attr:{ href: ConnectUrl, name: 'connect' , id : ID}, text: State"></a></td>
+            <td><a data-bind="attr:{ href: DeleteUrl, name: 'delete' , id : ID}">Delete</a></td>
+            <td><a data-bind="attr:{  href: '#', name: 'sts' , id : ID}">STS</a></td>
+            <td><a href="#" data-bind="click: ClearCredit">clear-credit</a></td>
+            <td><a href="#" data-bind="click: ClearTamper">clear-tamper</a></td>
+            <td><a href="#" data-bind="click: SetPostPaid">set-postpaid</a></td>
+            <td><a href="#" data-bind="click: SetPrePaid">set-prepaid</a></td>
+        </tr>
+    </tbody>
+</table>
+@section Scripts {
+    <script src="/js/FileSaver.min.js"></script>
+    <script src="/js/xlsx.core.min.js"></script>
+    <script src="/js/tableExport.js"></script>
+    <script src="~/js/knockout.js"></script>
+    <script>
+        var overviewDataModel = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model))
+
+        var promises = [];
+
+        function OverviewModel()
+        {
+            var self = this;
+            this.Gateways = ko.observableArray([]);
+
+            ko.utils.arrayForEach(overviewDataModel.devices, function (d)
+            {
+                var device = new Device(d);
+                self.Gateways.push(ko.observable(device));
+            });
+        }
+
+        function Device(d)
+        {
+            var connectUrl = "/overview/gateway/connect";
+            var self = this;
+            this.ID = ko.observable(d.id);
+            this.GatewayId = ko.observable(d.gatewayID);
+            this.Serial = ko.observable(d.serial);
+            this.Name = ko.observable(d.name);
+            this.AutoDisconnect = ko.observable(d.autoDisconnect);
+            this.DeviceTypeName = ko.observable(d.deviceTypeName);
+            this.DeviceStatus = ko.observable(d.deviceStatus);
+            this.DeviceTypeId = ko.observable(d.type.id);
+            this.DeviceTypeName = ko.observable(d.type.name);
+            this.DeviceMappingIndex= ko.observable(d.mapping.index);
+            this.DeviceMappingPort = ko.observable(d.mapping.port);
+            this.DeviceMappingProtocol = ko.observable(d.mapping.protocol);
+            this.MappingRemoteAddress = ko.observable(d.mapping.remote_address);
+            this.MappingRemoteIndex = ko.observable(d.mapping.remote_index);
+            this.MappingProcessInterval = ko.observable(d.mapping.process_interval);
+            this.MappingStatus = ko.observable(d.mapping.status);
+            this.MappingLastCommunicated = ko.observable(d.mapping.lastCommunicated);
+            this.ActiveEnergy = ko.observable("");
+            this.ReactiveEnergy = ko.observable("");
+            this.RemainingCredit = ko.observable("");
+            this.ContactorState = ko.observable("");
+            this.MaxDemand = ko.observable("");
+            this.CTRatio = ko.observable("");
+            this.PulseLevel = ko.observable("");
+            this.PulseCounter = ko.observable("");
+            this.BatteryVoltage = ko.observable("");
+            this.RSSI = ko.observable("");
+            this.SNR = ko.observable("");
+            this.Temperature = ko.observable("");
+            this.TimeLogged = ko.observable("");
+            this.OutputState = ko.observable("");
+            this.PrePaidOrDemnd = ko.observable("");
+            this.WaterConsumption = ko.observable("");
+            this.GasConsumption = ko.observable("");
+            this.DeleteUrl = ko.observable("/overview/gateway/deleteMeter/" + overviewDataModel.id + "/" + d.id);
+            this.State = ko.observable("");
+            this.ConnectUrl = ko.observable("");
+
+            this.AutoDisconnectStatus = ko.computed(function ()
+            {
+                if (self.AutoDisconnect())
+                    return "Auto";
+                else
+                    return "Manual";
+            });
+
+            this.SendSTS = function (type)
+            {
+                $(".loader-overlay").css("display", "block");
+
+                $.get("/overview/gateway/meterPrism/" + type + "/" + self.Serial() + "/" + self.ID(),
+                    function (data)
+                    {
+                        $(".loader-overlay").css("display", "none");
+                    });
+            };
+
+            this.ClearCredit = function ()
+            {
+                self.SendSTS("clear-credit");
+            }
+
+            this.ClearTamper = function ()
+            {
+                self.SendSTS("clear-tamper");
+            }
+
+            this.SetPostPaid = function ()
+            {
+                self.SendSTS("set-postpaid");
+            }
+
+            this.SetPrePaid = function ()
+            {
+                self.SendSTS("set-prepaid");
+            }
+
+            this.ToggleDisconnect = function (itm)
+            {
+                $(".loader-overlay").css("display", "block");
+
+                $.get("/overview/gateway/toggleDisconnect/" + self.Serial() + "/" + d.type.id,
+                    function (result)
+                    {
+                        $(".loader-overlay").css("display", "none");
+
+                        itm.AutoDisconnect(result);
+                    });
+            }
+
+            var promise = $.get('/overview/gateway/deviceDetails/' + self.ID(),
+                function (data)
+                {
+                    self.RemainingCredit(numberWithCommas(data.register.remainingCredit));
+
+                    var contactorState = "";
+                    if (data.register.contactorState != null)
+                    {
+                        if (data.register.contactorState == "1")
+                        {
+                            contactorState = "Connected"
+                        }
+                        else if (data.register.contactorState == "0")
+                        {
+                            contactorState = "Disconnected"
+                        }
+                    }
+
+                    self.ContactorState(contactorState);
+                    self.MaxDemand(data.register.maxDemand);
+                    self.CTRatio(data.register.cTRatio);
+                    self.PulseLevel(data.register.pulseLevel);
+                    self.PulseCounter(data.register.pulseCounter);
+                    self.BatteryVoltage(data.register.batteryVoltage);
+                    self.RSSI(data.register.rSSI);
+                    self.State(data.register.contactorState == null ? "" : (data.register.contactorState == "1" ? "Disconnect" : "Connect"));
+                    self.ConnectUrl(data.register.contactorState == "1" ? connectUrl + "/0/" + d.id + "/" + d.mapping.port + "/" + d.type.id + "/" + d.serial : connectUrl + "/1/" + d.id + "/" + d.mapping.port + "/" + d.type.id + "/" + d.serial);
+                    self.SNR(data.register.snr);
+                    self.Temperature(data.register.temperature);
+                    self.TimeLogged(data.register.timeLogged);
+                    self.OutputState(data.register.outputState);
+                    self.WaterConsumption(data.register.waterConsumption);
+                    self.GasConsumption(data.register.gasConsumption);
+                    if (data.register.cTRatio != null && data.register.cTRatio.trim() != "")
+                    {
+                        self.PrePaidOrDemnd("Demand")
+                    }
+                    else
+                    {
+                        self.PrePaidOrDemnd("Pre-paid")
+                    }
+                    self.ActiveEnergy(numberWithCommas(data.register.activeEnergy));
+                    self.ReactiveEnergy(numberWithCommas(data.register.reactiveEnergy));
+                });
+
+            promises.push(promise);
+        }
+
+        var model = new OverviewModel();
+        ko.applyBindings(model);
+
+        $.when.apply(this, promises).done(function ()
+        {
+            for (var i = 5; i < 30; i++)
+            {
+                var text = ""
+                $('#MeterTable tbody tr td:nth-child(' + i + ')').each(function ()
+                {
+                    text = text + $(this).text()
+                });
+                if (text.trim() == "")
+                {
+                    console.log('column: ' + i + ' is empty!!')
+                    $('td:nth-child(' + i + ')').hide();
+                }
+            }
+        });
+
+        $(".status:contains('online')").addClass("text-green");
+        $(".status:contains('offline')").addClass("text-red");
+
+        function numberWithCommas(number)
+        {
+            if (number != null)
+            {
+
+                if (number.length > 1)
+                {
+                    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+                else
+                {
+                    return number.toString()
+                }
+            }
+            return ""
+        }
+
+        function DownloadTable()
+        {
+            $(".loader-overlay").css("display", "block");
+            setTimeout(function ()
+            {
+                $('#MeterTable').tableExport({
+                    type: 'xlsx',
+                    postCallback: function ()
+                    {
+                        var delayInMilliseconds = 5000;
+
+                        setTimeout(function ()
+                        {
+                            $(".loader-overlay").css("display", "none");
+                        }, delayInMilliseconds);
+                    }
+                });
+            }, 2000);
+        }
+
+        $("a[name*='delete']").click(function (e)
+        {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            var id = $(this).attr('id');
+            $.confirm({
+                title: 'Confirm!',
+                content: 'Are you sure you want to delete the device ID: ' + id +'?',
+                buttons: {
+                    confirm: function ()
+                    {
+                        $(".loader-overlay").css("display", "block");
+                        $.get(url,
+                            function (data)
+                            {
+                                var delayInMilliseconds = 1000;
+
+                                setTimeout(function ()
+                                {
+                                    $(".loader-overlay").css("display", "none");
+                                    location.reload();
+                                }, delayInMilliseconds);
+                            });
+                    },
+                    cancel: function ()
+                    {
+
+                    }
+                }
+            });
+            return false;
+        });
+
+
+        $("a[name*='connect']").click(function (e)
+        {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            var id = $(this).attr('id');
+
+            var text = $(this).text();
+
+            $.confirm({
+                title: 'Confirm!',
+                content: 'Are you sure you want to ' + text + ' the device ID: ' + id + '?',
+                buttons: {
+                    confirm: function ()
+                    {
+                        $(".loader-overlay").css("display", "block");
+                        $.get(url,
+                            function (data)
+                            {
+                                var delayInMilliseconds = 1000;
+
+                                setTimeout(function ()
+                                {
+                                    $(".loader-overlay").css("display", "none");
+                                    location.reload();
+                                }, delayInMilliseconds);
+                            });
+                    },
+                    cancel: function ()
+                    {
+
+                    }
+                }
+            });
+            return false;
+        });
+
+        $("a[name*='sts']").click(function (e)
+        {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            var id = $(this).attr('id');
+            $.confirm({
+                    title: 'Enter STS',
+                    content: '' +
+                        '<form action="" class="formName">' +
+                        '<div class="form-group">' +
+                        '<input type="text" placeholder="STS" class="name form-control" required />' +
+                        '</div>' +
+                        '</form>',
+                    buttons: {
+                    formSubmit: {
+                        text: 'Submit',
+                        btnClass: 'btn-blue',
+                        action: function ()
+                        {
+                            var sts = this.$content.find('.name').val();
+                            if (!sts || sts.length > 25)
+                            {
+                                $.alert('provide a valid sts');
+                                return false;
+                            }
+                            $(".loader-overlay").css("display", "block");
+                            $.get("/overview/gateway/meterSTS/ " + sts + " /" + id,
+                                function (data)
+                                {
+                                    var delayInMilliseconds = 1000;
+
+                                    setTimeout(function ()
+                                    {
+                                        $(".loader-overlay").css("display", "none");
+                                        location.reload();
+                                    }, delayInMilliseconds);
+                                });
+                        }
+                    },
+                    cancel: function ()
+                    {
+                        //close
+                    },
+                },
+                onContentReady: function ()
+                {
+                    // bind to events
+                    var jc = this;
+                    this.$content.find('form').on('submit', function (e)
+                    {
+                        // if the user submits the form by pressing enter in the field.
+                        e.preventDefault();
+                        jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    });
+                }
+            });
+                return false;
+            });
+
+    </script>
+}

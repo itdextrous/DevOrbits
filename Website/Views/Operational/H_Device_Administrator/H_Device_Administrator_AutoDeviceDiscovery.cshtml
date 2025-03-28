@@ -1,0 +1,37 @@
+﻿@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_AutoDeviceDiscoveryModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_AutoDeviceDiscovery.GetDescription();
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row">
+            <div class="col">
+                <span>
+                    Gateway IDs
+                </span>
+                <textarea asp-for="GatewayIDs" class="form-control" type="" title="Gateway IDs"></textarea>
+            </div>
+            <div class="col">
+                <span>
+                    Emails To Send Report To
+                </span>
+                <textarea asp-for="ToSendTo" class="form-control" type="" title="Device IDs"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-right">
+                <button type="submit" class="btn btn-outline-primary">Start</button>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                @Html.Raw(Model.ErrorMessage)
+            </div>
+        }
+    </div>
+
+}

@@ -1,0 +1,144 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_DeviceTypesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_DeviceTypes.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Device Type</th>
+            <th scope="col">Calibration Diff</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col">
+                <select id="deviceType_" class="form-control">
+                    @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum bCT in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                    {
+                        <option value="@((int)bCT)">@bCT.GetDescription()</option>
+                    }
+                </select>
+            </td>
+            <td scope="col"><input id="calibrationDiff_" type="text" class="form-control" /></td>
+            <td scope="col"><a onclick="DoAdd();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a></td>
+        </tr>
+        <tr><td colspan="8">&nbsp;</td></tr>
+        @foreach (var item in Model.SiteAdmin_DeviceTypesItems)
+        {
+            <tr>
+                <td scope="col">
+                    <select id="deviceType_@item.ID" class="form-control">
+                        @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum bCT in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                        {
+                            @if (item.DeviceType == bCT)
+                            {
+                                <option value="@((int)bCT)" selected="selected">@bCT.GetDescription()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)bCT)">@bCT.GetDescription()</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col" class="text-nowrap">
+                    <input id="calibrationDiff_@item.ID" type="text" value="@item.CalibrationDiff" class="form-control" />
+                </td>
+                <td scope="col">
+                    <a onclick="DoUpdate('@item.ID', 'productNameUpdate_@item.ID');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                    &nbsp;
+                    <a onclick="DoDelete('@item.ID', '@item.DeviceType.GetDescription()');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#calibrationDiff_").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Calibration Diff');
+                $("#calibrationDiff_").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_DeviceTypes_ItemAdd",
+                {
+                    deviceType_: $("#deviceType_").val(),
+                    calibrationDiff_: $("#calibrationDiff_").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/SiteAdmin/SiteAdmin_DeviceTypes_ItemDelete/" + ItemID,
+                    {
+                        deviceType_: $("#deviceType_").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+        function DoUpdate(ItemID, textboxID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_DeviceTypes_ItemUpdate/" + ItemID,
+                {
+                    deviceType_: $("#deviceType_" + ItemID).val(),
+                    calibrationDiff_: $("#calibrationDiff_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

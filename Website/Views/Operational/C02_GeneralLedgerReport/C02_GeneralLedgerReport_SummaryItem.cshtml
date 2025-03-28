@@ -1,0 +1,39 @@
+@model MyVoltage.Models.OperationalModels.C02_GeneralLedgerReportModels.C02_GeneralLedgerReport_SummaryModel.C02_GeneralLedgerReport_SummaryItem
+@using MyVoltage.Extensions;
+@{
+    string rowclass = "";
+    string cellClass = "";
+}
+<td scope="col">@Model.Name</td>
+@{
+    DateTime currentDate = Model.FromDate;
+}
+@while (currentDate <= Model.ToDate)
+{
+    var thisMonthItem = Model.C02_GeneralLedgerReport_SummarySubItems.Where(p => p.Month == currentDate).SingleOrDefault();
+    if (thisMonthItem != null)
+    {
+        <td title="@Model.Name - @currentDate.ToMonth() - Balance Sheet" class="text-right" scope="col">
+            @(thisMonthItem.BalanceSheet.ToMoneyNoDecimal())
+            <br />
+            <span class="@(thisMonthItem.BalanceSheetCount == thisMonthItem.BalanceSheetCompleted ? "text-green" : "text-red")">
+                @thisMonthItem.BalanceSheetCompleted / @thisMonthItem.BalanceSheetCount @(thisMonthItem.BalanceLatestCompleted.HasValue ? $"({thisMonthItem.BalanceLatestCompleted.ToDateAndTimeShort()})" : "")
+            </span>
+        </td>
+        <td title="@Model.Name - @currentDate.ToMonth() - Income Statement" class="text-right" scope="col">
+            @(thisMonthItem.IncomeStatement.ToMoneyNoDecimal())            
+            <br />
+            <span class="@(thisMonthItem.IncomeStatementCount == thisMonthItem.IncomeStatementCompleted ? "text-green" : "text-red")">
+                @thisMonthItem.IncomeStatementCompleted / @thisMonthItem.IncomeStatementCount @(thisMonthItem.IncomeStatementLatestCompleted.HasValue ? $"({thisMonthItem.IncomeStatementLatestCompleted.ToDateAndTimeShort()})" : "")
+            </span>
+        </td>
+        <td title="@Model.Name - @currentDate.ToMonth() - Total" class="text-right" scope="col">@(thisMonthItem.Total.ToMoneyNoDecimal())</td>
+        <td scope="col">&nbsp;</td>
+    }
+    currentDate = currentDate.AddMonths(1);
+}
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+    });
+</script>

@@ -1,0 +1,85 @@
+@model MyVoltage.Models.OperationalModels.Z_BugsModels.Z_Bugs_MyBugsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Z_Bugs_MyBugs.GetDescription()}";
+}
+<div class="row col-12">
+
+    <table class="table table-responsive-xl table-striped table-hover table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">Bug #</th>
+                <th scope="col">Reported By</th>
+                <th scope="col">Date Reported</th>
+                <th scope="col">Description</th>
+                <th scope="col">Company</th>
+                <th scope="col">Customer</th>
+                <th scope="col">Meter Serial</th>
+                <th scope="col">Bug Location</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Z_Bugs_MyBugsItems)
+            {
+                string rowClass = "";
+                switch (item.Status)
+                {
+                    case MyVoltage.Data.ReportedBug.StatusEnum.New:
+                        rowClass = "table-danger";
+                        break;
+                    case MyVoltage.Data.ReportedBug.StatusEnum.Open:
+                        rowClass = "";
+                        break;
+                    case MyVoltage.Data.ReportedBug.StatusEnum.Closed:
+                        rowClass = "table-success";
+                        break;
+                    case MyVoltage.Data.ReportedBug.StatusEnum.OnHold:
+                        rowClass = "table-warning";
+                        break;
+                }
+                string desc = "[Not Linked]";
+                if (item.LinkedSecureAreaID.HasValue)
+                {
+                    var sa = (MyVoltage.Data.SecureAreaEnum)item.LinkedSecureAreaID.Value;
+                    foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                    {
+                        foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                        {
+                            if (sa == dsa.Item1)
+                            {
+                                desc = $"{psa.Key.Item3} - {dsa.Item3}";
+                                break;
+                            }
+                        }
+                    }
+                }
+                <tr class="@Html.Raw(rowClass)" style="cursor:pointer;" title="View / Edit" onclick="RedirectToEditFlag('@item.ID');">
+                    <td scope="col">@item.ID</td>
+                    <td scope="col">@item.Username</td>
+                    <td scope="col" class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.UserDescription</td>
+                    <td scope="col">@item.CompanyName</td>
+                    <td scope="col">@item.CustomerNo</td>
+                    <td scope="col">@item.MeterSerial</td>
+                    <td scope="col" class="text-nowrap">@(desc)</td>
+                    <td scope="col">@item.Priority.GetDescription()</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/changeBugID/' + flagID + '?R=' + encodeURIComponent('/operational/Z_Bugs/Z_Bugs_BugDetail/');
+        }
+    </script>
+}

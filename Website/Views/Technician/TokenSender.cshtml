@@ -1,0 +1,66 @@
+@model MyVoltage.Models.TechnicianViewModels.TokenSenderViewModel
+@{
+    ViewData["Title"] = "Token Sender";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<form asp-action="TokenSender" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+
+                    <div class="row">
+                        <div class="col"><label asp-for="Serial" class="control-label"></label>:</div>
+                        <div class="col">
+                            <input class="form-group" id="Serial_Search" asp-for="Serial" />
+                            <span asp-validation-for="Serial" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><label asp-for="TokenTypes" class="control-label"></label>:</div>
+                        <div class="col">
+                            @Html.DropDownList("TokenType", Model.TokenTypes)
+                            <span asp-validation-for="TokenTypes" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input type="submit" value="Send Token to Meter" class="btn btn-default" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/technician/TokenSender/searchmeters",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

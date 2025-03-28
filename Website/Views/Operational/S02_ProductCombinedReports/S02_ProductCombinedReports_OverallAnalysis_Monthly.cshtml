@@ -1,0 +1,181 @@
+@model MyVoltage.Models.OperationalModels.S02_ProductCombinedReports.S02_ProductCombinedReportsModels.S02_ProductCombinedReports_OverallAnalysis_MonthlyModel
+@{
+    ViewData["Title"] = "Combined Reports - Overall Analysis - Monthly";
+}
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{ DateTime currentDate = Model.FromDate;}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body text-left">
+                <div class="row">
+                    <div class="col-2">Between</div>
+                    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                    <div class="col-1">And</div>
+                    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                    <div class="col-2">
+                        <select id="devicetype" name="devicetype">
+                            @if (!Model.DeviceType.HasValue)
+                            {
+                                <option selected="selected" value="">Show All</option>
+                            }
+                            else
+                            {
+                                <option value="">Show All</option>
+                            }
+                            @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                            {
+                                @if (Model.DeviceType.HasValue && Model.DeviceType.Value == dt)
+                                {
+                                    <option selected="selected" value="@((int)dt)">@dt</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int)dt)">@dt</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+                (Tip: Use Ctrl + F to search)
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+        <div class="row mt-4">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <span>Select company to view report</span>
+            }
+            else
+            {
+                <table class="table table-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th rowspan="3" scope="col">Meter Serial</th>
+                            <th rowspan="3" scope="col">Customer No</th>
+                            <th rowspan="3" scope="col">Customer Name</th>
+                            <th rowspan="3" scope="col">Device Type</th>
+                            <th rowspan="3" scope="col">Occupancy</th>
+                            @{ currentDate = Model.FromDate;}
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th colspan="11" class="text-nowrap text-center" style="border-left: 3px solid black;border-right:3px solid black;border-top:3px solid black;" scope="col">@Html.Raw(currentDate.ToString("MMMM yyyy"))</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                        </tr>
+                        <tr>
+                            @{ currentDate = Model.FromDate;}
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th colspan="2" scope="col" class="text-center" style="border-left: 3px solid black;border-right:1px solid black;border-top:1px solid black;">Readings</th>
+                                <th colspan="3" scope="col" class="text-center" style="border-left: 1px solid black;border-right:1px solid black;border-top:1px solid black;">Consumption</th>
+                                <th colspan="2" scope="col" class="text-center" style="border-left: 1px solid black;border-right:1px solid black;border-top:1px solid black;">Charges</th>
+                                <th colspan="2" scope="col" class="text-center" style="border-left: 1px solid black;border-right:1px solid black;border-top:1px solid black;">Gross Profitability</th>
+                                <th colspan="2" scope="col" class="text-center" style="border-left: 1px solid black;border-right:3px solid black;border-top:1px solid black;">Nett Profitability</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                        </tr>
+                        <tr>
+                            @{ currentDate = Model.FromDate;}
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th scope="col" class="text-center" style="border-left: 3px solid black;border-top:1px solid black;">First</th>
+                                <th scope="col" class="text-center" style="border-right:1px solid black;border-top:1px solid black;">Last</th>
+                                <th scope="col" class="text-center" style="border-left: 1px solid black;border-top:1px solid black;">Metered</th>
+                                <th scope="col" class="text-center" style="border-top:1px solid black;">Billed</th>
+                                <th scope="col" class="text-center" style="border-right:1px solid black;border-top:1px solid black;">Unbilled</th>
+                                <th scope="col" class="text-center" style="border-left: 1px solid black;border-top:1px solid black;">Billed</th>
+                                <th scope="col" class="text-center" style="border-right:1px solid black;border-top:1px solid black;">Cost</th>
+                                <th scope="col" class="text-center" style="border-left: 1px solid black;border-top:1px solid black;">Profit</th>
+                                <th scope="col" class="text-center" style="border-right:1px solid black;border-top:1px solid black;">Margin</th>
+                                <th scope="col" class="text-center" style="border-left: 1px solid black;border-top:1px solid black;">Meter Charges</th>
+                                <th scope="col" class="text-center" style="border-right:3px solid black;border-top:1px solid black;">Nett Operational Profit</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.S02_ProductCombinedReports_OverallAnalysis_MonthlyItems)
+                        {
+                            <tr onclick="RedirectToCustomer('@item.MeterSerial');" style="cursor:pointer;">
+                                <td scope="col" class="text-nowrap" title="">@item.MeterSerial</td>
+                                <td scope="col" class="text-nowrap" title="">@item.CustomerNo</td>
+                                <td scope="col" class="text-nowrap" title="">@item.CustomerName</td>
+                                <td scope="col" title="">@item.DeviceType</td>
+                                <td scope="col" title="">@item.Occupancy</td>
+                                @{ currentDate = Model.FromDate;}
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    var billingItem = item.S02_ProductCombinedReports_OverallAnalysis_MonthlyItem_SubItems.Where(p => p.BillingMonth == currentDate).SingleOrDefault();
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - First Reading" class="text-right text-nowrap" scope="col" style="border-left: 3px solid black;">@billingItem.BilledFirstReading.ToString("N0") (@billingItem.FirstReading.ToString("N0"))</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Last Reading" class="text-right text-nowrap" scope="col">@billingItem.BilledLastReading.ToString("N0") (@billingItem.LastReading.ToString("N0"))</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Consumption Metered" class="text-right text-nowrap" scope="col" style="border-left: 1px solid black;">@billingItem.MeteredUnits.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Consumption Billed" class="text-right text-nowrap" scope="col">@billingItem.BilledUnits.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Consumption Unbilled" class="text-right text-nowrap" scope="col">@billingItem.UnbilledUnits.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Charges Billed" class="text-right text-nowrap" scope="col" style="border-left: 1px solid black;">R @billingItem.BilledAmount.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Charges Cost" class="text-right text-nowrap" scope="col">R @billingItem.Cost.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Profitability Profit" class="text-right text-nowrap" scope="col" style="border-left: 1px solid black;">R @billingItem.Profit.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Profitability Margin" class="text-right text-nowrap" scope="col" style="border-right: 1px solid black;">@billingItem.GrossProfitPerc.ToString("N0") %</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Profitability Meter Charges" class="text-right text-nowrap" scope="col" style="border-left: 1px solid black;">R @billingItem.AgreedMonthlyRental.ToString("N0")</td>
+                                    <td title="@billingItem.BillingMonth.ToString("MMMM yyyy") - @item.CustomerNo - @item.MeterSerial - Profitability Nett Operational Profit" class="text-right text-nowrap" scope="col" style="border-right: 3px solid black;">R @billingItem.NettProfit.ToString("N0")</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                            </tr>
+                        }
+                        <tr>
+                            <td scope="col" class="text-nowrap" title="" style="border-top: 3px double black;border-bottom: 3px double black;">Total</td>
+                            <td scope="col" class="text-nowrap" title="" style="border-top: 3px double black;border-bottom: 3px double black;"></td>
+                            <td scope="col" class="text-nowrap" title="" style="border-top: 3px double black;border-bottom: 3px double black;"></td>
+                            <td scope="col" title="" style="border-top: 3px double black;border-bottom: 3px double black;"></td>
+                            <td scope="col" title="" style="border-top: 3px double black;border-bottom: 3px double black;"></td>
+                            @{ currentDate = Model.FromDate;}
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                var billingItems = (from p in Model.S02_ProductCombinedReports_OverallAnalysis_MonthlyItems
+                                                    select p.S02_ProductCombinedReports_OverallAnalysis_MonthlyItem_SubItems.Where(d => d.BillingMonth == currentDate).SingleOrDefault()).ToList();
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - First Reading" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-left: 3px solid black;">-</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Last Reading" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;">-</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Consumption Metered" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-left: 1px solid black;">@billingItems.Select(p => p.MeteredUnits).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Consumption Billed" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;">@billingItems.Select(p => p.BilledUnits).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Consumption Unbilled" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;">@billingItems.Select(p => p.UnbilledUnits).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Charges Billed" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-left: 1px solid black;">R @billingItems.Select(p => p.BilledAmount).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Charges Cost" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;">R @billingItems.Select(p => p.Cost).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Profitability Profit" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-left: 1px solid black;">R @billingItems.Select(p => p.Profit).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Profitability Margin" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-right: 1px solid black;">
+                                    @if (billingItems.Select(p => p.BilledAmount).Sum() > 0)
+                                    {
+                                        @(((billingItems.Select(p => p.Profit).Sum() / billingItems.Select(p => p.BilledAmount).Sum()) * 100.0m).ToString("N0"))
+                                    }
+                                    %
+                                </td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Profitability Meter Charges" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-left: 1px solid black;">R @billingItems.Select(p => p.AgreedMonthlyRental).Sum().ToString("N0")</td>
+                                <td title="@currentDate.ToString("MMMM yyyy") - Total - Profitability Nett Operational Profit" class="text-right text-nowrap" scope="col" style="border-top: 3px double black;border-bottom: 3px double black;border-right: 3px solid black;">R @((billingItems.Select(p => p.Profit).Sum() - billingItems.Select(p => p.AgreedMonthlyRental).Sum()).ToString("N0"))</td>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToCustomer(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/S02_ProductCombinedReports/S02_ProductCombinedReports_OverallAnalysis_Monthly%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val() + '%26devicetype=' + $("#devicetype").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/S02_ProductCombinedReports/S02_ProductCombinedReports_OverallAnalysis_Monthly?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&devicetype=' + $("#devicetype").val();
+        }
+    </script>
+}

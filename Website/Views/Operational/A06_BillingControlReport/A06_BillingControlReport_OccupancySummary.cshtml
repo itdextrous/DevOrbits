@@ -1,0 +1,78 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_OccupancySummaryModel
+
+@using MyVoltage.Extensions; 
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_OccupancySummary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-right">
+                @*<a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails" class="btn btn-outline-primary">More Details&nbsp;<i class="fas fa-chevron-right"></i></a>*@
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Customers Count</th>
+                            <th scope="col">Customers Checked</th>
+                            <th scope="col">Customers Not Checked</th>
+                            <th scope="col">Customers Checked Too Long Ago</th>
+                            <th scope="col">Date Last Checked</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A06_BillingControlReport_OccupancySummaryItems)
+                        {
+                            string rowclass = "";
+                            string cellClass = "";
+                            if (item.Status == "Outstanding")
+                            {
+                                rowclass = " class=\"table-danger\"";
+                                cellClass = " class=\"text-red font-weight-bold\"";
+                            }
+                            else if (item.Status == "Too long ago")
+                            {
+                                rowclass = " class=\"table-warning\"";
+                                cellClass = " class=\"text-orange font-weight-bold\"";
+                            }
+                            else if (item.Status == "Reviewed")
+                            {
+                                rowclass = " class=\"table-success\"";
+                                cellClass = " class=\"text-green font-weight-bold\"";
+                            }
+                            <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');" @Html.Raw(rowclass)>
+                                <td scope="col">@item.CompanyName</td>
+                                <td scope="col" @Html.Raw(cellClass)>@item.Status</td>
+                                <td scope="col">@item.CustomersCount</td>
+                                <td scope="col">@item.CustomersCheckedCount</td>
+                                <td scope="col">@item.CustomersNotCheckedCount</td>
+                                <td scope="col">@item.CustomersCheckedTooLongAgoCount</td>
+                                <td scope="col">@item.DateLastChecked</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails';
+        }
+    </script>
+}

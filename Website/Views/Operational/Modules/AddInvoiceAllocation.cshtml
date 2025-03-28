@@ -1,0 +1,145 @@
+@model MyVoltage.Models.OperationalModels.ModulesModels.AddInvoiceAllocationModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{Model.ActivityType.GetDescription()} - Add Invoice Allocation";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Invoice Allocated successfully added
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col">
+                            @switch (Model.ActivityType)
+                            {
+                                case MyVoltage.Data.ActivityTypeEnum.A08_Task:
+                                    <a href="/operational/A08_Tasks/A08_Task_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.A09_Flag:
+                                    <a href="/operational/A09_Flags/A09_Flags_CompanyReview" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Flag</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.E01_BuildingOnboardingTask:
+                                    <a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.D02_SaleTask:
+                                    <a href="/operational/D02_Sale/D02_SaleTask_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <form asp-action="AddInvoiceAllocation" enctype="multipart/form-data">
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="CustomerNo" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="text" class="form-control" asp-for="CustomerNo" />
+                                <span asp-validation-for="CustomerNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="DescriptionOfInvoiceAllocation" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <textarea class="form-control" asp-for="DescriptionOfInvoiceAllocation"></textarea>
+                                <span asp-validation-for="DescriptionOfInvoiceAllocation" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="DateOfInvoiceAllocation" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="date" class="form-control" asp-for="DateOfInvoiceAllocation" />
+                                <span asp-validation-for="DateOfInvoiceAllocation" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="InvoiceAmount" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="text" class="form-control" asp-for="InvoiceAmount" />
+                                <span asp-validation-for="InvoiceAmount" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="InvoiceNo" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="text" class="form-control" asp-for="InvoiceNo" />
+                                <span asp-validation-for="InvoiceNo" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#CustomerNo").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/Modules/AddInvoiceAllocation_Search_Customer_No",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+
+    </script>
+}

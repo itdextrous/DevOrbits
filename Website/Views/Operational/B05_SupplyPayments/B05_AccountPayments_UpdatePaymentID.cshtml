@@ -1,0 +1,248 @@
+@model MyVoltage.Models.OperationalModels.B05_SupplyPayments.B05_SupplyPaymentsModels.B05_AccountPayments_UpdatePaymentIDModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.B05_AccountPayments_PaymentDetails.GetDescription()} - {operationalProvider.CompanyName} - Update Payment ID";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Skybill Document No updated.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-12">
+                            <h4>Netcash Statement Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Date
+                        </div>
+                        <div class="col">
+                            @Model.BuildingCouncilDetails_InvoiceItem.ActionDate.ToDateShort()
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Description
+                        </div>
+                        <div class="col">
+                            @Model.BuildingCouncilDetails_InvoiceItem.Description
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Amount
+                        </div>
+                        <div class="col">
+                            @Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT.ToMoney("R")
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+                    <div>
+                        <form asp-action="B05_AccountPayments_UpdatePaymentID" enctype="multipart/form-data">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="PaymentID" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    @if (Model.AllowEdit)
+                                    {
+                                        <input type="text" class="form-control" asp-for="PaymentID" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" asp-for="PaymentID" readonly="readonly" />
+                                    }
+                                    <span asp-validation-for="PaymentID" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                </div>
+                                <div class="col">
+                                    <a href="#" onclick="SystemCheck();" class="btn btn-outline-primary-sm"><i class="fas fa-check"></i>&nbsp;System Check</a>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="SkybillDocumentNo" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" asp-for="SkybillDocumentNo" />
+                                    <span asp-validation-for="SkybillDocumentNo" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                </div>
+                                <div class="col">
+                                    <a href="#" onclick="SystemCheckSkybillDocumentNo();" class="btn btn-outline-primary-sm"><i class="fas fa-check"></i>&nbsp;System Check</a>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Amount</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Amount" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Company</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Company" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Customer</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Customer" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Date</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Date" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label class="control-label">Description</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" id="Description" readonly="readonly" value="System Check Required" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-6 text-left">
+                                    <a href="/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button class="btn btn-outline-primary-sm" disabled id="formBtn"><i class="fas fa-plus-circle"></i>&nbsp;Update Payment ID</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        function SystemCheck() {
+            if ($("#PaymentID").val() != '') {
+                $("#loaderContent").css("display", "block");
+                $.get('/operational/B05_SupplyPayments/B05_AccountPayments_UpdatePaymentID_SystemCheck/' + $("#PaymentID").val() + '/@Model.BuildingCouncilDetails_InvoiceItem.ID', function (data, status) {
+                    if (data.result) {
+                        $("#SkybillDocumentNo").val(data.documentNo);
+                        $("#Amount").val('R ' + data.amount.toLocaleString('en-GB'));
+                        $("#Customer").val(data.customer);
+                        $("#Company").val(data.company);
+                        $("#Date").val(data.date);
+                        $("#Description").val(data.description);
+                        if (data.amount == '@(Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT < 0 ? Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT * -1.0m : Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT)') {
+                            $("#formBtn").removeAttr('disabled');
+                        }
+                    }
+                    else {
+                        $("#SkybillDocumentNo").val("System check failed.");
+                        $("#Amount").val("System check failed.");
+                        $("#Customer").val("System check failed.");
+                        $("#Company").val("System check failed.");
+                        $("#Date").val("System check failed.");
+                        $("#Description").val("System check failed.");
+                        $("#formBtn").attr('disabled', 'disabled');
+                    }
+                }).done(function () {
+                    $("#loaderContent").css("display", "none");
+                });
+            }
+        }
+
+        function SystemCheckSkybillDocumentNo() {
+            if ($("#SkybillDocumentNo").val() != '') {
+                $("#loaderContent").css("display", "block");
+                $.get('/operational/B05_SupplyPayments/B05_AccountPayments_UpdatePaymentID_SystemCheckSkybillDocumentNo/' + $("#SkybillDocumentNo").val() + '/@Model.BuildingCouncilDetails_InvoiceItem.ID', function (data, status) {
+                    if (data.result) {
+                        $("#SkybillDocumentNo").val(data.documentNo);
+                        $("#Amount").val('R ' + data.amount.toLocaleString('en-GB'));
+                        $("#Customer").val(data.customer);
+                        $("#Company").val(data.company);
+                        $("#Date").val(data.date);
+                        $("#Description").val(data.description);
+                        if (data.amount == '@(Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT < 0 ? Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT * -1.0m : Model.BuildingCouncilDetails_InvoiceItem.AmountExclVAT)') {
+                            $("#formBtn").removeAttr('disabled');
+                        }
+                    }
+                    else {
+                        $("#SkybillDocumentNo").val("System check failed.");
+                        $("#Amount").val("System check failed.");
+                        $("#Customer").val("System check failed.");
+                        $("#Company").val("System check failed.");
+                        $("#Date").val("System check failed.");
+                        $("#Description").val("System check failed.");
+                        $("#formBtn").attr('disabled', 'disabled');
+                    }
+                }).done(function () {
+                    $("#loaderContent").css("display", "none");
+                });
+            }
+        }
+
+
+    </script>
+}

@@ -1,0 +1,93 @@
+﻿@model MyVoltage.Models.LeaduserModels.PropertiesModel
+
+
+@if (Model.PropertiesItems.Count == 0)
+{
+    <tr>
+        <td class="text-center" colspan="15">No Data to display</td>
+    </tr>
+}
+else
+{
+    @foreach (var item in Model.PropertiesItems.OrderByDescending(x => x.ID))
+    {
+        string rowClass = "";
+        string title = $"{item.Name}";
+        int rowSpan = item.ContactsItems.Count;
+        @*foreach (var itemC in item.ContactsItems)
+        {*@
+            <tr class="@Html.Raw(rowClass) @(item.Status.Contains("Closed")?"closed_row":string.Empty)" title="@title">
+                <td scope="col" hidden>
+                    @item.ID
+                </td>
+                <td scope="col">
+                    @item.CompanyTypeName
+                </td>
+                <td scope="col" class="c-pointer" onclick='javascript:location.href="/leaduser/D01_Leads_Properties_Edit/@item.ID"'>
+                    @item.Name
+                </td>
+                <td scope="col">
+                    @item.NoOfRegisteredUnits
+                </td>
+                <td scope="col">
+                    @item.NoOfMeteringPoints
+                </td>
+                <td scope="col" class="text-nowrap">
+                    @(item.CreatedByUserTimestamp.HasValue ? item.CreatedByUserTimestamp.Value.ToString("yyyy-MM-dd") : string.Empty)
+                    @*2023-08-02*@
+                </td>
+                <td scope="col" class="text-nowrap">
+                    @item.LeadGeneratorName
+                </td>
+                <td scope="col">
+                    @item.ResponsibleUsername
+                </td>
+                <td scope="col" class="@(item.Status.Contains("Rejected")?"text_red":string.Empty)">
+                    @item.Status
+                    @*L01. Lead Generation*@
+                </td>
+                <td scope="col">
+                    @(item.StatusChangeDate.HasValue ? item.StatusChangeDate.Value.ToString("yyyy-MM-dd") : string.Empty)
+                </td>
+                <td scope="col" class="text-nowrap">
+                    @item.Active
+                </td>
+                <td scope="col" class="text-center">
+                    @if (item.ProductID.HasValue && item.ProductID.Value == (int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Electricity)
+                    {
+                        <span class="dot_icon"></span>
+                    }
+                </td>
+                <td scope="col" class="text-center">
+                    @if (item.ProductID.HasValue && item.ProductID.Value == (int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Water)
+                    {
+                        <span class="dot_icon"></span>
+                    }
+                </td>
+                <td scope="col" class="text-center">
+                    @if (item.ProductID.HasValue && item.ProductID.Value == (int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Gas)
+                    {
+                        <span class="dot_icon"></span>
+                    }
+                </td>
+                <td scope="col" class="text-center">
+                    @if (item.ProductID.HasValue && item.ProductID.Value == (int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Solar)
+                    {
+                        <span class="dot_icon"></span>
+                    }
+                </td>
+                <td scope="col" class="text-center">
+                    @if (item.ProductID.HasValue && item.ProductID.Value == (int)MyVoltage.Models.LeaduserModels.ProductTypeEnum.Generator)
+                    {
+                        <span class="dot_icon"></span>
+                    }
+                </td>
+            </tr>
+        @*}*@
+    }
+}
+
+
+
+
+

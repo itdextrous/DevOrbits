@@ -1,0 +1,114 @@
+@model MyVoltage.Models.OperationalModels.C05_MonthlyManualInvoicing.C05_MonthlyManualInvoicing_BillingsToOwner_CaptureModel
+@{
+    ViewData["Title"] = "Billings to Owner - Capture";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/C05_MonthlyManualInvoicing/C05_MonthlyManualInvoicing_BillingsToOwner_Details" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="C05_MonthlyManualInvoicing_BillingsToOwner_Capture" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label class="control-label">Company Name</label>
+                                        </div>
+                                        <div class="col">
+                                            @operationalProvider.CompanyName
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BillingMonth" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="BillingMonth" type="date" />
+                                            <span asp-validation-for="BillingMonth" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BillingDate" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="BillingDate" type="date" />
+                                            <span asp-validation-for="BillingDate" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BillingType" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("BillingType", Model.BillingType)
+                                            <span asp-validation-for="BillingType" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="Attachment" class="control-label"></label>
+                                            @if (!string.IsNullOrEmpty(Model.AttachmentURL))
+                                            {
+                                                <a href="@Model.AttachmentURL" target="_blank">View</a>
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="Attachment" />
+                                            <span asp-validation-for="Attachment" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C05_MonthlyManualInvoicing_BillingsToOwner_Capture, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                            {
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            }
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

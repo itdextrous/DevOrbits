@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Registration success";
+    Layout = "~/Views/Shared/LayoutEmpty.cshtml";
+}
+
+<div class="row my-5">
+    <div class="col-md-4 mx-auto text-white">
+        <h2 class="text-danger">@ViewData["Title"]</h2>
+        <p class="text-danger">THANK YOU FOR YOUR REGISTRATION. OUR CUSTOMER CARE CONSULTANTS WILL REVIEW THE INFORMATION SUBMITTED. PLEASE ALLOW 2 BUSINESS DAYS FOR THE BILLING TO BE ACTIVATED.</p>
+        If you are not redirected to your dashboard in the next 5 seconds you can use this <a href="/dashboard">link</a>
+    </div>
+</div>
+
+<script>
+   window.setTimeout(function () { window.location = "/dashboard"; }, 5000);
+</script>

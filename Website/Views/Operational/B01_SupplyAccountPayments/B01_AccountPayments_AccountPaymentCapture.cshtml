@@ -1,0 +1,308 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_AccountPaymentCaptureModel
+@{
+    ViewData["Title"] = "Account Payments - Account Payment Details";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentCapture" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+
+                }
+                else
+                {
+
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="B01_AccountPayments_AccountPaymentCapture" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingNo
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingName
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingSkybillName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingSkybillName
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilElecAccNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilElecAccNo" />
+                                            <span asp-validation-for="CouncilElecAccNo" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilWaterAccNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilWaterAccNo" />
+                                            <span asp-validation-for="CouncilWaterAccNo" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="PaymentTypes" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("PaymentType", Model.PaymentTypes)
+                                            <span asp-validation-for="PaymentTypes" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilTypes" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("CouncilType", Model.CouncilTypes)
+                                            <span asp-validation-for="CouncilTypes" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilCycles" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("CouncilCycle", Model.CouncilCycles)
+                                            <span asp-validation-for="CouncilCycles" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilURL" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilURL" />
+                                            <span asp-validation-for="CouncilURL" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilBulkElecNo1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilBulkElecNo1" />
+                                            <span asp-validation-for="CouncilBulkElecNo1" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilMyVoltageBulkElecNo1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilMyVoltageBulkElecNo1" />
+                                            <span asp-validation-for="CouncilMyVoltageBulkElecNo1" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilReconDescriptionBulkElecNo1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilReconDescriptionBulkElecNo1" />
+                                            <span asp-validation-for="CouncilReconDescriptionBulkElecNo1" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilReconRateBulkElecNo1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilReconRateBulkElecNo1" />
+                                            <span asp-validation-for="CouncilReconRateBulkElecNo1" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilBulkElecNo2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilBulkElecNo2" />
+                                            <span asp-validation-for="CouncilBulkElecNo2" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilMyVoltageBulkElecNo2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilMyVoltageBulkElecNo2" />
+                                            <span asp-validation-for="CouncilMyVoltageBulkElecNo2" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilReconDescriptionBulkElecNo2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilReconDescriptionBulkElecNo2" />
+                                            <span asp-validation-for="CouncilReconDescriptionBulkElecNo2" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilReconRateBulkElecNo2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilReconRateBulkElecNo2" />
+                                            <span asp-validation-for="CouncilReconRateBulkElecNo2" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilBulkElecNo3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilBulkElecNo3" />
+                                            <span asp-validation-for="CouncilBulkElecNo3" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilMyVoltageBulkElecNo3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilMyVoltageBulkElecNo3" />
+                                            <span asp-validation-for="CouncilMyVoltageBulkElecNo3" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilReconDescriptionBulkElecNo3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilReconDescriptionBulkElecNo3" />
+                                            <span asp-validation-for="CouncilReconDescriptionBulkElecNo3" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilReconRateBulkElecNo3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilReconRateBulkElecNo3" />
+                                            <span asp-validation-for="CouncilReconRateBulkElecNo3" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilBulkWaterHighFlow" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilBulkWaterHighFlow" />
+                                            <span asp-validation-for="CouncilBulkWaterHighFlow" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilMyVoltageBulkWaterHighFlow" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilMyVoltageBulkWaterHighFlow" />
+                                            <span asp-validation-for="CouncilMyVoltageBulkWaterHighFlow" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilBulkWaterLowFlow" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilBulkWaterLowFlow" />
+                                            <span asp-validation-for="CouncilBulkWaterLowFlow" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilMyVoltageBulkWaterLowFlow" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilMyVoltageBulkWaterLowFlow" />
+                                            <span asp-validation-for="CouncilMyVoltageBulkWaterLowFlow" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilBulkWaterOther" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilBulkWaterOther" />
+                                            <span asp-validation-for="CouncilBulkWaterOther" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="CouncilMyVoltageBulkWaterOther" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="CouncilMyVoltageBulkWaterOther" />
+                                            <span asp-validation-for="CouncilMyVoltageBulkWaterOther" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentCapture, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                            {
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            }
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,63 @@
+@model MyVoltage.Models.OperationalModels.V01_Policies.V01_PoliciesModels.V01_Policies_AllModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V01_Policies_All.GetDescription()}";
+}
+<div class="row col-12">
+    <a href="/operational/V01_Policies/V01_Policies_CreateNew" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Policy</a>
+</div>
+
+<div class="row col-12">
+
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Heading</th>
+                <th scope="col">Description</th>
+                <th scope="col">Linked Secure Area</th>
+                <th scope="col">Policy Type</th>
+                <th scope="col">Active From Date</th>
+                <th scope="col">Active To Date</th>
+                <th scope="col">Users Linked</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.V01_Policies_AllItems)
+            {
+                <tr style="cursor:pointer;" title="View / Edit" onclick="RedirectToEditFlag('@item.ID');">
+                    <td scope="col">@item.Heading</td>
+                    <td scope="col">@item.Description</td>
+                    <td scope="col">@item.SecureAreaName</td>
+                    <td scope="col">@item.PolicyType.GetDescription()</td>
+                    <td scope="col">@item.ActiveFromDate.ToDateShort(true)</td>
+                    <td scope="col">@item.ActiveToDate.ToDateShort(true)</td>
+                    <td scope="col" class="font-weight-bold">
+                        @foreach (var user in item.V01_Policies_ResponsibleUserItems)
+                        {
+                            if (user.DateApproved.HasValue)
+                            {
+                                <span class="text-green" title="@user.Username approved"><i class="fas fa-check-circle"></i>&nbsp;@user.Username</span><br />
+                            }
+                            else
+                            {
+                                <span class="text-red" title="@user.Username pending"><i class="fas fa-times-circle"></i>&nbsp;@user.Username</span><br />
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/changePolicyID/' + flagID + '?R=@Html.UrlEncoder.Encode("/operational/V01_Policies/V01_Policies_Edit")';
+        }
+    </script>
+}

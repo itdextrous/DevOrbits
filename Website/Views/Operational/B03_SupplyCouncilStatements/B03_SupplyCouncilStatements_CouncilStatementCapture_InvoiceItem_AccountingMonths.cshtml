@@ -1,0 +1,59 @@
+@model MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItem_AccountingMonthsModel
+@using MyVoltage.Extensions;
+<table class="table table-responsive-xl table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Council Statement No</th>
+            <th scope="col">Invoice Item</th>
+            <th scope="col">Charge Type</th>
+            <th scope="col">Resource Type</th>
+            <th scope="col">Product</th>
+            <th scope="col">Month</th>
+            <th scope="col" class="text-right">Days</th>
+            <th scope="col" class="text-right">Units</th>
+            <th scope="col" class="text-right">Rate</th>
+            <th scope="col" class="text-right">Amount<br />(Excl. VAT)</th>
+            <th scope="col" class="text-right">VAT</th>
+            <th scope="col" class="text-right">Amount<br />(Incl. VAT)</th>
+            <th>Payable By Service Provider</th>
+            <th>Payable By Client</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems)
+        {
+            <tr>
+                <td scope="col">@Model.InvoiceItem.BuildingCouncilDetails_InvoiceID</td>
+                <td scope="col">@Model.InvoiceItem.ID</td>
+                <td scope="col">@Model.InvoiceItem.ChargeType</td>
+                <td scope="col">@Model.InvoiceItem.ResourceType</td>
+                <td scope="col">@Model.InvoiceItem.ProductName</td>
+                <td scope="col">@item.Month.ToMonth()</td>
+                <td scope="col" class="text-right">@item.NoOfDays</td>
+                <td scope="col" class="text-right">@item.Units.ToMoney()</td>
+                <td scope="col" class="text-right">@item.Rate.ToString("N4")</td>
+                <td scope="col" class="text-right">@item.AmountExclVAT.ToMoney()</td>
+                <td scope="col" class="text-right">@item.VAT.ToMoney()</td>
+                <td scope="col" class="text-right">@item.AmountInclVAT.ToMoney()</td>
+                <td class="text-nowrap text-right">@(((Model.InvoiceItem.PayableByServiceProviderPerc.HasValue ? Model.InvoiceItem.PayableByServiceProviderPerc.Value : 0) * item.AmountInclVAT).ToMoneyNoDecimal("R"))</td>
+                <td class="text-nowrap text-right">@(((Model.InvoiceItem.PayableByClientPerc.HasValue ? Model.InvoiceItem.PayableByClientPerc.Value : 0) * item.AmountInclVAT).ToMoneyNoDecimal("R"))</td>
+            </tr>
+        }
+        <tr class="border-table-total">
+            <td scope="col">Total</td>
+            <td scope="col">-</td>
+            <td scope="col">-</td>
+            <td scope="col">-</td>
+            <td scope="col">-</td>
+            <td scope="col">-</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => p.NoOfDays).Sum()</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => p.Units).Sum().ToMoney()</td>
+            <td scope="col" class="text-right">-</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => p.AmountExclVAT).Sum().ToMoney()</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => p.VAT).Sum().ToMoney()</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => p.AmountInclVAT).Sum().ToMoney()</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => (Model.InvoiceItem.PayableByServiceProviderPerc.HasValue ? Model.InvoiceItem.PayableByServiceProviderPerc.Value : 0) * p.AmountInclVAT).Sum().ToMoney()</td>
+            <td scope="col" class="text-right">@Model.InvoiceItem.Item_MonthResult.BuildingCouncilDetails_InvoiceItem_MonthItems.Select(p => (Model.InvoiceItem.PayableByClientPerc.HasValue ? Model.InvoiceItem.PayableByClientPerc.Value : 0) * p.AmountInclVAT).Sum().ToMoney()</td>
+        </tr>
+    </tbody>
+</table>

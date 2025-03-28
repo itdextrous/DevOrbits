@@ -1,0 +1,168 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_NetcashMissingSkybillJournals_AddModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_NetcashMissingSkybillJournals.GetDescription()} - {operationalProvider.CompanyName} - Create Entry";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Skybill Journal successfully created.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col-12">
+                            <h4>Netcash Statement Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Date
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.Date.ToDateShort()
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Transaction Code
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.TransactionCode - @Model.NetcashStatement.TransactionCodeDescription
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Internal DBID
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.InternalDBID
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Description
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.Description
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Amount
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.Amount.ToMoney("R")
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Internal Indicator
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.InternalIndicator
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Ledger Account Affected
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.LedgerAccountAffected
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col">
+                            Date Synced
+                        </div>
+                        <div class="col">
+                            @Model.NetcashStatement.DateSynced.ToDateAndTimeShort()
+                        </div>
+                    </div>
+								
+                </div>
+
+                <div class="card-body">
+                    <div>
+                        <form asp-action="J_Finance_NetcashMissingSkybillJournals_Add" enctype="multipart/form-data">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="PostingDate" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="date" class="form-control" asp-for="PostingDate" />
+                                    <span asp-validation-for="PostingDate" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="Customer" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    @Html.DropDownList("Customer", Model.Customer, new { @class = "form-control" })
+                                    <span asp-validation-for="Customer" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="CreateConvenienceFee" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    @*<label class="switch">
+                                            <input type="checkbox" asp-for="CreateConvenienceFee">
+                                            <span class="slider round"></span>
+                                        </label>*@
+                                    <span asp-validation-for="CreateConvenienceFee" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-6 text-left">
+                                    <a href="/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Skybill Journal</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

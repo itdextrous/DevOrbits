@@ -1,0 +1,199 @@
+@model MyVoltage.Models.OperationalModels.B02_CouncilReadingsModels.B02_CouncilReadingsModel_MirrorReadingUpdateModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B02_CouncilReadings_CouncilReadingUpdate.GetDescription() + " - " + operationalProvider.CompanyName;
+}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID > 0)
+            {
+                @if (Model != null && Model.IsSuccessful)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Odo Reading successfully added.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/B02_CouncilReadings/B02_CouncilReadings_CouncilReadingUpdate" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+
+                }
+                else
+                {
+                    <div class="card-header">
+
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="B02_CouncilReadings_CouncilReadingUpdate" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="row text-orange mb-md-2">
+                                        <div class="col-12">
+                                            <h5>Create Odo</h5>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    Company:
+                                </div>
+                                <div class="col">
+                                    @operationalProvider.CompanyName
+                                </div>
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="BuildingCouncilMeter" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    @Html.DropDownList("BuildingCouncilMeter", Model.BuildingCouncilMeter, new { @class = "form-control" })
+                                    <span asp-validation-for="BuildingCouncilMeter" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="OdoReading" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="OdoReading" value="@(Model != null && Model.OdoReading > 0 ? Model.OdoReading.ToString("N0") : "")" />
+                                    <span asp-validation-for="OdoReading" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="DateLogged" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="DateLogged" placeholder="yyyy-MM-dd" />
+                                    <span asp-validation-for="DateLogged" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="TimeLogged" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="TimeLogged" placeholder="HH:mm" />
+                                    <span asp-validation-for="TimeLogged" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row mb-md-2">
+                                <div class="col">
+                                    <label asp-for="Photo" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" asp-for="Photo" />
+                                    <span asp-validation-for="Photo" class="text-red"></span>
+                                </div>
+                            </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        <a href="#" onclick="GetReadingAndDiff();" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Check With System</a>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Latest Live Reading
+                                    </div>
+                                    <div class="col">
+                                        <label id="latestLiveReading"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Latest Live Reading Time
+                                    </div>
+                                    <div class="col">
+                                        <label id="latestLiveReadingTime"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Calculated Difference
+                                    </div>
+                                    <div class="col">
+                                        <label id="calculatedDifference"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-md-2">
+                                    <div class="col-12">
+                                        <label id="differenceMessage" class="font-weight-bold"></label>
+                                    </div>
+                                </div>
+
+                            <div class="row mb-md-2">
+                                @if (Model.BuildingCouncilMeter.Count == 0)
+                                {
+                                    <div class="col-12 font-weight-bold text-red">No meters found.</div>
+                                }
+                                else
+                                {
+                                    <div class="col-6 text-left">
+                                        <a id="noAccessBtn" href="#noAccessBtn" class="btn btn-outline-danger-sm"><i class="fas fa-exclamation-circle"></i>&nbsp;No Access To Meter</a>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                    </div>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div>Select a company to start...</div>
+                </div>
+                <div class="card-footer">
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function GetReadingAndDiff() {
+            $("#loaderContent").css("display", "block");
+            $.get("/operational/B02_CouncilReadings/B02_CouncilReadings_CouncilReadingUpdate_GetReadingAndDiff/" + $("#BuildingCouncilMeter").val() + "?OdoReading=" + $("#OdoReading").val())
+                .done(function (data) {
+                    $("#latestLiveReading").html(data.latestLiveReading);
+                    $("#latestLiveReadingTime").html(data.latestLiveReadingTime);
+                    $("#calculatedDifference").html(data.calculatedDifference);
+                    $("#differenceMessage").html(data.differenceMessage);
+                    $("#loaderContent").css("display", "none");
+                });
+        }
+        $("#searchButton").click(function () {
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + $("#serialSearch").val() + '?R=' + returnUrl;
+        });
+
+        $("#noAccessBtn").click(function () {
+            document.location.href = '/operational/B02_CouncilReadings/B02_CouncilReadings_CouncilReadingUpdateNoAccess/' + $("#BuildingCouncilMeter").val();
+        });
+
+        $(document).ready(function () {
+
+        });
+    </script>
+}

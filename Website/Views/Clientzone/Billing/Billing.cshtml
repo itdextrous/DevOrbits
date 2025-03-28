@@ -1,0 +1,126 @@
+@model MyVoltage.Models.ClientzoneModels.BillingModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@inject UserManager<ApplicationUser> userMan;
+@using System.Globalization;
+@{
+    ViewData["Title"] = "Billing - Detailed Daily Billing";
+    Layout = "LayoutClientzone";
+    var SelectedMonth1 = DateTime.Now;
+}
+
+<div class="container invoices tax_invoice daily_billing_data">
+    <div class="pt_m_45">
+        <h3 class="text-center page_heading">Billing information</h3>
+        <h4 class="text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">Detailed daily billing</h4>
+    </div>
+    <div class="pt-50">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-striped table-design mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Posting Date</th>
+                        <th>&nbsp;</th>
+                        <th scope="col" class="text-end">Amount</th>
+                        <th scope="col" class="text-end">Balance</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Document No</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.AllEntries)
+                    {
+                        var externalChargeItem = Model.ExternalChargesSchedulingImports != null ? Model.ExternalChargesSchedulingImports.Where(p => p.ReferenceNumber == entry.Description).FirstOrDefault() : null;
+                        <tr>
+                            <td scope="row">@entry.Posting_Date.ToString("yyyy/MM/dd")</td>
+                            <td>
+                                @if (externalChargeItem != null)
+                                {
+                                    <a href="#" id="@externalChargeItem.ID" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Invoice" onclick="DownloadInvoice(this.id, '/clientzone/billing/getexternalchargesschedulingimportphoto/')"><i class="fas fa-file-pdf"></i></a>
+                                    @*<a href="/clientzone/billing/getexternalchargesschedulingimportphoto/@externalChargeItem.ID" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Invoice"><i class="fas fa-file-pdf"></i></a>*@
+                                }
+                                else
+                                {
+                                    @if (@entry.Document_Type == "Invoice")
+                                    {
+                                        <a href="#" id="@System.Net.WebUtility.UrlEncode(entry.Document_No)" onclick="DownloadInvoice(this.id, '/clientzone/billing/Invoice/')" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Invoice"><i class="fas fa-file-pdf"></i></a>
+                                        @*<a href="/clientzone/billing/Invoice/@System.Net.WebUtility.UrlEncode(entry.Document_No)" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Invoice"><i class="fas fa-file-pdf"></i></a>*@
+                                    }
+                                }
+                            </td>
+                            <td class="text-end">R @entry.Original_Amount.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                            <td class ="text-end">R @entry.Balance.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                            <td>@entry.Description</td>
+                            <td>@entry.Document_No</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.TotalEntries > 10)
+        {
+            var prevDisabled = !Model.AllEntries.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.AllEntries.HasNextPage ? "disabled" : "";
+            <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                <a asp-route-pageIndex="@(Model.AllEntries.PageIndex - 1)"
+                   class="btn btn-default @prevDisabled">
+                    Previous
+                </a>
+                <a align="left" asp-route-pageIndex="@(Model.AllEntries.PageIndex + 1)"
+                   class="btn btn-default @nextDisabled">
+                    Next
+                </a>
+            </div>
+        }
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $('#billingLI').addClass("active");
+        $('#Billing_collapse').addClass("show");
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        function saveByteArray(reportName, base64) {
+            var link = document.createElement('a');
+            link.href = "data:application/pdf;base64," + base64;
+            link.download = reportName;
+            link.click();
+        };
+
+        async function DownloadInvoice(id, url) {
+            $(".tooltip").tooltip("hide");
+            $("#loaderContent").css("display", "block");
+            var result = await $.get(url + id);
+            $("#loaderContent").css("display", "none");
+            if (result) {
+                // Open the PDF in a new tab
+                let pdfWindow = window.open("", '_blank')
+                if(pdfWindow){
+                    pdfWindow.document.write(
+                        "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
+                        encodeURI(result?.data) + "'></iframe>"
+                    )
+                    pdfWindow.focus();
+                }else{
+                    alert('Please allow pop-ups to open the PDF.');
+                }
+
+                //saveByteArray(result?.name, result?.data);
+            } else {
+                toastr.error("Something went wrong. Please try again later.");
+            }
+        }
+
+        $(window).bind('mousewheel', function (event) {
+            $(".tooltip").tooltip("hide");
+        });
+
+    </script>
+}

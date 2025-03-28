@@ -1,0 +1,264 @@
+@model MyVoltage.Models.OperationalModels.C09_CashflowForecast.C09_CashflowForecast_UpdateBankBalancesModel
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C09_CashflowForecast_UpdateBankBalances.GetDescription() + " - " + opProv.CompanyName;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h3>Page Filters</h3>
+            </div>
+            <div class="card-body text-left">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col text-left">Between</div>
+                                    <div class="col"><input class="form-control" type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+                                    <div class="col text-center">And</div>
+                                    <div class="col"><input class="form-control" type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="row mt-2 mb-2">
+    <div class="col-12">
+        <table class="table table-bordered table-sm table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" class="">Company</th>
+                    <th scope="col" class="">Date</th>
+                    <th scope="col" class="">Balance</th>
+                    <th scope="col" class=""></th>
+                    <th scope="col" class=""></th>
+                </tr>
+                <tr>
+                    <td title="Company" scope="col">
+                        <select id="reportingDescriptionID" class="form-control">
+                            @foreach (var bCD in Model.Companies)
+                            {
+                                @if (opProv.CompanyID.ToString() == bCD.Value)
+                                {
+                                    <option selected="selected" value="@bCD.Value">@bCD.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@bCD.Value">@bCD.Text</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td title="Month" scope="col">
+                        <input id="date" type="date" class="form-control" />
+                    </td>
+                    <td title="Amount" scope="col">
+                        <input id="amount" type="text" class="form-control" />
+                    </td>
+                    <td title="" scope="col" class="text-center">
+                        <a onclick="DoAdd();" href="#month" class="btn btn-sm btn-outline-primary-sm" title="Add"><i class="fas fa-plus-circle"></i></a>
+                    </td>
+                    <td title="" scope="col" class="text-center">
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    string rowClass = "";
+                    DateTime? previousDate = null;
+                }
+                @foreach (var item in Model.C09_CashflowForecast_CostSettings_Templates)
+                {
+                    if (previousDate.HasValue && previousDate.Value != item.Date)
+                    {
+                        if (string.IsNullOrEmpty(rowClass))
+                        {
+                            rowClass = "table-secondary";
+                        }
+                        else
+                        {
+                            rowClass = "";
+                        }
+                    }
+                    <tr class="@Html.Raw(rowClass)">
+                        <td scope="col">
+                            <select id="reportingDescriptionID@(item.ID)" class="form-control">
+                                @foreach (var bCD in Model.Companies)
+                                {
+                                    @if (item.CompanyID.ToString() == bCD.Value)
+                                    {
+                                        <option selected="selected" value="@bCD.Value">@bCD.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@bCD.Value">@bCD.Text</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td title="Month" scope="col" class="text-nowrap">
+                            <input id="date@(item.ID)" type="date" class="form-control" value="@item.Date.ToDateShort()" />
+                        </td>
+                        <td title="Month" scope="col" class="text-nowrap">
+                            <input id="amount@(item.ID)" type="text" class="form-control" value="@item.Amount.ToMoney()" />
+                        </td>
+                        <td title="" scope="col" class="text-center">
+                            <a onclick="DoUpdate('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Update"><i class="fas fa-save"></i></a>
+                        </td>
+                        <td title="" scope="col" class="text-center">
+                            <a onclick="DoDelete('@item.ID');" href="#month_@item.ID" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                    previousDate = item.Date;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C09_CashflowForecast/C09_CashflowForecast_UpdateBankBalances?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&ReportingCategoryID=' + $("#ReportingCategoryID").val() + '&ReportingDescriptionID=' + $("#ReportingDescriptionID").val();
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#reportingDescriptionID").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Reporting Description');
+                $("#reportingDescriptionID").focus();
+                return;
+            }
+
+            if ($("#date").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Date');
+                $("#date").focus();
+                return;
+            }
+
+            if ($("#amount").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Amount');
+                $("#amount").focus();
+                return;
+            }
+
+            $.post("/operational/C09_CashflowForecast/C09_CashflowForecast_UpdateBankBalances_ItemAdd",
+                {
+                    reportingDescriptionID: $("#reportingDescriptionID").val(),
+                    date: $("#date").val(),
+                    amount: $("#amount").val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoUpdate(itemID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#reportingDescriptionID" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Reporting Description');
+                $("#reportingDescriptionID" + itemID).focus();
+                return;
+            }
+
+            if ($("#date" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Date');
+                $("#date" + itemID).focus();
+                return;
+            }
+
+            if ($("#amount" + itemID).val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Amount');
+                $("#amount" + itemID).focus();
+                return;
+            }
+
+            $.post("/operational/C09_CashflowForecast/C09_CashflowForecast_UpdateBankBalances_ItemUpdate",
+                {
+                    itemid: itemID,
+                    reportingDescriptionID: $("#reportingDescriptionID" + itemID).val(),
+                    date: $("#date" + itemID).val(),
+                    amount: $("#amount" + itemID).val(),
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(itemID) {
+            if (confirm('Are you sure you wish to delete this item? This action cannot be undone.')) {
+                $("#loaderContent").css("display", "block");
+
+                $.post("/operational/C09_CashflowForecast/C09_CashflowForecast_UpdateBankBalances_ItemDelete",
+                    {
+                        itemid: itemID,
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                        }
+                    });
+            }
+        }
+
+    </script>
+}

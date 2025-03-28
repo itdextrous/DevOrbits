@@ -1,0 +1,682 @@
+@model MyVoltage.Models.ClientzoneModels.DashboardModel;
+@using MyVoltage.Extensions;
+@using MyVoltage.Models.ClientzoneModels;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@using System.Globalization;
+@{
+    ViewData["Title"] = "Smart View";
+    Layout = "LayoutClientzone";
+    var totalValue = new List<string>();
+    string fixedTotalCharge;
+    int? waterMetersCount = null;
+}
+
+<div class="container consumptioninsights custom_container">
+    <div class="row align-items-end pt_m_45">
+        <div class="col-xxl d-none d-xxl-block">
+            <hr class="mt-45 mb-0" />
+        </div>
+        <div class="col-xxl px-0 px-md-1">
+            <div class="chartBgBox">
+                <div class="noDataChart"></div>
+                <div class="totalUsage_box">
+                    <h3>Total usage</h3>
+                    @if (Model.ShowIncVAT)
+	                {
+                        <h4>R @Model.SummaryBlocks.Select(p => Math.Round(p.TotalInVat, MidpointRounding.AwayFromZero)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</h4>
+	                }
+	                else
+	                {
+                        <h4>R @Model.SummaryBlocks.Select(p => Math.Round(p.Total, MidpointRounding.AwayFromZero)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</h4>
+	                }
+                </div>
+                <div class="usageChartBox">
+                    <canvas id="myChart" width="215" height="215"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl">
+            <div class="hello text-grape text-nowrap" data-bs-toggle="tooltip" data-bs-placement="top" id="fullnameDiv">
+                Hello <span id="fullname" onmouseover="checkFullNameOverflow()">@clientzoneProvider.CustomerName</span>
+            </div>
+            <div class="month text-nowrap">
+                Current month: <span>@Model.SelectedMonth.ToString("MMMM yyyy")</span>
+            </div>
+            <hr class="mt-45 mb-0" />
+        </div>
+    </div>
+
+    <div class="blockSection">
+        <div class="row gap_15 summaryBlockRow mt-45 justify-content-center">
+            @{
+                string blockClass = "londonsky";
+                string icon = "Consumption-Data-Fixed-Charges-Icon.png";
+            }
+            @foreach (var m in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption))
+            {
+                @if (m.DeviceTypeID.HasValue)
+                {
+                    switch (m.DeviceTypeID.Value)
+                    {
+                        case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                            icon = "Consumption-Data-Electricity-Icon.png";
+                            blockClass = "greenapple";
+                            break;
+                        case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                            icon = "Consumption-Data-Water-Icon.png";
+                            blockClass = "tropicalwave";
+                            break;
+                        case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                            icon = "Consumption-Data-Gas-Icon.png";
+                            blockClass = "tequilasunrise";
+                            break;
+                    }
+
+                }
+
+                if (m.ProductName.Trim().ToLower() == ClientzoneSD.Sanitation_Consumption)
+                {
+                    icon = "Sanitation_consumption_icon.png";
+                    blockClass = "darkblue";
+                }
+                if (m.ProductName.Trim().ToLower() == ClientzoneSD.Water_Consumption)
+                {
+                    icon = "Consumption-Data-Water-Icon.png";
+                    blockClass = "tropicalwave";
+                }
+                <div class="col-xl-3 col-sm-6">
+                    <div class="summaryblock border text-center text-@blockClass">
+                        <div class="card_header bg-@blockClass">
+                            <div class="header">
+                                @m.ProductName
+                            </div>
+                            <div class="subheader">
+                                @Model.SelectedMonth.ToString("MMMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="icon">
+                            <div class="text-center bg-white">
+                                <img src="~/images/Clientzone/@icon" />
+                            </div>
+                        </div>
+
+                        <div class="spacer"></div>
+
+                        <div class="totalusage">
+                            <div class="totalusageinner bg-@blockClass">
+                                <div class="head text-white">
+                                    Total usage:
+                                </div>
+                                <div class="value text-white">
+                                    @if (Model.ShowIncVAT)
+                                    {
+                                        <span> R @m.TotalInVat.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") incl.VAT</span>
+                                    }
+                                    else
+                                    {
+                                        <span> R @m.Total.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") excl.VAT</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data_value">
+                            <div class="head">
+                                Number of units:
+                            </div>
+                            <div class="value">
+                                @m.Units.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")
+                                <span class="units_type1"> kWH</span>
+                                <span class="units_type2"> kL</span>
+                                <span class="units_type3"> m<sup>3</sup></span>
+                            </div>
+                        </div>
+
+                        <div class="data_value">
+                            <div class="head">
+                                Current tarrif:
+                            </div>
+                            <div class="value">
+                                R @m.PricePerUnit.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")/unit
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+            @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Count() == 0)
+            {
+                waterMetersCount = clientzoneProvider.Meters.Count(x => x.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Water);
+                var showSanitation = false;
+
+                @foreach (var m in clientzoneProvider.Meters)
+                {
+                    switch (m.DeviceType)
+                    {
+                        case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                            icon = "Consumption-Data-Electricity-Icon.png";
+                            blockClass = "greenapple";
+                            break;
+                        case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                            if (waterMetersCount!=null && waterMetersCount > 1)
+                            {
+                                if (showSanitation)
+                                {
+                                    icon = "Sanitation_consumption_icon.png";
+                                    blockClass = "darkblue";
+                                    waterMetersCount = null;
+                                    break;
+                                }
+                                else
+                                {
+                                    showSanitation = true;
+                                }
+                            }
+                            icon = "Consumption-Data-Water-Icon.png";
+                            blockClass = "tropicalwave";
+                            break;
+                        case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                            icon = "Consumption-Data-Gas-Icon.png";
+                            blockClass = "tequilasunrise";
+                            break;
+                    }
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="summaryblock border text-center text-@blockClass">
+                            <div class="card_header bg-@blockClass">
+                                <div class="header">
+                                    @(blockClass == "darkblue" ? "Sanitation" : m.DeviceType.ToString()) consumption
+                                </div>
+                                <div class="subheader">
+                                    @DateTime.Now.ToString("MMMM yyyy")
+                                </div>
+                            </div>
+
+                            <div class="icon">
+                                <div class="text-center bg-white">
+                                    <img src="~/images/Clientzone/@icon" />
+                                </div>
+                            </div>
+
+                            <div class="spacer"></div>
+
+                            <div class="totalusage">
+                                <div class="totalusageinner bg-@blockClass">
+                                    <div class="head text-white">
+                                        Total usage:
+                                    </div>
+                                    <div class="value text-white">
+                                        R 0
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="data_value">
+                                <div class="head">
+                                    Number of units:
+                                </div>
+                                <div class="value">
+                                    0
+                                    <span class="units_type1"> kWH</span>
+                                    <span class="units_type2"> kL</span>
+                                    <span class="units_type3"> m<sup>3</sup></span>
+                                </div>
+                            </div>
+
+                            <div class="data_value">
+                                <div class="head">
+                                    Current tarrif:
+                                </div>
+                                <div class="value">
+                                    R 0/unit
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+                
+
+
+                @*<div class="col-xl-3 col-sm-6">
+                    <div class="summaryblock border text-center text-greenapple">
+                        <div class="card_header bg-greenapple">
+                                <div class="header">
+                                Electricity consumption
+                                </div>
+                                <div class="subheader">
+                                    @DateTime.Now.ToString("MMMM yyyy")
+                                </div>
+                            </div>
+
+                            <div class="icon">
+                                <div class="text-center bg-white">
+                                <img src="~/images/Clientzone/Consumption-Data-Electricity-Icon.png" />
+                                </div>
+                            </div>
+
+                            <div class="spacer"></div>
+
+                            <div class="totalusage">
+                                <div class="totalusageinner">
+                                    <div class="head">
+                                        Total usage:
+                                    </div>
+                                    <div class="value">
+                                        R 0
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="data_value">
+                                <div class="head">
+                                    Number of units:
+                                </div>
+                                <div class="value">
+                                    0
+                                    <span class="units_type1"> kWH</span>
+                                    <span class="units_type2"> kL</span>
+                                    <span class="units_type3"> m<sup>3</sup></span>
+                                </div>
+                            </div>
+
+                            <div class="data_value">
+                                <div class="head">
+                                    Current tarrif:
+                                </div>
+                                <div class="value">
+                                    R 0/unit
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="summaryblock border text-center text-tropicalwave">
+                        <div class="card_header bg-tropicalwave">
+                            <div class="header">
+                                Sanitation consumption
+                            </div>
+                            <div class="subheader">
+                                @DateTime.Now.ToString("MMMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="icon">
+                            <div class="text-center bg-white">
+                                <img src="~/images/Clientzone/Consumption-Data-Water-Icon.png" />
+                            </div>
+                        </div>
+
+                        <div class="spacer"></div>
+
+                        <div class="totalusage">
+                            <div class="totalusageinner">
+                                <div class="head">
+                                    Total usage:
+                                </div>
+                                <div class="value">
+                                    R 0
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data_value">
+                            <div class="head">
+                                Number of units:
+                            </div>
+                            <div class="value">
+                                0
+                                <span class="units_type1"> kWH</span>
+                                <span class="units_type2"> kL</span>
+                                <span class="units_type3"> m<sup>3</sup></span>
+                            </div>
+                        </div>
+
+                        <div class="data_value">
+                            <div class="head">
+                                Current tarrif:
+                            </div>
+                            <div class="value">
+                                R 0/unit
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="summaryblock border text-center text-tropicalwave">
+                        <div class="card_header bg-tropicalwave">
+                            <div class="header">
+                                Water consumption
+                            </div>
+                            <div class="subheader">
+                                @Model.SelectedMonth.ToString("MMMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="icon">
+                            <div class="text-center bg-white">
+                                <img src="~/images/Clientzone/Consumption-Data-Water-Icon.png" />
+                            </div>
+                        </div>
+
+                        <div class="spacer"></div>
+
+                        <div class="totalusage">
+                            <div class="totalusageinner">
+                                <div class="head">
+                                    Total usage:
+                                </div>
+                                <div class="value">
+                                    R 0
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data_value">
+                            <div class="head">
+                                Number of units:
+                            </div>
+                            <div class="value">
+                                0
+                                <span class="units_type1"> kWH</span>
+                                <span class="units_type2"> kL</span>
+                                <span class="units_type3"> m<sup>3</sup></span>
+                            </div>
+                        </div>
+
+                        <div class="data_value">
+                            <div class="head">
+                                Current tarrif:
+                            </div>
+                            <div class="value">
+                                R 0/unit
+                            </div>
+                        </div>
+
+                    </div>
+                </div>*@
+            }
+            @{
+                blockClass = "londonsky";
+                icon = "Consumption-Data-Fixed-Charges-Icon.png";
+            }
+            @if (Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Count() > 0)
+            {
+                <div class="col-xl-3 col-sm-6">
+                    <div class="summaryblock border text-center text-@blockClass">
+                        <div class="card_header bg-@blockClass">
+                            <div class="header">
+                                Fixed charges
+                            </div>
+
+                            <div class="subheader">
+                                @Model.SelectedMonth.ToString("MMMM yyyy")
+                            </div>
+                        </div>
+                        
+                        <div class="icon">
+                            <div class="text-center bg-white">
+                                <img src="~/images/Clientzone/@icon" />
+                            </div>
+                        </div>
+
+                        <div class="spacer"></div>
+
+                        <div class="totalusage">
+                            <div class="totalusageinner bg-@blockClass">
+                                <div class="head text-white">
+                                    Total charges:
+                                </div>
+                                <div class="value text-white">
+                                    @if (Model.ShowIncVAT)
+                                    {
+                                        <span>R @(Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Select(p => Math.Round(p.TotalInVat)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")) incl.VAT</span>
+                                    }
+                                    else
+                                    {
+                                        <span>R @(Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Select(p => Math.Round(p.Total)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")) excl.VAT</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        @foreach (var m in Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed))
+                        {
+                            <div class="data_value">
+                                <div class="head">
+                                    @m.ProductName:
+                                </div>
+                                <div class="value">
+                                    @if (Model.ShowIncVAT)
+                                    {
+                                        <span>R @m.TotalInVat.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") incl.VAT</span>
+                                    }
+                                    else
+                                    {
+                                        <span>R @m.Total.ToString("N0", new CultureInfo("en-US")).Replace(",", " ") excl.VAT</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="col-xl-3 col-sm-6">
+                    <div class="summaryblock border text-center text-@blockClass">
+                        <div class="card_header bg-@blockClass">
+                            <div class="header">
+                                Fixed charges
+                            </div>
+
+                            <div class="subheader">
+                                @DateTime.Now.ToString("MMMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="icon">
+                            <div class="text-center bg-white">
+                                <img src="~/images/Clientzone/@icon" />
+                            </div>
+                        </div>
+
+                        <div class="spacer"></div>
+
+                        <div class="totalusage">
+                            <div class="totalusageinner bg-@blockClass">
+                                <div class="head text-white">
+                                    Total charges:
+                                </div>
+                                <div class="value text-white">
+                                    R 0
+                                </div>
+                            </div>
+                        </div>
+                       
+                        <div class="data_value">
+                            <div class="head">
+                                Monthly meter rental:
+                            </div>
+                            <div class="value">
+                                R 0
+                            </div>
+                        </div>
+                        <div class="data_value">
+                            <div class="head">
+                                Water network access charges:
+                            </div>
+                            <div class="value">
+                                R 0
+                            </div>
+                        </div>
+                        <div class="data_value">
+                            <div class="head">
+                                Sanitation network access charges:
+                            </div>
+                            <div class="value">
+                                R 0
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="footer page_footer mt-45 mx-auto">
+        <div class="altrow totalData d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="usage_txt">Total usage:</div>
+                @if (Model.ShowIncVAT)
+                {
+                    <span class="price">R @Model.SummaryBlocks.Select(p => Math.Round(p.TotalInVat)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</span> <span class="val_text">incl.VAT</span>
+                }
+                else
+                {
+                    <span class="price">R @Model.SummaryBlocks.Select(p => Math.Round(p.Total)).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</span> <span class="val_text">excl.VAT</span>
+                }
+            </div>
+            <div class="ps-2">
+                <a href="/clientzone/realtimeconsumption" class="btn btn-islandsunrise">Insights</a>
+            </div>
+        </div>
+        <div class="totalData d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="usage_txt">Balance:</div>
+                <span class="price"> @clientzoneProvider.CustomerBalance</span>
+            </div>
+            <div class="ps-2">
+                <a href="/clientzone/recharge" class="btn btn-islandsunrise">Recharge</a>
+            </div>
+        </div>
+        <div class="text-grape queries_text mt-45 text-center">
+            <p class="m-0">Please email queries to: <a href="mailto:info@myvoltage.co.za?Subject=Website%20enquiry" class="decoration_none">info@myvoltage.co.za</a></p>
+        </div>
+        <div class="mt-45 text-center">
+            <img src="~/images/clientzone/Slogan_hi-quality.png" class="slogan_img" height="66" alt="">
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        Chart.pluginService.register({
+            beforeDraw: function (chart) {
+                var width = chart.chart.width,
+                    height = chart.chart.height,
+                    ctx = chart.chart.ctx;
+
+                ctx.restore();
+                ctx.font = "16px Roboto bold";
+                ctx.textBaseline = "middle";
+
+                var text = "R @Model.TotalUsage.ToString("N0", new CultureInfo("en-US")).Replace(",", " ")",
+                    textX = Math.round((width - ctx.measureText(text).width) / 0),
+                    textY = height / 0;
+
+                ctx.fillText(text, textX, textY);
+                ctx.save();
+            }
+        });
+
+         const customLabel = function (tooltipItem, data) {
+             //debugger;
+            var dataset = data.datasets[tooltipItem.datasetIndex];
+            var label = data.labels[tooltipItem.index];
+            var value = dataset.data[tooltipItem.index];
+            var numString = value.toString();
+            var formattedNumber = "";
+
+            // Check if the number has more than 3 digits
+            if (numString.length > 3) {
+                formattedNumber = numString.substr(0, numString.length - 3); // Get first part of the number
+                formattedNumber += " " + numString.substr(numString.length - 3, 3); // Add space after last 3 digits
+            } else {
+                formattedNumber = numString; // Number has less than 4 digits, keep it as is
+            }
+            if (formattedNumber.length)
+                return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase() + ": " + formattedNumber;
+        };
+
+        @if (Model.ShowIncVAT)
+        {
+            fixedTotalCharge = Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Select(p => Math.Round(p.TotalInVat)).Sum().ToString("0").Replace(",", " ");
+            totalValue = Model.SummaryBlocks.Where(x => x.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Select(p => Math.Round(p.TotalInVat).ToString("0")).ToList();
+        }
+        else
+        {
+            fixedTotalCharge = Model.SummaryBlocks.Where(p => p.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Fixed).Select(p => Math.Round(p.Total)).Sum().ToString("0").Replace(",", " ");
+            totalValue = Model.SummaryBlocks.Where(x => x.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Select(p => Math.Round(p.Total, MidpointRounding.AwayFromZero).ToString("0")).ToList();
+        }
+
+        const data = {
+            labels: [@(Html.Raw(string.Join(", ", Model.SummaryBlocks.Where(x => x.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Select(p => $"'{p.ProductName}'").ToList()))), "Fixed charges"],
+            datasets: [
+                {
+                    data: [@(string.Join(", ", totalValue)), @fixedTotalCharge],
+                    backgroundColor: [@(Html.Raw(string.Join(", ", Model.SummaryBlocks.Where(x => x.ChargeType == MyVoltage.Data.SiteAdmin_ProductChargeType.Consumption).Select(p => $"'{p.BGColor}'").ToList()))), "#4E5375"],
+                    boxWidth: 1
+                },
+                {
+                    percentageInnerCutout: 85,
+                }
+            ]
+        };
+
+        if ((data.datasets[0].data[0] == undefined || data.datasets[0].data[0] == null) && data.datasets[0].data[1] == 0) {
+            $(".noDataChart").show();
+        }
+
+        const ctx = document.getElementById('myChart');
+        var config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                legend: {
+                    display: false,
+                },
+                plugins: {
+                    title: {
+                        display: false,
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: customLabel
+                    }
+                },
+                maintainAspectRatio: false
+            },
+        };
+
+        var chart = new Chart(ctx, config);
+        $(document).ready(function () {
+        });
+
+        function checkFullNameOverflow(){
+            let el = $('#fullnameDiv');
+            let fullNameEl = $('#fullname');
+
+            if (fullNameEl.width() < 232) {
+                el.removeAttr('data-bs-original-title');
+            } else {
+                el.attr('data-bs-original-title', fullNameEl.text());
+            }
+        }
+
+    </script>
+}

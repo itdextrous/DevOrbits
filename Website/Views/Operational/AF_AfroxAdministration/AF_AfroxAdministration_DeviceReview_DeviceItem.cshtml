@@ -1,0 +1,38 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_DeviceReview_DeviceModel.AF_AfroxAdministration_DeviceReview_DeviceItem
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    string rowclass = "";
+    //if (Model.deviceStatus != "offline")
+    //{
+    //    rowclass = "table-success";
+    //}
+    //else
+    //{
+    //    rowclass = "table-danger";
+    //}
+}
+<td title="@Model.name @Model.serial - ID" scope="col">@Model.id</td>
+<td title="@Model.name @Model.serial - Name" scope="col">@Model.name</td>
+<td title="@Model.name @Model.serial - Serial" scope="col">@Model.serial</td>
+<td title="@Model.name @Model.serial - Status" scope="col" class="@Model.deviceStatus.ToUpper()">@Model.deviceStatus</td>
+<td title="@Model.name @Model.serial - Since" scope="col" class="text-nowrap">@Model.status.time.ToDateAndTimeShort()</td>
+<td title="@Model.name @Model.serial - Remaining Credit" scope="col">@Model.GasConsumption</td>
+
+<td title="@Model.name @Model.serial - Internal Battery V" scope="col" class="@Model.ContactorState.ToUpper()">@Model.InternalBatteryV</td>
+<td title="@Model.name @Model.serial - Signal RSSI" scope="col" class="@Model.ContactorState.ToUpper()">@Model.SignalRSSI</td>
+<td title="@Model.name @Model.serial - SNR" scope="col" class="@Model.ContactorState.ToUpper()">@Model.SNR</td>
+
+<td title="@Model.name @Model.serial - Temp" scope="col">@Model.Temp</td>
+<td title="@Model.name @Model.serial - Remaining Credit" scope="col">@Model.RemainingCredit</td>
+<td scope="col">
+    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_DeviceReview, MyVoltage.Data.SecureAreaActionEnum.Delete))
+    {
+        <a title="Delete" href="#" onclick="ConfirmDelete('@Model.id', '@Model.name - @Model.serial');" class="btn btn-sm btn-outline-primary-sm text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+    }
+</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

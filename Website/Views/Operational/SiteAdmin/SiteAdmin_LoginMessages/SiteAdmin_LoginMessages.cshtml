@@ -1,0 +1,125 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_LoginMessagesModel
+@{
+    ViewData["Title"] = "System Admin - Login Messages";
+}
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                <h3 class="text-orange">Update Login Messages</h3>
+                <br />
+                Tip: Convert your text to encoded text to avoid invalid characters from creeping in <a href="http://htmlencode.net/" target="_blank">here</a>
+            </div>
+            <div class="card-body">
+                <form asp-action="SiteAdmin_LoginMessages" enctype="multipart/form-data">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="LoginMessage1" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <textarea class="form-control" asp-for="LoginMessage1">@Html.Raw(System.Web.HttpUtility.HtmlDecode(Model.LoginMessage1))</textarea>
+                            <span asp-validation-for="LoginMessage1" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="LoginMessage2" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <textarea class="form-control" asp-for="LoginMessage2"></textarea>
+                            <span asp-validation-for="LoginMessage2" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col text-uppercase font-weight-bold">
+                            <label asp-for="LoginMessage3" class="control-label"></label>
+                        </div>
+                        <div class="col">
+                            <textarea class="form-control" asp-for="LoginMessage3"></textarea>
+                            <span asp-validation-for="LoginMessage3" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.SiteAdmin_LoginMessages, MyVoltage.Data.SecureAreaActionEnum.Add))
+                    {
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <input type="submit" value="Save Changes" class="btn btn-default" />
+                            </div>
+                        </div>
+                    }
+
+
+                </form>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                <h3 class="text-orange">Historical Messages</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date Created</th>
+                            <th scope="col">Created By</th>
+                            <th scope="col">Login Message 1</th>
+                            <th scope="col">Login Message 2</th>
+                            <th scope="col">Login Message 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.SiteAdmin_LoginMessagesItems)
+                        {
+                            <tr>
+                                <td scope="col">@item.DateCreated.ToDateAndTimeShort()</td>
+                                <td scope="col">@item.CreatedBy</td>
+                                <td scope="col">
+                                    @Html.Raw(System.Web.HttpUtility.HtmlDecode(item.LoginMessage1))
+                                </td>
+                                <td scope="col">
+                                    @Html.Raw(System.Web.HttpUtility.HtmlDecode(item.LoginMessage2))
+                                </td>
+                                <td scope="col">
+                                    @Html.Raw(System.Web.HttpUtility.HtmlDecode(item.LoginMessage3))
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+//        function RedirectToEditFlag(flagID) {
+//            document.location.href = '/operational/SiteAdmin/SiteAdmin_A09_FlagTypes/Edit/' + flagID;
+//        }
+    </script>
+}

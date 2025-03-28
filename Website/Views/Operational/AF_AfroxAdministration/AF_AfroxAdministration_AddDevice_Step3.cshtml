@@ -1,0 +1,218 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_AddDeviceModel_Step3Model
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_AddDevice.GetDescription()} - Step 2";
+}
+
+<form asp-action="AF_AfroxAdministration_AddDevice_Step3" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    @if (Model == null || !Model.IsSuccess)
+                    {
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="GatewayID" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                @Model.GatewayID
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="GatewayName" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                @Model.GatewayName
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="GatewayHardwareType" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                @Model.GatewayHardwareType
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="MeterType" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                @Model.MeterType
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="DeviceType" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                @Model.DeviceType
+                            </div>
+                        </div>
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="SerialNumber" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                @Model.Prefix<input class="form-control" type="text" asp-for="SerialNumber" />
+                                <span asp-validation-for="SerialNumber" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="Name" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="text" asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-red"></span>
+                            </div>
+                        </div>
+                        @if (Model.ShowPort)
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="Port" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="Port" />
+                                    <span asp-validation-for="Port" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowProtocol)
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="Protocol" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="Protocol" />
+                                    <span asp-validation-for="Protocol" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowRemoteAddress)
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="RemoteAddress" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="RemoteAddress" />
+                                    <span asp-validation-for="RemoteAddress" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowRemoteIndex)
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="RemoteIndex" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="RemoteIndex" />
+                                    <span asp-validation-for="RemoteIndex" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowProcessInterval)
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="ProcessInterval" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="ProcessInterval" />
+                                    <span asp-validation-for="ProcessInterval" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ShowOdo)
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="Odo" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="Odo" />
+                                    <span asp-validation-for="Odo" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="DateLogged" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="date" asp-for="DateLogged" placeholder="yyyy-MM-dd" />
+                                    <span asp-validation-for="DateLogged" class="text-red"></span>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">
+                                    <label asp-for="TimeLogged" class="control-label"></label>:
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" asp-for="TimeLogged" placeholder="HH:mm" />
+                                    <span asp-validation-for="TimeLogged" class="text-red"></span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <label asp-for="file" class="control-label"></label>:
+                            </div>
+                            <div class="col">
+                                <input class="form-control" asp-for="file" />
+                                <span asp-validation-for="file" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="row mt-2 mb-2">
+                                <div class="col-12">
+                                    <span class="text-red font-weight-bold">@Model.ErrorMessage</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12 text-right">
+                                <button type="submit" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Device</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12">
+                                Success.
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12 text-center">
+                                <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_NewlyAddedDevices" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Go to Device List</a>
+                                <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_AddDevice" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Another Device</a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="card-footer">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>

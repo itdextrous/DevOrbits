@@ -1,0 +1,59 @@
+@model MyVoltage.Models.AdminViewModels.TechniciansViewModel
+@{
+    ViewData["Title"] = "Technicians";
+}
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row">
+    <a href="/admin/addtechnician" class="btn btn-outline-primary btn-sm float-right my-4">Add New</a>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4">
+            <div class="card-body">
+                @*<div>
+            <form asp-action="TokenLog" enctype="multipart/form-data">
+                <div class="row"><label asp-for="CustomerNumber" class="control-label"></label>:</div>
+                <div class="row">
+                    <div class="col-10">
+                        <input class="form-group" style="width:90%;" id="CustomerNumber_Search" asp-for="CustomerNumber" />
+                        <span asp-validation-for="CustomerNumber" class="text-red"></span>
+                    </div>
+                    <div class="row">
+                        <input asp-action="TokenLog" type="submit" value="Refresh Customer" class="btn btn-default" />
+                    </div>
+                </div>
+            </form>
+        </div>*@
+                <table class="table table-bordered admin-table-detail mt-3 table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col">Confirmed</th>
+                            <th scope="col">Deleted</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Model.Technicians)
+                        {
+                            <tr>
+                                <td scope="row">@entry.Email</td>
+                                <td scope="row">@entry.PhoneNumber</td>
+                                <td scope="row">@(entry.IsConfirmed ? "Yes" : "No")</td>
+                                <td scope="row">@(entry.IsDeleted ? "Yes" : "No")</td>
+                                <td scope="row"><a class="btn" href="/admin/edittechnician/@entry.Id" title="Edit @entry.Email">Edit</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

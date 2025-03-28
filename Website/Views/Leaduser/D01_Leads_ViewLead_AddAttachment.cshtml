@@ -1,0 +1,86 @@
+@model MyVoltage.Models.LeaduserModels.D01_Leads_ViewLead_AddAttachmentModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_ViewLead.GetDescription()} - Add Attachments";
+    Layout = "LayoutLeaduser";
+}
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Attachment successfully added
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col">
+                            <a href="/leaduser/D01_Leads_ViewLead" class="btn btn-grape"><i class="fas fa-chevron-left"></i>&nbsp;Back To Lead</a>
+                        </div>
+                        <div class="col">
+                            <a href="/leaduser/D01_Leads_ViewLead_AddAttachment" class="btn btn-grape"><i class="fas fa-plus-circle"></i>&nbsp;Add Another Attachment</a>
+                        </div>
+                        <div class="col">
+                            <a href="/leaduser/D01_Leads_MyLeads" class="btn btn-grape"><i class="fas fa-list"></i>&nbsp;Show All My Leads</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="D01_Leads_ViewLead_AddAttachment" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input class="form-control" asp-for="Description" />
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="Attachment" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input class="form-control" asp-for="Attachment" />
+                                <span asp-validation-for="Attachment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="AttachmentType" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("AttachmentType", Model.AttachmentType, new { @class = "form-control" })
+                                <span asp-validation-for="AttachmentType" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-grape"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+

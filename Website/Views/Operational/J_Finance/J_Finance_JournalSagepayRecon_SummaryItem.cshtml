@@ -1,0 +1,21 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_JournalSagepayRecon_SummaryModel
+@using MyVoltage.Extensions; 
+@using MyVoltage.Data;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (!Model.Difference.HasValue || Convert.ToInt32(Model.Difference) != 0)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+}
+<td scope="col">@Model.CompanyName</td>
+<td scope="col">@Model.SkybillSagepayBalance.ToMoneyNoDecimal("R")</td>
+<td scope="col">@Model.SkybillVendingBalance.ToMoneyNoDecimal("R", Model.CompanyName.Substring(0, 3) + "-S Not Found")</td>
+<td scope="col">@Model.Difference.ToMoneyNoDecimal("R")</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

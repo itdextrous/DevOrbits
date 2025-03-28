@@ -1,0 +1,272 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-body">
+                <div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Created Between
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control" type="date" name="FromDate" id="FromDate" asp-for="FromDate" value="@(Model.FromDate.ToDateShort(true))" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            And
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control" type="date" name="ToDate" id="ToDate" asp-for="ToDate" value="@(Model.ToDate.ToDateShort(true))" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                            &nbsp;
+                            <a href="/operational/J_Finance/J_Finance_ReceiptLogExceptions" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                            Note: Reset filters if page misbehaves.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+            <thead>
+                <tr>
+
+                    <th scope="col">Create Date</th>
+                    <th scope="col">Reference</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Reason</th>
+                    <th scope="col">Customer Number</th>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Payment Status</th>
+                    <th scope="col">Fee Status</th>
+                    <th scope="col">Vending 1 Status</th>
+                    <th scope="col">Vending 2 Status</th>
+                    <th scope="col">Vending 3 Status</th>
+                    <th scope="col">Vending 4 Status</th>
+                    <th scope="col">NS Skybill Document No</th>
+                    <th scope="col">NS Payment ID</th>
+                    <th scope="col">NS Internal DB ID</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.J_Finance_ReceiptLogExceptionsItems)
+                {
+                    string sbStatus = entry.PaymentStatus.GetDescription();
+                    string sbStatusFee = entry.FeeStatus.GetDescription();
+                    string sbStatusVending1 = entry.Vending1Status.Item1.GetDescription();
+                    string sbStatusVending2 = entry.Vending2Status.Item1.GetDescription();
+                    string sbStatusVending3 = entry.Vending3Status.Item1.GetDescription();
+                    string sbStatusVending4 = entry.Vending4Status.Item1.GetDescription();
+                    string rowClass = "";
+                    string cellClass = "";
+                    string cellClassFee = "";
+                    string cellClassVending1 = "";
+                    string cellClassVending2 = "";
+                    string cellClassVending3 = "";
+                    string cellClassVending4 = "";
+                    string rootURL = $"/operational/J_Finance/J_Finance_ReceiptLog/RepostSkybill/{entry.PaymentMethodID}/{entry.Reference}";
+
+                    if (entry.PaymentStatus == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Found)
+                    {
+                        sbStatus = $"{entry.SkybillCompanyName}:{entry.SkybillCustomerNo}";
+                        cellClass = "font-weight-bold text-green";
+                    }
+                    else if (entry.PaymentStatus == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Missing)
+                    {
+                        //sbStatus = $"Missing";
+                        cellClass = "font-weight-bold text-red";
+                        if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                        {
+                            sbStatus = $"<a onclick=\"RedirectToCreate('{rootURL}/MAIN');\" href=\"#\" class=\"btn btn-sm btn-outline-danger btn-outline-danger-sm\"><i class=\"fas fa-plus-circle\"></i>&nbsp;Create</a>";
+                        }
+                    }
+
+                    if (entry.FeeStatus == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Found)
+                    {
+                        sbStatusFee = $"{entry.SkybillFeeAmount.ToMoney("R")}";
+                        cellClassFee = "font-weight-bold text-green";
+                    }
+                    else if (entry.FeeStatus == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Missing)
+                    {
+                        sbStatusFee = $"Missing";
+                        cellClassFee = "font-weight-bold text-red";
+                        if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                        {
+                            sbStatusFee = $"<a onclick=\"RedirectToCreate('{rootURL}/FEE');\" href=\"#\" class=\"btn btn-sm btn-outline-danger btn-outline-danger-sm\"><i class=\"fas fa-plus-circle\"></i>&nbsp;Create</a>";
+                        }
+                    }
+
+                    if (entry.Vending1Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Found)
+                    {
+                        sbStatusVending1 = $"{entry.Vending1Status.Item2.ToMoney("R")}";
+                        cellClassVending1 = "font-weight-bold text-green";
+                    }
+                    else if (entry.Vending1Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Missing)
+                    {
+                        sbStatusVending1 += $" {entry.Vending1Status.Item2.ToMoney("R")}";
+                        cellClassVending1 = "font-weight-bold text-red";
+                        if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval)
+                            && entry.Vending1Status.Item2 == 0)
+                        {
+                            sbStatusVending1 = $"<a onclick=\"RedirectToCreate('{rootURL}/VENDING1');\" href=\"#\" class=\"btn btn-sm btn-outline-danger btn-outline-danger-sm\"><i class=\"fas fa-plus-circle\"></i>&nbsp;Create</a>";
+                        }
+                    }
+
+                    if (entry.Vending2Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Found)
+                    {
+                        sbStatusVending2 = $"{entry.Vending2Status.Item2.ToMoney("R")}";
+                        cellClassVending2 = "font-weight-bold text-green";
+                    }
+                    else if (entry.Vending2Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Missing)
+                    {
+                        sbStatusVending2 += $" {entry.Vending2Status.Item2.ToMoney("R")}";
+                        cellClassVending2 = "font-weight-bold text-red";
+                        if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval)
+                            && entry.Vending2Status.Item2 == 0)
+                        {
+                            sbStatusVending2 = $"<a onclick=\"RedirectToCreate('{rootURL}/VENDING2');\" href=\"#\" class=\"btn btn-sm btn-outline-danger btn-outline-danger-sm\"><i class=\"fas fa-plus-circle\"></i>&nbsp;Create</a>";
+                        }
+                    }
+
+                    if (entry.Vending3Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Found)
+                    {
+                        sbStatusVending3 = $"{entry.Vending3Status.Item2.ToMoney("R")}";
+                        cellClassVending3 = "font-weight-bold text-green";
+                    }
+                    else if (entry.Vending3Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Missing)
+                    {
+                        sbStatusVending3 += $" {entry.Vending3Status.Item2.ToMoney("R")}";
+                        cellClassVending3 = "font-weight-bold text-red";
+                        if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval)
+                            && entry.Vending3Status.Item2 == 0)
+                        {
+                            sbStatusVending3 = $"<a onclick=\"RedirectToCreate('{rootURL}/VENDING3');\" href=\"#\" class=\"btn btn-sm btn-outline-danger btn-outline-danger-sm\"><i class=\"fas fa-plus-circle\"></i>&nbsp;Create</a>";
+                        }
+                    }
+
+                    if (entry.Vending4Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Found)
+                    {
+                        sbStatusVending4 = $"{entry.Vending4Status.Item2.ToMoney("R")}";
+                        cellClassVending4 = "font-weight-bold text-green";
+                    }
+                    else if (entry.Vending4Status.Item1 == MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_ReceiptLogExceptionsModel.J_Finance_ReceiptLogExceptionsItem.StatusType.Missing)
+                    {
+                        sbStatusVending4 += $" {entry.Vending4Status.Item2.ToMoney("R")}";
+                        cellClassVending4 = "font-weight-bold text-red";
+                        if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.J_Finance_ReceiptLogExceptions, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval)
+                            && entry.Vending4Status.Item2 == 0)
+                        {
+                            sbStatusVending4 = $"<a onclick=\"RedirectToCreate('{rootURL}/VENDING4');\" href=\"#\" class=\"btn btn-sm btn-outline-danger btn-outline-danger-sm\"><i class=\"fas fa-plus-circle\"></i>&nbsp;Create</a>";
+                        }
+                    }
+
+                    <tr class="@Html.Raw(rowClass)">
+                        <td scope="row">@entry.CreateDate.ToDateAndTimeShort()</td>
+                        <td scope="row">@entry.Reference</td>
+                        <td scope="row">@entry.PaymentMethod</td>
+                        <td scope="row">@entry.Amount</td>
+                        <td scope="row">@entry.Reason</td>
+                        <td scope="row">@entry.CustomerNumber</td>
+                        <td scope="row">@entry.FullName</td>
+                        <td scope="row" class="@Html.Raw(cellClass) text-nowrap">@Html.Raw(sbStatus)</td>
+                        <td scope="row" class="@Html.Raw(cellClassFee) text-nowrap text-right">@Html.Raw(sbStatusFee)</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending1) text-nowrap text-right">@Html.Raw(sbStatusVending1)</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending2) text-nowrap text-right">@Html.Raw(sbStatusVending2)</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending3) text-nowrap text-right">@Html.Raw(sbStatusVending3)</td>
+                        <td scope="row" class="@Html.Raw(cellClassVending4) text-nowrap text-right">@Html.Raw(sbStatusVending4)</td>
+                        <td scope="row">@entry.NSSkybillDocumentNo</td>
+                        <td scope="row">@entry.NSPaymentID</td>
+                        <td scope="row">@entry.NSInternalDBID</td>
+                        <td scope="row">
+                            @if (!string.IsNullOrEmpty(entry.SerialNumber))
+                            {
+                                <a href="/operational/changeActiveMeter/@entry.SerialNumber?R=/operational/customer/Customer_Billing" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-alt"></i>&nbsp;Billing</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CustomerNumber").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/J_Finance/J_Finance_ReceiptLog/Search",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+
+        function RedirectToBilling(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=' + encodeURIComponent("/operational/customer/Customer_Billing");
+        }
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/J_Finance/J_Finance_ReceiptLogExceptions?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val();
+        }
+        function RedirectToCreate(url) {
+            $("#loaderContent").css("display", "block");
+                $.get(url)
+                .done(function( data ) {
+                    if (data == 'true') {
+                        alert('Journal successfully posted.');
+                        document.location.reload();
+                    }
+                    else {
+                        $("#loaderContent").css("display", "none");
+                        alert('There was an error posting your Journal.');
+                    }
+                });
+        }
+    </script>
+}

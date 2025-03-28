@@ -1,0 +1,149 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_Metering_Details_VerificationUploadModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_Metering_Details.GetDescription()} - Verification Upload";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Verification successfully uploaded.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Metering Details</a>
+                    &nbsp;
+                    <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Metering Review</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Details" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Metering Details</a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Metering Review</a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <h5>@operationalProvider.CustomerMeterSerial</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            @operationalProvider.CustomerNumber
+                        </div>
+                    </div>
+                </div>
+                <form asp-action="AF_AfroxAdministration_Metering_Details_VerificationUpload" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomerTradingName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Model.CustomerTradingName
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="CustomerAccNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Model.CustomerAccNo
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="MeterSerialNo" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Model.MeterSerialNo
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="FromDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Model.FromDate
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ToDate" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Model.ToDate
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="VerificationPhoto" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="file" class="form-control" asp-for="VerificationPhoto" />
+                                <span asp-validation-for="VerificationPhoto" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Comment" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="Comment"></textarea>
+                                <span asp-validation-for="Comment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-lg btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+    </script>
+}

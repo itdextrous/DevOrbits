@@ -1,0 +1,196 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_OdoReadingExportModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_OdoReadingExport.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Please select a company from the sidebar to see results.</span>
+        }
+        else
+        {
+            if (Model.A02_MirrorMeterAuditing_OdoReadingExportItems.Count == 0)
+            {
+                <span>There are no entries for @operationalProvider.CompanyName</span>
+            }
+            else
+            {
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <div class="row mb-4">
+                            <div class="col">
+                                <a onclick="ExportModelExcel();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-file-excel"></i>&nbsp;Export Results</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-responsive-xl table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="text-left border-table-left">device_id</th>
+                                    <th scope="col" class="text-center border-table">register_source</th>
+                                    <th scope="col" class="text-center border-table">register_scaling</th>
+                                    <th scope="col" class="text-center border-table">register_value</th>
+                                    <th scope="col" class="text-center border-table-right">register_time</th>
+                                    <th scope="col">&nbsp;</th>
+                                    <th scope="col" class="text-center border-table-left">Serial</th>
+                                    <th scope="col" class="text-center border-table">CustomerNo</th>
+                                    <th scope="col" class="text-center border-table">Audit Reading</th>
+                                    <th scope="col" class="text-center border-table">System Reading</th>
+                                    <th scope="col" class="text-center border-table">System Reading</th>
+                                    <th scope="col" class="text-center border-table-right">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.A02_MirrorMeterAuditing_OdoReadingExportItems)
+                                {
+                                    <tr>
+                                        <td scope="col" class="border-table-left">@item.MirrorDevice.DeviceIDLinked</td>
+                                        <td scope="col" class="text-right border-table">180</td>
+                                        <td scope="col" class="text-right border-table">@item.LatestOdo.register_scaling</td>
+                                        <td scope="col" class="text-right border-table">@item.LatestOdo.VirtualOdoReading @item.LatestOdo.unit</td>
+                                        <td scope="col" class="text-right border-table-right">@item.LatestOdo.TimeLogged.ToDateAndTimeShort()</td>
+                                        <td scope="col">
+                                            @switch (item.DeviceType)
+                                            {
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                    <img src="/images/elec-icon-s.png" />
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                    <img src="/images/water-icon-s.png" />
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                    <img src="/images/gas-icon-s.png" />
+                                                    break;
+                                            }
+                                            @item.DeviceType.GetDescription()
+                                        </td>
+                                        <td scope="col" class="text-right border-table-left">@item.MirrorDevice.Serial</td>
+                                        <td scope="col" class="text-right border-table">@item.SkybillCustomerNo</td>
+                                        <td scope="col" class="text-right border-table"><div id="latestReadingOdo_@item.MirrorDevice.Id"><i class="fas fa-spinner"></i></div></td>
+                                        <td scope="col" class="text-right border-table"><div id="verificationReading_@item.MirrorDevice.Id"><i class="fas fa-spinner"></i></div></td>
+                                        <td scope="col" class="text-right border-table"><div id="calculatedDifferenceReading_@item.MirrorDevice.Id"><i class="fas fa-spinner"></i></div></td>
+                                        <!--Click to go to m2m reading page, wrong hour being checked, add customer details-->
+                                        <td scope="col" class="text-right border-table-right">
+                                            <a href="/operational/changeActiveMeter/@(item.MirrorDevice.Serial)?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_M2MMirrorReconReview" class="btn btn-sm btn-outline-primary-sm">
+                                                <i class="fas fa-eye"></i>&nbsp;View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        @if (true@* Model.TotalEntries > Model.EntriesPerPage *@)
+                        {
+                            var prevDisabled = !Model.A02_MirrorMeterAuditing_OdoReadingExportItems.HasPreviousPage ? "disabled" : "";
+                            var nextDisabled = !Model.A02_MirrorMeterAuditing_OdoReadingExportItems.HasNextPage ? "disabled" : "";
+                            <div class="row mt-2">
+                                <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                                    <div class="col-md-auto text-left">
+                                        <a href="#" onclick="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_OdoReadingExportItems.PageIndex - 1));"
+                                           class="btn btn-outline-primary-sm @prevDisabled">
+                                            <i class="fas fa-step-backward"></i>&nbsp;Previous Page
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col text-center">
+                                    @for (int pageNumber = 1; pageNumber <= Model.A02_MirrorMeterAuditing_OdoReadingExportItems.TotalPages; pageNumber++)
+                                    {
+                                        var numberDisabled = Model.A02_MirrorMeterAuditing_OdoReadingExportItems.PageIndex == pageNumber ? "btn-outline-warning disabled" : "btn-outline-primary-sm";
+                                        <a href="#" onclick="RedirectToFilter(@(pageNumber));"
+                                           class="btn btn-sm @numberDisabled">
+                                            @pageNumber
+                                        </a>
+                                    }
+                                </div>
+                                <div class="col-md-auto">
+                                    <select id="EntriesPerPage" class="form-control" onchange="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_OdoReadingExportItems.PageIndex));">
+                                        @if (Model.EntriesPerPage == 100)
+                                        {
+                                            <option value="100" selected="selected">100</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="100">100</option>
+                                        }
+                                        @if (Model.EntriesPerPage == 500)
+                                        {
+                                            <option value="500" selected="selected">500</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="500">500</option>
+                                        }
+                                        @if (Model.EntriesPerPage == 1000)
+                                        {
+                                            <option value="1000" selected="selected">1000</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="1000">1000</option>
+                                        }
+                                        @if (Model.EntriesPerPage == Model.TotalEntries)
+                                        {
+                                            <option value="@Model.TotalEntries" selected="selected">All (@(Model.TotalEntries))</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@Model.TotalEntries">All (@(Model.TotalEntries))</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-auto text-right">
+                                    <a align="left" href="#" onchange="RedirectToFilter(@(Model.A02_MirrorMeterAuditing_OdoReadingExportItems.PageIndex + 1));"
+                                       class="btn btn-outline-primary-sm @nextDisabled">
+                                        <i class="fas fa-step-forward"></i>&nbsp;Next Page
+                                    </a>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?EntriesPerPage=' + $("#EntriesPerPage").val() + '&pageIndex=' + pageIndex;
+        }
+        function ExportModelExcel() {
+            // $("#loaderContent").css("display", "block");
+            window.open('/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_OdoReadingExport_Excel');
+        }
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.A02_MirrorMeterAuditing_OdoReadingExportItems.Where(p => p.LatestOdo != null && p.LatestOdo.TimeLogged.HasValue).Select(p => p.MirrorDevice.Id).ToList())));
+        $(companies).each(function () {
+            PopulateLabelsForUpdate(this);
+        });
+        function PopulateLabelsForUpdate(itemID) {
+            $.post('/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_OdoReadingExport_GetRegisters',
+                {
+                    deviceid: itemID,
+                })
+                .done(function (data) {
+                    $("#latestReadingOdo_" + itemID).html(data.latestReadingOdo);
+                    $("#verificationReading_" + itemID).html(data.verificationReading);
+                    $("#calculatedDifferenceReading_" + itemID).html(data.calculatedDifferenceReading);
+                });
+        }
+    </script>
+}

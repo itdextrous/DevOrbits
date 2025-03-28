@@ -1,0 +1,27 @@
+﻿@model MyVoltage.Models.PaymentViewModels.PaymentResultModel
+
+@{
+    ViewBag.Title = "Payment Result";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div class="paymentMobilePage account_form">
+    <div class="py-4 text-center">
+        @if (Model.PaymentStatus != (int)MyVoltage.Data.PaymentStatusEnum.Approved)
+        {
+            <h2 class="payment_heading" data-bind="text: Reason"></h2>
+            <a href="/rechargemobile" class="btn btn-default mt-4 try_again_btn">I want to try again</a>
+        }
+        else
+        {
+            <h2 class="payment_heading">Your <br>payment was <br>successful!</h2>
+        }
+    </div>
+</div>
+
+@section Scripts
+        {
+<script>
+</script>
+}
+

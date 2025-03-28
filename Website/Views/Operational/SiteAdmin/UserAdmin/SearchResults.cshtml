@@ -1,0 +1,78 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.UserAdminSearchResultsModel
+@{
+    ViewData["Title"] = "User Administration - Search Results";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <a href="/operational/SiteAdmin/UserAdmin/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New User</a>
+            </div>
+            <div class="card-body">
+                <form asp-action="SiteAdmin_UserAdmin" enctype="multipart/form-data">
+                    <div class="row col-12 mb-md-2">Search User to Edit / Delete:</div>
+                    <div class="row col-12 mb-md-2"><input style="width:90%;" type="text" asp-for="SearchString" placeholder="Enter search value here" /></div>
+                    <div class="row col-12 mb-md-2"><button class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</button></div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <table class="table table-responsive-xl table-striped">
+                    <thead>
+                        <tr>
+                            @foreach (System.Data.DataColumn col in Model.SearchResultsTable.Columns)
+                            {
+                                if (col.ColumnName == "Id")
+                                {
+                                    continue;
+                                }
+                                <th scope="col">@col.ColumnName</th>
+                            }
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (System.Data.DataRow dr in Model.SearchResultsTable.Rows)
+                        {
+                            <tr>
+                                @foreach (System.Data.DataColumn col in Model.SearchResultsTable.Columns)
+                                {
+                                    if (col.ColumnName == "Id")
+                                    {
+                                        continue;
+                                    }
+                                    <td scope="col">@dr[col.ColumnName]</td>
+                                }
+                                <td scope="col">
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.UserAdmin, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="/operational/SiteAdmin/UserAdmin/Edit/@dr["Id"]" title="Edit @dr["Email"]">Edit</a>
+                                        <text>&nbsp;|&nbsp;</text>
+                                    }
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.UserAdmin, MyVoltage.Data.SecureAreaActionEnum.Delete))
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="ConfirmDelete('@dr["Id"]','@dr["Email"]','@Model.SearchString');" title="Delete @dr["Email"]">Delete</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ConfirmDelete(userID, email, searchstring) {
+            if (confirm('Are you sure you want to delete this user? (' + email + ')')) {
+                document.location.href = '/operational/SiteAdmin/UserAdmin/Delete/' + userID + '/' + searchstring;
+            }
+        }
+    </script>
+}

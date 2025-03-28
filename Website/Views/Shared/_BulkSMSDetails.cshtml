@@ -1,0 +1,26 @@
+﻿@using MyVoltage.Models.BulkSMSResponse
+@model List<BulkSMS>
+
+<h5>BulkSMS Details</h5>
+@if (Model.Count > 0)
+{
+    @foreach (var m in Model)
+    {
+        var date = Convert.ToDateTime(m.submission.date);
+
+        <span>Type: </span><span><b>@m.type</b></span><br />
+        <span>To: </span><span><b>@m.to</b></span><br />
+        <span>Body: </span><span><b>@m.body</b></span><br />
+        <span>Date send: </span><span><b>@date.ToString("ddd, dd MMM yyy HH:mm:ss")</b></span><br />
+        <span>Status: </span><span><b>@m.status.type</b></span><br />
+        <hr />
+    }
+}
+else
+{
+    <span><b>No sms details found</b></span>
+}
+
+
+
+

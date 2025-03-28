@@ -1,0 +1,230 @@
+@inject MyVoltage.Services.CustomerProvider customerProvider
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.Customer.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.Customer_AccountStatement.GetDescription()}";
+}
+
+@*@{
+        await Html.RenderPartialAsync("customerRecharge");
+    }*@
+
+<div class="row mb-4">
+    <div class="col">
+
+            <div class="row mb-4">
+                <div class="col">
+                    @if (string.IsNullOrEmpty(customerProvider.CustomerNumber))
+                    {
+                        <div>Select customer for individual TAX Invoice...</div>
+                    }
+                    else
+                    {
+                        <div class="card p-md-1 mv-gradient">
+                            <div class="card-header">
+                                <h4>TAX Invoice</h4>
+                            </div>
+                            <div class="card-body bg-white">
+                                <div class="row mt-2 mb-2">
+                                    <div class="col">Year</div>
+                                    <div class="col">
+                                        <select id="yearDropDownTI" class="form-control">
+                                            @for (int i = 0; i > -2; i--)
+                                            {
+                                                <option value="@DateTime.Now.AddYears(i).Year">@(DateTime.Now.AddYears(i).ToString("yyyy"))</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col">Month</div>
+                                    <div class="col">
+                                        <select id="monthDropDownTI" class="form-control">
+                                            @for (int i = 1; i <= 12; i++)
+                                            {
+                                                <option value="@i">@(new System.DateTime(DateTime.Now.Year, i, 1).ToString("MMMM"))</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col">Email</div>
+                                    <div class="col">
+                                        <input id="emailTxtTI" type="text" class="form-control" value="@userManager.GetEmailAsync(userManager.GetUserAsync(User).Result).Result" />
+                                    </div>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col">Report Type</div>
+                                    <div class="col">
+                                        <select id="statementTypeDropDownTI" class="form-control">
+                                            <option value="Download">Download</option>
+                                            <option value="Email">Email</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="row mt-2 mb-2">
+                                    <div class="col text-right">
+                                        <a id="getReportBtnTI" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;@customerProvider.CustomerNumber TAX Invoice</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+
+        <div class="row mb-4">
+            <div class="col">
+                @if (string.IsNullOrEmpty(customerProvider.CustomerNumber))
+                {
+                    <div>Select customer for individual statements...</div>
+                }
+                else
+                {
+                    <div class="card p-md-1 mv-gradient">
+                        <div class="card-header">
+                            <h4>Customer Account Statement</h4>
+                        </div>
+                        <div class="card-body bg-white">
+                            <div class="row mt-2 mb-2">
+                                <div class="col">Year</div>
+                                <div class="col">
+                                    <select id="yearDropDown" class="form-control">
+                                        @for (int i = 0; i > -2; i--)
+                                        {
+                                            <option value="@DateTime.Now.AddYears(i).Year">@(DateTime.Now.AddYears(i).ToString("yyyy"))</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">Month</div>
+                                <div class="col">
+                                    <select id="monthDropDown" class="form-control">
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            <option value="@i">@(new System.DateTime(DateTime.Now.Year, i, 1).ToString("MMMM"))</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">Email</div>
+                                <div class="col">
+                                    <input id="emailTxt" type="text" class="form-control" value="@userManager.GetEmailAsync(userManager.GetUserAsync(User).Result).Result" />
+                                </div>
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <div class="col">Report Type</div>
+                                <div class="col">
+                                    <select id="statementTypeDropDown" class="form-control">
+                                        <option value="Download">Download</option>
+                                        <option value="Email">Email</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="row mt-2 mb-2">
+                                <div class="col text-right">
+                                    <a id="getReportBtn" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;@customerProvider.CustomerNumber Account Statement</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#getReportBtn").click(function (e) {
+            if ($("#emailTxt").val() == '' && $("#statementTypeDropDown").val() == 'Email') {
+                alert('Email address missing.');
+                return;
+            }
+            $("#loaderContent").css("display", "block");
+
+            if ($("#statementTypeDropDown").val() == 'Email') {
+
+                $.get('/Customer_AccountStatement_Email/' + $("#yearDropDown").val() + '/' + $("#monthDropDown").val() + '/' + $("#emailTxt").val(), function (data, status) {
+                    if (data == "false") {
+                        alert('There was a problem generating invoice for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                    else {
+                        alert('Email sent for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                }).done(function() {
+                    $("#loaderContent").css("display", "none");
+                });
+
+            }
+            else {
+                $("#loaderContent").css("display", "none");
+                window.open('/Customer_AccountStatement_Download/' + $("#yearDropDown").val() + '_' + $("#monthDropDown").val() + '.xlsx');
+                return false;
+                $.fileDownload('/Customer_AccountStatement_Download/' + $("#yearDropDown").val() + '_' + $("#monthDropDown").val() + '.xlsx', {
+                    successCallback: function (url) {
+                        document.location.href = '/Customer_AccountStatement';
+                    },
+                    failCallback: function (html, url) {
+                        alert('There was a problem downloading invoice for ' + $("#yearDropDown").val() + '-' + $("#monthDropDown").val());
+                    }
+                });
+                $("#loaderContent").css("display", "none");
+                return false;
+            }
+
+
+        });
+
+        $("#getReportBtnTI").click(function (e) {
+            if ($("#emailTxtTI").val() == '' && $("#statementTypeDropDownTI").val() == 'Email') {
+                alert('Email address missing.');
+                return;
+            }
+            $("#loaderContent").css("display", "block");
+
+            if ($("#statementTypeDropDownTI").val() == 'Email') {
+
+                $.get('/Customer_TaxInvoice_Email/' + $("#yearDropDownTI").val() + '/' + $("#monthDropDownTI").val() + '/' + $("#emailTxtTI").val(), function (data, status) {
+                    if (data == "false") {
+                        alert('There was a problem generating invoice for ' + $("#yearDropDownTI").val() + '-' + $("#monthDropDownTI").val());
+                    }
+                    else {
+                        alert('Email sent for ' + $("#yearDropDownTI").val() + '-' + $("#monthDropDownTI").val());
+                    }
+                }).done(function() {
+                    $("#loaderContent").css("display", "none");
+                });
+
+            }
+            else {
+                $("#loaderContent").css("display", "none");
+                window.open('/Customer_TaxInvoice_Download/' + $("#yearDropDownTI").val() + '_' + $("#monthDropDownTI").val() + '.xlsx');
+                return false;
+                $.fileDownload('/Customer_TaxInvoice_Download/' + $("#yearDropDownTI").val() + '_' + $("#monthDropDownTI").val() + '.xlsx', {
+                    successCallback: function (url) {
+                        document.location.href = '/Customer_AccountStatement';
+                    },
+                    failCallback: function (html, url) {
+                        alert('There was a problem downloading invoice for ' + $("#yearDropDownTI").val() + '-' + $("#monthDropDownTI").val());
+                    }
+                });
+                $("#loaderContent").css("display", "none");
+                return false;
+            }
+
+
+        });
+    </script>
+}

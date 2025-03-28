@@ -1,0 +1,47 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A6_011_Occupancy_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_OccupancySummary.GetDescription() Details</h5>
+</div>
+@if (Model.A6_011_Occupancy_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Customers Count</th>
+                <th scope="col">Customers Checked</th>
+                <th scope="col">Customers Not Checked</th>
+                <th scope="col">Customers Checked Too Long Ago</th>
+                <th scope="col">Date Last Checked</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A6_011_Occupancy_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.Name</td>
+                    <td scope="col">@item.Status</td>
+                    <td scope="col">@item.CustomersCount</td>
+                    <td scope="col">@item.CustomersCheckedCount</td>
+                    <td scope="col">@item.CustomersNotCheckedCount</td>
+                    <td scope="col">@item.CustomersCheckedTooLongAgoCount</td>
+                    <td scope="col">@item.DateLastChecked</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

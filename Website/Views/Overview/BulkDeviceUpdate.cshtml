@@ -1,0 +1,36 @@
+﻿@model MyVoltage.Models.MeterViewModels.BulkDeviceUpdateModel
+
+@{
+    ViewData["Title"] = "Device Name Bulk Update";
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>Device IDs&nbsp;<a href="#" title="Device IDs">?</a></span>
+                <textarea asp-for="DeviceIDs" class="form-control" type="" title="Device IDs"></textarea>
+            </div>
+            <div class="col">
+                <span asp-validation-for="NewDeviceName">New Device Name</span>
+                <input asp-for="NewDeviceName" class="form-control" type="text" />
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Change Names</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                <span class="text-red">@Model.ErrorMessage</span>
+            </div>
+        }
+    </div>
+
+}

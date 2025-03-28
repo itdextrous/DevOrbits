@@ -1,0 +1,195 @@
+@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_TokenSenderModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.N_TechnicianToolkit_TokenSender.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider opProv;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<form asp-action="N_TechnicianToolkit_TokenSender" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <h5>Send a token</h5>
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-2 mt-2">
+                        <div class="col"><label asp-for="Serial" class="control-label"></label>:</div>
+                        <div class="col">
+                            <input class="form-control" id="Serial_Search" asp-for="Serial" />
+                            <span asp-validation-for="Serial" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-2 mt-2">
+                        <div class="col"><label asp-for="Token" class="control-label"></label>:</div>
+                        <div class="col">
+                            <input class="form-control" asp-for="Token" />
+                            <span asp-validation-for="Token" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-2 mt-2">
+                        <div class="col"><label asp-for="TokenTypes" class="control-label"></label>:</div>
+                        <div class="col">
+                            @Html.DropDownList("TokenType", Model.TokenTypes, new { @class = "form-control" })
+                            <span asp-validation-for="TokenTypes" class="text-red"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <div class="row mb-2 mt-2">
+                        <div class="col-12 text-right">
+                            <input type="submit" value="Send Token to Meter" class="btn btn-outline-primary-sm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    <h5>Connect a meter</h5>
+                </div>
+                <div class="card-body">
+                    @if (string.IsNullOrEmpty(opProv.CustomerMeterSerial))
+                    {
+                        <span>Select a meter to connect first...</span>
+                    }
+                    else
+                    {
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer No</th>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Account Type</th>
+                                    <th scope="col">Device Serial</th>
+                                    <th scope="col">Device Status</th>
+                                    <th scope="col">Contactor Status</th>
+                                    <th scope="col">Contactor Installed</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itemC in Model.A07_CreditControlAndNotifierProcess_MeterContactorStateItems)
+                                {
+                                    string rowclass = "";
+                                    string cellClass = "";
+                                    if (itemC.Device.IsContactorInstalled.HasValue && itemC.Device.IsContactorInstalled.Value)
+                                    {
+                                        if (itemC.IsContactorConnected.HasValue && itemC.IsContactorConnected.Value)
+                                        {
+                                            rowclass = " class=\"table-success\"";
+                                            cellClass = " class=\"text-green font-weight-bold\"";
+                                        }
+                                        else
+                                        {
+                                            rowclass = " class=\"table-danger\"";
+                                            cellClass = " class=\"text-red font-weight-bold\"";
+                                        }
+                                    }
+                                    <tr title="@itemC.SkybillCustomer.Customer_No" @Html.Raw(rowclass)>
+                                        <td scope="col">@itemC.SkybillCustomer.Customer_No</td>
+                                        <td scope="col">@itemC.SkybillCustomer.Customer_Name</td>
+                                        <td scope="col">@itemC.SkybillCustomer.AccountType</td>
+                                        <td scope="col">
+                                            @switch (itemC.Device.MeterType)
+                                            {
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                    <img src="~/images/elec-icon-s.png" />
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                    <img src="~/images/water-icon-s.png" />
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                    <img src="~/images/gas-icon-s.png" />
+                                                    break;
+                                            }
+                                            @itemC.Device.Serial
+                                        </td>
+                                        <td scope="col">@(itemC.Device.ActiveStatusID.HasValue ? ((MyVoltage.Data.ActiveStatus)itemC.Device.ActiveStatusID.Value).GetDescription() : "-")</td>
+                                        <td scope="col">@(itemC.IsContactorConnected.ToContactorState())</td>
+                                        <td scope="col">@(itemC.Device.IsContactorInstalled.ToBoolean())</td>
+                                        <td scope="col" class="text-nowrap">
+                                            @if (itemC.Device.IsContactorInstalled.HasValue && itemC.Device.IsContactorInstalled.Value && itemC.IsContactorConnected.HasValue)
+                                            {
+                                                if (itemC.IsContactorConnected.Value)
+                                                {
+                                                    <a onclick="DoConnect('0', '@(itemC.M2MDevice.id)', '@(itemC.M2MDevice.mapping.port)', '@(itemC.M2MDevice.type.id)', '@(itemC.M2MDevice.serial)', '@(itemC.Device.DeviceAPIIDValue)');" href="#" class="btn btn-sm btn-outline-danger-sm">Disconnect</a>
+                                                }
+                                                else
+                                                {
+                                                    <a onclick="DoConnect('1', '@(itemC.M2MDevice.id)', '@(itemC.M2MDevice.mapping.port)', '@(itemC.M2MDevice.type.id)', '@(itemC.M2MDevice.serial)', '@(itemC.Device.DeviceAPIIDValue)');" href="#" class="btn btn-sm btn-outline-success">Connect</a>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/operational/N_TechnicianToolkit/N_TechnicianToolkit_NewlyAddedDevices/TokenSender/searchmeters",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        });
+
+        function DoConnect(actionId, deviceId, portNum, typeID, serial, deviceAPIID) {
+            $("#loaderContent").css("display", "block");
+
+            $.get("/operational/N_TechnicianToolkit/N_TechnicianToolkit_TokenSender/connect/" + actionId + "/" + deviceId + "/" + portNum + "/" + typeID + "/" + serial + "/" + deviceAPIID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

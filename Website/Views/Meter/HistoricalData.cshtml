@@ -1,0 +1,1194 @@
+@model MyVoltage.Models.MeterViewModels.HistoricalDataModel
+@inject MyVoltage.Services.CustomerProvider customerProvider
+@{
+    ViewData["Title"] = "Historical Data Summary";
+}
+
+@{
+    await Html.RenderPartialAsync("customerRecharge");
+}
+
+<div class="historic-data mt-0 mt-md-5 mb-5">
+    <div class="row dash-top">
+        <div class="col">
+            <h3>@ViewData["Title"]</h3>
+        </div>
+        <div class="col text-md-right balance">
+            <h4>Balance: <span class="text-primary">@customerProvider.GetBalance()</span></h4>
+            @if (customerProvider.AccountType == 2)
+            {
+                <h4>Units: <span class="text-primary">@customerProvider.GetRemainingCredit()</span></h4>
+            }
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4 class="text-uppercase">Overall View</h4>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-pills mb-3" id="pills-overall-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="pills-monthly-tab" data-toggle="pill" href="#overall-monthly" role="tab" aria-controls="pills-home" aria-selected="true"><span>Monthly Usage</span></a>
+                </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent-overall">
+                <div class="tab-pane fade show active" id="overall-monthly" role="tabpanel" aria-labelledby="overall-monthly">
+                    <div class="row my-4">
+                        <div class="col" style="height: 150px">
+                            <canvas id="monthlyUsage"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="overall-expenses" role="tabpanel" aria-labelledby="overall-expenses">
+                    <div class="row my-4">
+                        <div class="col" style="height: 150px">
+                            <canvas id="lastMonthTotals"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-responsive-sm table-borderless table-hover historical-data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">&nbsp;</th>
+                        <th scope="col">&nbsp;</th>
+                        <!--<th scope="col">Rent</th>-->
+                        @if (@Model.ElecTotals != null)
+                        {
+                            <th scope="col" class="text-light-orange"><img src="/images/elec-icon-s.png" alt=""> Electricity</th>
+
+                        }
+
+                        @if (@Model.WaterTotals != null)
+                        {
+                            <th scope="col" class="text-blue"><img src="/images/water-icon-s.png" alt=""> Water</th>
+                        }
+
+                        @if (@Model.GasTotals != null)
+                        {
+                            <th scope="col" class="text-secondary"><img src="/images/gas-icon-s.png" alt=""> Gas</th>
+                        }
+
+                        @if (@Model.RentTotals != null)
+                        {
+                            <th scope="col" class="text-green"><img src="~/images/home-icon-s.png" alt=""> Rent</th>
+                        }
+                        <th scope="col" class="text-black">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        Boolean yearShown = false;
+                        Boolean lasYearShown = false;
+                    }
+                    @for (int i = @Model.Months.Count - 1; i >= 0; i--)
+                    {
+
+                        var n = 12 - DateTime.Now.Month;
+                        var monthDiff = @Model.Months.Count - n - 1;
+
+                        if (i > monthDiff)
+                        {
+                            continue;
+                        }
+
+                        string year = "";
+
+                        // = (i == 11 || i == monthDiff) ?  : "";
+
+                        Decimal total = 0;
+
+                        if (@Model.ElecTotals == null && @Model.WaterTotals == null && @Model.RentTotals == null && @Model.GasTotals == null)
+                        {
+                            continue;
+                        }
+
+                        if (@Model.ElecTotals != null && @Model.WaterTotals != null && @Model.RentTotals != null && @Model.GasTotals != null)
+                        {
+                            if (@Model.ElecTotals[i].ToString("N0").Equals("0") && @Model.WaterTotals[i].ToString("N0").Equals("0") && @Model.RentTotals[i].ToString("N0").Equals("0") && @Model.GasTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+                            total = @Model.ElecTotals[i] + @Model.WaterTotals[i] + Model.RentTotals[i] + Model.GasTotals[i];
+                        }
+                        else if (@Model.ElecTotals != null && @Model.RentTotals != null && @Model.GasTotals != null)
+                        {
+                            if (@Model.ElecTotals[i].ToString("N0").Equals("0") && @Model.RentTotals[i].ToString("N0").Equals("0") && @Model.GasTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+
+                            total = @Model.ElecTotals[i] + Model.RentTotals[i] + Model.GasTotals[i];
+                        }
+                        else if (@Model.WaterTotals != null && @Model.RentTotals != null && @Model.GasTotals != null)
+                        {
+                            if (@Model.WaterTotals[i].ToString("N0").Equals("0") && @Model.RentTotals[i].ToString("N0").Equals("0") && @Model.GasTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+                            total = @Model.WaterTotals[i] + Model.RentTotals[i] + Model.GasTotals[i];
+                        }
+                        else if (@Model.WaterTotals != null && @Model.ElecTotals != null && @Model.GasTotals != null)
+                        {
+                            if (@Model.WaterTotals[i].ToString("N0").Equals("0") && @Model.ElecTotals[i].ToString("N0").Equals("0") && @Model.ElecTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+
+                            total = @Model.WaterTotals[i] + Model.ElecTotals[i] + Model.GasTotals[i];
+                        }
+                        else if (@Model.WaterTotals != null && @Model.ElecTotals != null)
+                        {
+                            if (@Model.WaterTotals[i].ToString("N0").Equals("0") && @Model.ElecTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+
+                            total = @Model.WaterTotals[i] + Model.ElecTotals[i];
+                        }
+                        else if (@Model.ElecTotals != null)
+                        {
+                            if (@Model.ElecTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+                            total = @Model.ElecTotals[i];
+                        }
+                        else if (@Model.WaterTotals != null)
+                        {
+                            if (@Model.WaterTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+                            total = @Model.WaterTotals[i];
+                        }
+                        else if (@Model.GasTotals != null)
+                        {
+                            if (@Model.GasTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+                            total = @Model.GasTotals[i];
+                        }
+                        else if (@Model.RentTotals != null)
+                        {
+                            if (@Model.RentTotals[i].ToString("N0").Equals("0"))
+                            {
+                                continue;
+                            }
+                            total = @Model.RentTotals[i];
+                        }
+
+                        if (i <= 12 && !yearShown)
+                        {
+                            year = @Model.Months[i].ToString("yyyy");
+                            yearShown = true;
+                        }
+
+                        if (12 < i && !lasYearShown)
+                        {
+                            year = @Model.Months[i].ToString("yyyy");
+                            lasYearShown = true;
+                        }
+
+                        <tr>
+                            <th>@year </th>
+                            <td>@Model.Months[i].ToString("MMMM")</td>
+                            @if (@Model.ElecTotals != null)
+                            {
+                                <td>R @Model.ElecTotals[i].ToString("N0")</td>
+                            }
+                            @if (@Model.WaterTotals != null)
+                            {
+                                <td>R @Model.WaterTotals[i].ToString("N0")</td>
+                            }
+                            @if (@Model.GasTotals != null)
+                            {
+                                <td>R @Model.GasTotals[i].ToString("N0")</td>
+                            }
+                            @if (@Model.RentTotals != null)
+                            {
+                                <td>R @Model.RentTotals[i].ToString("N0")</td>
+                            }
+                            <td>R @total.ToString("N0")</td>
+                        </tr>
+                        @if (i == 13)
+                        {
+                            @Html.Raw("</tbody>")
+                            @Html.Raw("<tbody>")
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    @for (var y = 0; y < @Model.MeterData.Count; y++)
+    {
+        if (@Model.MeterData[y].MeterType == "elec")
+        {
+            <div class="card mt-4 dash-block elec">
+                <span class="icon"><span></span></span>
+                <div class="card-header">
+                    <h4 class="text-uppercase">Electricity</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-pills mb-3" id="pills-elec-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-cost-tab" data-toggle="pill" href="#elec-cost" role="tab" aria-controls="pills-home" aria-selected="true"><span>Cost</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-kwh-tab" data-toggle="pill" href="#elec-kwh" role="tab" aria-controls="pills-profile" aria-selected="false"><span>Used KWH</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-avg-tab" data-toggle="pill" href="#elec-avg" role="tab" aria-controls="pills-contact" aria-selected="false"><span>Average Rate</span></a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent-2">
+                        <div class="tab-pane fade show active" id="elec-cost" role="tabpanel" aria-labelledby="elec-cost">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="elecCostChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="elec-kwh" role="tabpanel" aria-labelledby="elec-kwh">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="elecUsageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="elec-avg" role="tabpanel" aria-labelledby="elec-avg">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="elecAvgChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-responsive-sm table-borderless table-hover data-table-detailed">
+                        <thead>
+                            <tr class="th-detail">
+                                <td>&nbsp;</td>
+                                <td colspan="3">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">Avg Rate per kWh</td>
+                            </tr>
+                            <tr class="th-heading">
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">Change</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</th>
+                                <th scope="col">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < 12; i++)
+                            {
+                                Decimal f = @Model.MeterData[y].Totals[i + 13] - @Model.MeterData[y].Totals[i];
+                                string sign = @Math.Sign(@f) == 1 ? "+" : "-";
+                                string increase = @sign + "R" + Math.Abs(@f).ToString("N0");
+
+                                if (@Model.MeterData[y].Totals[i].ToString("N0").Equals("0") && @Model.MeterData[y].Totals[i + 13].ToString("N0").Equals("0") &&
+                                    @Model.MeterData[y].Usages[i].ToString("N0").Equals("0") && @Model.MeterData[y].Usages[i + 13].ToString("N0").Equals("0"))
+                                {
+                                    continue;
+                                }
+                                <tr>
+                                    <th>@Model.MeterData[y].Months[i].ToString("MMMM")</th>
+                                    <td>R @Model.MeterData[y].Totals[i + 13].ToString("N0")</td>
+                                    <td>@Model.MeterData[y].Usages[i + 13].ToString("N0")</td>
+                                    <td>@increase</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Totals[i].ToString("N0")</td>
+                                    <td>@Model.MeterData[y].Usages[i].ToString("N0")</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Avgs[i + 13].ToString("n2")</td>
+                                    <td>R @Model.MeterData[y].Avgs[i].ToString("n2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        }
+        else if (@Model.MeterData[y].MeterType == "water")
+        {
+            <div class="card dash-block water mt-4">
+                <span class="icon"><span></span></span>
+                <div class="card-header">
+                    <h4 class="text-uppercase">Water</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-pills mb-3" id="pills-water-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-cost-tab" data-toggle="pill" href="#water-cost" role="tab" aria-controls="pills-home" aria-selected="true"><span>Cost</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-kl-tab" data-toggle="pill" href="#used-kl" role="tab" aria-controls="pills-profile" aria-selected="false"><span>Used KL</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-kl-avg-tab" data-toggle="pill" href="#water-avg" role="tab" aria-controls="pills-contact" aria-selected="false"><span>Average</span></a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent-3">
+                        <div class="tab-pane fade show active" id="water-cost" role="tabpanel" aria-labelledby="water-cost">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="waterCostChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="used-kl" role="tabpanel" aria-labelledby="used-kl">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="waterUsageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="water-avg" role="tabpanel" aria-labelledby="water-avg">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="waterAvgChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <table class="table table-responsive-sm table-borderless table-hover data-table-detailed">
+                        <thead>
+                            <tr class="th-detail">
+                                <td>&nbsp;</td>
+                                <td colspan="3">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">Avg Rate per KL</td>
+                            </tr>
+                            <tr class="th-heading">
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</th>
+                                <th scope="col">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < 12; i++)
+                            {
+                                Decimal a = @Model.MeterData[y].Totals[i + 13] - @Model.MeterData[y].Totals[i];
+                                string sign = @Math.Sign(@a) == 1 ? "+" : "-";
+                                string increase = @sign + "R" + Math.Abs(@a).ToString("N0");
+
+
+                                if (@Model.MeterData[y].Totals[i].ToString("N0").Equals("0") && @Model.MeterData[y].Totals[i + 13].ToString("N0").Equals("0") &&
+                                      @Model.MeterData[y].Usages[i].ToString("N0").Equals("0") && @Model.MeterData[y].Usages[i + 13].ToString("N0").Equals("0"))
+                                {
+                                    continue;
+                                }
+
+                                <tr>
+                                    <th>@Model.MeterData[y].Months[i].ToString("MMMM")</th>
+                                    <td>R @Model.MeterData[y].Totals[i + 13].ToString("N0")</td>
+                                    <td>@Model.MeterData[y].Usages[i + 13].ToString("N0")</td>
+                                    <td>@increase</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Totals[i].ToString("N0")</td>
+                                    <td>@Model.MeterData[y].Usages[i].ToString("N0")</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Avgs[i + 13].ToString("n2")</td>
+                                    <td>R @Model.MeterData[y].Avgs[i].ToString("n2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else if (@Model.MeterData[y].MeterType == "gas")
+        {
+            <div class="card dash-block gas mt-4">
+                <span class="icon"><span></span></span>
+                <div class="card-header">
+                    <h4 class="text-uppercase">Gas</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-pills mb-3" id="pills-gas-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-cost-tab" data-toggle="pill" href="#gascost" role="tab" aria-controls="pills-home" aria-selected="true"><span>Cost</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-m3-tab" data-toggle="pill" href="#used-m3" role="tab" aria-controls="pills-profile" aria-selected="false"><span>Used m3</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-m3-avg-tab" data-toggle="pill" href="#gas-avg" role="tab" aria-controls="pills-contact" aria-selected="false"><span>Average</span></a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent-3">
+                        <div class="tab-pane fade show active" id="gas-cost" role="tabpanel" aria-labelledby="gas-cost">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="gasCostChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="used-m3" role="tabpanel" aria-labelledby="used-m3">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="gasUsageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="gas-avg" role="tabpanel" aria-labelledby="gas-avg">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="gasAvgChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-responsive-sm table-borderless table-hover data-table-detailed">
+                        <thead>
+                            <tr class="th-detail">
+                                <td>&nbsp;</td>
+                                <td colspan="3">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">Avg Rate per m3</td>
+                            </tr>
+                            <tr class="th-heading">
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</th>
+                                <th scope="col">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < 12; i++)
+                            {
+                                Decimal a = @Model.MeterData[y].Totals[i + 13] - @Model.MeterData[y].Totals[i];
+                                string sign = @Math.Sign(@a) == 1 ? "+" : "-";
+                                string increase = @sign + "R" + Math.Abs(@a).ToString("N0");
+
+
+                                if (@Model.MeterData[y].Totals[i].ToString("N0").Equals("0") && @Model.MeterData[y].Totals[i + 13].ToString("N0").Equals("0") &&
+                                      @Model.MeterData[y].Usages[i].ToString("N0").Equals("0") && @Model.MeterData[y].Usages[i + 13].ToString("N0").Equals("0"))
+                                {
+                                    continue;
+                                }
+
+                                <tr>
+                                    <th>@Model.MeterData[y].Months[i].ToString("MMMM")</th>
+                                    <td>R @Model.MeterData[y].Totals[i + 13].ToString("N0")</td>
+                                    <td>@Model.MeterData[y].Usages[i + 13].ToString("N0")</td>
+                                    <td>@increase</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Totals[i].ToString("N0")</td>
+                                    <td>@Model.MeterData[y].Usages[i].ToString("N0")</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Avgs[i + 13].ToString("n2")</td>
+                                    <td>R @Model.MeterData[y].Avgs[i].ToString("n2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else if (@Model.MeterData[y].MeterType == "rent")
+        {
+            <div class="card dash-block home">
+                <span class="icon"><span></span></span>
+                <div class="card-header">
+                    <h4 class="text-uppercase">Rent</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-pills mb-3" id="pills-rent-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-cost-tab" data-toggle="pill" href="#rent-cost" role="tab" aria-controls="pills-home" aria-selected="true"><span>Cost</span></a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent-3">
+                        <div class="tab-pane fade show active" id="rent-cost" role="tabpanel" aria-labelledby="rent-cost">
+                            <div class="row my-4">
+                                <div class="col" style="height: 150px">
+                                    <canvas id="rentCostChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-responsive-sm table-borderless table-hover data-table-detailed">
+                        <thead>
+                            <tr class="th-detail">
+                                <td>&nbsp;</td>
+                                <td colspan="3">@Model.Months[Model.Months.Count - 1].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                                <td colspan="2">@Model.Months[Model.Months.Count - 13].ToString("yyyy")</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr class="th-heading">
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">&nbsp;</th>
+
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">&nbsp;</th>
+                                <th scope="col">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < 12; i++)
+                            {
+                                string increase = "";
+
+                                try
+                                {
+                                    Decimal a = @Model.MeterData[y].Totals[i + 13] - @Model.MeterData[y].Totals[i];
+                                    string sign = @Math.Sign(@a) == 1 ? "+" : "-";
+                                    increase = @sign + "R" + Math.Abs(@a).ToString("N0");
+                                }
+                                catch
+                                {
+                                    continue;
+                                }
+
+                                if (@Model.MeterData[y].Totals[i].ToString("N0").Equals("0")
+                                    && @Model.MeterData[y].Totals[i + 13].ToString("N0").Equals("0"))
+                                {
+                                    continue;
+                                }
+
+                                <tr>
+                                    <th>@Model.MeterData[y].Months[i].ToString("MMMM")</th>
+                                    <td>R @Model.MeterData[y].Totals[i + 13].ToString("N0")</td>
+                                    <td>&nbsp;</td>
+                                    @*<td>@Model.MeterData[y].Usages[i + 12].ToString("N2")</td>*@
+                                    <td>@increase</td>
+                                    <td>&nbsp;</td>
+                                    <td>R @Model.MeterData[y].Totals[i].ToString("N0")</td>
+                                    @*<td>@Model.MeterData[y].Usages[i].ToString("N2")</td>*@
+                                    <td>&nbsp;</td>
+                                    @*<td>@Model.MeterData[y].Avgs[i + 13].ToString("n2")</td>
+                                        <td>@Model.MeterData[y].Avgs[i].ToString("n2")</td>*@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>
+<a href="/recharge">
+    <div class="top-up-mobile d-block d-md-none">
+        <span><i class="fas fa-plus-circle"></i> Recharge</span>
+    </div>
+</a>
+
+@section Scripts {
+    <script src="/js/Chart.bundle.min.js"></script>
+    <script src="~/js/chart.utils.js"></script>
+    <!--Temporary solution to remove the gradient bg after logged in. -->
+    <script>
+        $(function cleanBody()
+        {
+            var body = $('body');
+
+            if (body.is('.mv-gradient'))
+            {
+                body.removeClass('mv-gradient');
+            } else
+            {
+                setTimeout(cleanBody, 500);
+            }
+        });
+
+        var waterColor = 'rgb(65,105,225)'
+        var electrictyColor = 'rgb(255,221,120)'
+        var rentColor = 'rgb(32,202,58)'
+        var gasColor = 'rgb(128,128,128)'
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+
+        var historicalDataModel = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        var config = {
+            type: 'line',
+            stacked: false,
+            data: {
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'kWh'
+                }]
+                ,
+                labels: null
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false,
+                    text: 'Main Colours'
+                },
+                onClick: function (e)
+                {
+                    var element = this.getElementAtEvent(e);
+
+                    // changes only the color of the active object
+                    //this.active[0]._chart.config.data.datasets[0].backgroundColor = "red";
+
+                    if (element.length > 0)
+                    {
+                        var dataset = this.active[0]._chart.config.data.datasets[0];
+
+                        var url = "/usage/" + dataset.MeterNumber + "/" + dataset.Years[element[0]._index] + "/" + dataset.Months[element[0]._index]
+
+                        window.location.href = url;
+                    }
+                },
+
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)'
+                        },
+                        position: 'right',
+                        autoSkip: false,
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 1,
+                            zeroLineWidth: 0
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: function (label, index, labels)
+                            {
+                                label = parseFloat(label)
+
+                                if (Math.max.apply(Math, this.ticks) <= 5)
+                                {
+                                    label = toFixed(label, 2)
+                                }
+                                else
+                                {
+                                    label = toFixed(label, 0)
+                                }
+
+                                return numberWithCommas(label)
+                            },
+                        },
+                        position: 'right',
+                        id: "y-axis-0",
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    }]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+            },
+           // plugins: [{
+                /* Adjust axis labelling font size according to chart size */
+          //      beforeDraw: function (c)
+          //      {
+         //           var chartWidth = c.chart.width;
+         //           var size = chartWidth * 1 / 115;
+       //             c.scales['x-axis-0'].options.ticks.minor.fontSize = size;
+        //        }
+        //    }],
+        };
+
+        function loadMothlyUsage()
+        {
+            $.get('/historicaldata/monthlyUsage',
+                function (data)
+                {
+                    var model = data
+                    var monthlyUsageConfig = $.extend(true, {}, config);
+                    var monthlyUsagelabels = []
+                    monthlyUsageConfig.data.datasets = [];
+                    var dataSetCount = 0;
+
+                    for (var i = 0; i < model.Months.length; i++)
+                    {
+                        var mydate = new Date(model.Months[i].substring(0, 10));
+                        monthlyUsagelabels.push(monthNames[mydate.getMonth()] + " " + mydate.getFullYear())
+                    }
+
+                    if (model.ElecTotals !== null)
+                    {
+                        monthlyUsageConfig.data.datasets.push({
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 0,
+                            label: ''
+                        });
+
+                        monthlyUsageConfig.data.datasets[dataSetCount].pointBackgroundColor = [];
+
+                        for (var i = 0; i < model.Months.length; i++)
+                        {
+                            monthlyUsageConfig.data.datasets[dataSetCount].data.push(toFixed(model.ElecUsages[i], 2))
+                            monthlyUsageConfig.data.datasets[dataSetCount].backgroundColor.push(electrictyColor);
+                            monthlyUsageConfig.data.datasets[dataSetCount].pointBackgroundColor.push(electrictyColor);
+                        }
+                        monthlyUsageConfig.data.datasets[dataSetCount].yAxisID = "y-axis-" + dataSetCount;
+                        monthlyUsageConfig.data.datasets[dataSetCount].borderColor = electrictyColor
+
+                        dataSetCount++
+                    }
+
+                    if (model.WaterTotals !== null)
+                    {
+                        monthlyUsageConfig.data.datasets.push({
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 0,
+                            label: ''
+                        });
+
+                        monthlyUsageConfig.data.datasets[dataSetCount].pointBackgroundColor = [];
+                        for (var i = 0; i < model.Months.length; i++)
+                        {
+                            monthlyUsageConfig.data.datasets[dataSetCount].data.push(toFixed(model.WaterUsages[i], 2))
+                            monthlyUsageConfig.data.datasets[dataSetCount].backgroundColor.push(waterColor);
+                            monthlyUsageConfig.data.datasets[dataSetCount].pointBackgroundColor.push(waterColor);
+                        }
+                        monthlyUsageConfig.data.datasets[dataSetCount].yAxisID = "y-axis-" + dataSetCount;
+                        monthlyUsageConfig.data.datasets[dataSetCount].borderColor = waterColor
+                        dataSetCount++
+                    }     
+
+                    if (model.GasTotals !== null)
+                    {
+                        monthlyUsageConfig.data.datasets.push({
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 0,
+                            label: ''
+                        });
+
+                        monthlyUsageConfig.data.datasets[dataSetCount].pointBackgroundColor = [];
+                        for (var i = 0; i < model.Months.length; i++)
+                        {
+                            monthlyUsageConfig.data.datasets[dataSetCount].data.push(toFixed(model.GasUsages[i], 2))
+                            monthlyUsageConfig.data.datasets[dataSetCount].backgroundColor.push(gasColor);
+                            monthlyUsageConfig.data.datasets[dataSetCount].pointBackgroundColor.push(gasColor);
+                        }
+                        monthlyUsageConfig.data.datasets[dataSetCount].yAxisID = "y-axis-" + dataSetCount;
+                        monthlyUsageConfig.data.datasets[dataSetCount].borderColor = gasColor
+                        dataSetCount++
+                    }
+
+                    if (dataSetCount == 2)
+                    {
+                        monthlyUsageConfig.options.scales.yAxes[1] = [{
+                            display: true,
+                            id: "y-axis-1",
+                            gridLines: {
+                                drawOnChartArea: false,
+                            },
+                            position: 'left',
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }];
+                    }
+                    else if (dataSetCount == 3)
+                    {
+                        monthlyUsageConfig.options.scales.yAxes[1] = [{
+                            display: true,
+                            id: "y-axis-1",
+                            gridLines: {
+                                drawOnChartArea: false,
+                            },
+                            position: 'left',
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }];
+                        monthlyUsageConfig.options.scales.yAxes[2] = [{
+                            display: true,
+                            id: "y-axis-2",
+                            gridLines: {
+                                drawOnChartArea: false,
+                            },
+                            position: 'left',
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }];
+                    }
+
+                    monthlyUsageConfig.data.labels = monthlyUsagelabels
+
+                    var ctx = document.getElementById('monthlyUsage').getContext("2d");
+                    new Chart(ctx, monthlyUsageConfig);
+                });
+        }
+
+        function loadDailyTotals()
+        {
+            var time = new Date();
+            var lastMonth = new Date(time.getFullYear(), time.getMonth() - 1, 1);
+
+            $.get('/historicaldata/dailyTotals/' + lastMonth.getFullYear() + '-' + lastMonth.getMonth(),
+                function (data)
+                {
+                    var model = data
+                    var lastMonthTotalsConfig = $.extend(true, {}, config);
+
+                    lastMonthTotalsConfig.data.datasets[0].pointBackgroundColor = [];
+
+                    for (var itm in model.dailyTotals.Item1)
+                    {
+                        lastMonthTotalsConfig.data.datasets[0].backgroundColor.push(electrictyColor);
+                        lastMonthTotalsConfig.data.datasets[0].pointBackgroundColor.push(electrictyColor);
+                    }
+
+                    lastMonthTotalsConfig.data.datasets[0].data = model.dailyTotals.Item2
+                    lastMonthTotalsConfig.data.datasets[0].borderColor = electrictyColor
+                    lastMonthTotalsConfig.data.datasets.fill = false
+                    lastMonthTotalsConfig.data.labels = model.dailyTotals.Item1
+
+                    var lastMonthTotalsConfigCtx = document.getElementById('lastMonthTotals').getContext("2d");
+                    var chartTotal = new Chart(lastMonthTotalsConfigCtx, lastMonthTotalsConfig);
+                });
+        }
+
+
+        function loadCosts(type)
+        {
+            var costsConfig = $.extend(true, {}, config);
+
+            costsConfig.data.datasets = [{
+                    data: [],
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'R'
+                },
+                {
+                    data: [],
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'R'
+                }]
+
+            costsConfig.type = 'bar';
+
+            for (var j = 0; j < historicalDataModel.MeterData.length; j++)
+            {
+                meter = historicalDataModel.MeterData[j];
+                if (meter.MeterType == type)
+                {
+                    var monthlyUsagelabels = []
+                    for (var i = 0; i < 12; i++)
+                    {
+                        costsConfig.data.datasets[1].data.push(toFixed(meter.Totals[i], 0));
+                        costsConfig.data.datasets[1].backgroundColor.push(getColors(type)[0]);
+                        costsConfig.data.datasets[0].data.push(toFixed(meter.Totals[i + 13], 2));
+                        costsConfig.data.datasets[0].backgroundColor.push(getColors(type)[1]);
+                        var mydate = new Date(meter.Months[i].substring(0, 10));
+                        monthlyUsagelabels.push(monthNames[mydate.getMonth()])
+                    }
+
+                  
+                    costsConfig.data.datasets[1].borderColor = getColors(type)[0]
+                    costsConfig.data.datasets[0].borderColor = getColors(type)[1]
+                    costsConfig.data.datasets.fill = false
+                    costsConfig.data.labels = monthlyUsagelabels
+
+                    var costConfigCtx = document.getElementById(type + 'CostChart').getContext("2d");
+                    var chartTotal = new Chart(costConfigCtx, costsConfig);
+                }
+            }
+
+        }
+
+        function loadUsage(type)
+        {
+            for (var j = 0; j < historicalDataModel.MeterData.length; j++)
+            {
+                var usageConfig = $.extend(true, {}, config);
+
+                usageConfig.data.datasets = [{
+                    data: [],
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'kWh'
+                },
+                {
+                    data: [],
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'kWh'
+                }]
+
+                if (type == 'gas')
+                {
+                    usageConfig.data.datasets[0].label = 'm3'
+                    usageConfig.data.datasets[1].label = 'm3'
+                }
+                else if (type == 'water')
+                {
+                    usageConfig.data.datasets[0].label = 'kL'
+                    usageConfig.data.datasets[1].label = 'kL'
+                }
+
+                usageConfig.type = 'bar';
+
+                meter = historicalDataModel.MeterData[j];
+
+                if (meter.MeterType == type)
+                {
+                    var monthlyUsagelabels = []
+
+                    for (var i = 0; i < 12; i++)
+                    {
+                        usageConfig.data.datasets[1].data.push(toFixed(meter.Usages[i], 2));
+                        usageConfig.data.datasets[1].backgroundColor.push(getColors(type)[0]);
+                        usageConfig.data.datasets[0].backgroundColor.push(getColors(type)[1]);
+                        usageConfig.data.datasets[0].data.push(toFixed(meter.Usages[i + 13], 2))
+                        var mydate = new Date(meter.Months[i].substring(0, 10));
+                        monthlyUsagelabels.push(monthNames[mydate.getMonth()])
+                    }
+
+                    usageConfig.data.datasets[1].borderColor = getColors(type)[0]
+                    usageConfig.data.datasets[0].borderColor = getColors(type)[1]
+                    usageConfig.data.datasets.fill = false
+                    usageConfig.data.labels = monthlyUsagelabels
+
+                    var usageConfigCtx = document.getElementById(type + 'UsageChart').getContext("2d");
+                    new Chart(usageConfigCtx, usageConfig);
+                }
+            }
+        }
+
+        function loadAvg(type)
+        {
+            for (var j = 0; j < historicalDataModel.MeterData.length; j++)
+            {
+                meter = historicalDataModel.MeterData[j];
+
+                if (meter.MeterType == type)
+                {
+                    var loadConfig = $.extend(true, {}, config);
+                    loadConfig.data.datasets = [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 0,
+                        label: 'R'
+                    },
+                    {
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 0,
+                        label: 'R'
+                    }]
+                    loadConfig.type = 'bar';
+
+                    var monthlyUsagelabels = []
+                    for (var i = 0; i < 12; i++)
+                    {
+                        loadConfig.data.datasets[1].backgroundColor.push(getColors(type)[0]);
+                        loadConfig.data.datasets[1].data.push(toFixed(meter.Avgs[i], 2));
+                        loadConfig.data.datasets[0].backgroundColor.push(getColors(type)[1]);
+                        loadConfig.data.datasets[0].data.push(toFixed(meter.Avgs[i + 13], 2))
+                        var mydate = new Date(meter.Months[i].substring(0, 10));
+                        monthlyUsagelabels.push(monthNames[mydate.getMonth()])
+                    }
+
+                    //loadConfig.data.datasets[0].data = meter.Avgs
+                    loadConfig.data.datasets[1].borderColor = getColors(type)[0]
+                    loadConfig.data.datasets[0].borderColor = getColors(type)[1]
+                    loadConfig.data.datasets.fill = false
+                    loadConfig.data.labels = monthlyUsagelabels
+
+                    var loadConfigCtx = document.getElementById(type + 'AvgChart').getContext("2d");
+                    var chartTotal = new Chart(loadConfigCtx, loadConfig);
+                }
+            }
+        }
+
+        var totalsLoaded = false;
+        var elecKwhLoaded = false;
+        var elecKwhAvgLoaded = false
+        var waterAvgLoaded = false
+        var waterKlLoaded = false
+        var gasAvgLoaded = false
+        var gasM3Loaded = false
+
+        loadCosts('elec')
+
+        loadCosts('water')
+
+        loadCosts('gas')
+
+        loadCosts('rent')
+
+        loadMothlyUsage();
+
+        $(document).on("click", "#pills-expenses-tab", function ()
+        {
+            if (totalsLoaded == false)
+            {
+                loadDailyTotals();
+                totalsLoaded = true;
+            }
+        });
+
+        $(document).on("click", "#pills-kwh-tab", function ()
+        {
+            if (elecKwhLoaded == false)
+            {
+                loadUsage("elec");
+                elecKwhLoaded = true;
+            }
+        });
+
+        $(document).on("click", "#pills-avg-tab", function ()
+        {
+            if (elecKwhAvgLoaded == false)
+            {
+                loadAvg("elec");
+                elecKwhAvgLoaded = true;
+            }
+        });
+
+
+        $(document).on("click", "#pills-kl-tab", function ()
+        {
+            if (waterKlLoaded == false)
+            {
+                loadUsage("water");
+                waterKlLoaded = true;
+            }
+        });
+
+
+        $(document).on("click", "#pills-kl-avg-tab", function ()
+        {
+            if (waterAvgLoaded == false)
+            {
+                loadAvg("water");
+                waterAvgLoaded = true;
+            }
+        });
+
+        $(document).on("click", "#pills-m3-tab", function ()
+        {
+            if (gasM3Loaded == false)
+            {
+                loadUsage("gas");
+                gasM3Loaded = true;
+            }
+        });
+
+
+        $(document).on("click", "#pills-m3-avg-tab", function ()
+        {
+            if (gasAvgLoaded == false)
+            {
+                loadAvg("gas");
+                gasAvgLoaded = true;
+            }
+        });
+
+        function numberWithCommas(number)
+        {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function toFixed(number, decimals)
+        {
+            var x = Math.pow(10, Number(decimals) + 1);
+            return (Number(number) + (1 / x)).toFixed(decimals)
+        }
+
+        function getColors(type)
+        {
+            var waterColor = 'rgb(0,0,255)'
+            var electrictyColor = 'rgb(255,192,1)'
+            var rentColor = 'rgb(32,202,58)'
+            var gasColor = 'rgb(128,128,128)'
+
+            var waterLastYearColor = 'rgb(74, 144, 226)'
+            var electrictyLastYearColor = 'rgb(255, 138, 3)'
+            var rentLastColor = 'rgb(32,202,58)'
+            var gasLastColor = 'rgb(105, 105, 105)'
+
+            var isElectricity = (type == "elec")
+            var isWater = (type == "water")
+            var isRent = (type == "rent")
+            var isGas= (type == "gas")
+
+            if (isWater)
+            {
+                return [waterColor, waterLastYearColor]
+            }
+            else if (isGas)
+            {
+                return [gasColor, gasLastColor]
+            }
+            else if (isElectricity)
+            {
+                return [electrictyColor, electrictyLastYearColor]
+            }
+            else
+            {
+                return [rentColor, rentLastColor]
+            }
+        }
+
+    </script>
+}

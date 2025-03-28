@@ -1,0 +1,30 @@
+@model MyVoltage.Models.OperationalModels.S02_ProductCombinedReports.S02_ProductCombinedReportsModels.S02_ProductCombinedReports_UnbilledAnalysis_Units_SummaryModel.S02_ProductCombinedReports_UnbilledAnalysis_Units_SummaryItem
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+@{
+    string title = $"{Model.CompanyName}";
+}
+@if (Model.FirstDate.HasValue && Model.LastDate.HasValue)
+{
+    title += $" - Calculated between {Model.FirstDate.ToDateShort()} and {Model.LastDate.ToDateShort()}";
+}
+<td scope="col">
+    @Model.CompanyName
+</td>
+<td scope="col" class="text-right">@Model.CustomerCount</td>
+<td scope="col" class="text-right font-weight-bold" title="Total Amount - @Model.CompanyName">@Model.TotalAmount.ToMoney()</td>
+@foreach (var product in Model.Products)
+{
+    decimal? amount = null;
+    if (Model.ProductsAmounts.ContainsKey(product))
+    {
+        amount = Model.ProductsAmounts[product];
+    }
+    <td scope="col" class="text-right" title="@product.ProductName - @Model.CompanyName">@amount.ToMoney()</td>
+}
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("title", '@title');
+    });
+</script>

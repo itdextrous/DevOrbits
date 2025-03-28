@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.svg" type="favicon.svg" />
+    @if (!string.IsNullOrEmpty(ViewBag.MetaDescription))
+    {
+        <meta name="description" content="@ViewBag.MetaDescription">
+    }
+    else
+    {
+        <meta name="description" content="MyVoltage Homepage Description here">
+    }
+
+    @if (Context.Request.Path.ToString().Length > 1)
+
+    {
+        <title>@ViewData["Title"] - MyVoltage</title>
+    }
+
+    <!-- Fontawesome 5 -->
+    <script>
+        FontAwesomeConfig = { searchPseudoElements: true };
+    </script>
+    <script defer src="~/js/fontawesome-all.js"></script>
+
+    <link rel="stylesheet" href="~/css/myvoltage-admin.css" />
+    <link rel="stylesheet" href="~/css/jquery-confirm.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.structure.min.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.theme.min.css" />
+
+</head>
+<body>
+
+    <div class="wrapper">
+        @await Html.PartialAsync("AdminSidebar")
+        <div class="main-panel">
+            <div class="top-banner">
+                <h3 class="text-uppercase font-weight-bold pl-2">@ViewBag.Title</h3>
+            </div>
+            <div class="content">
+                <div class="container-fluid admin-content">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/jquery-3.2.1.min.js"></script>
+    <script src="~/js/popper.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/jquery-confirm.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/jquery-ui.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            $(".chevron-btn").click(function () {
+                $("#SidebarToggle").toggleClass("sidebar-hide");
+                $("span").toggleClass("expanded");
+
+            });
+        });
+    </script>
+
+</body>
+</html>

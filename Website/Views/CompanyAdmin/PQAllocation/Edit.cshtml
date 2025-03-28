@@ -1,0 +1,97 @@
+@model MyVoltage.Models.CompanyAdminViewModels.PQAllocationEditModel
+@{
+    ViewData["Title"] = "PQ Allocation Edit";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <a href="/companyadmin/pqallocation" class="btn btn-toolbar">Back to list</a>
+    </div>
+</div>
+
+<form asp-action="PQAllocationEdit" enctype="multipart/form-data">
+    <div class="row mt-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card p-md-4">
+                <div class="card-header">
+                    @Model.PQAllocation.SerialNumber
+                    @switch (Model.PQAllocation.DeviceType)
+                    {
+                        case MyVoltage.Controllers.AccountController.DeviceType.Electricity:
+                            <img src="~/images/elec-icon-s.png" />
+                            break;
+                        case MyVoltage.Controllers.AccountController.DeviceType.Water:
+                            <img src="~/images/water-icon-s.png" />
+                            break;
+                        case MyVoltage.Controllers.AccountController.DeviceType.Gas:
+                            <img src="~/images/gas-icon-s.png" />
+                            break;
+                    }
+                    (<strong>@Model.PQAllocation.DeviceType.ToString()</strong>)
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer No</th>
+                                <th scope="col">Calculation Basis</th>
+                                <th scope="col">PQ %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemCustomer in Model.PQAllocation.PQAllocationCustomers)
+                            {
+                                <tr>
+                                    <td scope="col">@itemCustomer.CustomerNo</td>
+                                    <td scope="col">
+                                        <input type="text" name="Quota_@itemCustomer.CustomerNo" id="Quota_@itemCustomer.CustomerNo" value="@itemCustomer.QuotaAmount.ToString("0.000")" />
+                                    </td>
+                                    <td scope="col">@itemCustomer.PQPerc.ToString("0.00000") %</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td scope="col">Total</td>
+                                <td scope="col">
+                                    @Model.PQAllocation.PQAllocationCustomers.Select(p => p.QuotaAmount).Sum().ToString("0.000")
+                                </td>
+                                <td scope="col">@Model.PQAllocation.PQAllocationCustomers.Select(p => p.PQPerc).Sum().ToString("0.00000") %</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" value="Save Changes" class="btn btn-default" />
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/companyAdmin/pqallocation/serialsearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

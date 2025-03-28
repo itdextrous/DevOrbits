@@ -1,0 +1,1073 @@
+@model MyVoltage.Models.ClientzoneModels.ProfileModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@inject UserManager<ApplicationUser> usermanager;
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "LayoutClientzone";
+}
+
+<div class="container profile">
+    <div class="pt_m_45 mb-m25">
+        <h3 class="text-center page_heading">User profile settings</h3>
+        <h4 id="pageHeading" class="grapeheader text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">
+            Personal profile
+        </h4>
+    </div>
+    <div class="row mt-85 row_gap" id="clickToReload">
+        <div class="col-sm-6 iconblock text-start rounded p-0" id="personalDetailsLink">
+            <a href="#" onclick="PersonalProfile();">
+                <div class="d-flex align-items-center">
+                    <div class="icon_box">
+                        <img src="~/images/clientzone/Personal-Profile.png" />
+                    </div>
+                    <div class="px-12">
+                        Personal profile
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 iconblock text-start rounded p-0" id="usageDisplayLink">
+            <a href="#" onclick="UsageDisplay();">
+                <div class="d-flex align-items-center">
+                    <div class="icon_box">
+                        <img src="~/images/clientzone/Usage-Display-Settings.png" />
+                    </div>
+                    <div class="px-12">
+                        Usage display
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 iconblock text-start rounded p-0" id="notificationsLink">
+            <a href="#" onclick="Notifications();">
+                <div class="d-flex align-items-center">
+                    <div class="icon_box">
+                        <img src="~/images/clientzone/Notification-Settings.png" />
+                    </div>
+                    <div class="px-12">
+                        Notifications
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 iconblock text-start rounded p-0" id="taxInvoiceLink">
+            <a href="#" onclick="TaxInvoice();">
+                <div class="d-flex align-items-center">
+                    <div class="icon_box">
+                        <img src="~/images/clientzone/Tax-Invoice-Settings.png" />
+                    </div>
+                    <div class="px-12">
+                        Tax invoice settings
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <hr class="my-45" />
+    <div id="personalProfile">
+        <div class="max-w-385 text-center">
+            <div class="mb-2">
+                @*<label class="form-label text-nowrap" asp-for="CompanyName"></label>*@
+                <input type="text" class="form-control-trim" asp-for="CompanyName" placeholder="Company name" data-bs-toggle="tooltip" data-bs-placement="top" onmouseover="setTooltip('CompanyName', 'Company name')" readonly />
+            </div>
+            <div class="mb-2">
+                @*<label class="form-label text-nowrap" asp-for="CustomerNumber"></label>*@
+                <input type="text" class="form-control-trim" asp-for="CustomerNumber" onmouseover="setTooltip('CustomerNumber', 'Customer number')" data-bs-toggle="tooltip" data-bs-placement="top" placeholder="Customer number" readonly />
+            </div>
+            <div class="mb-2">
+                @*<label class="form-label text-nowrap" asp-for="AccountType"></label>*@
+                <input type="text" class="form-control-trim" asp-for="AccountType" onmouseover="setTooltip('AccountType', 'Account type')" data-bs-toggle="tooltip" data-bs-placement="top" placeholder="Account type" readonly />
+            </div>
+            <div class="mb-20">
+                @*<label class="form-label text-nowrap" asp-for="LoginEmail"></label>*@
+                <input type="text" class="form-control-trim" asp-for="LoginEmail" onmouseover="setTooltip('LoginEmail', 'Email')" data-bs-toggle="tooltip" data-bs-placement="top" placeholder="Email" readonly />
+            </div>
+            <div class="mb-3 edit_field">
+                @*<label class="form-label text-nowrap" asp-for="OccupancyDate"></label>*@
+                <input type="text" name="date" onkeydown="return false" class="form-control-trim datePicker_input occupancyDate" asp-format="{0:yyyy/MM/dd}" onfocusout="onFocusOut('OccupancyDate')" data-bs-toggle="tooltip" data-bs-placement="top" onmouseover="setTooltip('OccupancyDate', 'Occupancy Date')" placeholder="mm/dd/yyyy" asp-for="OccupancyDate" autocomplete="off" readonly />
+                <img class="edit" src="~/images/Clientzone/calendar_icon.png" height="20" onclick="ImgEditClick('OccupancyDate')" />
+            </div>
+            <div class="mb-3 edit_field">
+                @*<label class="form-label text-nowrap" asp-for="FullName"></label>*@
+                <input onkeypress="return preventSpaces(event)" type="text" class="form-control-trim edit-control" asp-for="FullName" onfocusout="onFocusOut('FullName')" data-bs-toggle="tooltip" data-bs-placement="top" onmouseover="setTooltip('FullName', 'Full Name')" placeholder="Full name" autocomplete="off" readonly />
+                <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('FullName')" />
+            </div>
+            <div class="mb-3 edit_field">
+                @*<label class="form-label text-nowrap" asp-for="PhoneNumber"></label>*@
+                <input class="form-control-trim edit-control" asp-for="PhoneNumber" onkeypress="return noSpecialCharacter1(event)" type="number" onfocusout="onFocusOut('PhoneNumber')" data-bs-toggle="tooltip" data-bs-placement="top" onmouseover="setTooltip('PhoneNumber', 'Cellphone Number')" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="12" placeholder="Cellphone Number" autocomplete="off" readonly />
+                <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('PhoneNumber')" />
+            </div>
+            <div class="edit_field">
+                @*<label class="form-label text-nowrap" asp-for="NotificationEmail"></label>*@
+                <input type="email" class="form-control-trim edit-control" asp-for="NotificationEmail" onkeypress="return noSpaces(event)" onfocusout="onFocusOut('NotificationEmail')" data-bs-toggle="tooltip" data-bs-placement="top" onmouseover="setTooltip('NotificationEmail', 'Notifications Email')" placeholder="Notifications Email" autocomplete="off" readonly />
+                <span asp-validation-for="NotificationEmail" id="emailValid"></span>
+                <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('NotificationEmail')" />
+            </div>
+            <div class="mt-45 mb-15">
+                <a href="#" class="btn btn-islandsunrise bg-grape" onclick="UpdatePersonalProfile();">Update Information</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="usageDisplay" style="display:none;">
+        <div class="max-w-385">
+            <div class="switch-box">
+@*                <label class="form-check-label text-nowrap" asp-for="ShowHourlyUsage"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="ShowHourlyUsage">
+                    <label class="custom-control-label" for="ShowHourlyUsage"></label>
+                </div>
+            </div>
+            <div class="switch-box mt-20">
+*@                <label class="form-check-label text-nowrap" asp-for="ShowCostInclVAT"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="ShowCostInclVAT">
+                    <label class="custom-control-label" for="ShowCostInclVAT"></label>
+                </div>
+            </div>
+            <div class="switch-box mt-20">
+                <label class="form-check-label text-nowrap" asp-for="ShowDetailedDailyBilling"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="ShowDetailedDailyBilling">
+                    <label class="custom-control-label" for="ShowDetailedDailyBilling"></label>
+                </div>
+            </div>
+            <div class="mt-45">
+                @foreach (var m in Model.Customer_UsageMeterSettings)
+                {
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="icon_box me-1 bg-transparent">
+                            @switch (m.DeviceType)
+                            {
+                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                    <img src="~/images/Clientzone/electricity-icon.png" height="48" />
+                                    break;
+                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                    <img src="~/images/Clientzone/water_icon.png" height="48" />
+                                    break;
+                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                    <img src="~/images/Clientzone/Gas_Icon.png" height="48" />
+                                    break;
+                            }
+                        </div>
+                        <div class="form-control-trim">
+                            Meter &#35; @m.MeterSerial
+                        </div>
+                    </div>
+                    @*<div class="mb-3">
+                <select class="browser-default custom-select form-control-trim" id="meterType_@m.MeterSerial" name="meterType_@m.MeterSerial">
+                @foreach (MyVoltage.Data.MeterTypeEnum meterType in ((MyVoltage.Data.MeterTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.MeterTypeEnum))).OrderBy(p => p.GetDescription()))
+                {
+                if (m.DisplayType.HasValue && (int)meterType == m.DisplayType)
+                {
+                <option value="@((int)meterType)" selected="selected">@meterType.GetDescription()</option>
+                }
+                else
+                {
+                <option value="@((int)meterType)">@meterType.GetDescription()</option>
+                }
+                }
+                </select>
+                </div>*@
+                }
+            </div>
+            <div class="mt-45 select-holder">
+                @*<label class="select_label">Select Meter Type</label>*@
+                <label class="select_label">Real-time Insight Display</label>
+                <select class="browser-default custom-select form-control-trim js-select" id="meterType" name="meterType">
+                    @foreach (MyVoltage.Data.MeterTypeEnum meterType in ((MyVoltage.Data.MeterTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.MeterTypeEnum))).OrderBy(p => p.GetDescription()))
+                    {
+                            if (Model.DisplayType.HasValue && (int)meterType == Model.DisplayType)
+                            {
+                                <option value="@((int)meterType)" selected="selected">@meterType.GetDescription()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)meterType)">@meterType.GetDescription()</option>
+                            }
+                    }
+                </select>
+                <input id="meterTypeSelect" type="text" class="js-static-input form-control-trim">
+            </div>
+            <div class="text-center mt-45 mb-15">
+                <a href="#" class="btn btn-islandsunrise bg-grape" onclick="UpdateUsageDisplay();">Update Information</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="notifications" style="display:none;">
+        <div class="max-w-385">
+            <div class="switch-box">
+                <label class="form-check-label text-nowrap" asp-for="LowBalanceNotifications"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="LowBalanceNotifications">
+                    <label class="custom-control-label" for="LowBalanceNotifications"></label>
+                </div>
+            </div>
+@*            <div class="switch-box mt-20">
+                <label class="form-check-label text-nowrap" asp-for="LeakNotifications"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="LeakNotifications">
+                    <label class="custom-control-label" for="LeakNotifications"></label>
+                </div>
+            </div>
+            <div class="switch-box mt-20">
+                <label class="form-check-label text-nowrap" asp-for="HighUsageNotifications"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="HighUsageNotifications">
+                    <label class="custom-control-label" for="HighUsageNotifications"></label>
+                </div>
+            </div>
+*@
+            <div class="switch-box mt-20">
+                <label class="form-check-label text-nowrap" asp-for="NewsLetters"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="NewsLetters">
+                    <label class="custom-control-label" for="NewsLetters"></label>
+                </div>
+            </div>
+            <div>
+                @*<label class="form-label text-nowrap" asp-for="SystemNotificationType"></label>*@
+                @*<select class="browser-default custom-select form-control-trim" id="SystemNotificationType" name="SystemNotificationType">*@
+                @foreach (MyVoltage.Data.NotificationTypeEnum notificationType in ((MyVoltage.Data.NotificationTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.NotificationTypeEnum))).OrderBy(p => p.GetDescription()))
+                {
+                    int value = Model.SystemNotificationType;
+                    var enumDisplayStatus = (MyVoltage.Data.NotificationTypeEnum)value;
+                    string stringValue = enumDisplayStatus.ToString();
+                    bool Checked = false;
+
+
+                    if (value == 3 || (value == 1 && notificationType.ToString() == "SMS") || (value == 2 && notificationType.ToString() == "Email"))
+                    {
+                        Checked = true;
+                    }
+                    if (notificationType.ToString() == "SMS" || notificationType.ToString() == "Email")
+                    {
+                        <div class="switch-box mt-20">
+                            <label class="form-check-label text-nowrap" for="@notificationType.ToString()">@notificationType.GetDescription()</label>
+                            <div class="custom-control custom-switch">
+                                <input class="custom-control-input " id="@notificationType.ToString()" type="checkbox" checked="@Checked" value="@((int)notificationType)">
+                                <label class="custom-control-label" for="@notificationType.ToString()"></label>
+                            </div>
+                        </div>
+                    }
+
+
+                    @*  if (Model.SystemNotificationType == (int)notificationType)
+                {
+                <option value="@((int)notificationType)" selected="selected">@notificationType.GetDescription()</option>
+                }
+                else
+                {
+                <option value="@((int)notificationType)">@notificationType.GetDescription()</option>
+                }*@
+                }
+                @*</select>*@
+            </div>
+            @*<div class="mb-10">
+            <label class="form-label text-nowrap" asp-for="InfoNotificationType"></label>
+            <select class="browser-default custom-select form-control-trim" id="InfoNotificationType" name="InfoNotificationType">
+            @foreach (MyVoltage.Data.NotificationTypeEnum notificationType in ((MyVoltage.Data.NotificationTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.NotificationTypeEnum))).OrderBy(p => p.GetDescription()))
+            {
+            if (Model.InfoNotificationType == (int)notificationType)
+            {
+            <option value="@((int)notificationType)" selected="selected">@notificationType.GetDescription()</option>
+            }
+            else
+            {
+            <option value="@((int)notificationType)">@notificationType.GetDescription()</option>
+            }
+            }
+            </select>
+            </div>*@
+            <div class="mb-3 mt-45 select-holder">
+                @*<label class="form-label text-nowrap" asp-for="LowBalanceNotification"></label>*@
+                <label class="select_label">Set Low Notifications Amount</label>
+                <select class="browser-default custom-select form-control-trim js-select" id="LowBalanceNotification" name="LowBalanceNotification">
+                    @foreach (var lowBalValue in Model.LowBalanceNotificationValues)
+                    {
+                        if (Model.LowBalanceNotification == lowBalValue)
+                        {
+                            <option value="@(lowBalValue)" selected="selected">R @lowBalValue</option>
+                        }
+                        else
+                        {
+                            <option value="@(lowBalValue)">R @lowBalValue</option>
+                        }
+                    }
+                </select>
+                <input id="LowBalNotSelect" type="text" class="js-static-input form-control-trim">
+            </div>
+
+            <div class="text-center mt-45 mb-15">
+                <a href="#" class="btn btn-islandsunrise bg-grape" onclick="UpdateNotifications();">Update Information</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="taxInvoice" style="display:none;">
+        <div class="max-w-385">
+            <div class="switch-box">
+                <label class="form-check-label text-nowrap" asp-for="ActivateTaxInvoice"></label>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" asp-for="ActivateTaxInvoice">
+                    <label class="custom-control-label" for="ActivateTaxInvoice"></label>
+                </div>
+            </div>
+            <div class="mt-45 text-center">
+                <div class="mb-3 edit_field">
+                    @*<label class="form-label text-nowrap" asp-for="RecipientName"></label>*@
+                    <input onkeypress="return preventSpaces(event)" type="text" class="form-control-trim edit-control" data-bs-toggle="tooltip" data-bs-placement="top" onfocusout="onFocusOut('RecipientName')" onmouseover="setTooltip('RecipientName', 'Company name')" placeholder="Company name" asp-for="RecipientName" autocomplete="off" readonly />
+                    <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('RecipientName')" />
+                </div>
+                <div class="mb-3 edit_field">
+                    @*<label class="form-label text-nowrap" asp-for="RecipientAddress"></label>*@
+                    @*<input onkeypress="return preventSpaces(event)" type="text" class="form-control-trim edit-control" data-bs-toggle="tooltip" data-bs-placement="top" onfocusout="onFocusOut('RecipientAddress')" onmouseover="setTooltip('RecipientAddress', 'Company address')" placeholder="Company address" asp-for="RecipientAddress" autocomplete="off" readonly />*@
+                    <input onkeypress="return preventSpaces(event)" type="text" class="form-control-trim edit-control" data-bs-toggle="tooltip" data-bs-placement="top" onfocusout="onFocusOut('RecipientAddress')" onmouseover="setTooltip('RecipientAddress', 'Address')" placeholder="Address" asp-for="RecipientAddress" autocomplete="off" readonly />
+                    <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('RecipientAddress')" />
+                </div>
+                <div class="mb-3 edit_field">
+                    @*<label class="form-label text-nowrap" asp-for="RecipientVatNumber"></label>*@
+                    <input type="text" class="form-control-trim edit-control" data-bs-toggle="tooltip" data-bs-placement="top" onfocusout="onFocusOut('RecipientVatNumber')" onmouseover="setTooltip('RecipientVatNumber', 'Company VAT')" placeholder="Company VAT" asp-for="RecipientVatNumber" autocomplete="off" readonly onkeypress="return noSpecialCharacter(event)" />
+                    <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('RecipientVatNumber')" />
+                </div>
+                <div class="edit_field d-none">
+                    @*<label class="form-label text-nowrap" asp-for="RecipientReferenceNumber"></label>*@
+                    <input type="text" class="form-control-trim edit-control" data-bs-toggle="tooltip" data-bs-placement="top" onfocusout="onFocusOut('RecipientReferenceNumber')" onmouseover="setTooltip('RecipientReferenceNumber', 'Recipient reference')" placeholder="Recipient reference" asp-for="RecipientReferenceNumber" autocomplete="off" onkeypress="return noSpecialCharacter(event)" readonly />
+                    <img class="edit" src="~/images/Clientzone/pencil.png" height="20" onclick="ImgEditClick('RecipientReferenceNumber')" />
+                </div>
+                <div class="mt-45 mb-15">
+                    <a href="#" class="btn btn-islandsunrise bg-grape" onclick="UpdateTaxInvoice();">Update Information</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+@*Model for OTP verification*@
+<div class="modal fade" id="verificationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="queries_text">
+                    <h5 class="modal-title model-otp-title"></h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="max-w-400">
+                    <h6 class="text-center mt-2" id="OTPModalLabel"></h6>
+                    <div class="form-group otp_fields">
+                        <div class="row gap_12">
+                            <div class="col">
+                                <input id="opt1" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" class="form-control text-center rounded" placeholder="-" onkeyup="FocusControl('opt2', 'opt1');" maxlength="1" autocomplete="off" />
+                            </div>
+                            <div class="col">
+                                <input id="opt2" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" pattern="\d*" class="form-control text-center rounded" placeholder="-" onkeyup="FocusControl('opt3', 'opt2');" maxlength="1" autocomplete="off" />
+                            </div>
+                            <div class="col">
+                                <input id="opt3" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" pattern="\d*" class="form-control text-center rounded" placeholder="-" onkeyup="FocusControl('opt4', 'opt3');" maxlength="1" autocomplete="off" />
+                            </div>
+                            <div class="col">
+                                <input id="opt4" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" type="number" pattern="\d*" class="form-control text-center rounded" placeholder="-" maxlength="1" autocomplete="off" />
+                            </div>
+                        </div>
+                        <p style="display: none;" id="otpId" class="text-danger text-center m-0 mt-2">Please enter a valid OTP.</p>
+                    </div>
+                    <div class="queries_text mt-20 pt-1 pt-md-2 text-center">
+                        <p class="mb-1">
+                            Did not receive OTP?
+                        </p>
+                        <a href="#" onclick="ResendOTP()">
+                            Request a new OTP
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="verifyOTP()" class="btn btn-islandsunrise bg-grape mx-0 my-1">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        var profileModel = JSON.parse('@Json.Serialize(@Model)');
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        var isSms = true;
+        var isEmail = true;
+        var meterTypeText = "";
+        var meterTypeVal = "";
+        var meterTypeText = "";
+        var meterTypeVal = "";
+        var occupanyDate;
+
+        $(function () {
+            $("#OccupancyDate")[0].value = $("#OccupancyDate")[0].value.split(" ")[0];
+            occupanyDate = $("#OccupancyDate")[0].value;
+            $('#OccupancyDate').datepicker("destroy");
+            isSms = $("#SMS").is(':checked');
+            isEmail = $("#Email").is(':checked');
+            meterTypeText = $("#meterType").find("option:selected").text();
+            meterTypeVal = $("#meterType").val();
+
+            lowBalNotText = $("#LowBalanceNotification").find("option:selected").text();
+            lowBalNotVal = $("#LowBalanceNotification").val();
+        });
+        //select box js start
+        const inputs = document.getElementsByClassName('js-static-input');
+        const selects = document.getElementsByClassName('js-select');
+
+        for (let i = 0; i < inputs.length; i++) {
+            getSelected(i);
+            selects[i].addEventListener("change", function () {
+                getSelected(i);
+            });
+        }
+        function getSelected(i) {
+            inputs[i].value = selects[i].options[selects[i].selectedIndex].text;
+        }
+
+        function FocusControl(controlID, last) {
+            if ($("#" + last).val().length <= 0) return;
+            $("#" + controlID).focus();
+            $("#" + controlID).select();
+        }
+
+        //select box js end
+
+        $("#usageDisplay").css("display", "none");
+        $("#notifications").css("display", "none");
+        $("#taxInvoice").css("display", "none");
+
+        $("#usageDisplayLink").addClass("iconblock");
+        $("#usageDisplayLink").removeClass("iconblockactive");
+
+        $("#notificationsLink").addClass("iconblock");
+        $("#notificationsLink").removeClass("iconblockactive");
+
+        $("#taxInvoiceLink").addClass("iconblock");
+        $("#taxInvoiceLink").removeClass("iconblockactive");
+
+        $("#personalDetailsLink").addClass("iconblockactive");
+        $("#personalDetailsLink").removeClass("iconblock");
+
+        if ($("#NotificationEmail").val() == '') {
+            var login = $("#LoginEmail").val();
+            $("#NotificationEmail").val(login);
+        }
+
+        function PersonalProfile() {
+            $("#usageDisplay").css("display", "none");
+            $("#notifications").css("display", "none");
+            $("#taxInvoice").css("display", "none");
+
+            $("#personalProfile").fadeIn();
+            $("#pageHeading").html("Personal profile");
+
+            $("#usageDisplayLink").addClass("iconblock");
+            $("#usageDisplayLink").removeClass("iconblockactive");
+
+            $("#notificationsLink").addClass("iconblock");
+            $("#notificationsLink").removeClass("iconblockactive");
+
+            $("#taxInvoiceLink").addClass("iconblock");
+            $("#taxInvoiceLink").removeClass("iconblockactive");
+
+            $("#personalDetailsLink").addClass("iconblockactive");
+            $("#personalDetailsLink").removeClass("iconblock");
+        }
+        function UsageDisplay() {
+            $("#personalProfile").css("display", "none");
+            $("#taxInvoice").css("display", "none");
+            $("#notifications").css("display", "none");
+
+            $("#usageDisplay").fadeIn();
+            $("#pageHeading").html("Usage display");
+
+            $("#usageDisplayLink").addClass("iconblockactive");
+            $("#usageDisplayLink").removeClass("iconblock");
+
+            $("#notificationsLink").addClass("iconblock");
+            $("#notificationsLink").removeClass("iconblockactive");
+
+            $("#taxInvoiceLink").addClass("iconblock");
+            $("#taxInvoiceLink").removeClass("iconblockactive");
+
+            $("#personalDetailsLink").addClass("iconblock");
+            $("#personalDetailsLink").removeClass("iconblockactive");
+        }
+        function Notifications() {
+            $("#personalProfile").css("display", "none");
+            $("#taxInvoice").css("display", "none");
+            $("#usageDisplay").css("display", "none");
+
+            $("#notifications").fadeIn();
+            $("#pageHeading").html("Notifications");
+
+            $("#usageDisplayLink").addClass("iconblock");
+            $("#usageDisplayLink").removeClass("iconblockactive");
+
+            $("#notificationsLink").addClass("iconblockactive");
+            $("#notificationsLink").removeClass("iconblock");
+
+            $("#taxInvoiceLink").addClass("iconblock");
+            $("#taxInvoiceLink").removeClass("iconblockactive");
+
+            $("#personalDetailsLink").addClass("iconblock");
+            $("#personalDetailsLink").removeClass("iconblockactive");
+        }
+        function TaxInvoice() {
+            $("#personalProfile").css("display", "none");
+            $("#usageDisplay").css("display", "none");
+            $("#notifications").css("display", "none");
+
+            $("#taxInvoice").fadeIn();
+            $("#pageHeading").html("Tax invoice settings");
+
+            $("#usageDisplayLink").addClass("iconblock");
+            $("#usageDisplayLink").removeClass("iconblockactive");
+
+            $("#notificationsLink").addClass("iconblock");
+            $("#notificationsLink").removeClass("iconblockactive");
+
+            $("#taxInvoiceLink").addClass("iconblockactive");
+            $("#taxInvoiceLink").removeClass("iconblock");
+
+            $("#personalDetailsLink").addClass("iconblock");
+            $("#personalDetailsLink").removeClass("iconblockactive");
+        }
+
+        function UpdateUsageDisplay() {
+            $("#loaderContent").css("display", "block");
+
+            var meters = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Customer_UsageMeterSettings)));
+            //var metersString = "";
+            //$(meters).each(function() {
+            //    metersString = metersString + this.MeterSerial + "=" + $("#meterType_" + this.MeterSerial).val() + ";";
+            //});
+
+            var metersString = $("#meterType").val();
+
+            $.post("/clientzone/profile/update_usagedisplay",
+                {
+                    showDetailedDailyBilling: document.getElementById("ShowDetailedDailyBilling").checked,
+                    showCostInclVAT: document.getElementById("ShowCostInclVAT").checked,
+                    //showHourlyUsage: document.getElementById("ShowHourlyUsage").checked,
+                    meters: metersString
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data.isSuccess) {
+                        toastr.success("User profile updated successfully.");
+                        profileModel.showDetailedDailyBilling = document.getElementById("ShowDetailedDailyBilling").checked,
+                        profileModel.showCostInclVAT = document.getElementById("ShowCostInclVAT").checked,
+                        //profileModel.showHourlyUsage = document.getElementById("ShowHourlyUsage").checked,
+                        meterTypeVal = $("#meterType").val();
+                        meterTypeText = $("#meterType").find("option:selected").text();
+                        //window.location.reload();
+                    }
+                    else {
+                        toastr.error(data.result);
+                    }
+                });
+
+        }
+
+        async function UpdatePersonalProfile() {
+            $("#loaderContent").css("display", "block");
+
+            $("#OccupancyDate").removeClass("is-invalid");
+
+            if ($("#OccupancyDate").val() == '' || $("#OccupancyDate").val() == "mm/dd/yyyy") {
+                $("#OccupancyDate").addClass("is-invalid");
+                $("#loaderContent").css("display", "none");
+                toastr.error('Invalid Occupancy date.');
+                return;
+            }
+
+            $("#FullName").removeClass("is-invalid");
+            //let regexFullName = /^[a-zA-Z](?!.*\s{2})(?!.*['_]{2})(?!.*(?<=['])[_])[a-zA-Z'_]*(\s?[a-zA-Z'_]+)+(?<!['_])\s?$/;
+            //let isFullNameValid = regexFullName.test($("#FullName").val());
+            if ($("#FullName").val() == '') {
+                $("#FullName").addClass("is-invalid");
+                $("#loaderContent").css("display", "none");
+                toastr.error('Full Name is required.');
+                return;
+            }
+            //else if (!isFullNameValid) {
+            //    $("#FullName").addClass("is-invalid");
+            //    $("#loaderContent").css("display", "none");
+            //    toastr.error('Invalid Full Name.');
+            //    return;
+            //}
+
+            $("#PhoneNumber").removeClass("is-invalid");
+            let regexPhone = /^0((60[3-9]|64[0-9]|66[0-5])\d{6}|(7[1-4689]|6[1-8]|8[1-9])\d{7})$/;
+            let isPhoneValid = regexPhone.test($("#PhoneNumber").val());
+            //if ($("#PhoneNumber").val() == '' || $("#PhoneNumber").val().length != "10" || $.isNumeric($('#distance').val())) {
+            if ($("#PhoneNumber").val() == '') {
+                $("#PhoneNumber").addClass("is-invalid");
+                $("#loaderContent").css("display", "none");
+                toastr.error('Cellphone number is required.');
+                return;
+            }
+            else if (!isPhoneValid) {
+                $("#PhoneNumber").addClass("is-invalid");
+                $("#loaderContent").css("display", "none");
+                toastr.error('Cellphone Number is not valid.');
+                return;
+            }
+
+            $("#NotificationEmail").removeClass("is-invalid");
+            let regexEmail = /^[\w_%+-]*(?:[\w-+%_](?:\.[\w-+%_]{0,})?)*@@[\w][\w-]*[\w](?:\.[a-zA-Z]{2,}){1,4}$/;
+            let isEmailValid = regexEmail.test($("#NotificationEmail").val());
+            if ($("#NotificationEmail").val() == '' ) {
+                $("#NotificationEmail").addClass("is-invalid");
+                $("#loaderContent").css("display", "none");
+                toastr.error('Notification email is required.');
+                return;
+            }
+            else if (!isEmailValid) {
+                $("#NotificationEmail").addClass("is-invalid");
+                $("#loaderContent").css("display", "none"); 
+                toastr.error('Notification Email is not valid.');
+                return;
+            }
+
+            if (await checkNumberChanged()) {
+                return;
+            }
+
+            if (await checkEmailChange()) {
+                return;
+            }
+
+            UpdatePersonalProfileHelper();
+        }
+
+        async function checkEmailChange() {
+            $("#loaderContent").css("display", "block");
+            $("#opt1").val('');
+            $("#opt2").val('');
+            $("#opt3").val('');
+            $("#opt4").val('');
+
+            let response = await $.get("/clientzone/profile/check_number_status?em=" + $("#NotificationEmail").val());
+
+            if (response.isEmailChanged == true) {
+                $(".model-otp-title").text('Enter Email Verification OTP :');
+                $("#otpId").css('display', 'none');
+                $("#OTPModalLabel").text('Please check your email and enter one time pin (OTP).');
+                $("#loaderContent").css("display", "none");
+                $('#verificationModal').modal('show');
+                return true;
+            }
+            $("#loaderContent").css("display", "none");
+            return false;
+        }
+
+        async function checkNumberChanged() {
+            $("#loaderContent").css("display", "block");
+            $("#opt1").val('');
+            $("#opt2").val('');
+            $("#opt3").val('');
+            $("#opt4").val('');
+            let response = await $.get("/clientzone/profile/check_number_status?ph=" + $("#PhoneNumber").val());
+
+            if (response.isNumberChanged == true) {
+                $(".model-otp-title").text('Enter SMS Verification OTP :');
+                $("#otpId").css('display', 'none');
+                $("#OTPModalLabel").text('Please check your CellPhone and enter one time pin (OTP).');
+                $("#loaderContent").css("display", "none");
+                $('#verificationModal').modal('show');
+                return true;
+            }
+            $("#loaderContent").css("display", "none");
+            return false;
+        }
+
+        async function verifyOTP() {
+            $("#otpId").css('display', 'none');
+            let otp1 = $("#opt1").val();
+            let otp2 = $("#opt2").val();
+            let otp3 = $("#opt3").val();
+            let otp4 = $("#opt4").val();
+            if (otp1 == "" || otp2 == "" || otp3 == "" || otp4 == "") {
+                $("#otpId").css('display', 'block');
+                return;
+            }
+            var authType = $("#OTPModalLabel").text().indexOf('email') > -1 ? "email" : "phone";
+            $("#loaderContent").css("display", "block");
+            let response = await $.post("/clientzone/profile/confirm_profile_otp",
+                { otp: "" + otp1 + otp2 + otp3 + otp4, email: $("#NotificationEmail").val(), phone: $("#PhoneNumber").val(), authType: authType }
+            );
+            if (response) {
+                if (response.status == true) {
+                    $('#verificationModal').modal('hide');
+                    if ($("#OTPModalLabel").text().indexOf('CellPhone') > -1) {
+                        if (await checkEmailChange()) {
+                            toastr.success("Cellphone number updated successfully.");
+                            return;
+                        }
+                    }
+                    UpdatePersonalProfileHelper();
+                } else {
+                    $("#loaderContent").css("display", "none");
+                    $("#otpId").css('display', 'block');
+                }
+            }
+        }
+
+        function ResendOTP() {
+            $("#loaderContent").css("display", "block");
+            $.get('/clientzone/profile/resend-otp?' +
+                ($("#OTPModalLabel").text().indexOf('email') > -1 ? 'em=' + $("#NotificationEmail").val() :
+                    "ph=" + $("#PhoneNumber").val()))
+                .done(function (response) {
+                    $("#loaderContent").css("display", "none");
+                    if (response.status == true) {
+                        toastr.options.toastClass = 'transform_none';
+                        toastr.success(response.msg);
+                        toastr.options.toastClass = 'transform_none';
+                    } else {
+                        toastr.error(response.msg);
+                    }
+                })
+        }
+
+        function UpdatePersonalProfileHelper() {
+            $("#loaderContent").css("display", "block");
+            $.post("/clientzone/profile/update_personalprofile",
+                {
+                    occupancyDate: $("#OccupancyDate").val(),
+                    fullName: $("#FullName").val(),
+                    phoneNumber: $("#PhoneNumber").val(),
+                    notificationEmail: $("#NotificationEmail").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data.isSuccess) {
+                        //alert("Success");
+                        toastr.success("User profile updated successfully.");
+                        occupanyDate = $("#OccupancyDate")[0].value;
+                        profileModel.fullName = $("#FullName").val(),
+                        profileModel.phoneNumber = $("#PhoneNumber").val(),
+                        profileModel.notificationEmail = $("#NotificationEmail").val()
+                        //window.location.reload();
+                    }
+                    else {
+                        toastr.error(data.result);
+                        //alert(data.result);
+                    }
+                });
+        }
+
+        function UpdateNotifications() {
+            $("#loaderContent").css("display", "block");
+            isSms = $("#SMS")[0].checked;
+            isEmail = $("#Email")[0].checked;
+            var sysN = isSms && isEmail ? 3 : (isSms ? 1 : (isEmail ? 2 : 4));
+            $.post("/clientzone/profile/update_notifications",
+                {
+                    lowBalanceNotifications: document.getElementById("LowBalanceNotifications").checked,
+                    //highUsageNotifications: document.getElementById("HighUsageNotifications").checked,
+                    //leakNotifications: document.getElementById("LeakNotifications").checked,
+                    newsLetters: document.getElementById("NewsLetters").checked,
+                    lowBalanceNotification: $("#LowBalanceNotification").val(),
+                    systemNotificationType: sysN,
+                    //systemNotificationType: $("#SystemNotificationType").val(),
+                    //infoNotificationType: $("#InfoNotificationType").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data.isSuccess) {
+                        //alert("Success");
+                        toastr.success("User profile updated successfully.");
+
+                        profileModel.lowBalanceNotifications = document.getElementById("LowBalanceNotifications").checked,
+                        //profileModel.highUsageNotifications = document.getElementById("HighUsageNotifications").checked,
+                        //profileModel.leakNotifications = document.getElementById("LeakNotifications").checked,
+                        profileModel.newsLetters = document.getElementById("NewsLetters").checked,
+                        lowBalNotVal = $("#LowBalanceNotification").val(),
+                        lowBalNotText = $("#LowBalanceNotification").find("option:selected").text(),
+                        profileModel.systemNotificationType = sysN
+                        //window.location.reload();
+                    }
+                    else {
+                        toastr.error(data.result);
+                        //alert(data.result);
+                    }
+                });
+        }
+
+        function UpdateTaxInvoice() {
+            $("#loaderContent").css("display", "block");
+            $.post("/clientzone/profile/update_taxinvoice",
+                {
+                    activateTaxInvoice: document.getElementById("ActivateTaxInvoice").checked,
+                    recipientName: $("#RecipientName").val().trim() || null,
+                    recipientAddress: $("#RecipientAddress").val().trim() || null,
+                    recipientVatNumber: $("#RecipientVatNumber").val().trim() || null,
+                    recipientReferenceNumber: $("#RecipientReferenceNumber").val().trim() || null
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data.isSuccess) {
+                        //alert("Success");
+                        toastr.success("User profile updated successfully.");
+
+                        profileModel.activateTaxInvoice = document.getElementById("ActivateTaxInvoice").checked,
+                        profileModel.recipientName = $("#RecipientName").val().trim() || null,
+                        profileModel.recipientAddress = $("#RecipientAddress").val().trim() || null,
+                        profileModel.recipientVatNumber = $("#RecipientVatNumber").val().trim() || null,
+                        profileModel.recipientReferenceNumber = $("#RecipientReferenceNumber").val().trim() || null
+                        //window.location.reload();
+                    }
+                    else {
+                        toastr.error(data.result);
+                        //alert(data.result);
+                    }
+                });
+
+        }
+
+        function setTooltip(id, title) {
+            if ($(`#${id}`).val().length > 0) {
+                $(`#${id}`).attr('data-bs-original-title', title);
+            } else {
+                $(`#${id}`).removeAttr('data-bs-original-title');
+            }
+        }
+
+        function onFocusOut(id) {
+            $(`#${id}`).attr('readonly', true);
+        }
+
+        function ImgEditClick(id) {
+            $(`#${id}`).attr('readonly', false);
+
+            if (id == "OccupancyDate") {
+                 $('#OccupancyDate').datepicker({
+                   format: "yyyy/mm/dd",
+                    autoclose: false,
+                    startDate: '1990/01/01'
+                });
+                $(`#${id}`).datepicker('update')
+            }
+
+            $(`#${id}`).focus();
+        }
+
+        $("#OccupancyDate").change((e) => {
+            $('#OccupancyDate').datepicker("destroy");
+        });
+
+        function noSpaces(event) {
+            var keysToPrevent = [32];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function noSpecialCharacter(event) { // Space key is allowed
+            var keysToPrevent = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96, 123, 124, 125, 126];
+            var key = event.keyCode || event.which;
+            var input = event.target.value;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+
+            if (key === 32) {
+                // Prevent white space at the beginning of the field
+                if (input.length === 0 || input.trim().length === 0 || event.target.selectionStart === 0) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                // Check if there is already a white space
+                var startIndex = event.target.selectionStart - 1;
+                var endIndex = event.target.selectionStart;
+                var prevChar = input.slice(startIndex, endIndex);
+                var nextChar = input.charAt(endIndex);
+
+                if (prevChar === ' ' || nextChar === ' ') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        function noSpecialCharacter1(event) { 
+            var keysToPrevent = [4, 32, 43, 45, 46, 69, 101];
+            var key = event.keyCode || event.which;
+            var check = $.inArray(key, keysToPrevent)
+            if (check != -1) {
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function preventSpaces(event) {
+            var key = event.keyCode || event.which;
+            var input = event.target.value;
+
+            if (key === 32) {
+                // Prevent white space at the beginning of the field
+                if (input.length === 0 || input.trim().length === 0 || event.target.selectionStart === 0) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                // Check if there is already a white space
+                var startIndex = event.target.selectionStart - 1;
+                var endIndex = event.target.selectionStart;
+                var prevChar = input.slice(startIndex, endIndex);
+                var nextChar = input.charAt(endIndex);
+
+                if (prevChar === ' ' || nextChar === ' ') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        $('#clickToReload').children().on("click", function () {
+            $("#loaderContent").css("display", "block");
+            resetData(profileModel);
+        });
+
+        function resetData(data){
+            //---------------Personal profile---------------
+            $('#OccupancyDate').val(occupanyDate);
+            $('#FullName').val(data.fullName);
+            $('#PhoneNumber').val(data.phoneNumber);
+            $('#NotificationEmail').val(data.notificationEmail);
+
+            // -------------- Usage display-----------------
+            //if (data.showHourlyUsage == true) {
+            //    if (!$("#ShowHourlyUsage").is(':checked'))
+            //        $("#ShowHourlyUsage").trigger('click');
+            //} else {
+            //    if ($("#ShowHourlyUsage").is(':checked'))
+            //        $("#ShowHourlyUsage").trigger('click');
+            //}
+
+            if (data.showCostInclVAT == true) {
+                if (!$("#ShowCostInclVAT").is(':checked'))
+                    $("#ShowCostInclVAT").trigger('click');
+            } else {
+                if ($("#ShowCostInclVAT").is(':checked'))
+                    $("#ShowCostInclVAT").trigger('click');
+            }
+
+            if (data.showDetailedDailyBilling == true) {
+                if (!$("#ShowDetailedDailyBilling").is(':checked'))
+                    $("#ShowDetailedDailyBilling").trigger('click');
+            } else {
+                if ($("#ShowDetailedDailyBilling").is(':checked'))
+                    $("#ShowDetailedDailyBilling").trigger('click');
+            }
+
+            $('#meterType').val(meterTypeVal);  // Select type
+            $('#meterTypeSelect').val(meterTypeText);
+
+            //----------------Notifications-----------------
+            if (data.lowBalanceNotifications == true) {
+                if (!$("#LowBalanceNotifications").is(':checked'))
+                    $("#LowBalanceNotifications").trigger('click');
+            } else {
+                if ($("#LowBalanceNotifications").is(':checked'))
+                    $("#LowBalanceNotifications").trigger('click');
+            }
+
+            //if (data.leakNotifications == true) {
+            //    if (!$("#LeakNotifications").is(':checked'))
+            //        $("#LeakNotifications").trigger('click');
+            //} else {
+            //    if ($("#LeakNotifications").is(':checked'))
+            //        $("#LeakNotifications").trigger('click');
+            //}
+
+            //if (data.highUsageNotifications == true) {
+            //    if (!$("#HighUsageNotifications").is(':checked'))
+            //        $("#HighUsageNotifications").trigger('click');
+            //} else {
+            //    if ($("#HighUsageNotifications").is(':checked'))
+            //        $("#HighUsageNotifications").trigger('click');
+            //}
+
+            if (data.newsLetters == true) {
+                if (!$("#NewsLetters").is(':checked'))
+                    $("#NewsLetters").trigger('click');
+            } else {
+                if ($("#NewsLetters").is(':checked'))
+                    $("#NewsLetters").trigger('click');
+            }
+
+            if (isEmail == true) {
+                if (!$("#Email").is(':checked'))
+                    $("#Email").trigger('click');
+            } else {
+                if ($("#Email").is(':checked'))
+                    $("#Email").trigger('click');
+            }
+
+            if (isSms == true) {
+                if (!$("#SMS").is(':checked'))
+                    $("#SMS").trigger('click');
+            } else {
+                if ($("#SMS").is(':checked'))
+                    $("#SMS").trigger('click');
+            }
+
+            $('#LowBalanceNotification').val(lowBalNotVal); // Select type
+            $('#LowBalNotSelect').val(lowBalNotText);
+
+
+            //------- Tax invoice settings page -------------
+            if (data.activateTaxInvoice == true) {
+                if (!$("#ActivateTaxInvoice").is(':checked'))
+                    $("#ActivateTaxInvoice").trigger('click');
+            } else {
+                if ($("#ActivateTaxInvoice").is(':checked'))
+                    $("#ActivateTaxInvoice").trigger('click');
+            }
+
+            $('#RecipientName').val(data.recipientName);
+            $('#RecipientAddress').val(data.recipientAddress);
+            $('#RecipientVatNumber').val(data.recipientVatNumber);
+            $('#RecipientReferenceNumber').val(data.recipientReferenceNumber);
+
+            $("#loaderContent").css("display", "none");
+           
+        }
+
+        $("#OccupancyDate").click(() => {
+            let isPicker = $('#OccupancyDate').data('datepicker');
+            if(isPicker){
+                $("#OccupancyDate").datepicker("update");
+            }
+        })
+
+        $('#OccupancyDate').datepicker()
+            .on("hide", function (e) {
+                $('#OccupancyDate').datepicker("destroy");
+            });
+
+    </script>
+}

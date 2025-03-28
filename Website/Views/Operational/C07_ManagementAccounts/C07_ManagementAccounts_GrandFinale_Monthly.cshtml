@@ -1,0 +1,695 @@
+@model MyVoltage.Models.OperationalModels.C07_ManagementAccounts.C07_ManagementAccounts_GrandFinale_MonthlyModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor;
+@using MyVoltage.Extensions;
+@{
+    DateTime currentDate = Model.FromDate;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        From:
+        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+        &nbsp;
+        To:
+        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("Partner", Model.Partner, new { @class = "form-control", @onChange = "GetCompanies();"  })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("Company", Model.Company, new { @class = "form-control"  })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-md-auto">
+        Amount Type:
+    </div>
+    <div class="col">
+        @Html.DropDownList("AmountType", Model.AmountType, new { @class = "form-control"  })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <a href="/operational/C07_ManagementAccounts/C07_ManagementAccounts_GrandFinale_Monthly" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        &nbsp;
+        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+    </div>
+</div>
+@if (httpContextAccessor.HttpContext.Request.QueryString.HasValue)
+{
+    <hr class="bg-dark" />
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <h4>Overall</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <canvas id="myChart_Summary" height="300"></canvas>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered table-striped ">
+                    <thead>
+                        <tr>
+                            <th class="text-left text-nowrap"></th>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <th class="text-center text-nowrap">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ReportingParentDescriptionItems_Summary)
+                        {
+                            <tr>
+                                <td class="text-left text-nowrap @(item.IsTotal ? "border-table-total" : "")">@item.ReportingDescription</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap @(item.IsTotal ? "border-table-total" : "")" title="@currentDate.ToMonth() - @item.ReportingDescription">@(item.IsPercentage ? $"{item.MonthlyValues[currentDate].ToMoney()} %" : item.MonthlyValues[currentDate].ToMoneyNoDecimal())</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                                <td class="text-right text-nowrap @(item.IsTotal ? "border-table-total" : "")" title="Total - @item.ReportingDescription">@(item.IsPercentage ? $"-" : item.MonthlyValues.Values.Sum().ToMoneyNoDecimal())</td>
+                            </tr>
+                            @if (item.ShowLineBreakAfter)
+                            {
+                                <tr>
+                                    <td class="text-left text-nowrap">&nbsp;</td>
+                                    @{
+                                        currentDate = Model.FromDate;
+                                    }
+                                    @while (currentDate <= Model.ToDate)
+                                    {
+                                        <td class="text-right text-nowrap"></td>
+                                        currentDate = currentDate.AddMonths(1);
+                                    }
+                                    <td class="text-right text-nowrap"></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr class="bg-dark" />
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <h4>Sales</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <canvas id="myChart_Sales" height="300"></canvas>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered table-striped ">
+                    <thead>
+                        <tr>
+                            <th class="text-left text-nowrap"></th>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <th class="text-center text-nowrap">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ReportingParentDescriptionItems_Sales.Count > 0)
+                        {
+                            @foreach (var item in Model.ReportingParentDescriptionItems_Sales[0].ReportingCategoryItems)
+                            {
+                                <tr>
+                                    <td class="text-left text-nowrap">@item.ReportingDescription</td>
+                                    @{
+                                        currentDate = Model.FromDate;
+                                    }
+                                    @while (currentDate <= Model.ToDate)
+                                    {
+                                        <td class="text-right text-nowrap" title="@currentDate.ToMonth() - @item.ReportingDescription">@item.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                        currentDate = currentDate.AddMonths(1);
+                                    }
+                                    <td class="text-right text-nowrap" title="Total - @item.ReportingDescription">@item.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                                </tr>
+                            }
+                            <tr class="border-table-total">
+                                <td class="text-left text-nowrap">@Model.ReportingParentDescriptionItems_Sales[0].Total.ReportingDescription</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap" title="Summary Total">@Model.Total_Sales.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                                <td class="text-right text-nowrap" title="Total - @Model.ReportingParentDescriptionItems_Sales[0].Total.ReportingDescription">@Model.Total_Sales.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr class="bg-dark" />
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <h4>Gross Profit</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <canvas id="myChart_GrossProfit" height="300"></canvas>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered table-striped ">
+                    <thead>
+                        <tr>
+                            <th class="text-left text-nowrap"></th>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <th class="text-center text-nowrap">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ReportingParentDescriptionItems_GrossProfit.Count > 0)
+                        {
+                            @foreach (var item in Model.ReportingParentDescriptionItems_GrossProfit[0].ReportingCategoryItems)
+                            {
+                                <tr>
+                                    <td class="text-left text-nowrap">@item.ReportingDescription</td>
+                                    @{
+                                        currentDate = Model.FromDate;
+                                    }
+                                    @while (currentDate <= Model.ToDate)
+                                    {
+                                        <td class="text-right text-nowrap" title="@currentDate.ToMonth() - @item.ReportingDescription">@item.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                        currentDate = currentDate.AddMonths(1);
+                                    }
+                                    <td class="text-right text-nowrap" title="Total - @item.ReportingDescription">@item.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                                </tr>
+                            }
+                            <tr class="border-table-total">
+                                <td class="text-left text-nowrap">@Model.ReportingParentDescriptionItems_GrossProfit[0].Total.ReportingDescription</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap" title="Summary Total">@Model.Total_GrossProfit.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                                <td class="text-right text-nowrap" title="Total - @Model.ReportingParentDescriptionItems_GrossProfit[0].Total.ReportingDescription">@Model.Total_GrossProfit.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr class="bg-dark" />
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <h4>Operating Expenses</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <canvas id="myChart_OperatingExpenses" height="300"></canvas>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered table-striped ">
+                    <thead>
+                        <tr>
+                            <th class="text-left text-nowrap"></th>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <th class="text-center text-nowrap">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ReportingParentDescriptionItems_OperatingExpenses)
+                        {
+                            <tr>
+                                <td class="text-left text-nowrap">@item.ReportingParentDescription</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap" title="@currentDate.ToMonth() - @item.ReportingParentDescription">@item.Total.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                                <td class="text-right text-nowrap" title="Total - @item.ReportingParentDescription">@item.Total.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                            </tr>
+                        }
+                        <tr class="border-table-total">
+                            <td class="text-left text-nowrap">@Model.Total_OperatingExpenses.ReportingDescription</td>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <td class="text-right text-nowrap" title="Summary Total">@Model.Total_OperatingExpenses.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <td class="text-right text-nowrap" title="Total - @Model.Total_OperatingExpenses.ReportingDescription">@Model.Total_OperatingExpenses.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr class="bg-dark" />
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <h4>Other Expenses</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <canvas id="myChart_OtherExpenses" height="300"></canvas>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered table-striped ">
+                    <thead>
+                        <tr>
+                            <th class="text-left text-nowrap"></th>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <th class="text-center text-nowrap">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ReportingParentDescriptionItems_OtherExpenses)
+                        {
+                            <tr>
+                                <td class="text-left text-nowrap">@item.ReportingParentDescription</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap" title="@currentDate.ToMonth() - @item.ReportingParentDescription">@item.Total.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                                <td class="text-right text-nowrap" title="Total - @item.ReportingParentDescription">@item.Total.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                            </tr>
+                        }
+                        <tr class="border-table-total">
+                            <td class="text-left text-nowrap">@Model.Total_OtherExpenses.ReportingDescription</td>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <td class="text-right text-nowrap" title="Summary Total">@Model.Total_OtherExpenses.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <td class="text-right text-nowrap" title="Total - @Model.Total_OtherExpenses.ReportingDescription">@Model.Total_OtherExpenses.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr class="bg-dark" />
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <h4>Gross Profit</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <canvas id="myChart_GrossProfit_Companies" height="300"></canvas>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered table-striped ">
+                    <thead>
+                        <tr>
+                            <th class="text-left text-nowrap"></th>
+                            @{
+                                currentDate = Model.FromDate;
+                            }
+                            @while (currentDate <= Model.ToDate)
+                            {
+                                <th class="text-center text-nowrap">@currentDate.ToMonth()</th>
+                                currentDate = currentDate.AddMonths(1);
+                            }
+                            <th class="text-center text-nowrap">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ReportingParentDescriptionItems_GrossProfit_Companies.Count > 0)
+                        {
+                            @foreach (var item in Model.ReportingParentDescriptionItems_GrossProfit_Companies)
+                            {
+                                <tr>
+                                    <td class="text-left text-nowrap">@item.ReportingDescription</td>
+                                    @{
+                                        currentDate = Model.FromDate;
+                                    }
+                                    @while (currentDate <= Model.ToDate)
+                                    {
+                                        <td class="text-right text-nowrap" title="@currentDate.ToMonth() - @item.ReportingDescription">@item.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                        currentDate = currentDate.AddMonths(1);
+                                    }
+                                    <td class="text-right text-nowrap" title="Total - @item.ReportingDescription">@item.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                                </tr>
+                            }
+                            <tr class="border-table-total">
+                                <td class="text-left text-nowrap">Total</td>
+                                @{
+                                    currentDate = Model.FromDate;
+                                }
+                                @while (currentDate <= Model.ToDate)
+                                {
+                                    <td class="text-right text-nowrap" title="Summary Total">@Model.Total_GrossProfit_Companies.MonthlyValues[currentDate].ToMoneyNoDecimal()</td>
+                                    currentDate = currentDate.AddMonths(1);
+                                }
+                                <td class="text-right text-nowrap" title="Total">@Model.Total_GrossProfit_Companies.MonthlyValues.Values.Sum().ToMoneyNoDecimal()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+}
+@section Scripts {
+    <script src="/js/Chart.bundle.min.js"></script>
+    <script src="~/js/chart.utils.js"></script>
+    <script>
+        GetCompanies();
+        function GetCompanies() {
+            $("#Company").empty();
+            $("#Company").append(`<option value="">[All Companies]</option>`);
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Companies)));
+            $(companies).each(function () {
+                if (this.PartnerID == $("#Partner").val()) {
+                    if (this.CompanyID == '@(httpContextAccessor.HttpContext.Request.Query["Company"])') {
+                        $("#Company").append(`<option value="${this.CompanyID}" selected>${this.Name}</option>`);
+                    }
+                    else {
+                        $("#Company").append(`<option value="${this.CompanyID}">${this.Name}</option>`);
+                    }
+                }
+            });
+
+        }
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        const data_Summary_Total = {
+            labels: [@(Html.Raw(string.Join(", ", Model.ChartLabels.Select(p => $"'{p}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_Summary_Datasets)))
+                            };
+
+        const ctx_Summary_Total = document.getElementById('myChart_Summary');
+        var config_Summary_Total = {
+            type: 'bar',
+            data: data_Summary_Total,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [
+                        {
+                            id: 'y-axis-0', type: 'linear',
+                            ticks: {
+                                // Include a dollar sign in the ticks
+                                callback: function (value, index, ticks) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                }
+                            }
+                        },
+                        {
+                            id: 'y-axis-1', type: 'linear', position: 'right',
+                            ticks: {
+                                // Include a dollar sign in the ticks
+                                callback: function (value, index, ticks) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                }
+                            }
+                        },
+                    ],
+                },
+            },
+        };
+
+        var chart_Summary_Total = new Chart(ctx_Summary_Total, config_Summary_Total);
+        const data_Sales = {
+            labels: [@(Html.Raw(string.Join(", ", Model.ChartLabels.Select(p => $"'{p}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_Sales_Datasets)))
+                            };
+        const ctx_Sales = document.getElementById('myChart_Sales');
+        var config_Sales = {
+            type: 'bar',
+            data: data_Sales,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+            },
+        };
+        var chart_Sales = new Chart(ctx_Sales, config_Sales);
+
+        const data_GrossProfit = {
+            labels: [@(Html.Raw(string.Join(", ", Model.ChartLabels.Select(p => $"'{p}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_GrossProfit_Datasets)))
+                            };
+        const ctx_GrossProfit = document.getElementById('myChart_GrossProfit');
+        var config_GrossProfit = {
+            type: 'bar',
+            data: data_GrossProfit,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+            },
+        };
+        var chart_GrossProfit = new Chart(ctx_GrossProfit, config_GrossProfit);
+
+        const data_OperatingExpenses = {
+            labels: [@(Html.Raw(string.Join(", ", Model.ChartLabels.Select(p => $"'{p}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_OperatingExpenses_Datasets)))
+                            };
+        const ctx_OperatingExpenses = document.getElementById('myChart_OperatingExpenses');
+        var config_OperatingExpenses = {
+            type: 'bar',
+            data: data_OperatingExpenses,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+            },
+        };
+        var chart_OperatingExpenses = new Chart(ctx_OperatingExpenses, config_OperatingExpenses);
+
+        const data_OtherExpenses = {
+            labels: [@(Html.Raw(string.Join(", ", Model.ChartLabels.Select(p => $"'{p}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_OtherExpenses_Datasets)))
+                            };
+        const ctx_OtherExpenses = document.getElementById('myChart_OtherExpenses');
+        var config_OtherExpenses = {
+            type: 'bar',
+            data: data_OtherExpenses,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+            },
+        };
+        var chart_OtherExpenses = new Chart(ctx_OtherExpenses, config_OtherExpenses);
+
+        const data_GrossProfit_Companies = {
+            labels: [@(Html.Raw(string.Join(", ", Model.ChartLabels.Select(p => $"'{p}'").ToList())))],
+            datasets: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Total_GrossProfit_Companies_Datasets)))
+                            };
+        const ctx_GrossProfit_Companies = document.getElementById('myChart_GrossProfit_Companies');
+        var config_GrossProfit_Companies = {
+            type: 'bar',
+            data: data_GrossProfit_Companies,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                    }
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+            },
+        };
+        var chart_GrossProfit_Companies = new Chart(ctx_GrossProfit_Companies, config_GrossProfit_Companies);
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C07_ManagementAccounts/C07_ManagementAccounts_GrandFinale_Monthly?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val()
+                + '&AmountType=' + $("#AmountType").val() + '&Partner=' + $("#Partner").val() + '&Company=' + $("#Company").val();
+        }
+    </script>
+}

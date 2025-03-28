@@ -1,0 +1,229 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_AllocationRerunModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_AllocationRerun.GetDescription()}";
+}
+@if (Model.IsSuccessfull)
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Allocation Rerun successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/J_Finance/J_Finance_AllocationRerun" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <form asp-action="J_Finance_AllocationRerun" enctype="multipart/form-data">
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>Create New Run</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-1 mt-1">
+                            <div class="col-12">
+                                Netcash Transactions Created Between
+                            </div>
+                        </div>
+                        <div class="row mb-1 mt-1">
+                            <div class="col-12">
+                                <input type="date" name="fromDate" id="fromDate" asp-for="FromDate" value="@(Model.FromDate.ToDateShort())" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row mb-1 mt-1">
+                            <div class="col-12">
+                                And
+                            </div>
+                        </div>
+                        <div class="row mb-1 mt-1">
+                            <div class="col-12">
+                                <input type="date" name="toDate" id="toDate" asp-for="ToDate" value="@(Model.ToDate.ToDateShort())" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row mb-1 mt-1">
+                            <div class="col-12">
+                                @Html.DropDownList("CompanyID", Model.CompanyID, new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mt-1 mb-1 col-12">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-play"></i>&nbsp;Start New Run</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.InProgressItem != null)
+    {
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                        <h4>Allocation Rerun Currently In Progress:</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Report ID</th>
+                                    <th scope="col">Company</th>
+                                    <th scope="col">From Date</th>
+                                    <th scope="col">To Date</th>
+                                    <th scope="col">Report Started</th>
+                                    <th scope="col">Report Ended</th>
+                                    <th scope="col">Progress</th>
+                                    <th scope="col">Payments Checked</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col">@Model.InProgressItem.ID</td>
+                                    <td scope="col">@Model.InProgressItem.CompanyName</td>
+                                    <td scope="col">@Model.InProgressItem.FromDate.ToDateShort()</td>
+                                    <td scope="col">@Model.InProgressItem.ToDate.ToDateShort()</td>
+                                    <td scope="col">@Model.InProgressItem.DateStarted.ToDateAndTimeShort()</td>
+                                    <td scope="col">@Model.InProgressItem.DateEnded.ToDateAndTimeShort() @((Model.InProgressItem.DateEnded.HasValue && Model.InProgressItem.DateStarted.HasValue) ? $" ({(Model.InProgressItem.DateEnded.Value - Model.InProgressItem.DateStarted.Value).TotalMinutes:N0}m)" : "")</td>
+                                    <td scope="col">
+                                        @Model.InProgressItem.Progress.ToMoney()
+                                        <span> %</span>
+                                        @if (Model.InProgressItem.DateStarted.HasValue)
+                                        {
+                                            double totalMSSinceStart = (DateTime.Now - Model.InProgressItem.DateStarted.Value).TotalMilliseconds;
+                                            double progressLeft = Convert.ToDouble(100) - Convert.ToDouble(Model.InProgressItem.Progress);
+                                            double partsLeft = progressLeft / Convert.ToDouble(Model.InProgressItem.Progress);
+                                            double msLeft = partsLeft * totalMSSinceStart;
+                                            @if (!Model.InProgressItem.DateEnded.HasValue && Model.InProgressItem.Progress != 0)
+                                            {
+                                                <span>(ETA: @(DateTime.Now.AddMilliseconds(msLeft).ToDateAndTimeShort()))</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td scope="col">@Model.InProgressItem.ItemsCompleted / @Model.InProgressItem.TotalItems</td>
+                                    <td scope="col">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+    <div class="row mb-4">
+        <div class="col">
+
+            <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Report ID</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">From Date</th>
+                        <th scope="col">To Date</th>
+                        <th scope="col">Report Started</th>
+                        <th scope="col">Report Ended</th>
+                        <th scope="col">Progress</th>
+                        <th scope="col">Payments Checked</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var itemC in Model.J_Finance_AllocationRerunItems.OrderByDescending(p => p.DateCreated))
+                    {
+                        string rowClass = "";
+                        if (itemC.Progress < 100 && itemC.DateEnded.HasValue)
+                        {
+                            rowClass = "table-danger";
+                        }
+                        else if (itemC.Progress == 100 && itemC.DateEnded.HasValue)
+                        {
+                            rowClass = "table-success";
+                        }
+                        <tr class="@rowClass">
+                            <td scope="col">@itemC.ID</td>
+                            <td scope="col">@itemC.CompanyName</td>
+                            <td scope="col">@itemC.FromDate.ToDateShort()</td>
+                            <td scope="col">@itemC.ToDate.ToDateShort()</td>
+                            <td scope="col">@itemC.DateStarted.ToDateAndTimeShort()</td>
+                            <td scope="col">@itemC.DateEnded.ToDateAndTimeShort() @((itemC.DateEnded.HasValue && itemC.DateStarted.HasValue) ? $" ({(itemC.DateEnded.Value - itemC.DateStarted.Value).TotalMinutes:N0}m)" : "")</td>
+                            <td scope="col">
+                                @itemC.Progress.ToMoney()
+                                <span> %</span>
+                                @if (itemC.DateStarted.HasValue)
+                                {
+                                    double totalMSSinceStart = (DateTime.Now - itemC.DateStarted.Value).TotalMilliseconds;
+                                    double progressLeft = Convert.ToDouble(100) - Convert.ToDouble(itemC.Progress);
+                                    double partsLeft = progressLeft / Convert.ToDouble(itemC.Progress);
+                                    double msLeft = partsLeft * totalMSSinceStart;
+                                    @if (!itemC.DateEnded.HasValue && itemC.Progress != 0)
+                                    {
+                                        <span>(ETA: @(DateTime.Now.AddMilliseconds(msLeft).ToDateAndTimeShort()))</span>
+                                    }
+                                }
+                            </td>
+                            <td scope="col">@itemC.ItemsCompleted / @itemC.TotalItems</td>
+                            <td scope="col">
+                                @if (itemC.DateEnded.HasValue)
+                                {
+                                    <a href="/operational/J_Finance/J_Finance_AllocationRerun_Restart/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Restart</a>
+                                    <span>&nbsp;</span>
+                                    <a href="/operational/J_Finance/J_Finance_AllocationRerun_Delete/@itemC.ID" class="btn btn-sm btn-outline-danger-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+}
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        $("#CustomerNumber_Search").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/J_Finance/J_Finance_ReceiptLog/Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+    })
+</script>
+}

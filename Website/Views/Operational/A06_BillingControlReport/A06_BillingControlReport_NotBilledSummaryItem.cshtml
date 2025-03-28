@@ -1,0 +1,78 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledSummaryItem
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledSummaryItem.StatusType.Outstanding)
+    {
+        rowclass = " class=\"table-danger\"";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_NotBilledSummaryItem.StatusType.Reviewed)
+    {
+        rowclass = " class=\"table-success\"";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+}
+<td style="border-left:2px solid black;border-right:2px solid black;" scope="col">@Model.CompanyName</td>
+<td title="@Model.CompanyName - Status" style="border-left:2px solid black;border-right:2px solid black;" id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+{
+    if (Model.CustomersPerAccountTypeCount.ContainsKey(accountType))
+    {
+        <td class="text-right" title="@Model.CompanyName - @accountType.GetDescription() - Customer Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@Model.CustomersPerAccountTypeCount[accountType]</td>
+    }
+    else
+    {
+        <td class="text-right" title="@Model.CompanyName - @accountType.GetDescription() - Customer Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+    }
+}
+<td class="text-right" title="@Model.CompanyName - Total Customer Count" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@Model.CustomersCount</td>
+
+@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+{
+    if (Model.MetersPerAccountTypeCount.ContainsKey(accountType))
+    {
+        <td class="text-right" title="@Model.CompanyName - @accountType.GetDescription() - Meter Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@Model.MetersPerAccountTypeCount[accountType]</td>
+    }
+    else
+    {
+        <td class="text-right" title="@Model.CompanyName - @accountType.GetDescription() - Meter Count" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+    }
+}
+<td class="text-right" title="@Model.CompanyName - Total Meter Count" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@Model.MetersCount</td>
+
+@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+{
+    if (Model.MetersNotBilledPerAccountTypeCount.ContainsKey(accountType))
+    {
+        <td class="text-right" title="@Model.CompanyName - @accountType.GetDescription() - Meters Not Billed" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@Model.MetersNotBilledPerAccountTypeCount[accountType]</td>
+    }
+    else
+    {
+        <td class="text-right" title="@Model.CompanyName - @accountType.GetDescription() - Meters Not Billed" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+    }
+}
+<td class="text-right" title="@Model.CompanyName - Total Meters Not Billed" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@Model.MetersNotBilledCount</td>
+
+@*@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+{
+    if (Model.MetersCheckedPerAccountTypeCount.ContainsKey(accountType))
+    {
+        <td title="@Model.CompanyName - @accountType.GetDescription() - Meters Checked" style="border-left:1px solid black;border-right:1px solid black;" scope="col">@Model.MetersCheckedPerAccountTypeCount[accountType]</td>
+    }
+    else
+    {
+        <td title="@Model.CompanyName - @accountType.GetDescription() - Meters Checked" style="border-left:1px solid black;border-right:1px solid black;" scope="col"></td>
+    }
+}
+<td title="@Model.CompanyName - Total Meters Checked" style="border-left:1px solid black;border-right:2px solid black;" scope="col">@Model.MetersCheckedCount</td>*@
+
+
+<script>
+    $(document).ready(function () {
+            $('#@Model.TableRowID').addClass('@rowclass');
+        });
+</script>

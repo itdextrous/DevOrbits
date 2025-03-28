@@ -1,0 +1,79 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_DeviceAPIsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_DeviceAPIs.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        <a href="/operational/SiteAdmin/SiteAdmin_DeviceAPIs_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Device API</a>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Description</th>
+                    <th scope="col">URL</th>
+                    <th scope="col">Use Skybill</th>
+                    <th scope="col">Is Sync Active</th>
+                    <th scope="col">Latest Sync Date</th>
+                    <th scope="col">Latest Sync GW Count</th>
+                    <th scope="col">Latest Sync Device Count</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SiteAdmin_DeviceAPIsItems)
+                {
+                    string rowClass = "";
+                    string title = $"{item.Description}";
+                    <tr class="@Html.Raw(rowClass)" title="@title">
+                        <td scope="col" class="text-nowrap">
+                            @item.Description
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.URL
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.UseSkybill.ToBoolean(true)
+                        </td>
+                        <td scope="col" class="text-nowrap">
+                            @item.IsSyncActive.ToBoolean(true)
+                        </td>
+                        <td scope="col" class="text-nowrap text-right">
+                            @item.LatestSyncDate.ToDateAndTimeShort()
+                        </td>
+                        <td scope="col" class="text-nowrap text-right">
+                            @item.LatestSyncGWCount
+                        </td>
+                        <td scope="col" class="text-nowrap text-right">
+                            @item.LatestSyncDeviceCount
+                        </td>
+                        <td scope="col">
+                            @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.SiteAdmin_DeviceAPIs, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                            {
+                                <a href="/operational/SiteAdmin/SiteAdmin_DeviceAPIs_Edit/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}

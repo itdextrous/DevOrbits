@@ -1,0 +1,136 @@
+@model MyVoltage.Models.OperationalModels.X_MeterTeamAdmin.X_MeterTeamAdmin_CustomersModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_Customers.GetDescription()} - {operationalProvider.CompanyName}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <span>Select a company to begin</span>
+        </div>
+    </div>
+}
+else if (Model.X_MeterTeamAdmin_CustomersItems.Count == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <span>There are no customers for @operationalProvider.CompanyName</span>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_Customers_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Customer</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_Customers_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Customer</a>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Address</th>
+                        <th scope="col">AuxiliaryIndex1</th>
+                        <th scope="col">AuxiliaryIndex2</th>
+                        <th scope="col">AuxiliaryIndex3</th>
+                        <th scope="col">AuxiliaryIndex4</th>
+                        <th scope="col">AuxiliaryIndex5</th>
+                        <th scope="col">Balance_LCY</th>
+                        <th scope="col">BILLING_CYCLE</th>
+                        <th scope="col">Blocked</th>
+                        <th scope="col">Customer_Name</th>
+                        <th scope="col">Customer_No</th>
+                        <th scope="col">DeviceID</th>
+                        <th scope="col">deviceType</th>
+                        <th scope="col">GatewayID</th>
+                        <th scope="col">GPS_Coordinates</th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Manufacturer</th>
+                        <th scope="col">No</th>
+                        <th scope="col">Owner</th>
+                        <th scope="col">Partner_Code</th>
+                        <th scope="col">Serial_No</th>
+                        <th scope="col">Service_Address_No</th>
+                        <th scope="col">Service_Code</th>
+                        <th scope="col">CreatedBySync</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var itemC in Model.X_MeterTeamAdmin_CustomersItems)
+                    {
+                        string rowclass = "";
+                        string cellClass = "";
+                        if (string.IsNullOrEmpty(itemC.Blocked))
+                        {
+                            rowclass = " class=\"table-success\"";
+                            cellClass = " class=\"text-green font-weight-bold\"";
+                        }
+                        else
+                        {
+                            rowclass = " class=\"table-danger\"";
+                            cellClass = " class=\"text-red font-weight-bold\"";
+                        }
+                        <tr @Html.Raw(rowclass)>
+                            <td scope="col">@itemC.Address</td>
+                            <td scope="col">@itemC.AuxiliaryIndex1</td>
+                            <td scope="col">@itemC.AuxiliaryIndex2</td>
+                            <td scope="col">@itemC.AuxiliaryIndex3</td>
+                            <td scope="col">@itemC.AuxiliaryIndex4</td>
+                            <td scope="col">@itemC.AuxiliaryIndex5</td>
+                            <td scope="col">@itemC.Balance_LCY</td>
+                            <td scope="col">@itemC.BILLING_CYCLE</td>
+                            <td scope="col">@itemC.Blocked</td>
+                            <td scope="col">@itemC.Customer_Name</td>
+                            <td scope="col">@itemC.Customer_No</td>
+                            <td scope="col">@itemC.DeviceID</td>
+                            <td scope="col">@itemC.deviceType</td>
+                            <td scope="col">@itemC.GatewayID</td>
+                            <td scope="col">@itemC.GPS_Coordinates</td>
+                            <td scope="col">@itemC.ID</td>
+                            <td scope="col">@itemC.Manufacturer</td>
+                            <td scope="col">@itemC.No</td>
+                            <td scope="col">@itemC.Owner</td>
+                            <td scope="col">@itemC.Partner_Code</td>
+                            <td scope="col">@itemC.Serial_No</td>
+                            <td scope="col">@itemC.Service_Address_No</td>
+                            <td scope="col">@itemC.Service_Code</td>
+                            <td scope="col">@itemC.CreatedBySync</td>
+                            <td scope="col">
+                                @if (itemC.CreatedBySync.HasValue && !itemC.CreatedBySync.Value)
+                                {
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_Customers, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                    {
+                                        <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_Customers_Edit/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                    }
+                                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.X_MeterTeamAdmin_Customers, MyVoltage.Data.SecureAreaActionEnum.Delete))
+                                    {
+                                        <a href="/operational/X_MeterTeamAdmin/X_MeterTeamAdmin_Customers_Delete/@itemC.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification';
+        }
+    </script>
+}

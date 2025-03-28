@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewData["Title"] = "Billing and Usage";
+}
+
+<div class="row">
+    <div class="col-md-9 mx-auto">
+        <form>
+        <p class="font-weight-bold mb-1">Search User</p>
+        <div class="clearfix">
+            <div class="form-group">
+                <input class="form-control" type="text" name="keyword" value="@ViewContext.HttpContext.Request.Query["keyword"]" placeholder="Enter Email, Cell Number, Customer Number, Client Name or Meter number">
+            </div>
+            <input class="btn btn-primary float-right" type="submit" value="Search" />
+        </div>
+        
+        <h4 class="mt-4">Details</h4>
+        @if (Model != null && Model.Count != 0)
+        {
+            @foreach (var m in Model)
+            {
+                <div class="card mb-5 clearfix">
+                    <div class="card-body">
+                        <div class="billing-acc-details">
+                            <span>Full Name: </span><span><b>@m.Fullname</b></span><br />
+                            <span>Email: </span><span><b>@(m.NotificationEmailAddress == null ? "-" : m.NotificationEmailAddress)</b></span><br />
+                            <span>Phone number: </span><span><b>@(m.CellphoneNum == null ? "-" : m.CellphoneNum)</b></span><br />
+                            <span>Company: </span><span><b>@m.Company</b></span><br />
+                            <span>Customer Number: </span><span><b>@m.CustomerNumber</b></span><br />
+                            <span>Meter number: </span><span><b>@(m.MeterNumber == null ? "-" : m.MeterNumber)</b></span><br />
+                            <span>Email Verified: </span><span><b>@(m.EmailVerified == true ? "Yes" : "No")</b></span><br />
+                            <span>Cell Verified: </span><span><b>@(m.CellVerified == true ? "Yes" : "No")</b></span><br />
+                            <span>Active: </span><span><b>@(m.Active == true ? "Yes" : "No")</b></span><br />
+                        </div>
+
+                        <div class="user-acc-actions">
+                            <a href="/billingUsage/CustomerLedgerEntries/@m.Company/@m.CustomerNumber" target="_blank">Customer Ledger Entries</a>
+                            <a href="/billingUsage/CustomerMeters/@m.Company" target="_blank">Customer Meters</a>
+                            <a href="/billingUsage/SalesInvoiceLines/@m.Company/@m.CustomerNumber" target="_blank">Sales Invoice Lines</a>
+                            <a href="/billingUsage/PaymentInfo/@m.CustomerNumber" target="_blank">Payment Information</a>
+                            <a href="/billingUsage/CustomerUsage/@m.CustomerNumber/@m.MeterNumber" target="_blank">Usage</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+           <div class="card">
+                <div class="card-body">
+                     <span><b>No search results found...</b></span><br />
+                </div>
+            </div>
+        }
+ 
+            </form>
+    </div>
+</div>
+
+

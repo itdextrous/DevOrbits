@@ -1,0 +1,102 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_CreditControlReviewModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_CreditControlReview.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-1 text-left">
+                        <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_CreditControlDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_CreditControlReview, MyVoltage.Data.SecureAreaActionEnum.Add) && !string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                    {
+                        <div class="col-2 text-right text-red font-weight-bold">
+                            Classify @operationalProvider.CustomerNumber As:
+                        </div>
+                        <div class="col-9">
+                            @foreach (var action in Model.A07_CreditControlAndNotifierProcess_CreditControlReviewActions)
+                            {
+                                <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledVerification_Action/@action.ActionID/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary @action.ActionColor" title="@action.ActionDescription"><i class="fas fa-@action.ActionIcon"></i>&nbsp;@action.ActionDisplayName</a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div id="deviceDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Device Details...
+                    </div>
+                </div>
+
+                <div id="billingDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Billing Details...
+                    </div>
+                </div>
+
+                <div id="customerDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Details...
+                    </div>
+                </div>
+
+                <div id="customerUsage" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Usage...
+                    </div>
+                </div>
+
+                <div id="customerMeterList" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter List...
+                    </div>
+                </div>
+
+                <div id="customerGraphsMonthly" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter Graphs...
+                    </div>
+                </div>
+
+                <div id="customerOccupancyStatus" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Occupancy Status...
+                    </div>
+                </div>
+            }
+
+            <div class="card-footer align-middle">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#deviceDetails").load('@Url.Content("/operational/shared/meter/DeviceDetails")');
+            $("#billingDetails").load('@Url.Content("/operational/shared/meter/billingDetails")');
+            $("#customerDetails").load('@Url.Content("/operational/shared/customer/customerdetails")');
+            $("#customerUsage").load('@Url.Content("/operational/shared/customer/customerusage")');
+            $("#customerMeterList").load('@Url.Content("/operational/shared/customer/customermeterlist")');
+            $("#customerGraphsMonthly").load('@Url.Content("/operational/shared/customer/customergraphsmonthly")');
+            $("#customerOccupancyStatus").load('@Url.Content("/operational/shared/customer/customeroccupancystatus")');
+        });
+    </script>
+}

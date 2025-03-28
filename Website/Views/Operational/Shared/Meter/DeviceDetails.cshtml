@@ -1,0 +1,76 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.DeviceDetailModel
+<div class="row col-12">
+    <h5 class="text-orange">Device Details</h5>
+</div>
+<div class="row">
+    <div class="col">Property</div>
+    <div class="col">@Model.CompanyName</div>
+</div>
+<div class="row">
+    <div class="col">Meter ID</div>
+    <div class="col">@Model.MeterID</div>
+</div>
+<div class="row">
+    <div class="col">SerialNumber</div>
+    <div class="col">@Model.SerialNumber</div>
+</div>
+<div class="row">
+    <div class="col">Name</div>
+    <div class="col">@Model.Name</div>
+</div>
+<div class="row">
+    <div class="col">Type Name</div>
+    <div class="col">@Model.TypeName</div>
+</div>
+<div class="row">
+    <div class="col">Contactor State</div>
+    <div class="col @Model.ContactorState.ToUpper()">@Model.ContactorState</div>
+</div>
+<div class="row">
+    <div class="col">Is Contactor Installed</div>
+    <div class="col">@Model.IsContactorInstalled</div>
+</div>
+<div class="row">
+    <div class="col">Skybill Customer No</div>
+    <div class="col">@Model.SkybillCustomerNo</div>
+</div>
+<div class="row">
+    <div class="col">Live Reading</div>
+    <div class="col">@Model.LiveReading</div>
+</div>
+<div class="row">
+    <div class="col">Live Reading Date</div>
+    <div class="col">@Model.LiveReadingDate</div>
+</div>
+<div class="row">
+    <div class="col">Last Billed Reading</div>
+    <div class="col">@Model.LastBilledReading</div>
+</div>
+<div class="row">
+    <div class="col">Last Billed Reading Date</div>
+    <div class="col">@Model.LastBilledReadingDate</div>
+</div>
+<div class="row">
+    <div class="col">Remaining Balance Amount</div>
+    <div class="col">@Model.RemainingBalanceAmount</div>
+</div>
+@*<div class="row">
+    <div class="col">Current Tarrif Step</div>
+    <div class="col">@Model.CurrentTarrifStep</div>
+</div>
+<div class="row">
+    <div class="col">Current_Cost_Per_Unit</div>
+    <div class="col">@Model.CurrentCostPerUnit</div>
+</div>*@
+<div class="row">
+    <div class="col">Average billing per day past 7 days</div>
+    <div class="col">@Model.AverageBillingPerDayPast7Days</div>
+</div>
+<div class="row">
+    <div class="col">Average units per day past 7 days</div>
+    <div class="col">@Model.AverageUnitsPerDayPast7Days</div>
+</div>
+@*<div class="row">
+    <div class="col">Not billed Alert for unit 03/08/2020</div>
+    <div class="col">@Model.NotBilledAlertForUnit</div>
+</div>*@

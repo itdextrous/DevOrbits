@@ -1,0 +1,45 @@
+﻿@model MyVoltage.Models.BuildingCouncilReconReportModel
+
+@{
+    ViewData["Title"] = "Building Council Recon Report";
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>
+                    Company
+                </span>
+                <select asp-for="CompanyID">
+                    @foreach (var company in Model.Companies)
+                    {
+                        <option value="@company.CompanyID">@company.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <span>
+                    Emails To Send Report To
+                </span>
+                <textarea asp-for="ToSendTo" class="form-control" type="" title="Emails"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Start</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                @Html.Raw(Model.ErrorMessage)
+            </div>
+        }
+    </div>
+
+}

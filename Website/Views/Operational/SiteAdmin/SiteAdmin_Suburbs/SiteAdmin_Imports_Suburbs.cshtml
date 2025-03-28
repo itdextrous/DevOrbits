@@ -1,0 +1,138 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_Imports_Models.SiteAdmin_Imports_SuburbsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    ViewData["Title"] = "System Admin - Imports - Suburbs";
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                Welcome to @(ViewData["Title"])<br />
+            </div>
+
+            <div class="card-body">
+
+                @if (Model.IsSuccessfull)
+                {
+                    <div class="row col-12 mt-md-2">
+                        Success!
+                    </div>
+                    <div class="row col-12 mt-md-2">
+                        Details successfully updated.
+                    </div>
+                    <div class="row col-12 mt-md-2">
+                        <a href="/operational/SiteAdmin/SiteAdmin_Imports_Suburbs" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                }
+                else
+                {
+
+                    <form asp-action="SiteAdmin_Imports_Suburbs" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-12">
+
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="UploadFile" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" asp-for="UploadFile" />
+                                        <span asp-validation-for="UploadFile" class="text-red"></span>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.ResultMessage))
+                                {
+                                    <div class="row col-12 mb-2 mt-2">
+                                        @Model.ResultMessage
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-12 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Import</button>
+                        </div>
+                    </form>
+
+                }
+
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row col-12 mt-md-2">
+    <h6>Last 20 Imports</h6>
+</div>
+<div class="row col-12 mt-md-2">
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">User</th>
+                <th scope="col">Upload Started</th>
+                <th scope="col">Upload Ended</th>
+                <th scope="col">Import Progress</th>
+                <th scope="col">Import Started</th>
+                <th scope="col">Import Ended</th>
+                <th scope="col">Original File</th>
+                <th scope="col">Result File</th>
+                <th scope="col">Result</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SiteAdmin_Imports_SuburbsItems)
+            {
+                <tr>
+                    <td scope="col">@item.Username</td>
+                    <td scope="col">@item.DateUploadStarted.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.DateUploadEnded.ToDateAndTimeShort()</td>
+                    <td scope="col" class="text-nowrap">
+                        @if (item.SourceItemCount.HasValue)
+                        {
+                            <span>
+                                @item.ItemsCompleted / @item.SourceItemCount
+                                @if (item.SourceItemCount.Value > 0 && item.ItemsCompleted.HasValue)
+                                {
+                                    <span>(@(((item.ItemsCompleted.Value / item.SourceItemCount.Value) * 100.0m).ToString("N0"))%)</span>
+                                }
+                                <br />
+                                Succeeded: @item.ItemsSucceeded
+                                <br />
+                                Failed: @item.ItemsFailed
+                            </span>
+                        }
+                    </td>
+                    <td scope="col">@item.DateImportStarted.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.DateImportEnded.ToDateAndTimeShort()</td>
+                    <td scope="col"><a href="/operational/SiteAdmin/SiteAdmin_Imports_SuburbsFile/@item.ID/Original" target="_blank">@item.OriginalFileName</a></td>
+                    <td scope="col">
+                        @if (item.DateImportEnded.HasValue)
+                        {
+                            <a href="/operational/SiteAdmin/SiteAdmin_Imports_SuburbsFile/@item.ID/Result" target="_blank">Result.xlsx</a>
+                        }
+                    </td>
+                    <td scope="col"><a href="#" onclick="alert('@Html.Encode(item.ResultMessage)');">@item.ResultFriendly</a></td>
+                    <td scope="col">
+                        @if (item.DateImportEnded.HasValue)
+                        {
+                            <a class="btn btn-sm btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_Imports_RentalDataRetry/@item.ID"><i class="fas fa-undo"></i>&nbsp;Retry</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,442 @@
+@model MyVoltage.Models.OperationalModels.InsightsModels.ProductsDailyCostModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+@foreach (var productItem in Model.ProductItems)
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+
+                <div class="card-header">
+                    <h5 class="text-orange">
+                        <span>@productItem.ProductName</span>
+                    </h5>
+                </div>
+                @if (productItem.DeviceTypeID != 0)
+                {
+                    <div class="card-body">
+                        <canvas id="monthlyChart_@productItem.ProductID"></canvas>
+                    </div>
+                }
+                <div class="card-body">
+                    <table class="table table-sm table-hover table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Month</th>
+                                <th scope="col" class="text-right">Units</th>
+                                <th scope="col" class="text-right">Unit Price</th>
+                                <th scope="col" class="text-right">
+                                    Total
+                                    <br />
+                                    @if (operationalProvider.ShowCostInclVAT)
+                                    {
+                                        <span class="text-green font-weight-bold">Incl Vat</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red font-weight-bold">Excl Vat</span>
+                                    }
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var billingItem in productItem.MonthlyBillingItems)
+                            {
+                                <tr>
+                                    <td scope="col">@billingItem.Date.ToMonth()</td>
+                                    <td scope="col" class="text-right">@billingItem.Units.ToMoneyNoDecimal()</td>
+                                    <td scope="col" class="text-right">@billingItem.CostPerUnit.ToMoney("R")</td>
+                                    <td scope="col" class="text-right">@billingItem.Amount.ToMoneyNoDecimal("R")</td>
+                                </tr>
+                            }
+                            <tr class="border-table-total">
+                                <td scope="col">Total</td>
+                                <td scope="col" class="text-right">@productItem.MonthlyBillingItems.Select(p => p.Units).Sum().ToMoneyNoDecimal()</td>
+                                <td scope="col" class="text-right">@productItem.MonthlyBillingItems.Select(p => p.CostPerUnit).Average().ToMoney("R")</td>
+                                <td scope="col" class="text-right">@productItem.MonthlyBillingItems.Select(p => p.Amount).Sum().ToMoneyNoDecimal("R")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-body">
+                    <hr />
+                </div>
+
+                @if (productItem.DeviceTypeID != 0)
+                {
+                    <div class="card-body">
+                        <canvas id="dailyChart_@productItem.ProductID"></canvas>
+                    </div>
+                }
+
+                <div class="card-body">
+                    <table class="table table-sm table-hover table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-right">Units</th>
+                                <th scope="col" class="text-right">Unit Price</th>
+                                <th scope="col" class="text-right">
+                                    Total
+                                    <br />
+                                    @if (operationalProvider.ShowCostInclVAT)
+                                    {
+                                        <span class="text-green font-weight-bold">Incl Vat</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red font-weight-bold">Excl Vat</span>
+                                    }
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var billingItem in productItem.DailyBillingItems)
+                            {
+                                <tr>
+                                    <td scope="col">@billingItem.Date.ToDateShort()</td>
+                                    <td scope="col" class="text-right">@billingItem.Units.ToString("N3")</td>
+                                    <td scope="col" class="text-right">@billingItem.CostPerUnit.ToMoney("R")</td>
+                                    <td scope="col" class="text-right">@billingItem.Amount.ToMoneyNoDecimal("R")</td>
+                                </tr>
+                            }
+                            <tr class="border-table-total">
+                                <td scope="col">Total</td>
+                                <td scope="col" class="text-right">@productItem.DailyBillingItems.Select(p => p.Units).Sum().ToString("N3")</td>
+                                <td scope="col" class="text-right">@productItem.DailyBillingItems.Select(p => p.CostPerUnit).Average().ToMoney("R")</td>
+                                <td scope="col" class="text-right">@productItem.DailyBillingItems.Select(p => p.Amount).Sum().ToMoneyNoDecimal("R")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer">
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+}
+
+<script src="/js/Chart.bundle.min.js"></script>
+<script src="~/js/chart.utils.js"></script>
+<script src="~/js/knockout.js"></script>
+<!--Temporary solution to remove the gradient bg after logged in. -->
+<script>
+
+        function formatLabels(label, index, labels)
+        {
+            label = parseFloat(label)
+
+            if (Math.max.apply(Math, this.ticks) <= 5)
+            {
+                label = toFixed(label, 2)
+            }
+            else
+            {
+                label = toFixed(label, 0)
+            }
+
+            return numberWithCommas(label)
+        }
+
+        function formatToolTips(tooltipItem, data)
+        {
+            var label = parseFloat(tooltipItem.yLabel)
+
+            if (Math.max.apply(Math, this.ticks) <= 5)
+            {
+                label = toFixed(label, 2)
+            }
+            else
+            {
+                label = toFixed(label, 0)
+            }
+
+            return data.datasets[tooltipItem.datasetIndex].label + " " + numberWithCommas(label)
+        }
+
+        var config = {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: null,
+                    borderColor: 'rgb(247, 138, 31)',
+                    label: 'Cost Per Unit',
+                    type: 'line',
+                    backgroundColor: 'rgb(247, 138, 31)',
+                    fill: false,
+                },
+                {
+                    data: null,
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'Units'
+                }]
+                ,
+                labels: null
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    callbacks: {
+                        label: formatToolTips
+                        }
+                    },
+                title: {
+                    display: false,
+                    text: 'Main Colours'
+                },
+                scales: {
+                    xAxes: [{
+
+                        //display: false,
+                        ticks: {
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            autoSkip: false,
+                        },
+
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 1,
+                            zeroLineWidth: 0
+                        },
+
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            callback: formatLabels,
+                            beginAtZero: false,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)'
+                        },
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    }]
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            },
+        };
+
+        var charts = {};
+
+        function DisplayChart(data, name, years, months, days, deviceTypeID)
+        {
+
+            if (charts[name] != undefined)
+                charts[name].destroy();
+
+            var ctx = document.getElementById(name).getContext("2d");
+            var newConfig = $.extend(true, {}, config);
+
+            newConfig.data.datasets[1].data = data.Data.Item1;
+            newConfig.data.labels = data.Labels;
+
+            //if (data.Data.Item3 != null)
+            //{
+            //    data.Data.Item2 = data.Data.Item3
+            //    newConfig.data.datasets[0].label = "kVA"
+            //}
+
+            //if (data.Data.Item4 != null) {
+            //    data.Data.Item2 = data.Data.Item4
+            //    newConfig.data.datasets[0].label = "kWh"
+            //}
+
+            newConfig.data.dataAvgs = data.Avgs;
+            newConfig.data.dataTotals = data.Totals;
+
+            if (years != '') {
+                newConfig.data.datasets[1].Years = years
+            }
+            if (months != '') {
+                newConfig.data.datasets[1].Months = months
+            }
+            if (days != '') {
+                newConfig.data.datasets[1].Days = days
+            }
+
+            // Tooltips
+            newConfig.options.tooltips = {
+                callbacks: {
+                    title: function (tooltipItem, data) {
+                        return "";
+                    },
+                    afterLabel: function (tooltipItem, data) {
+                        if (tooltipItem.datasetIndex === 1) {
+                            var label = tooltipItem.yLabel
+                            var x = label + " " + data.datasets[tooltipItem.datasetIndex].label
+                            var y = data.dataAvgs[tooltipItem.index]
+                            var z = data.dataTotals[tooltipItem.index]
+
+                            var str = ["Cost: R " + toFixed(z, 2)]
+                            str.push("Cost Per Unit: R " + toFixed(y, 2))
+                            return str;
+                        }
+                    }
+                }
+            };
+
+            // Line graph
+            if (data.Data.Item2 != null) {
+                // Balances - Only for Daily chart
+                newConfig.data.datasets[0].yAxisID = "y-axis-0";
+                newConfig.data.datasets[1].yAxisID = "y-axis-1";
+                newConfig.data.datasets[0].data = data.Data.Item2;
+                newConfig.options.scales.yAxes = [
+                    {
+                        id: "y-axis-0",
+                        position: 'right',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    },
+                    {
+                        ticks: {
+                            beginAtZero: false,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: formatLabels,
+                        },
+                        id: "y-axis-1",
+                        position: 'left',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0)'
+                        }
+                    }]
+            }
+
+            var waterColor = 'rgb(65,105,225)'
+            var electrictyColor = 'rgb(255,221,120)'
+            var gasColor = 'rgb(128,128,128)'
+
+            var waterLastColor = 'rgb(0,0,255)'
+            var electrictyLastColor = 'rgb(255,192,1)'
+            var gasLastColor = 'rgb(105,105,105)'
+
+            var color = electrictyColor;
+            var lastColor = electrictyLastColor;
+
+            if (deviceTypeID == '@((int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Water)') {
+                color = waterColor;
+                lastColor = waterLastColor;
+            }
+            else if (deviceTypeID == '@((int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)') {
+                color = gasColor;
+                lastColor = gasLastColor;
+            }
+
+            for (var itm in data.Labels)
+            {
+                newConfig.data.datasets[1].backgroundColor.push(color);
+            }
+
+            newConfig.data.datasets[1].backgroundColor[data.Labels.length - 1] = lastColor;
+
+            newConfig.data.datasets[1].MeterNumber = '@operationalProvider.CustomerMeterSerial'
+            newConfig.data.datasets[1].Name = '@operationalProvider.CustomerMeterName'
+
+            var chart = new Chart(ctx, newConfig);
+            charts[name] = chart;
+        }
+
+        function CalendarModel()
+        {
+            var self = this;
+
+            this.MonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            this.Months = ko.observableArray();
+            this.Years = ko.observableArray();
+
+            this.Day = ko.observable(@Model.Month.Day);
+            this.Month = ko.observable(@Model.Month.Month);
+            this.Year = ko.observable(@Model.Month.Year);
+
+            this.FullMonth = ko.computed(function ()
+            {
+                return this.MonthNames[this.Month() - 1] + " " + this.Year();
+            }, this);
+
+            this.FullDay = ko.computed(function ()
+            {
+                return this.Day() + " " + this.MonthNames[this.Month() - 1] + " " + this.Year();
+            }, this);
+
+            this.DaysInMonth = function (year, month)
+            {
+                return new Date(year, month, 0).getDate();
+            }
+
+            this.Days = ko.computed(function ()
+            {
+                var totalDays = self.DaysInMonth(self.Year(), self.Month());
+
+                var days = [];
+
+                for (i = 1; i < totalDays+1; i++)
+                {
+                    days.push(i + ' ' + self.FullMonth());
+                }
+
+                return days;
+            }, this);
+
+        }
+
+        var model = new CalendarModel();
+        ko.applyBindings(model);
+
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+        function monthNameToNum(monthname)
+        {
+            var month = months.indexOf(monthname);
+            return month + 1;
+        }
+
+        function numberWithCommas(number)
+        {
+            //if (number > 1)
+                //return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            //else
+           return Number.parseFloat(number).toFixed(2);
+        }
+
+        function toFixed(number, decimals)
+        {
+            //var x = Math.pow(10, Number(decimals) + 1);
+            //return (Number(number) + (1 / x)).toFixed(decimals)
+            return Number.parseFloat(number).toFixed(decimals);
+        }
+
+        $(document).ready(function () {
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ProductItems)));
+            $(companies).each(function() {
+                if (this.DeviceTypeID != 0) {
+                    DisplayChart(this.DailyBillingData, 'dailyChart_' + this.ProductID, '', '', '', this.DeviceTypeID);
+                    DisplayChart(this.MonthlyBillingData, 'monthlyChart_' + this.ProductID, '', '', '', this.DeviceTypeID);
+                    }
+            });
+        });
+
+</script>

@@ -1,0 +1,28 @@
+﻿@inject UserManager<ApplicationUser> usermanager;
+@if (@User.IsInRole("CompanyAdmin"))
+{
+    Layout = "Layout";
+}
+else if (@User.IsInRole("Admin"))
+{
+    Layout = "LayoutAdmin";
+}
+else if (@User.IsInRole("Operational"))
+{
+    Layout = "LayoutOperational";
+}
+else
+{
+    Layout = "LayoutClientzone";
+}
+@*@try
+{
+    if (@usermanager != null && @User != null && @usermanager.GetUserName(User) !=null  && (@usermanager.GetUserName(User).Contains("lendl@myvoltage.co.za") || @usermanager.GetUserName(User).Contains("zprins1@gmail.com")))
+    {
+        Layout = "LayoutClientzone";
+    }
+}
+catch
+{
+
+}*@

@@ -1,0 +1,90 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions; 
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_OccupancyVerification.GetDescription()} - {operationalProvider.CustomerNumber}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-2 text-left">
+                        <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyDetails" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                    </div>
+                    @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A06_BillingControlReport_OccupancyVerification, MyVoltage.Data.SecureAreaActionEnum.Add) && !string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+                    {
+                        <div class="col-2 text-right text-red font-weight-bold">
+                            Classify Unit As:
+                        </div>
+                        <div class="col-8">
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_Occupied/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Occupied</a>
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_Vacant/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Vacant</a>
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_ServiceMeter/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Service Meter</a>
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_LowUsage/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Low Usage</a>
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_ManualReadings/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Manual Readings</a>
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_ReplaceMeters/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Replace Meters</a>
+                            <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification_NoInformation/@Html.Encode(operationalProvider.CustomerNumber)" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;No Information</a>
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div id="customerDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Details...
+                    </div>
+                </div>
+
+                <div id="customerUsage" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Usage...
+                    </div>
+                </div>
+
+                <div id="customerMeterList" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter List...
+                    </div>
+                </div>
+
+                <div id="customerGraphsMonthly" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter Graphs...
+                    </div>
+                </div>
+
+                <div id="customerOccupancyStatus" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Occupancy Status...
+                    </div>
+                </div>
+            }
+
+            <div class="card-footer align-middle">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#customerDetails").load('@Url.Content("/operational/shared/customer/customerdetails")');
+            $("#customerUsage").load('@Url.Content("/operational/shared/customer/customerusage")');
+            $("#customerMeterList").load('@Url.Content("/operational/shared/customer/customermeterlist")');
+            $("#customerGraphsMonthly").load('@Url.Content("/operational/shared/customer/customergraphsmonthly")');
+            $("#customerOccupancyStatus").load('@Url.Content("/operational/shared/customer/customeroccupancystatus")');
+        });
+    </script>
+}

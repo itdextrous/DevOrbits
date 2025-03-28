@@ -1,0 +1,1406 @@
+@model MyVoltage.Models.OperationalModels.A08_Tasks.A08_TasksModels.A08_Task_ReviewModel
+@inject UserManager<ApplicationUser> userMan;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A08_Task_Review.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+@if (Model.A08_Task == null)
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    The task you are looking for cannot be found.
+                </div>
+                <div class="card-footer">
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(Model.A08_Task.A08_Tasks_TypeItem.HowToURL))
+    {
+        <div id="howToDiv" class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <div class="row col-12 mb-md-2 p-4 ui-state-error rounded">
+                            <div class="ui-state-error-text">
+                                <h3>ATTENTION!</h3>
+                                <br />
+                                Please refer to the How To Document before getting started.
+                                <br />
+                                <br />
+                                <a href="/operational/A08_Tasks/A08_TaskTypeHowToDocument/@Model.A08_Task.A08_Tasks_TypeItem.ID" target="_blank" class="btn btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download How To Document</a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div id="statusDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                @if (Model.A08_Task.A08_Tasks_TypeItem.A08_Task_TypeStatuses.Count > 0)
+                {
+                    <div class="card-body">
+                        <div class="row justify-content-start">
+                            <div class="col-md-auto mt-1">Mark task as:</div>
+                            @foreach (var status in Model.A08_Task.A08_Tasks_TypeItem.A08_Task_TypeStatuses.OrderBy(p => p.IsResolvedStatus).ThenBy(p => p.ActionName))
+                            {
+                                if (Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserRequiresCompletedState.HasValue
+                                && Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserRequiresCompletedState.Value
+                                && status.IsResolvedStatus.HasValue
+                                && status.IsResolvedStatus.Value
+                                && userMan.GetUserId(User) != Model.A08_Task.ReportingToUserID)
+                                {
+                                    continue;
+                                }
+
+                                string btnClass = "btn-outline-primary-sm";
+                                string btnIcon = "sign-in-alt";
+                                if (Model.A08_Task.StatusID == status.ID)
+                                {
+                                    btnClass = "btn-success";
+                                }
+                                if (status.IsResolvedStatus.HasValue && status.IsResolvedStatus.Value)
+                                {
+                                    btnIcon = "flag-checkered";
+                                }
+                                <div class="col-md-auto mt-1">
+                                    <a class="btn @Html.Raw(btnClass) @(Model.A08_Task.StatusID == status.ID ? "disabled" : "")" @(Model.A08_Task.StatusID == status.ID ? "aria-disabled=\"true\"" : "") href="/operational/A08_Tasks/A08_Task_ReviewStatusChange/@(status.ID)"><i class="fas fa-@btnIcon"></i>&nbsp;@status.ActionName</a>
+                                </div>
+                            }
+                        </div>
+
+
+                    </div>
+                }
+                else
+                {
+                    <div class="card-body text-red">
+                        Cannot load statuses. Please check Task Type Setup to assign a Status Group.
+                    </div>
+                }
+                @if (Model.A08_Task.A08_Tasks_TypeItem.A08_Task_TypeMeetingAgendaes.Count > 0)
+                {
+                    <div class="card-body" style="border-top: 1px solid rgba(0, 0, 0, 0.125);">
+                        <div class="row justify-content-start">
+                            <div class="col-md-auto mt-1">Added as agenda item:</div>
+                            @foreach (var MeetingAgenda in Model.A08_Task.A08_Tasks_TypeItem.A08_Task_TypeMeetingAgendaes.OrderBy(p => p.IsResolvedMeetingAgenda).ThenBy(p => p.ActionName))
+                            {
+                                if (Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserRequiresCompletedState.HasValue
+                                && Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserRequiresCompletedState.Value
+                                && MeetingAgenda.IsResolvedMeetingAgenda.HasValue
+                                && MeetingAgenda.IsResolvedMeetingAgenda.Value
+                                && userMan.GetUserId(User) != Model.A08_Task.ReportingToUserID)
+                                {
+                                    continue;
+                                }
+
+                                string btnClass = "btn-outline-primary-sm";
+                                string btnIcon = "sign-in-alt";
+                                if (MeetingAgenda.IsResolvedMeetingAgenda.HasValue && MeetingAgenda.IsResolvedMeetingAgenda.Value)
+                                {
+                                    btnIcon = "flag-checkered";
+                                }
+                                if (Model.A08_Task.MeetingAgendaID.HasValue && Model.A08_Task.MeetingAgendaID == MeetingAgenda.ID)
+                                {
+                                    btnClass = "btn-success";
+                                }
+                                <div class="col-md-auto mt-1">
+                                    &nbsp;<a class="btn @Html.Raw(btnClass) @(Model.A08_Task.MeetingAgendaID.HasValue && Model.A08_Task.MeetingAgendaID == MeetingAgenda.ID ? "disabled" : "")" @(Model.A08_Task.MeetingAgendaID.HasValue && Model.A08_Task.MeetingAgendaID == MeetingAgenda.ID ? "aria-disabled=\"true\"" : "") href="/operational/A08_Tasks/A08_Task_ReviewMeetingAgendaChange/@(MeetingAgenda.ID)"><i class="fas fa-@btnIcon"></i>&nbsp;@MeetingAgenda.ActionName</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-body text-red" style="border-top: 1px solid rgba(0, 0, 0, 0.125);">
+                        Cannot load Meeting Agendaes. Please check Task Type Setup to assign a Meeting Agenda Group.
+                    </div>
+                }
+                @if (userMan.GetUserId(User) == Model.A08_Task.ResponsibleUserID
+               || userMan.GetUserId(User) == Model.A08_Task.ReportingToUserID)
+                {
+                    <div class="card-body" style="border-top: 1px solid rgba(0, 0, 0, 0.125);">
+                        Time Tracker:&nbsp;
+                        @if (Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault() == null || Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().EndTime.HasValue)
+                        {
+                            <a class="btn btn-outline-success" href="/operational/A08_Tasks/A08_Task_ReviewStartTimeAllocated/@Model.A08_Task.ID"><i class="fas fa-play-circle"></i>&nbsp;START</a>
+                        }
+                        else
+                        {
+                            <label id="timeLeft">@(TimeSpan.FromSeconds(Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().SecOfWorkAllocated).Hours.ToString("00")):@(TimeSpan.FromSeconds(Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().SecOfWorkAllocated).Minutes.ToString("00")):@(TimeSpan.FromSeconds(Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().SecOfWorkAllocated).Seconds.ToString("00"))&nbsp;</label>
+                            <a class="btn btn-outline-danger-sm" href="/operational/A08_Tasks/A08_Task_ReviewStopTimeAllocated/@(Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().ID)"><i class="fas fa-stop-circle"></i>&nbsp;STOP</a>
+                        }
+
+                    </div>
+                    <div class="card-footer">
+                        Time Allocated Today:
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/1">1 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/5">5 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/10">10 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/20">20 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/30">30 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/45">45 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/60">60 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/90">90 min</a>
+                        &nbsp;<a class="btn btn-outline-primary-sm" href="/operational/A08_Tasks/A08_Task_ReviewAddTimeAllocated/120">120 min</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-footer">
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.A08_Task.A08_TaskStatusItem.IsResolvedStatus.HasValue || !Model.A08_Task.A08_TaskStatusItem.IsResolvedStatus.Value)
+    {
+        <div id="formDiv" class="row mb-4">
+            <div class="col">
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="A08_Task_Review" enctype="multipart/form-data">
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="Identifier" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" asp-for="Identifier" />
+                                    <span asp-validation-for="Identifier" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label class="control-label">Heading</label>
+                                </div>
+                                <div class="col-6">
+                                    @Model.A08_Task.A08_Tasks_TypeItem.Heading
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="WorkflowGroupID" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownList("WorkflowGroupID", Model.WorkflowGroupID, new { @class = "browser-default custom-select form-control-trim js-select", @onChange = "GetWorkflow();" })
+                                    <span asp-validation-for="WorkflowGroupID" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="BusinessPillar" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownList("BusinessPillar", Model.BusinessPillar, new { @class = "browser-default custom-select form-control-trim js-select", @disabled = "disabled" })
+                                    <span asp-validation-for="BusinessPillar" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="BusinessDepartment" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownList("BusinessDepartment", Model.BusinessDepartment, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                    <span asp-validation-for="BusinessDepartment" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="Description" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    <textarea type="text" class="form-control" asp-for="Description"></textarea>
+                                    <span asp-validation-for="Description" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="Comments" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    <textarea class="form-control" asp-for="Comments"></textarea>
+                                    <span asp-validation-for="Comments" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            @*<div class="row mb-md-2">
+                    <div class="col-6">
+                    <label asp-for="Status" class="control-label"></label>
+                    </div>
+                    <div class="col-6">
+                    @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                    <span asp-validation-for="Status" class="text-red"></span>
+                    </div>
+                    </div>*@
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="ResponsibleUser" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                    <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="ReportingToUser" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                    <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    Reporting To User Requires Completed State
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" readonly="readonly" value="@Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserRequiresCompletedState.ToBoolean()" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    Priority
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" readonly="readonly" value="@Model.A08_Task.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="DueDate" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" class="form-control" asp-for="DueDate" />
+                                    <span asp-validation-for="DueDate" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="CustomerNo" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" asp-for="CustomerNo" />
+                                    <span asp-validation-for="CustomerNo" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="MeterSerialNumber" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" asp-for="MeterSerialNumber" />
+                                    <span asp-validation-for="MeterSerialNumber" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-6">
+                                    <label asp-for="NotificationData" class="control-label"></label>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownListFor(x => x.NotificationData, Model.NotificationsActive, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                    <span asp-validation-for="NotificationData" class="text-red"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-md-2">
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div id="commentsDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Comments</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Comments</th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.A08_Task_Review_ReassignLogItems.Where(p => !string.IsNullOrEmpty(p.UserDescription)))
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>@item.UserDescription</td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="taskDetailsDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Task Details</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-bordered table-striped table-hover">
+                            <tr>
+                                <td>ID</td>
+                                <td>@Model.A08_Task.ID</td>
+                            </tr>
+                            <tr>
+                                <td>Wrike ID</td>
+                                <td>@Model.A08_Task.WrikeID</td>
+                            </tr>
+                            <tr>
+                                <td>Wrike Sync Date</td>
+                                <td>@Model.A08_Task.WrikeSyncDate.ToDateAndTimeShort()</td>
+                            </tr>
+                            <tr>
+                                <td>Workflow Group Name</td>
+                                <td>@Model.A08_Task.WorkflowGroupName</td>
+                            </tr>
+                            <tr>
+                                <td>Business Pillar Name</td>
+                                <td>@Model.A08_Task.BusinessPillarName</td>
+                            </tr>
+                            <tr>
+                                <td>Business Department Name</td>
+                                <td>@Model.A08_Task.BusinessDepartmentName</td>
+                            </tr>
+                            <tr>
+                                <td>Identifier</td>
+                                <td>@Model.A08_Task.Identifier</td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>@Model.A08_Task.Description</td>
+                            </tr>
+                            <tr>
+                                <td>Company</td>
+                                <td>
+                                    @if (Model.A08_Task.CompanyID.HasValue)
+                                    {
+                                        @opProv.Companies.Where(p => p.CompanyID == Model.A08_Task.CompanyID.Value).SingleOrDefault().Name
+                                    }
+                                    else
+                                    {
+                                        <span>All Companies</span>
+                                    }
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Created</td>
+                                <td>@Model.A08_Task.DateCreated.ToDateAndTimeShort()</td>
+                            </tr>
+                            <tr>
+                                <td>Task Reset Date</td>
+                                <td>@(string.Join(", ", Model.A08_Task.A08_Task_Review_ReassignLogItems.Where(p => p.IsReset.HasValue && p.IsReset.Value).Select(p => p.DateCreated.ToDateAndTimeShort())))</td>
+                            </tr>
+                            <tr>
+                                <td>Closed</td>
+                                <td>@Model.A08_Task.DateEnded.ToDateAndTimeShort(true)</td>
+                            </tr>
+                            <tr>
+                                <td>Duration from Created to Closed</td>
+                                <td>
+                                    @if (Model.A08_Task.DateEnded.HasValue)
+                                    {
+                                        TimeSpan ts = Model.A08_Task.DateEnded.Value - Model.A08_Task.DateCreated;
+                                        <span>@ts.Days days, @ts.Hours hours, @ts.Minutes minutes</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Responsible Person</td>
+                                <td>@Model.A08_Task.ResponsibleUserUsername</td>
+                            </tr>
+                            <tr>
+                                <td>Reporting To Person</td>
+                                <td>@Model.A08_Task.ReportingToUserUsername</td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td>@Model.A08_Task.A08_TaskStatusItem.ActionName - @Model.A08_Task.A08_TaskStatusItem.ReportingName</td>
+                            </tr>
+                            <tr>
+                                <td>Wrike Custom Status</td>
+                                <td>@Model.A08_Task.WrikeCustomStatus</td>
+                            </tr>
+                            <tr>
+                                <td>MeetingAgenda</td>
+                                <td>@(Model.A08_Task.A08_TaskMeetingAgendaItem != null ? Model.A08_Task.A08_TaskMeetingAgendaItem.ActionName : "") - @(Model.A08_Task.A08_TaskMeetingAgendaItem != null ? Model.A08_Task.A08_TaskMeetingAgendaItem.ReportingName : "")</td>
+                            </tr>
+                            <tr>
+                                <td>Due Date</td>
+                                <td>
+                                    @Model.A08_Task.DueDate.ToDateShort()
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Customer No</td>
+                                <td>
+                                    @Model.A08_Task.CustomerNo
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Meter Serial Number</td>
+                                <td>
+                                    @Model.A08_Task.MeterSerialNumber
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="templateDetailsDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Template Details</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-bordered table-striped table-hover">
+                            <tr>
+                                <td>TemplateNo</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.ID</td>
+                            </tr>
+                            <tr>
+                                <td>UpdateExistingTask</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.UpdateExistingTask</td>
+                            </tr>
+                            <tr>
+                                <td>TaskClassification</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.TaskClassification</td>
+                            </tr>
+                            <tr>
+                                <td>WorkflowGroupID</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.WorkflowGroupName</td>
+                            </tr>
+                            <tr>
+                                <td>BusinessPillar</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.BusinessPillarName</td>
+                            </tr>
+                            <tr>
+                                <td>BusinessDepartment</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.BusinessDepartmentName</td>
+                            </tr>
+                            <tr>
+                                <td>Identifier</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.Identifier</td>
+                            </tr>
+                            <tr>
+                                <td>Heading</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.Heading</td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.Description</td>
+                            </tr>
+                            <tr>
+                                <td>ResponsibleUser</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.ResponsibleUserUsername</td>
+                            </tr>
+                            <tr>
+                                <td>ReportingToUser</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserUsername</td>
+                            </tr>
+                            <tr>
+                                <td>ReportingToUserRequiresCompletedState</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.ReportingToUserRequiresCompletedState</td>
+                            </tr>
+                            <tr>
+                                <td>Priority</td>
+                                <td>@(Model.A08_Task.A08_Tasks_TypeItem.SiteAdmin_Priority != null ? Model.A08_Task.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Dashboard Link (LinkedSecureArea)
+                                </td>
+                                <td>
+                                    @{
+                                        string dashboardURL = "";
+                                        string desc = "";
+                                        if (Model.A08_Task.A08_Tasks_TypeItem.LinkedSecureAreaID.HasValue)
+                                        {
+                                            var sa = (MyVoltage.Data.SecureAreaEnum)Model.A08_Task.A08_Tasks_TypeItem.LinkedSecureAreaID.Value;
+                                            foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                                            {
+                                                foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                                                {
+                                                    if (sa == dsa.Item1)
+                                                    {
+                                                        desc = $"{psa.Key.Item3} - {dsa.Item3}";
+                                                        dashboardURL = $"/operational/{psa.Key.Item1}/{dsa.Item1}";
+                                                        if (Model.A08_Task.CompanyID.HasValue)
+                                                        {
+                                                            dashboardURL = $"/operational/changeActiveCompany/{Model.A08_Task.CompanyID.Value}?R={Html.UrlEncoder.Encode($"/operational/{psa.Key.Item1}/{dsa.Item1}")}";
+                                                        }
+
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    @if (!string.IsNullOrEmpty(dashboardURL))
+                                    {
+                                        <a class="btn btn-outline-primary-sm" href="@dashboardURL">@(desc)</a>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CreateIndividualFlagsForCompaniesLinked</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.CreateIndividualFlagsForCompaniesLinked</td>
+                            </tr>
+
+                            <tr>
+                                <td>Time Required To Clear</td>
+                                <td>
+                                    @if (Model.A08_Task.A08_Tasks_TypeItem.MinRequiredToClear == 0)
+                                    {
+                                        <span>Same day</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@Model.A08_Task.A08_Tasks_TypeItem.MinRequiredToClear workdays</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DefautlMinPlanned</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.DefautlMinPlanned</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    How To Document
+                                </td>
+                                <td>
+                                    <a href="/operational/A08_Tasks/A08_TaskTypeHowToDocument/@Model.A08_Task.A08_Tasks_TypeItem.ID" target="_blank" class="btn btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download How To Document</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>StatusGroup</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.StatusGroupName</td>
+                            </tr>
+                            <tr>
+                                <td>DefaultStatus</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.A08_Task_TypeStatusItem.ReportingName</td>
+                            </tr>
+                            <tr>
+                                <td>MeetingAgendaGroup</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.MeetingAgendaGroupName</td>
+                            </tr>
+                            <tr>
+                                <td>DefaultMeetingAgenda</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.A08_Task_TypeMeetingAgendaItem.ReportingName</td>
+                            </tr>
+                            <tr>
+                                <td>Task Generation</td>
+                                <td>
+                                    @if (Model.A08_Task.A08_Tasks_TypeItem.FrequenciesCount == 0)
+                                    {
+                                        <span>Manual</span>
+                                    }
+                                    else
+                                    {
+                                        <span>System</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Is Deleted</td>
+                                <td>@Model.A08_Task.A08_Tasks_TypeItem.IsDeleted.ToBoolean(false)</td>
+                            </tr>
+
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="attachmentsDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-left">
+                            <h5 class="text-orange">Attachments / Photos</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a href="/operational/A08_Tasks/A08_Task_Review_AddAttachment" class="btn btn-outline-primary-sm"><i class="fas fa-upload"></i>&nbsp;Add Attachment / Photo</a>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>File Type</th>
+                                <th>User</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.A08_Task_Review_AttachmentItems)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Description</td>
+                                    <td>@item.AttachmentType.GetDescription()</td>
+                                    <td>@item.Username</td>
+                                    <td class="text-right">
+                                        <a rel="popover" data-img="/operational/A08_Tasks/A08_Task_Review_GetAttachment/@item.ID" href="/operational/A08_Tasks/A08_Task_Review_GetAttachment/@item.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                        &nbsp;
+                                        @if (!item.IsDeleted)
+                                        {
+                                            <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteAttachment('@item.ID', '@item.Description (@item.AttachmentType.GetDescription()) - Added by @item.Username on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        }
+                                        else
+                                        {
+                                            <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module_timeOfWorkPlannedDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-left">
+                            <h5 class="text-orange">Time Planner</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            @if (userMan.GetUserId(User) == Model.A08_Task.ResponsibleUserID
+                           || userMan.GetUserId(User) == Model.A08_Task.ReportingToUserID)
+                            {
+                                <a href="/operational/Modules/AddTimeOfWorkPlanned?AT=@((int)MyVoltage.Data.ActivityTypeEnum.A08_Task)&AID=@opProv.TaskSelectedTaskID" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Time Planned</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <tr>
+                                <th>Created By</th>
+                                <th>Description</th>
+                                <th>Responsible User</th>
+                                <th>Date Planned</th>
+                                <th>Time Planned (HH:mm)</th>
+                                <th>Internal RPH</th>
+                                <th>External RPH</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.Module_TimeOfWorkPlanneds)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td class="text-nowrap">
+                                        @item.CreatedByUsername
+                                        <br />
+                                        @item.DateCreated.ToDateAndTimeShort()
+                                    </td>
+                                    <td>@item.DescriptionOfWorkPlanned</td>
+                                    <td class="text-nowrap">
+                                        @item.ResponsibleUsername
+                                    </td>
+                                    <td>@item.DateOfWorkPlanned.ToDateShort()</td>
+                                    <td>@item.TimePlanned.Hours.ToString("00"):@item.TimePlanned.Minutes.ToString("00")</td>
+                                    <td>@item.InternalChargeOutRatePerHour.ToDecimal(2) (@(item.InternalChargeOutRatePerHour.HasValue ? (item.InternalChargeOutRatePerHour.Value * Convert.ToDecimal(item.TimePlanned.TotalHours)).ToDecimal(2) : ""))</td>
+                                    <td>@item.ExternalChargeOutRatePerHour.ToDecimal(2) (@(item.ExternalChargeOutRatePerHour.HasValue ? (item.ExternalChargeOutRatePerHour.Value * Convert.ToDecimal(item.TimePlanned.TotalHours)).ToDecimal(2) : ""))</td>
+                                    <td class="text-right">
+                                        @if (item.CreatedByUserID == userMan.GetUserId(User))
+                                        {
+                                            <a href="/operational/Modules/EditTimeOfWorkPlanned/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteTimeOfWorkPlanned('@item.ID', '@item.DescriptionOfWorkPlanned - Added by @item.CreatedByUsername on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module_timeOfWorkAllocatedDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-left">
+                            <h5 class="text-orange">Time Allocated</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            @if (userMan.GetUserId(User) == Model.A08_Task.ResponsibleUserID
+                           || userMan.GetUserId(User) == Model.A08_Task.ReportingToUserID)
+                            {
+                                <a href="/operational/Modules/AddTimeOfWorkAllocated?AT=@((int)MyVoltage.Data.ActivityTypeEnum.A08_Task)&AID=@opProv.TaskSelectedTaskID" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Time Allocated</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <tr>
+                                <th>Created By</th>
+                                <th>Description</th>
+                                <th>Responsible User</th>
+                                <th>Start Time</th>
+                                <th>End time</th>
+                                <th>Time Allocated (HH:mm)</th>
+                                <th>Internal RPH</th>
+                                <th>External RPH</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.Module_TimeOfWorkAllocateds)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td class="text-nowrap">
+                                        @item.CreatedByUsername
+                                        <br />
+                                        @item.DateCreated.ToDateAndTimeShort()
+                                    </td>
+                                    <td>@item.DescriptionOfWorkAllocated</td>
+                                    <td class="text-nowrap">
+                                        @item.ResponsibleUsername
+                                    </td>
+                                    <td>@item.StartTime.ToDateAndTimeShort()</td>
+                                    <td>
+                                        @item.EndTime.ToDateAndTimeShort()
+                                        @if (!item.EndTime.HasValue)
+                                        {
+                                            <a class="btn btn-sm btn-outline-danger-sm" href="/operational/A08_Tasks/A08_Task_ReviewStopTimeAllocated/@(item.ID)"><i class="fas fa-stop-circle"></i></a>
+                                        }
+                                    </td>
+                                    <td>@item.TimeAllocated.Hours.ToString("00"):@item.TimeAllocated.Minutes.ToString("00")</td>
+                                    <td>@item.InternalChargeOutRatePerHour.ToDecimal(2) (@(item.InternalChargeOutRatePerHour.HasValue ? (item.InternalChargeOutRatePerHour.Value * Convert.ToDecimal(item.TimeAllocated.TotalHours)).ToDecimal(2) : ""))</td>
+                                    <td>@item.ExternalChargeOutRatePerHour.ToDecimal(2) (@(item.ExternalChargeOutRatePerHour.HasValue ? (item.ExternalChargeOutRatePerHour.Value * Convert.ToDecimal(item.TimeAllocated.TotalHours)).ToDecimal(2) : ""))</td>
+                                    <td class="text-right">
+                                        @if (item.CreatedByUserID == userMan.GetUserId(User))
+                                        {
+                                            <a href="/operational/Modules/EditTimeOfWorkAllocated/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteTimeOfWorkAllocated('@item.ID', '@item.DescriptionOfWorkAllocated - Added by @item.CreatedByUsername on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module_TravelAllocationDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-left">
+                            <h5 class="text-orange">Travel Allocated</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a href="/operational/Modules/AddTravelAllocation?AT=@((int)MyVoltage.Data.ActivityTypeEnum.A08_Task)&AID=@opProv.TaskSelectedTaskID" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Travel Allocated</a>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Created By</th>
+                                    <th>Description</th>
+                                    <th>Responsible User</th>
+                                    <th>Date Allocated</th>
+                                    <th>Vehicle Type Used</th>
+                                    <th>Vehicle Registration Number</th>
+                                    <th>Vehicle Odo Reading Start</th>
+                                    <th>Vehicle Odo Reading End</th>
+                                    <th>Vehicle Distance travelled (km)</th>
+                                    <th>Photo attachment</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+
+                            @foreach (var item in Model.A08_Task.Module_TravelAllocations)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td class="text-nowrap">
+                                        @item.CreatedByUsername
+                                        <br />
+                                        @item.DateCreated.ToDateAndTimeShort()
+                                    </td>
+                                    <td>@item.DescriptionOfTravelAllocation</td>
+                                    <td class="text-nowrap">
+                                        @item.ResponsibleUsername
+                                    </td>
+                                    <td>@item.DateOfTravelAllocation.ToDateShort()</td>
+                                    <td>@(((MyVoltage.Data.VehicleTypeEnum)item.VehicleTypeID))</td>
+                                    <td>@item.Vehicle.RegistrationNumber - @item.Vehicle.VehicleTypeName</td>
+                                    <td>@item.VehicleOdoStart.ToReading()</td>
+                                    <td>@item.VehicleOdoEnd.ToReading()</td>
+                                    <td>@item.VehicleDistanceKm.ToReading()</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.PhotoURL))
+                                        {
+                                            <a target="_blank" href="/operational/Modules/GetTravelAllocationAttachment/@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                        }
+                                    </td>
+                                    <td class="text-right">
+                                        @if (item.CreatedByUserID == userMan.GetUserId(User))
+                                        {
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteTravelAllocation('@item.ID', '@item.DescriptionOfTravelAllocation - Added by @item.CreatedByUsername on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module_StockAllocationDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-left">
+                            <h5 class="text-orange">Stock Allocated</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a href="/operational/Modules/AddStockAllocation?AT=@((int)MyVoltage.Data.ActivityTypeEnum.A08_Task)&AID=@opProv.TaskSelectedTaskID" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Stock Allocated</a>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Created By</th>
+                                <th>Description</th>
+                                <th>Responsible User</th>
+                                <th>Date Allocated</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.Module_StockAllocations)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td class="text-nowrap">
+                                        @item.CreatedByUsername
+                                        <br />
+                                        @item.DateCreated.ToDateAndTimeShort()
+                                    </td>
+                                    <td>@item.DescriptionOfStockAllocation</td>
+                                    <td class="text-nowrap">
+                                        @item.ResponsibleUsername
+                                    </td>
+                                    <td>@item.DateOfStockAllocation.ToDateShort()</td>
+                                    <td class="text-right">
+                                        @if (item.CreatedByUserID == userMan.GetUserId(User))
+                                        {
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteStockAllocation('@item.ID', '@item.DescriptionOfStockAllocation - Added by @item.CreatedByUsername on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module_InvoiceAllocationDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-left">
+                            <h5 class="text-orange">Invoice Allocation</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a href="/operational/Modules/AddInvoiceAllocation?AT=@((int)MyVoltage.Data.ActivityTypeEnum.A08_Task)&AID=@opProv.TaskSelectedTaskID" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Invoice Allocation</a>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Created By</th>
+                                <th>Description</th>
+                                <th>Responsible User</th>
+                                <th>Date Allocated</th>
+                                <th>Customer No</th>
+                                <th>Invoice Amount</th>
+                                <th>Invoice No</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.Module_InvoiceAllocations)
+                            {
+                                string aClass = "";
+                                if (item.IsDeleted)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td class="text-nowrap">
+                                        @item.CreatedByUsername
+                                        <br />
+                                        @item.DateCreated.ToDateAndTimeShort()
+                                    </td>
+                                    <td>@item.DescriptionOfInvoiceAllocation</td>
+                                    <td class="text-nowrap">@item.ResponsibleUsername</td>
+                                    <td>@item.DateOfInvoiceAllocation.ToDateShort()</td>
+                                    <td>@item.CustomerNo</td>
+                                    <td>@item.InvoiceAmount.ToMoney()</td>
+                                    <td>@item.InvoiceNo</td>
+                                    <td class="text-right">
+                                        @if (item.CreatedByUserID == userMan.GetUserId(User))
+                                        {
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteInvoiceAllocation('@item.ID', '@item.DescriptionOfInvoiceAllocation - Added by @item.CreatedByUsername on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                            else
+                                            {
+                                                <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module_NonComplianceDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col text-left">
+                            <h5 class="text-orange">Non Compliance</h5>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Responsible User</th>
+                                <th>User Comment</th>
+                                <th>Enforcer Comment</th>
+                                <th>Has Been Resolved</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.Module_NonCompliances)
+                            {
+                                string aClass = "";
+                                if (!item.HasBeenResolved.HasValue)
+                                {
+                                    aClass = "table-danger";
+                                }
+                                <tr class="@Html.Raw(aClass)">
+                                    <td class="text-nowrap">
+                                        @item.ResponsibleUsername
+                                        <br />
+                                        @item.DateCreated.ToDateAndTimeShort()
+                                    </td>
+                                    <td>
+                                        @if (item.UserCommentDate.HasValue)
+                                        {
+                                            <span>
+                                                @item.UserCommentUsername
+                                                <br />
+                                                @item.UserCommentDate.ToDateAndTimeShort(true)
+                                                <br />
+                                                @item.UserComment
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.EnforcerCommentDate.HasValue)
+                                        {
+                                            <span>
+                                                @item.EnforcerCommentUsername
+                                                <br />
+                                                @item.EnforcerCommentDate.ToDateAndTimeShort(true)
+                                                <br />
+                                                @item.EnforcerComment
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>@item.HasBeenResolved</td>
+                                    <td class="text-right"><a href="/operational/Modules/EditNonCompliance/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a></td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyDiv" class="row mb-4">
+        <div class="col">
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Task History</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changes</th>
+                                <th>Comments</th>
+                            </tr>
+
+                            @foreach (var item in Model.A08_Task.A08_Task_Review_ReassignLogItems)
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>
+                                        @(Html.Raw(string.IsNullOrEmpty(item.SystemDescription) ? "Added Comment" : item.SystemDescription))
+                                    </td>
+                                    <td>@item.UserDescription</td>
+                                </tr>
+                            }
+
+                            <tr>
+                                <td>@Model.A08_Task.DateCreated.ToDateAndTimeShort()</td>
+                                <td>[System]</td>
+                                <td>Task Created</td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        GetWorkflow();
+        function GetWorkflow() {
+            $("#BusinessPillar").val('');
+            var departmentID = 0;
+            var workflowGroupItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.WorkflowGroupItems)));
+            $(workflowGroupItems).each(function () {
+                if (this.ID == $("#WorkflowGroupID").val()) {
+                    departmentID = this.BusinessDepartmentID;
+                }
+            });
+
+            $("#BusinessDepartment").empty();
+            $("#BusinessDepartment").append(`<option value="0">00 - NONE</option>`);
+            var businessDepartmentItems = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BusinessDepartmentItems)));
+            $(businessDepartmentItems).each(function () {
+                if ('@Model.A08_Task.BusinessDepartmentID' == this.ID) {
+                    $("#BusinessDepartment").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                    $("#BusinessPillar").val(this.BusinessPillarID);
+                }
+                else {
+                    if (this.ID == departmentID) {
+                        $("#BusinessDepartment").append(`<option selected="selected" value="${this.ID}">${this.DisplayName}</option>`);
+                        $("#BusinessPillar").val(this.BusinessPillarID);
+                    }
+                    else {
+                        $("#BusinessDepartment").append(`<option value="${this.ID}">${this.DisplayName}</option>`);
+                    }
+                }
+            });
+
+        }
+
+        $('a[rel=popover]').popover({
+            html: true,
+            trigger: 'hover',
+            placement: 'bottom',
+            content: function () { return '<img height="100px;" src="' + $(this).data('img') + '" />'; }
+        });
+        function pretty_time_string(num) {
+            return (num < 10 ? "0" : "") + num;
+        }
+        setInterval(function () {
+            if ('@(Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault() == null || Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().EndTime.HasValue)' == 'False'
+                && '@(Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault() != null && Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().StartTime.HasValue)' == 'True') {
+                var start = new Date('@((Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault() != null && Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().StartTime.HasValue ? Model.A08_Task.Module_TimeOfWorkAllocateds.FirstOrDefault().StartTime.Value.ToString("dd-MMM-yy HH:mm:ss") : ""))');
+                var total_seconds = (new Date - start) / 1000;
+
+                var hours = Math.floor(total_seconds / 3600);
+                total_seconds = total_seconds % 3600;
+
+                var minutes = Math.floor(total_seconds / 60);
+                total_seconds = total_seconds % 60;
+
+                var seconds = Math.floor(total_seconds);
+                hours = pretty_time_string(hours);
+                minutes = pretty_time_string(minutes);
+                seconds = pretty_time_string(seconds);
+                var currentTimeString = hours + ":" + minutes + ":" + seconds;
+
+                $('#timeLeft').html(currentTimeString);
+            }
+        }, 1000);
+
+        function ConfirmDeleteAttachment(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/A08_Tasks/A08_Task_Review_DeleteAttachment/' + id;
+            }
+        }
+        function ConfirmDeleteTimeOfWorkPlanned(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/Modules/DeleteTimeOfWorkPlanned/' + id + "?R=" + encodeURIComponent(document.location.href);
+            }
+        }
+        function ConfirmDeleteTimeOfWorkAllocated(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/Modules/DeleteTimeOfWorkAllocated/' + id + "?R=" + encodeURIComponent(document.location.href);
+            }
+        }
+        function ConfirmDeleteTravelAllocation(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/Modules/DeleteTravelAllocation/' + id + "?R=" + encodeURIComponent(document.location.href);
+            }
+        }
+        function ConfirmDeleteStockAllocation(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/Modules/DeleteStockAllocation/' + id + "?R=" + encodeURIComponent(document.location.href);
+            }
+        }
+        function ConfirmDeleteInvoiceAllocation(id, desc) {
+            if (confirm('Are you sure you want to delete "' + desc + '" ?')) {
+                document.location.href = '/operational/Modules/DeleteInvoiceAllocation/' + id + "?R=" + encodeURIComponent(document.location.href);
+            }
+        }
+        $("#CustomerNo").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A08_Tasks/A08_Task_Create_CustomerNo_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { serialOrName: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+
+        $("#MeterSerialNumber").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A08_Tasks/A08_Task_Create_MeterSerialNumber_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { serialOrName: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+    </script>
+}

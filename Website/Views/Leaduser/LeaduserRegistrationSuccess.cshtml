@@ -1,0 +1,81 @@
+﻿@model MyVoltage.Models.LeaduserModels.RegistrationSuccessViewModel
+@{
+    ViewData["Title"] = "Registration";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+<style>
+    .accounts_pages {
+        background-color: #770571;
+        background: linear-gradient(30deg, #770571, #fec406);
+    }
+
+    .MVClientZoneLogo {
+        height: 85px;
+    }
+
+    @@media (max-width:767px){
+        .MVClientZoneLogo {
+            height: 68px;
+        }
+    }
+</style>
+<div class="accounts_pages">
+    <div class="account_form text-center">
+        <form asp-action="LeaduserRegistrationSuccess" asp-route-id="@ViewData["id"]" method="post" class="w-100" id="regisrationSuccessForm">
+            <div class="row">
+                <div class="col justify-content-center text-center d-flex">
+                    <a href="/">
+                        <img src="/images/leaduser/logo.svg" height="115" alt="" class="d-block mx-auto MVClientZoneLogo">
+                    </a>
+                </div>
+            </div>
+            <div class="mt-75 max-w-400">
+                <div class="tab-content registerTabs">
+                    <div class="tab-pane active" role="tabpanel" id="Notification_tab">
+                        <h2 class="text-white">Welcome!</h2>
+                        <div class="text-white queries_text mt-30 line_height_24">
+                            You have successfully registered as a new user!
+                        </div>
+                        <div class="mt-50 steps_btns d-flex align-items-center justify-content-center">
+                            @*<a asp-action="LeaduserRegisterOTPConfirm" asp-route-returnurl="@ViewData["ReturnUrlOtp"]" class="btn btn-default">Back</a>*@
+                            <button type="submit" class="btn btn-default">Login</button>
+                        </div>
+                    </div>
+                    <div class="tab-pane" role="tabpanel" id="Welcome_tab">
+                    </div>
+                </div>
+            </div>
+            <div class="text-white queries_text mt-50">
+                <p class="m-0">Queries: <a href="mailto:info@myvoltage.co.za?Subject=LeaduserRegister">info@myvoltage.co.za</a></p>
+            </div>
+            <div class="mt-50 text-center">
+                <img src="/images/Slogan_white.png" class="slogan_img" height="72" alt="">
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $(".next-step").click(function (e) {
+                var valid = $("#regisrationSuccessForm").valid();
+                if (valid) {
+                    var activeTab = $(".registerTabs .tab-pane.active");
+                    activeTab.next().addClass("active");
+                    activeTab.removeClass("active");
+                    return false;
+                }
+            });
+
+            $(".prev-step").click(function (e) {
+                var activeTab = $(".registerTabs .tab-pane.active");
+                activeTab.prev().addClass("active");
+                activeTab.removeClass("active");
+
+            });
+        });
+    </script>
+}
+

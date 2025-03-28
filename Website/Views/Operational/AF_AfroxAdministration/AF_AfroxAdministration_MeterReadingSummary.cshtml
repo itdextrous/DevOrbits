@@ -1,0 +1,106 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_MeterReadingSummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions; 
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_MeterReadingSummary.GetDescription()} - {operationalProvider.CompanyName}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+
+
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID > 0)
+                {
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <div class="row">
+                                @*<div class="col">Completed Today: @Model.CompletedToday</div>
+                                <div class="col">Left Today: @Model.LeftToday</div>*@
+                                <div class="col">Total: @Model.Total</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-responsive-xl table-striped table-hover table-sm">
+                            <tbody style="height:auto;">
+                            <thead>
+                                <tr>
+                                    <td>Serial</td>
+                                    <td>Meter Point</td>
+                                    <td>Customer Trading Name</td>
+                                    <td>SAP Customer Acc No</td>
+                                    <td>Occupancy Status</td>
+                                    <td>Latest Live Reading</td>
+                                    <td>Last Reading For @(DateTime.Now.AddMonths(-1).ToMonth())</td>
+                                    <td>Last Reading For @(DateTime.Now.AddMonths(-2).ToMonth())</td>
+                                    <td>Latest Audit Reading</td>
+                                    <td>Latest Audit Reading Time</td>
+                                    <td>Status</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.AF_AfroxAdministration_MeterReadingSummaryItems)
+                                {
+                                    string rowclass = "";
+                                    string cellClass = "";
+                                    if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Unverified)
+                                    {
+                                        rowclass = " class=\"table-danger\"";
+                                        cellClass = " class=\"text-red font-weight-bold\"";
+                                    }
+                                    else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Deleted)
+                                    {
+                                        rowclass = " class=\"table-warning\"";
+                                        cellClass = " class=\"text-orange font-weight-bold\"";
+                                    }
+                                    else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.Verified)
+                                    {
+                                        rowclass = " class=\"table-success\"";
+                                        cellClass = " class=\"text-green font-weight-bold\"";
+                                    }
+                                    else if (item.Status == MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes.NoAccess)
+                                    {
+                                        rowclass = " class=\"table-info\"";
+                                        cellClass = " class=\"text-red font-weight-bold\"";
+                                    }
+                                    <tr @Html.Raw(rowclass) style="cursor:pointer;" title="View @item.Serial" onclick="RedirectToVerification('@item.Serial');">
+                                        <td>@item.Serial</td>
+                                        <td>@item.DeviceName</td>
+                                        <td>@(item.CustomersDetail != null ? item.CustomersDetail.CustomerTradingName : "")</td>
+                                        <td>@(item.CustomersDetail != null ? item.CustomersDetail.CustomerAccNo : "")</td>
+                                        <td>@item.OccupancyStatus</td>
+                                        <td class="text-right">@item.LatestReading.ToReading()</td>
+                                        <td class="text-right">@(item.OneMonthAgo_DeviceReading != null ? item.OneMonthAgo_DeviceReading.VirtualOdometerReading.ToReading() : "")</td>
+                                        <td class="text-right">@(item.TwoMonthAgo_DeviceReading != null ? item.TwoMonthAgo_DeviceReading.VirtualOdometerReading.ToReading() : "")</td>
+                                        <td class="text-right">@item.LatestAuditReading.ToReading()</td>
+                                        <td>@item.LatestAuditReadingTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td @Html.Raw(cellClass)>@item.Status.GetDescription()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div>Select a company to start...</div>
+                }
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/AF_AfroxAdministration/AF_AfroxAdministration_MeterReadingDetails';
+        }
+    </script>
+}

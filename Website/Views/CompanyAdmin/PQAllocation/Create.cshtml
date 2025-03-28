@@ -1,0 +1,79 @@
+@model MyVoltage.Models.CompanyAdminViewModels.PQAllocationCreateModel
+@{
+    ViewData["Title"] = "PQ Allocation";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <a href="/companyadmin/pqallocation" class="btn btn-toolbar">Back to list</a>
+    </div>
+</div>
+
+<form asp-action="PQAllocationCreate" enctype="multipart/form-data">
+    <div class="row mt-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card bg-primary text-white">
+                <div class="p-3">
+                    <div class="row">
+                        <div class="col-md-12 form-group text-nowrap">
+                            <div class="row mb-2 mt-2">
+                                <div class="col text-uppercase font-weight-bold">
+                                    <label asp-for="Serial" class="control-label"></label>
+                                </div>
+                                <div class="col">
+                                    <input class="form-group" id="Serial_Search" asp-for="Serial" />
+                                    <span asp-validation-for="Serial" class="text-red"></span>
+                                </div>
+                            </div>
+                            @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-md-4">
+                                        @Model.ErrorMessage
+                                    </div>
+                                </div>
+                            }
+                            <div class="row mb-2 mt-2">
+                                <div class="col-md-4">
+                                    <input type="submit" value="Save Changes" class="btn btn-default" />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Serial_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/companyAdmin/pqallocation/serialsearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

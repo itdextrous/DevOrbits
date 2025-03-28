@@ -1,0 +1,168 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_MunicipalitiesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_Municipalities.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th style="min-width:150px;" scope="col">Municipality Name</th>
+            <th style="min-width:150px;" scope="col">Municipality Type</th>
+            <th style="min-width:150px;" scope="col">Province</th>
+            <th style="min-width:150px;" scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col" class="text-nowrap">
+                -
+            </td>
+            <td scope="col">
+                <input type="text" id="MunicipalityName" class="form-control" />
+            </td>
+            <td scope="col">
+                <select id="MunicipalityTypeID" class="form-control">
+                    @foreach (MyVoltage.Data.MunicipalityTypeEnum municipality in (MyVoltage.Data.MunicipalityTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.MunicipalityTypeEnum)))
+                    {
+                        <option value="@((int)municipality)">@municipality.GetDescription()</option>
+                    }
+                </select>
+            </td>
+            <td scope="col">
+                <select id="ProvinceID" class="form-control">
+                    @foreach (MyVoltage.Data.ProvinceEnum province in (MyVoltage.Data.ProvinceEnum[])Enum.GetValues(typeof(MyVoltage.Data.ProvinceEnum)))
+                    {
+                        <option value="@((int)province)">@province.GetDescription()</option>
+                    }
+                </select>
+            </td>
+            <td scope="col" class="text-nowrap">
+                <a href="#" onclick="DoAddStatus();" class="btn btn-sm btn-outline-primary-sm" title="Add"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+            </td>
+        </tr>
+        @foreach (var item in Model.SiteAdmin_MunicipalitiesItems)
+        {
+            <tr>
+                <td scope="col" class="text-nowrap">
+                    @item.ID
+                </td>
+                <td scope="col">
+                    <input type="text" id="MunicipalityName_@item.ID" class="form-control" value="@item.MunicipalityName" />
+                </td>
+                <td scope="col">
+                    <select id="MunicipalityTypeID_@item.ID" class="form-control">
+                        @foreach (MyVoltage.Data.MunicipalityTypeEnum municipality in (MyVoltage.Data.MunicipalityTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.MunicipalityTypeEnum)))
+                        {
+                            @if (item.MunicipalityTypeID == (int)municipality)
+                            {
+                                <option value="@((int)municipality)" selected="selected">@municipality.GetDescription()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)municipality)">@municipality.GetDescription()</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select id="ProvinceID_@item.ID" class="form-control">
+                        @foreach (MyVoltage.Data.ProvinceEnum province in (MyVoltage.Data.ProvinceEnum[])Enum.GetValues(typeof(MyVoltage.Data.ProvinceEnum)))
+                        {
+                            @if (item.ProvinceID == (int)province)
+                            {
+                                <option value="@((int)province)" selected="selected">@province.GetDescription()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)province)">@province.GetDescription()</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col" class="text-nowrap">
+                    <a href="#" onclick="DoUpdateStatus('@item.ID');" class="btn btn-sm btn-outline-primary-sm" title="Update"><i class="fas fa-edit"></i>&nbsp;Update</a>
+                    &nbsp;
+                    <a href="#" onclick="DoDeleteStatus('@item.ID');" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function DoAddStatus() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Municipalities_Add",
+                {
+                    municipalityname: $("#MunicipalityName").val(),
+                    municipalitytypeid: $("#MunicipalityTypeID").val(),
+                    provinceid: $("#ProvinceID").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Municipalities_Update/" + ItemID,
+                {
+                    municipalityname: $("#MunicipalityName_" + ItemID).val(),
+                    municipalitytypeid: $("#MunicipalityTypeID_" + ItemID).val(),
+                    provinceid: $("#ProvinceID_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Municipalities_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+    </script>
+}

@@ -1,0 +1,62 @@
+﻿@model MyVoltage.Models.OverviewViewModels.UserViewModel
+@{
+    ViewData["Title"] = "Overview";
+    Layout = "LayoutAdmin";
+}
+
+<form method="post">
+    <div class="row">
+        <div class="col">
+            <h4 class="text-white text-uppercase font-weight-bold my-3 h5">@ViewData["Title"]</h4>
+            @if (@ViewData["userInfo"] != null)
+            {
+                <h5>@ViewData["userInfo"].</h5>
+            }
+            <div class="form-group">
+                <input asp-for="Email" class="form-control d-block" value="@Model.Email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center border-bottom">
+            <div class="form-group text-center">
+                <button type="submit" class="btn" name="submit" value="search">Search Email</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center border-bottom">
+            <div class="form-group text-center">
+                <button type="submit" class="btn" name="submit" value="customerOrNumber">Search Customer Number / Cell Number</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center border-bottom">
+            <div class="form-group text-center">
+                <button type="submit" class="btn" name="submit" value="activate">Activate</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center border-bottom">
+            <div class="form-group text-center">
+                <button type="submit" class="btn" name="submit" value="delete">Delete</button>
+            </div>
+        </div>
+    </div>
+</form>
+@if (@Model.Users != null)
+{
+    @foreach (var user in @Model.Users)
+    {
+        <p><b>Email</b>  @user.Email</p>
+        <p><b>Full Name</b>  @user.FullName</p>
+        <p><b>Confirmed</b>  @(user.IsConfirmed.ToString())</p>
+        <p><b>Meter Number</b>  @user.MeterNumber</p>
+        <p><b>Customer Number</b>  @user.CustomerNumber</p>
+        <hr>
+    }
+}

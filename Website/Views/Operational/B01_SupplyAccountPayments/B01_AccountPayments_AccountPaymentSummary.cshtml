@@ -1,0 +1,64 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_AccountPaymentSummaryModel
+@using MyVoltage.Extensions; 
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentSummary.GetDescription();
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                Note: Items in red requires building details to be updated.
+            </div>
+            <div class="card-body">
+                <table class="table table-responsive-xl table-striped table-hover table-sm">
+                    <tbody style="height:auto;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Company Name</th>
+                            <th rowspan="2">Status</th>
+                            <th rowspan="2">Building No</th>
+                            <th rowspan="2">Building Name</th>
+                            <th rowspan="2">Payment Types</th>
+                            <th rowspan="2">Council Details Loaded</th>
+                            <th rowspan="2">Meters Loaded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.B01_AccountPayments_AccountPaymentSummaryItems)
+                        {
+                            string rowclass = "";
+                            string cellClass = "";
+                            if (item.Status == MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_AccountPaymentSummaryModel.StatusEnum.Outstanding)
+                            {
+                                rowclass = "table-danger";
+                                cellClass = "text-red font-weight-bold";
+                            }
+                            <tr class="@Html.Raw(rowclass)" style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToVerification('@item.CompanyID');">
+                                <td>@item.CompanyName</td>
+                                <td class="@Html.Raw(cellClass)">@item.Status.GetDescription()</td>
+                                <td>@item.BuildingNo</td>
+                                <td>@item.BuildingName</td>
+                                <td>@item.PaymentTypes</td>
+                                <td>@item.CouncilDetailsLoaded</td>
+                                <td>@item.MetersLoaded</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveCompany/' + serial + '?R=/operational/B01_SupplyAccountPayments/B01_AccountPayments_AccountPaymentDetails';
+        }
+    </script>
+}

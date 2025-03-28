@@ -1,0 +1,312 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_BuildingDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.SiteAdmin_BuildingDetails.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Select a company to start...</span>
+                }
+                else
+                {
+                    @if (!string.IsNullOrEmpty(Model.NoCustomerErrorMessage))
+                    {
+                        @Model.NoCustomerErrorMessage
+                    }
+                    else
+                    {
+                        <form asp-action="SiteAdmin_BuildingDetails" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12 form-group text-nowrap">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" asp-for="BuildingNo" />
+                                            <span asp-validation-for="BuildingNo" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" asp-for="BuildingName" />
+                                            <span asp-validation-for="BuildingName" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingSkybillName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @operationalProvider.CompanyName
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingAddress" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <textarea class="form-control" asp-for="BuildingAddress"></textarea>
+                                            <span asp-validation-for="BuildingAddress" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingLong" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" asp-for="BuildingLong" />
+                                            <span asp-validation-for="BuildingLong" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingLat" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" asp-for="BuildingLat" />
+                                            <span asp-validation-for="BuildingLat" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingPartnerName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" asp-for="BuildingPartnerName" />
+                                            <span asp-validation-for="BuildingPartnerName" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingElectricityInstallDate" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="date" class="form-control" asp-for="BuildingElectricityInstallDate" />
+                                            <span asp-validation-for="BuildingElectricityInstallDate" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingWaterInstallDate" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="date" class="form-control" asp-for="BuildingWaterInstallDate" />
+                                            <span asp-validation-for="BuildingWaterInstallDate" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingActiveFromDate" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="date" class="form-control" asp-for="BuildingActiveFromDate" />
+                                            <span asp-validation-for="BuildingActiveFromDate" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingManagingAgent" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingManagingAgent" />
+                                            <span asp-validation-for="BuildingManagingAgent" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingHasControlledAccess" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input type="checkbox" class="form-control" asp-for="BuildingHasControlledAccess" />
+                                            <span asp-validation-for="BuildingHasControlledAccess" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            &nbsp;
+                                        </div>
+                                        <div class="col">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerName1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingCaretakerName1" />
+                                            <span asp-validation-for="BuildingCaretakerName1" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerNo1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingCaretakerNo1" />
+                                            <span asp-validation-for="BuildingCaretakerNo1" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerNotes1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <textarea class="form-control" asp-for="BuildingCaretakerNotes1"></textarea>
+                                            <span asp-validation-for="BuildingCaretakerNotes1" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            &nbsp;
+                                        </div>
+                                        <div class="col">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerName2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingCaretakerName2" />
+                                            <span asp-validation-for="BuildingCaretakerName2" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerNo2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingCaretakerNo2" />
+                                            <span asp-validation-for="BuildingCaretakerNo2" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerNotes2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <textarea class="form-control" asp-for="BuildingCaretakerNotes2"></textarea>
+                                            <span asp-validation-for="BuildingCaretakerNotes2" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            &nbsp;
+                                        </div>
+                                        <div class="col">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerName3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingCaretakerName3" />
+                                            <span asp-validation-for="BuildingCaretakerName3" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerNo3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="BuildingCaretakerNo3" />
+                                            <span asp-validation-for="BuildingCaretakerNo3" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingCaretakerNotes3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <textarea class="form-control" asp-for="BuildingCaretakerNotes3"></textarea>
+                                            <span asp-validation-for="BuildingCaretakerNotes3" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            &nbsp;
+                                        </div>
+                                        <div class="col">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingMeterStatusChangeAuthEmail1" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingMeterStatusChangeAuthEmail1
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingMeterStatusChangeAuthEmail2" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingMeterStatusChangeAuthEmail2
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingMeterStatusChangeAuthEmail3" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingMeterStatusChangeAuthEmail3
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-2">
+                                        <div class="col-12 text-right">
+                                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.N_TechnicianToolkit_BuildingDetails, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                            {
+                                                <input type="submit" value="Save Changes" class="btn btn-default" />
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+                    }
+                }
+
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+}

@@ -1,0 +1,93 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_WinshuttleExportRequestResultModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_WinshuttleExport.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+
+
+            <div class="card-header">
+                <h5>Export Request Result:</h5>
+            </div>
+            @if (Model.AlreadyExist)
+            {
+                <div class="card-body">
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12 text-red font-weight-bold">
+                            The report you have requested already exists.
+                        </div>
+                    </div>
+
+                    <div class="row mt-2 mb-2">
+                        @if (Model.AF_AfroxAdministration_WinshuttleExport.DateEnded.HasValue)
+                        {
+                            <div class="col-4 text-center">
+                                <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportRequest_Download/@Model.AF_AfroxAdministration_WinshuttleExport.ID/1" class="btn btn-outline-primary-sm" target="_blank"><i class="fas fa-download"></i>&nbsp;Download Pre Billing Export</a>
+                            </div>
+                            <div class="col-4 text-center">
+                                <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportRequest_Download/@Model.AF_AfroxAdministration_WinshuttleExport.ID/2" class="btn btn-outline-primary-sm" target="_blank"><i class="fas fa-download"></i>&nbsp;Download Meter Readings Export</a>
+                            </div>
+                            <div class="col-4 text-center">
+                                <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportDelete/@Model.AF_AfroxAdministration_WinshuttleExport.ID" class="btn btn-outline-primary-sm"><i class="fas fa-dollar-sign"></i>&nbsp;Request New Report (This will delete the old report)</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12 text-left text-red font-weight-bold">
+                                Report has not finished generating yet. Please give it a few minutes before trying again.
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <div class="card-body">
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Report request successfully submitted
+                        </div>
+                    </div>
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-6 text-center">
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExportRequests" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;View Progress</a>
+                        </div>
+                        <div class="col-6 text-center">
+                            <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExport" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request New Report</a>
+                        </div>
+                    </div>
+
+                </div>
+            }
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_WinshuttleExport?P=' + $("#PartnerID").val() + '&F=' + $("#fromDate").val() + '&T=' + $("#toDate").val();
+        }
+    </script>
+}

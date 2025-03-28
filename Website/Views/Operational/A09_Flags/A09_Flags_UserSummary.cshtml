@@ -1,0 +1,154 @@
+@model MyVoltage.Models.OperationalModels.A09_Flags.A09_FlagsModels.A09_Flags_User_SummaryModel
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A09_Flags_UserSummary.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-2">Due Date Between</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" /></div>
+    <div class="col-1">And</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+<div class="row mt-3">
+    <table class="table table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th rowspan="3" scope="col" class="border-table">User Name</th>
+                <th rowspan="3" scope="col" class="border-table">Status</th>
+
+                <th rowspan="2" colspan="7" scope="col" class="border-table text-center">Unresolved Older Than Count</th>
+
+@*                 <th colspan="@Model.A09_Flags_User_SummaryStatusItems.Where(p => !p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value).Count()" scope="col" class="border-table text-center">Unresolved</th>
+                <th colspan="@Model.A09_Flags_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).Count()" scope="col" class="border-table text-center">Resolved</th>
+ *@                <th rowspan="3" scope="col" class="border-table">Total</th>
+            </tr>
+            <tr>
+@*                 @foreach (var sG in Model.A09_Flags_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.A09_Flags_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    <th colspan="@Model.A09_Flags_User_SummaryStatusItems.Where(p => (!p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value) && p.StatusGroupID == sG).Count()" scope="col" class="border-table text-center">@sgName</th>
+                }
+                @foreach (var sG in Model.A09_Flags_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.A09_Flags_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    <th colspan="@Model.A09_Flags_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value && p.StatusGroupID == sG).Count()" scope="col" class="border-table text-center">@sgName</th>
+                }
+ *@            </tr>
+            <tr>
+                <th scope="col" class="border-table text-nowrap text-center">Today Count</th>
+                <th scope="col" class="border-table text-nowrap text-center">1 Day</th>
+                <th scope="col" class="border-table text-nowrap text-center">3 Days</th>
+                <th scope="col" class="border-table text-nowrap text-center">7 Days</th>
+                <th scope="col" class="border-table text-nowrap text-center">14 Days</th>
+                <th scope="col" class="border-table text-nowrap text-center">1 Month</th>
+                <th scope="col" class="border-table text-nowrap text-center">Oldest</th>
+
+@*                 @foreach (var sG in Model.A09_Flags_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.A09_Flags_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    @foreach (var status in Model.A09_Flags_User_SummaryStatusItems.Where(p => (!p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value) && p.StatusGroupID == sG).ToList())
+                    {
+                        <th scope="col" class="border-table text-nowrap">@status.ActionName<br />@status.ReportingName</th>
+                    }
+                }
+                @foreach (var sG in Model.A09_Flags_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                {
+                    var sgName = Model.A09_Flags_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                    @foreach (var status in Model.A09_Flags_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value && p.StatusGroupID == sG).ToList())
+                    {
+                        <th scope="col" class="border-table text-nowrap">@status.ActionName<br />@status.ReportingName</th>
+                    }
+                }
+ *@            </tr>
+        </thead>
+        <tbody>
+            @{
+                var resolvedStatuses = Model.A09_Flags_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).ToList();
+            }
+            @foreach (var item in Model.A09_Flags_UserSummaryItems)
+            {
+                string rowclass = "";
+                string cellClass = "";
+                string statusText = "";
+                if (item.A09_Flags_User_SummaryItemStatuses.Where(p => resolvedStatuses.Select(c => c.ID).Contains(p.StatusID)).Select(p => p.Count).Sum() == item.A09_Flags_User_SummaryItemStatuses.Select(p => p.Count).Sum())
+                {
+                    cellClass = "text-green font-weight-bold";
+                    rowclass = " class=\"table-success\"";
+                    statusText = "Completed";
+                }
+                else
+                {
+                    cellClass = "text-red font-weight-bold";
+                    rowclass = " class=\"table-danger\"";
+                    statusText = "Due";
+                }
+                <tr title="View @item.UserName" @Html.Raw(rowclass)>
+                    <td class="border-table text-nowrap" scope="col">@item.UserName</td>
+                    <td title="@item.UserName - Status" scope="col" class="border-table text-nowrap @Html.Raw(cellClass)">@statusText</td>
+
+                    <td class="border-table text-nowrap" title="@item.UserName - Today Count" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@(DateTime.Now.Date.ToShortDateString())', '@(DateTime.Now.Date.ToShortDateString())', '', '', '', '', '', '', '');">@item.TodayCount</td>
+                    <td class="border-table text-nowrap" title="@item.UserName - Older Than 1 Day Count" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@(DateTime.Now.AddDays(-1).Date.ToShortDateString())', '@(DateTime.Now.Date.ToShortDateString())', '', '', '', '', '', '', '');">@item.OlderThan1DayCount</td>
+                    <td class="border-table text-nowrap" title="@item.UserName - Older Than 3 Days Count" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@(DateTime.Now.AddDays(-3).Date.ToShortDateString())', '@(DateTime.Now.Date.ToShortDateString())', '', '', '', '', '', '', '');">@item.OlderThan3DaysCount</td>
+                    <td class="border-table text-nowrap" title="@item.UserName - Older Than 7 Days Count" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@(DateTime.Now.AddDays(-7).Date.ToShortDateString())', '@(DateTime.Now.Date.ToShortDateString())', '', '', '', '', '', '', '');">@item.OlderThan7DaysCount</td>
+                    <td class="border-table text-nowrap" title="@item.UserName - Older Than 14 Days Count" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@(DateTime.Now.AddDays(-14).Date.ToShortDateString())', '@(DateTime.Now.Date.ToShortDateString())', '', '', '', '', '', '', '');">@item.OlderThan14DaysCount</td>
+                    <td class="border-table text-nowrap" title="@item.UserName - Older Than 1 Month Count" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@Model.FromDate.Value.ToDateShort()', '@Model.ToDate.Value.ToDateShort()', '', '', '', '', '', '', '');">@item.OlderThan1MonthCount</td>
+                    <td class="border-table text-nowrap" title="@item.UserName - Oldest Unresolved Ticket" scope="col">
+                        @if (item.OldestUnresolvedFlagCreateDate.HasValue)
+                        {
+                            <span>@item.OldestUnresolvedFlagCreateDate.ToDateAndTimeShort(true) (<a href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.OldestUnresolvedFlagTypeID/@item.OldestUnresolvedFlagID">@item.OldestUnresolvedFlagID</a>)</span>
+                        }
+                    </td>
+
+@*                     @foreach (var status in Model.A09_Flags_User_SummaryStatusItems.Where(p => !p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value).ToList())
+                    {
+                        var statusItem = item.A09_Flags_User_SummaryItemStatuses.Where(p => p.StatusID == status.ID).SingleOrDefault();
+                        <td title="@item.UserName - @status.GroupName - @status.ActionName - @status.ReportingName" class="border-table text-nowrap" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@Model.FromDate.Value.ToDateShort()', '@Model.ToDate.Value.ToDateShort()', '@(statusItem != null ? statusItem.StatusGroupID.ToString() : "")', '@(statusItem != null ? statusItem.StatusID.ToString() : "")', '', '', '', '', '');">@(statusItem != null ? statusItem.Count.ToString() : "0")</td>
+                    }
+                    @foreach (var status in Model.A09_Flags_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).ToList())
+                    {
+                        var statusItem = item.A09_Flags_User_SummaryItemStatuses.Where(p => p.StatusID == status.ID).SingleOrDefault();
+                        <td title="@item.UserName - @status.GroupName - @status.ActionName - @status.ReportingName" class="border-table text-nowrap" scope="col" style="cursor:pointer;" onclick="Search('', '', '', '', '@item.UserID', '', '@Model.FromDate.Value.ToDateShort()', '@Model.ToDate.Value.ToDateShort()', '@(statusItem != null ? statusItem.StatusGroupID.ToString() : "")', '@(statusItem != null ? statusItem.StatusID.ToString() : "")', '', '', '', '', '');">@(statusItem != null ? statusItem.Count.ToString() : "0")</td>
+                    }
+ *@                    <td title="@item.UserName - Total Tickets" scope="col" class="border-table text-nowrap">@item.Total</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@section Scripts {
+    <script>
+        function Search(FlagType, Heading, Description, Comments, ResponsibleUser, ReportingToUser, DueDateFrom, DueDateTo, StatusGroup, DefaultStatus, Priority, FlagID, LinkedTo, Company, ResolvedStatusType) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = "/operational/A09_Flags/A09_Flags_Search?FlagType=" + encodeURIComponent(FlagType != '' ? FlagType : '')
+                + "&Heading=" + encodeURIComponent(Heading != '' ? Heading : '')
+                + "&Description=" + encodeURIComponent(Description != '' ? Description : '')
+                + "&Comments=" + encodeURIComponent(Comments != '' ? Comments : '')
+                + "&ResponsibleUser=" + encodeURIComponent(ResponsibleUser != '' ? ResponsibleUser : '')
+                + "&ReportingToUser=" + encodeURIComponent(ReportingToUser != '' ? ReportingToUser : '')
+                + "&DueDateFrom=" + encodeURIComponent(DueDateFrom != '' ? DueDateFrom : '')
+                + "&DueDateTo=" + encodeURIComponent(DueDateTo != '' ? DueDateTo : '')
+                + "&StatusGroup=" + encodeURIComponent(StatusGroup != '' ? StatusGroup : '')
+                + "&DefaultStatus=" + encodeURIComponent(DefaultStatus != '' ? DefaultStatus : '')
+                + "&Priority=" + encodeURIComponent(Priority != '' ? Priority : '')
+                + "&FlagID=" + encodeURIComponent(FlagID != '' ? FlagID : '')
+                + "&LinkedTo=" + encodeURIComponent(LinkedTo != '' ? LinkedTo : '')
+                + "&Company=" + encodeURIComponent(Company != '' ? Company : '')
+                + "&ResolvedStatusType=" + encodeURIComponent(ResolvedStatusType != '' ? ResolvedStatusType : '')
+                ;
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/A09_Flags/A09_Flags_UserSummary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

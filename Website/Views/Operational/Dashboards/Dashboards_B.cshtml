@@ -1,0 +1,70 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Dashboards_B.GetDescription()} - {(operationalProvider.CompanyID == 0 ? "All Companies" : operationalProvider.CompanyName)}";
+}
+@if (operationalProvider.CompanyID == 0)
+{
+    <text>Select Company to begin...</text>
+}
+else
+{
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="b1_011_account_details_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading @MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_AccountPaymentSummary.GetDescription() Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="b1_021_supply_cost_settings_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading @MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsSummary.GetDescription() Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="b2_012_council_reading_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading @MyVoltage.Data.SecureAreaEnum.B02_CouncilReadings_CouncilReadingSummary.GetDescription() Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="b3_011_council_statement_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading @MyVoltage.Data.SecureAreaEnum.B03_SupplyCouncilStatements_CouncilStatementSummary.GetDescription() Details...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12">
+        <div class="border border-primary rounded p-2 m-2 w-100">
+            <div id="b5_011_payment_summary" class="">
+                <div class="text-primary">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading @MyVoltage.Data.SecureAreaEnum.B05_AccountPayments_PaymentSummary.GetDescription() Details...
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ('@operationalProvider.CompanyID' != '0') {
+                $("#b1_011_account_details_summary").load('@Url.Content("/operational/Dashboards/Dashboards_B/B1_011_Account_Details_Summary")');
+                $("#b1_021_supply_cost_settings_summary").load('@Url.Content("/operational/Dashboards/Dashboards_B/B1_021_Supply_Cost_Settings_Summary")');
+                $("#b2_012_council_reading_summary").load('@Url.Content("/operational/Dashboards/Dashboards_B/B2_012_Council_Reading_Summary")');
+                $("#b3_011_council_statement_summary").load('@Url.Content("/operational/Dashboards/Dashboards_B/B3_011_Council_Statement_Summary")');
+                $("#b5_011_payment_summary").load('@Url.Content("/operational/Dashboards/Dashboards_B/B5_011_Payment_Summary")');
+            }
+        });
+    </script>
+}

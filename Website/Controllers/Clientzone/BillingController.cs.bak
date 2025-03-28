@@ -1,0 +1,647 @@
+﻿using GemBox.Spreadsheet;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Net.Http.Headers;
+using MyVoltage.Api.Factories;
+using MyVoltage.Api.Interfaces;
+using MyVoltage.Api.SkyBill;
+using MyVoltage.Api.Zendesk;
+using MyVoltage.Data;
+using MyVoltage.Extensions;
+using MyVoltage.Models;
+using MyVoltage.Models.ClientzoneModels;
+using MyVoltage.Models.OperationalModels;
+using MyVoltage.Models.OperationalModels.SearchModels;
+using MyVoltage.Models.OperationalModels.SiteAdmin;
+using MyVoltage.Models.UsageViewModels;
+using MyVoltage.Services;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+
+namespace MyVoltage.Controllers.Operational
+{
+    [Authorize]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public class BillingController : Controller
+    {
+        private readonly DbContextOptions<Data.MyVoltageDbContext> _options;
+        private readonly DbContextOptions<MyVoltageApi.Data.MyVoltageApiDbContext> _APIoptions;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ClientzoneProvider _clientzoneProvider;
+        private readonly IMemoryCache _cache;
+        private readonly IDeviceFactory _deviceFactory;
+        private IDeviceApi _client;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IConfiguration _configuration;
+        private readonly IEmailSender _emailSender;
+        private readonly IHttpContextAccessor _context;
+        //private ICompositeViewEngine _viewEngine;
+        IServiceProvider _serviceProvider;
+
+        public BillingController(IMemoryCache cache,
+            IHttpContextAccessor context,
+            IEmailSender emailSender,
+            UserManager<ApplicationUser> userManager,
+            DbContextOptions<Data.MyVoltageDbContext> options,
+            ClientzoneProvider clientzoneProvider,
+            IHttpContextAccessor contextAccessor,
+            DbContextOptions<MyVoltageApi.Data.MyVoltageApiDbContext> APIoptions,
+            //ICompositeViewEngine viewEngine,
+            IServiceProvider serviceProvider,
+            IConfiguration configuration)
+        {
+            _context = context;
+            _emailSender = emailSender;
+            _userManager = userManager;
+            _options = options;
+            _clientzoneProvider = clientzoneProvider;
+            _cache = cache;
+            _contextAccessor = contextAccessor;
+            _client = new DeviceFactory().CreateDeviceApi(_cache, false, options, null);
+            _APIoptions = APIoptions;
+            _configuration = configuration;
+            //_viewEngine = viewEngine;
+            _serviceProvider = serviceProvider;
+        }
+
+        [HttpGet]
+        [Route("/clientzone/billing/invoices")]
+        public async Task<IActionResult> Invoices()
+        {
+
+            return View("~/Views/Clientzone/Billing/Invoices.cshtml");
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/clientzone/billing/invoice_view")]
+        public async Task<IActionResult> Invoice_View()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = _userManager.GetUserId(User),
+            };
+
+            Invoice_ViewModel model = new Invoice_ViewModel()
+            {
+                SelectedMonth = !string.IsNullOrEmpty(Request.Query["d"]) ? new DateTime(Convert.ToInt32(Request.Query["d"].ToString().Split('-')[0]), Convert.ToInt32(Request.Query["d"].ToString().Split('-')[1]), 1) : new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                ShowingPrintView = !string.IsNullOrEmpty(Request.Query["PV"]),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()))
+            {
+                var customer = db.Customers.Where(p => !p.IsDeleted && p.CustomerNumber == Request.Query["CN"].ToString()).SingleOrDefault();
+                var company = db.Companies.Where(p => p.CompanyID == Convert.ToInt32(Request.Query["CID"].ToString())).SingleOrDefault();
+                //var companySkin = db.CompanySkins.Where(p => p.CompanyID == _clientzoneProvider.CompanyID).SingleOrDefault();
+                //string logoPATH = "";
+                //if (companySkin != null && !string.IsNullOrEmpty(companySkin.Logo))
+                //{
+                //    logoPATH = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{companySkin.Logo}");
+                //}
+
+                SkyBillApiClient skyBillApiClient = new SkyBillApiClient(company.Name, _cache);
+                model.TaxInvoiceTemplate = skyBillApiClient.GetTaxInvoiceTaxInvoiceTemplate(customer, company, model.SelectedMonth);
+            }
+
+            activityLog.DateEnded = DateTime.Now;
+
+            if (!string.IsNullOrEmpty(activityLog.UserID))
+            {
+                db.Add(activityLog);
+                db.SaveChanges();
+            }
+
+            if (!string.IsNullOrEmpty(Request.Query["PV"]))
+                return View("~/Views/Clientzone/Billing/InvoiceView.cshtml", model);
+            else
+                return PartialView("~/Views/Clientzone/Billing/InvoiceView.cshtml", model);
+        }
+
+        [HttpGet]
+        [Route("/clientzone/billing/invoices_downloadpdf")]
+        public async Task<IActionResult> Invoices_DownloadPDF()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"]) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()) && !string.IsNullOrEmpty(Request.Query["d"].ToString()))
+            {
+                DateTime StatementMonth = new DateTime(Convert.ToDateTime(Request.Query["d"]).Year, Convert.ToDateTime(Request.Query["d"]).Month, 1);
+                string statementFileName = $"{HttpUtility.UrlEncode(Request.Query["CN"].ToString().Replace("/", "_"))}_{StatementMonth:yyyy_MM}_Invoice.pdf";
+
+                string url = $"{Request.Scheme}://{Request.Host}/clientzone/billing/invoice_view{Request.QueryString}";
+                byte[] statementBytes = null;
+
+                SelectPdf.HtmlToPdf converter = new SelectPdf.HtmlToPdf();
+                SelectPdf.PdfDocument doc = converter.ConvertUrl(url);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    doc.Save(ms);
+                    doc.Close();
+                    statementBytes = ms.ToArray();
+                }
+
+                activityLog.DateEnded = DateTime.Now;
+                if (!string.IsNullOrEmpty(activityLog.UserID))
+                {
+                    db.Add(activityLog);
+                    db.SaveChanges();
+                }
+
+                if (statementBytes != null && statementBytes.Length > 0)
+                {
+                    return File(statementBytes, "application/pdf", statementFileName);
+                }
+            }
+
+            return Content($"Error generating file", "text/plain");
+        }
+
+        [HttpGet]
+        [Route("/clientzone/billing/statements")]
+        public async Task<IActionResult> Statements()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+
+            activityLog.DateEnded = DateTime.Now;
+            if (!string.IsNullOrEmpty(activityLog.UserID))
+            {
+                db.Add(activityLog);
+                db.SaveChanges();
+            }
+
+            return View("~/Views/Clientzone/Billing/Statements.cshtml");
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/clientzone/billing/statement_view")]
+        public async Task<IActionResult> Statement_View()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            Statement_ViewModel model = new Statement_ViewModel()
+            {
+                SelectedMonth = !string.IsNullOrEmpty(Request.Query["d"].ToString()) ? new DateTime(Convert.ToInt32(Request.Query["d"].ToString().Split('-')[0]), Convert.ToInt32(Request.Query["d"].ToString().Split('-')[1]), 1) : new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                ShowingPrintView = !string.IsNullOrEmpty(Request.Query["PV"].ToString()),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()))
+            {
+                var customer = db.Customers.Where(p => !p.IsDeleted && p.CustomerNumber == Request.Query["CN"]).SingleOrDefault();
+                var company = db.Companies.Where(p => p.CompanyID == Convert.ToInt32(Request.Query["CID"])).SingleOrDefault();
+                //var companySkin = db.CompanySkins.Where(p => p.CompanyID == _clientzoneProvider.CompanyID).SingleOrDefault();
+                //string logoPATH = "";
+                //if (companySkin != null && !string.IsNullOrEmpty(companySkin.Logo))
+                //{
+                //    logoPATH = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{companySkin.Logo}");
+                //}
+
+                SkyBillApiClient skyBillApiClient = new SkyBillApiClient(company.Name, _cache);
+<<<<<<< HEAD
+                model.TaxInvoiceTemplate = skyBillApiClient.GetTenantConsumptionInvoiceTaxInvoiceTemplate(Request.Query["CN"], company.Name, model.SelectedMonth, company, customer, true);
+=======
+                model.TaxInvoiceTemplate = skyBillApiClient.GetTenantConsumptionInvoiceTaxInvoiceTemplate(Request.Query["CN"].ToString(), company.Name, model.SelectedMonth, company, customer, true);
+>>>>>>> dev
+            }
+
+            activityLog.DateEnded = DateTime.Now;
+            if (!string.IsNullOrEmpty(activityLog.UserID))
+            {
+                db.Add(activityLog);
+                db.SaveChanges();
+            }
+
+            if (!string.IsNullOrEmpty(Request.Query["PV"]))
+                return View("~/Views/Clientzone/Billing/StatementView.cshtml", model);
+            else
+                return PartialView("~/Views/Clientzone/Billing/StatementView.cshtml", model);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/clientzone/billing/StatementGroupedByMonth_View")]
+        public async Task<IActionResult> StatementGroupedByMonth_View()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"]) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            StatementGroupedByMonth_ViewModel model = new StatementGroupedByMonth_ViewModel()
+            {
+                FromDate = !string.IsNullOrEmpty(Request.Query["from"].ToString()) ? new DateTime(Convert.ToInt32(Request.Query["from"].ToString().Split('-')[0]), Convert.ToInt32(Request.Query["from"].ToString().Split('-')[1]), 1) : new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                ToDate = !string.IsNullOrEmpty(Request.Query["to"].ToString()) ? new DateTime(Convert.ToInt32(Request.Query["to"].ToString().Split('-')[0]), Convert.ToInt32(Request.Query["to"].ToString().Split('-')[1]), 1) : new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                ShowingPrintView = !string.IsNullOrEmpty(Request.Query["PV"].ToString()),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()))
+            {
+                var customer = db.Customers.Where(p => !p.IsDeleted && p.CustomerNumber == Request.Query["CN"].ToString()).SingleOrDefault();
+                var company = db.Companies.Where(p => p.CompanyID == Convert.ToInt32(Request.Query["CID"])).SingleOrDefault();
+                //var companySkin = db.CompanySkins.Where(p => p.CompanyID == _clientzoneProvider.CompanyID).SingleOrDefault();
+                //string logoPATH = "";
+                //if (companySkin != null && !string.IsNullOrEmpty(companySkin.Logo))
+                //{
+                //    logoPATH = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{companySkin.Logo}");
+                //}
+
+                SkyBillApiClient skyBillApiClient = new SkyBillApiClient(company.Name, _cache);
+<<<<<<< HEAD
+                model.TaxInvoiceTemplates = skyBillApiClient.GetTenantConsumptionInvoiceTaxInvoiceTemplateGroupedByMonth(Request.Query["CN"], company.Name, model.FromDate, model.ToDate, company, customer);
+=======
+                model.TaxInvoiceTemplates = skyBillApiClient.GetTenantConsumptionInvoiceTaxInvoiceTemplateGroupedByMonth(Request.Query["CN"].ToString(), company.Name, model.FromDate, model.ToDate, company, customer);
+>>>>>>> dev
+            }
+
+            activityLog.DateEnded = DateTime.Now;
+            if (!string.IsNullOrEmpty(activityLog.UserID))
+            {
+                db.Add(activityLog);
+                db.SaveChanges();
+            }
+
+            if (!string.IsNullOrEmpty(Request.Query["PV"]))
+                return View("~/Views/Clientzone/Billing/StatementGroupedByMonthView.cshtml", model);
+            else
+                return PartialView("~/Views/Clientzone/Billing/StatementGroupedByMonthView.cshtml", model);
+        }
+
+        [HttpGet]
+        [Route("/clientzone/billing/statementgroupedbymonth_downloadpdf")]
+        public async Task<IActionResult> StatementGroupedByMonth_DownloadPDF()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()) && !string.IsNullOrEmpty(Request.Query["from"].ToString()) && !string.IsNullOrEmpty(Request.Query["to"].ToString()))
+            {
+                DateTime StatementGroupedByMonthMonth = new DateTime(Convert.ToDateTime(Request.Query["from"]).Year, Convert.ToDateTime(Request.Query["from"]).Month, 1);
+                DateTime StatementGroupedByMonthMonthTo = new DateTime(Convert.ToDateTime(Request.Query["to"]).Year, Convert.ToDateTime(Request.Query["to"]).Month, 1);
+                string StatementGroupedByMonthFileName = $"{HttpUtility.UrlEncode(Request.Query["CN"].ToString().Replace("/", "_"))}_{StatementGroupedByMonthMonth:yyyy_MM}_{StatementGroupedByMonthMonthTo:yyyy_MM}_Statement.pdf";
+
+                string url = $"{Request.Scheme}://{Request.Host}/clientzone/billing/StatementGroupedByMonth_View{Request.QueryString}";
+                byte[] StatementGroupedByMonthBytes = null;
+
+                SelectPdf.HtmlToPdf converter = new SelectPdf.HtmlToPdf();
+                SelectPdf.PdfDocument doc = converter.ConvertUrl(url);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    doc.Save(ms);
+                    doc.Close();
+                    StatementGroupedByMonthBytes = ms.ToArray();
+                }
+
+                activityLog.DateEnded = DateTime.Now;
+                if (!string.IsNullOrEmpty(activityLog.UserID))
+                {
+                    db.Add(activityLog);
+                    db.SaveChanges();
+                }
+
+                if (StatementGroupedByMonthBytes != null && StatementGroupedByMonthBytes.Length > 0)
+                {
+                    return File(StatementGroupedByMonthBytes, "application/pdf", StatementGroupedByMonthFileName);
+                }
+            }
+
+            return Content($"Error generating file", "text/plain");
+        }
+
+        [HttpGet]
+        [Route("/clientzone/billing/statements_downloadpdf")]
+        public async Task<IActionResult> Statements_DownloadPDF()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()) && !string.IsNullOrEmpty(Request.Query["d"].ToString()))
+            {
+                DateTime StatementMonth = new DateTime(Convert.ToDateTime(Request.Query["d"]).Year, Convert.ToDateTime(Request.Query["d"]).Month, 1);
+                string statementFileName = $"{HttpUtility.UrlEncode(Request.Query["CN"].ToString().Replace("/", "_"))}_{StatementMonth:yyyy_MM}_Statement.pdf";
+
+                string url = $"{Request.Scheme}://{Request.Host}/clientzone/billing/statement_view{Request.QueryString}";
+                byte[] statementBytes = null;
+
+                SelectPdf.HtmlToPdf converter = new SelectPdf.HtmlToPdf();
+                SelectPdf.PdfDocument doc = converter.ConvertUrl(url);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    doc.Save(ms);
+                    doc.Close();
+                    statementBytes = ms.ToArray();
+                }
+
+                activityLog.DateEnded = DateTime.Now;
+                if (!string.IsNullOrEmpty(activityLog.UserID))
+                {
+                    db.Add(activityLog);
+                    db.SaveChanges();
+                }
+
+                if (statementBytes != null && statementBytes.Length > 0)
+                {
+                    return File(statementBytes, "application/pdf", statementFileName);
+                }
+            }
+
+            return Content($"Error generating file", "text/plain");
+        }
+
+        [HttpGet]
+        [Route("/clientzone/billing/currentbillingcycle")]
+        public async Task<IActionResult> CurrentBillingCycle()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            CurrentBillingCycleModel model = new CurrentBillingCycleModel()
+            {
+                SelectedMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                SummaryBlocks = new List<CurrentBillingCycleModel.SummaryBlock>(),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["d"].ToString()))
+                model.SelectedMonth = new DateTime(Convert.ToInt32(Request.Query["d"].ToString().Split('-')[0]), Convert.ToInt32(Request.Query["d"].ToString().Split('-')[1]), 1);
+
+            activityLog.DateEnded = DateTime.Now;
+            if (!string.IsNullOrEmpty(activityLog.UserID))
+            {
+                db.Add(activityLog);
+                db.SaveChanges();
+            }
+
+            return View("~/Views/Clientzone/Billing/CurrentBillingCycle.cshtml", model);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/clientzone/billing/currentbillingcyclediv")]
+        public async Task<IActionResult> CurrentBillingCycleDiv()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            CurrentBillingCycleModel model = new CurrentBillingCycleModel()
+            {
+                SelectedMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                SummaryBlocks = new List<CurrentBillingCycleModel.SummaryBlock>(),
+                ShowingPrintView = !string.IsNullOrEmpty(Request.Query["PV"].ToString()),
+                CustomerNumber = Request.Query["CN"].ToString(),
+                ShowIncVAT = !string.IsNullOrEmpty(Request.Query["SV"].ToString()) ? Convert.ToBoolean(Request.Query["SV"]) : false,
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["d"].ToString()))
+                model.SelectedMonth = new DateTime(Convert.ToInt32(Request.Query["d"].ToString().Split('-')[0]), Convert.ToInt32(Request.Query["d"].ToString().Split('-')[1]), 1);
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()))
+            {
+                var localCustomer = db.Customers.Where(p => !p.IsDeleted && p.CustomerNumber == Request.Query["CN"].ToString()).FirstOrDefault();
+                if (localCustomer != null && localCustomer.ShowCostInclVAT.HasValue)
+                    model.ShowIncVAT = localCustomer.ShowCostInclVAT.Value;
+                if (localCustomer != null)
+                {
+                    var company = db.Companies.Where(p => p.CompanyID == localCustomer.CompanyID).SingleOrDefault();
+                    model.NetcashBankAccountNo = company.NetcashBankAccountNo;
+                    model.NetcashBankAccountType = company.NetcashBankAccountType;
+                    model.NetcashBankBranchCode = company.NetcashBankBranchCode;
+                    model.NetcashBankName = company.NetcashBankName;
+                    model.RecipientAddress = localCustomer.RecipientAddress;
+                    model.RecipientName = localCustomer.RecipientName;
+                    model.RecipientReferenceNumber = localCustomer.RecipientReferenceNumber;
+                    model.RecipientVATNumber = localCustomer.RecipientVATNumber;
+                    model.SupplierAddress = company.SupplierAddress;
+                    model.SupplierName = company.SupplierName;
+                    model.SupplierVATNumber = company.SupplierVATNumber;
+                    model.SupplierPhone = company.SupplierPhone;
+                    model.SupplierPostal = company.SupplierPostal;
+                    model.SupplierURL = company.SupplierURL;
+                    model.CustomerName = localCustomer.FullName;
+                    model.Address1 = localCustomer.RecipientAddress;
+                    model.CompanyID = localCustomer.CompanyID;
+                }
+
+                var resourceEntriesPerProductForCustomerHistory = (from p in db.Report_ProductsResourceLedgerCustomerMonthlies
+                                                                   where p.CompanyID == Convert.ToInt32(Request.Query["CID"])
+                                                                   && p.CustomerNo == Request.Query["CN"].ToString()
+                                                                   && p.Month >= model.SelectedMonth.AddMonths(-4)
+                                                                   && p.Month <= model.SelectedMonth
+                                                                   select p).ToList();
+
+                var resourceEntriesPerProductForCustomer = (from p in resourceEntriesPerProductForCustomerHistory
+                                                            where p.Month == model.SelectedMonth
+                                                            select p).ToList();
+
+                var products = db.SiteAdmin_Products.ToList();
+
+                foreach (var entry in resourceEntriesPerProductForCustomer)
+                {
+                    var prod = products.Where(p => p.ID == entry.ProductID).SingleOrDefault();
+                    CurrentBillingCycleModel.SummaryBlock item = new CurrentBillingCycleModel.SummaryBlock()
+                    {
+                        ID = prod.ID,
+                        CostOfSalesLinkID = prod.CostOfSalesLinkID,
+                        CreatedByID = prod.CreatedByID,
+                        DateCreated = prod.DateCreated,
+                        DateUpdated = prod.DateUpdated,
+                        IncludeInC602x = prod.IncludeInC602x,
+                        ProductName = prod.ProductName,
+                        SalesLinkID = prod.SalesLinkID,
+                        Total = entry.Amount * -1.0m,
+                        Units = entry.Quantity * -1.0m,
+                        UpdatedByID = prod.UpdatedByID,
+                        ShowIncVAT = model.ShowIncVAT,
+                        ChargeTypeID = prod.ChargeTypeID,
+                        DeviceTypeID = prod.DeviceTypeID,
+                        MonthlyFigures = new Dictionary<DateTime, decimal?>(),
+                    };
+
+                    DateTime current = model.SelectedMonth;
+                    while (current >= model.SelectedMonth.AddMonths(-4))
+                    {
+                        var res = resourceEntriesPerProductForCustomerHistory.Where(p => p.ProductID == entry.ProductID && p.Month == current).FirstOrDefault();
+                        if (res != null)
+                            item.MonthlyFigures.Add(current, !model.ShowIncVAT ? (res.Amount * -1.0m) : (res.Amount * -1.0m) * 1.15m);
+                        current = current.AddMonths(-1);
+                    }
+
+                    model.SummaryBlocks.Add(item);
+                }
+            }
+
+
+
+            activityLog.DateEnded = DateTime.Now;
+            if (!string.IsNullOrEmpty(activityLog.UserID))
+            {
+                db.Add(activityLog);
+                db.SaveChanges();
+            }
+
+            if (!string.IsNullOrEmpty(Request.Query["PV"].ToString()))
+                return View("~/Views/Clientzone/Billing/CurrentBillingCycleDiv.cshtml", model);
+            else
+                return PartialView("~/Views/Clientzone/Billing/CurrentBillingCycleDiv.cshtml", model);
+        }
+
+
+        [HttpGet]
+        [Route("/clientzone/billing/currentbillingcycle_downloadpdf")]
+        public async Task<IActionResult> CurrentBillingCycle_DownloadPDF()
+        {
+            var db = new MyVoltageDbContext(_options);
+            Data.ActivityLog activityLog = new ActivityLog()
+            {
+                ActionID = (int)Data.LogActionEnum.PageLoad,
+                DateStarted = DateTime.Now,
+                Request = "",
+                Response = "",
+                SourceID = (int)LogSourceEnum.Clientzone,
+                SourceIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                URL = _context.HttpContext.Request.GetDisplayUrl().ToString(),
+                UserID = !string.IsNullOrEmpty(Request.Query["U"].ToString()) ? Request.Query["U"].ToString() : _userManager.GetUserId(User),
+            };
+
+            if (!string.IsNullOrEmpty(Request.Query["CID"].ToString()) && !string.IsNullOrEmpty(Request.Query["CN"].ToString()) && !string.IsNullOrEmpty(Request.Query["d"].ToString()))
+            {
+                DateTime StatementMonth = new DateTime(Convert.ToDateTime(Request.Query["d"]).Year, Convert.ToDateTime(Request.Query["d"]).Month, 1);
+                string statementFileName = $"{HttpUtility.UrlEncode(Request.Query["CN"].ToString().Replace("/", "_"))}_{StatementMonth:yyyy_MM}_CurrentBillingCycle.pdf";
+
+                string url = $"{Request.Scheme}://{Request.Host}/clientzone/billing/currentbillingcyclediv{Request.QueryString}";
+                byte[] statementBytes = null;
+
+                SelectPdf.HtmlToPdf converter = new SelectPdf.HtmlToPdf();
+                SelectPdf.PdfDocument doc = converter.ConvertUrl(url);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    doc.Save(ms);
+                    doc.Close();
+                    statementBytes = ms.ToArray();
+                }
+
+                activityLog.DateEnded = DateTime.Now;
+                if (!string.IsNullOrEmpty(activityLog.UserID))
+                {
+                    db.Add(activityLog);
+                    db.SaveChanges();
+                }
+
+                if (statementBytes != null && statementBytes.Length > 0)
+                {
+                    return File(statementBytes, "application/pdf", statementFileName);
+                }
+            }
+
+            return Content($"Error generating file", "text/plain");
+        }
+
+    }
+}

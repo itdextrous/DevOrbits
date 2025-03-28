@@ -1,0 +1,14 @@
+ <span style="font-size:19px"><p>Hi All,<br/>
+	Please see the latest UniPin data attached to this mail.
+  <br/><br/>
+  Kind Regards
+  <br/>
+ <strong style="color: #ff8a02;">The My Voltage Team</strong><br></span>
+  <span style="font-size:15px">
+  office +27 (0)87 057 2561<br>
+  mobile +27 (0)79 492 5036<br>
+  email info@myvoltage.co.za<br>
+ website <a href="http://www.myvoltage.co.za">www.myvoltage.co.za</span><br>
+  <br>
+  <img src="{url}/lib/email/logo.png"><br>
+  <br>

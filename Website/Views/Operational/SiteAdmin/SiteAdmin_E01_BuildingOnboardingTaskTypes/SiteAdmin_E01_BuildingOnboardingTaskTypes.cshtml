@@ -1,0 +1,185 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_E01_BuildingOnboardingTaskTypesModels.SiteAdmin_E01_BuildingOnboardingTask_TypesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.SiteAdmin_E01_BuildingOnboardingTaskTypes.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Task Type</a>
+    </div>
+
+    @if (opProv.CompanyID != 0)
+    {
+        <div class="col text-right">
+            <a href="#" onclick="LinkTasksForCompany();" class="btn btn-outline-primary-sm"><i class="fas fa-link"></i>&nbsp;Link All For&nbsp;@opProv.CompanyName</a>
+            <a href="#" onclick="UnLinkTasksForCompany();" class="btn btn-outline-primary-sm"><i class="fas fa-cut"></i>&nbsp;Unlink All For&nbsp;@opProv.CompanyName</a>
+            <a href="#" onclick="CreateTasksForCompany();" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create All For&nbsp;@opProv.CompanyName</a>
+        </div>
+    }
+</div>
+
+@if (opProv.CompanyID == 0)
+{
+    <div class="row mb-md-2">
+        <div class="col-12 font-weight-bold text-red">
+            Select a company to assign.
+        </div>
+    </div>
+}
+<div class="row mb-md-2">
+    @if (Model.ShowDeleted)
+    {
+        <div class="col-12">
+            Currently showing all entries. <a href="/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes" class="btn btn-outline-primary-sm"><i class="fas fa-search-minus"></i>&nbsp;Show Only Active</a>
+        </div>
+    }
+    else
+    {
+        <div class="col-12">
+            Currently showing active only entries. <a href="/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes?SD=t" class="btn btn-outline-primary-sm"><i class="fas fa-search-plus"></i>&nbsp;Show All</a>
+        </div>
+    }
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+
+        <table class="table table-responsive-xl table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Workflow Group</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Pillar</th>
+                    <th scope="col">Classification</th>
+                    <th scope="col">Identifier</th>
+                    <th scope="col">Heading</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Responsible Person</th>
+                    <th scope="col">Reporting To Person</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status Group</th>
+                    <th scope="col">Default Status</th>
+                    <th scope="col">Linked Secure Area</th>
+                    <th scope="col" class="text-nowrap text-right">Workdays Required to Clear<br />(Mon-Fri)</th>
+                    <th scope="col" class="text-nowrap"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SiteAdmin_E01_BuildingOnboardingTaskTypesItems)
+                {
+                    string desc = "";
+                    @foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                    {
+                        foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                        {
+                            if (item.LinkedSecureAreaID == ((int)dsa.Item1))
+                            {
+                                desc = $"<span class=\"\">{psa.Key.Item3} - {dsa.Item3}</span>";
+                                break;
+                            }
+                        }
+                    }
+                    <tr class="@(item.IsDeleted.HasValue && item.IsDeleted.Value ? "table-danger" : "")">
+                        <td scope="col">@item.WorkflowGroupName</td>
+                        <td scope="col">@item.BusinessDepartmentName</td>
+                        <td scope="col">@item.BusinessPillarName</td>
+                        <td scope="col">@item.TaskClassification.GetDescription()</td>
+                        <td scope="col">@item.Identifier</td>
+                        <td scope="col">@item.Heading</td>
+                        <td scope="col">@item.Description</td>
+                        <td scope="col">@item.ResponsibleUsername</td>
+                        <td scope="col">@item.ReportingToUserUsername</td>
+                        <td scope="col">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "")</td>
+                        <td scope="col">@(item.SiteAdmin_StatusGroup != null ? item.SiteAdmin_StatusGroup.StatusGroupName : "[NONE]")</td>
+                        <td scope="col">@item.SiteAdmin_Status</td>
+                        <td scope="col">@(Html.Raw(desc))</td>
+                        <td scope="col">@item.MinRequiredToClear</td>
+                        <td scope="col" class="text-nowrap">
+                            <a href="#" onclick="RedirectToEditFlag('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>&nbsp;
+                            @if (!item.IsDeleted.HasValue || !item.IsDeleted.Value)
+                            {
+                                <a href="#" onclick="RedirectToDeleteFlag('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a><span>&nbsp;</span>
+                                @if (opProv.CompanyID != 0)
+                                {
+                                    @if (item.IsLinkedToSelectedCompany)
+                                    {
+                                        <a href="#" onclick="DeleteCompany('@item.ID');" class="btn btn-sm btn-success"><i class="fas fa-minus-circle"></i>&nbsp;Linked</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="#" onclick="AddCompany('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Link</a>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <a href="#" onclick="RedirectToRestoreFlag('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-restore"></i>&nbsp;Restore</a><span>&nbsp;</span>
+                                @if (opProv.CompanyID != 0)
+                                {
+                                    @if (item.IsLinkedToSelectedCompany)
+                                    {
+                                        <a href="#" onclick="DeleteCompany('@item.ID');" class="btn btn-sm btn-danger"><i class="fas fa-minus-circle"></i>&nbsp;Unlink&nbsp;</a>
+                                    }
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEditFlag(flagID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/Edit/' + flagID;
+        }
+        function AddCompany(taskTypeID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/AddCompany/' + taskTypeID + '/@opProv.CompanyID?R=' + encodeURIComponent(document.location.href);
+        }
+        function DeleteCompany(taskTypeID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/DeleteCompany/' + taskTypeID + '/@opProv.CompanyID?R=' + encodeURIComponent(document.location.href);
+        }
+        function CreateTasksForCompany() {
+            if (confirm('Are you sure you wish to create all missing tasks for @opProv.CompanyName? There is no Undo button here.')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/CreateTasksForCompany/@opProv.CompanyID?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+        function LinkTasksForCompany() {
+            if (confirm('Are you sure you wish to link all tasks to @opProv.CompanyName?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/LinkTasksForCompany/@opProv.CompanyID?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+        function UnLinkTasksForCompany() {
+            if (confirm('Are you sure you wish to unlink all tasks to @opProv.CompanyName?')) {
+                $("#loaderContent").css("display", "block");
+                document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes/UnLinkTasksForCompany/@opProv.CompanyID?R=' + encodeURIComponent(document.location.href);
+            }
+        }
+        function RedirectToDeleteFlag(taskTypeID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes_Delete/' + taskTypeID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToRestoreFlag(taskTypeID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_E01_BuildingOnboardingTaskTypes_Restore/' + taskTypeID + '?R=' + encodeURIComponent(document.location.href);
+        }
+    </script>
+}

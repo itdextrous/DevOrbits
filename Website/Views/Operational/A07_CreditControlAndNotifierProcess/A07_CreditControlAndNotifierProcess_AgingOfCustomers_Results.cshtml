@@ -1,0 +1,151 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_AgingOfCustomers_ResultsModel;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_AgingOfCustomers_Results.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body text-left">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col text-left">Between</div>
+                                    <div class="col"><input class="form-control" type="month" name="fromDate" id="fromDate" value="@(Model.FromDate.ToString("yyyy-MM"))" /></div>
+                                    <div class="col text-center">And</div>
+                                    <div class="col"><input class="form-control" type="month" name="toDate" id="toDate" value="@(Model.ToDate.ToString("yyyy-MM"))" /></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                @Html.DropDownList("ServiceAddress", Model.ServiceAddress, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" rowspan="2" class="border-table">Service Address</th>
+                    <th scope="col" rowspan="2" class="border-table">Customer No</th>
+                    <th scope="col" rowspan="2" class="border-table">Customer Name</th>
+                    <th scope="col" rowspan="2" class="border-table">Contract Start Date</th>
+                    <th scope="col" rowspan="2" class="border-table">Contract End Date</th>
+                    <th scope="col" rowspan="2" class="border-table">Occupancy</th>
+                    @{
+                        DateTime current = Model.FromDate;
+                    }
+                    @while (current <= Model.ToDate)
+                    {
+                        <th scope="col" colspan="6" class="text-center border-table-spanned">@current.ToMonth()</th>
+                        current = current.AddMonths(1);
+                    }
+                </tr>
+                <tr>
+                    @{
+                        current = Model.FromDate;
+                    }
+                    @while (current <= Model.ToDate)
+                    {
+                        <th scope="col" class="border-table-left">Opening Balance</th>
+                        <th scope="col" class="border-table">Payments made And Convenience Fees charged</th>
+                        <th scope="col" class="border-table">Outstanding balance</th>
+                        <th scope="col" class="border-table">Curent Month Charges</th>
+                        <th scope="col" class="border-table">Credit Memo's</th>
+                        <th scope="col" class="border-table-right">Closing Balance</th>
+                        current = current.AddMonths(1);
+                    }
+                </tr>
+            </thead>
+            @foreach (var serviceAddr in Model.ServiceAddress.Where(p => !string.IsNullOrEmpty(p.Value)).ToList())
+            {
+                if (!string.IsNullOrEmpty(Model.SelectedServiceAddress) && serviceAddr.Value != Model.SelectedServiceAddress)
+                {
+                    continue;
+                }
+                <tbody id="CreditControlSummaryItem_@serviceAddr.Value.Replace("/", "-")" style="border:none;">
+                    <tr>
+                        <td scope="col">
+                            <div class="text-orange">
+                                @serviceAddr.Text
+                            </div>
+                        </td>
+                        <td scope="col" colspan="5">
+                            <div class="text-orange">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </td>
+                        @{
+                            current = Model.FromDate;
+                        }
+                        @while (current <= Model.ToDate)
+                        {
+                            <td scope="col" colspan="6">
+                                <div class="text-orange">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </td>
+                            current = current.AddMonths(1);
+                        }
+                    </tr>
+                </tbody>
+            }
+
+        </table>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ServiceAddress.Where(p => !string.IsNullOrEmpty(p.Value)).ToList())));
+        $(companies).each(function() {
+            $("#CreditControlSummaryItem_" + encodeURIComponent(this.Value.replace("/", "-"))).load('@(Url.Content("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_AgingOfCustomers_ResultsItem/"))' + encodeURIComponent(this.Value) + '/' + "CreditControlSummaryItem_" + encodeURIComponent(this.Value.replace("/", "-")) + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&ServiceAddress=' + $("#ServiceAddress").val(), function() {
+                });
+        });
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_AgingOfCustomers_Results' + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&ServiceAddress=' + $("#ServiceAddress").val();
+        }
+        function RedirectToDetails(serviceAddr, customerNo) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_AgingOfCustomers_Review/' + encodeURIComponent(serviceAddr) + '/' + customerNo;
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

@@ -1,0 +1,48 @@
+﻿@using MyVoltage.Models.OverviewViewModels
+@model List<PaymentInfoViewModel>
+@{
+    ViewData["Title"] = "Payment Information";
+    var customerNumber = (string)ViewData["CustomerNumber"];
+}
+
+<h4>Customer number: @customerNumber</h4>
+
+<div>
+    @if (Model != null && Model.Count != 0)
+    {
+        <table id="GatewayDetails" class="table table-repsonsive-sm table-bordered table-hover admin-table table-fixed">
+            <thead>
+                <tr>
+                    <td>Reference</td>
+                    <td>Created Date</td>
+                    <td>Amount</td>
+                    <td>Status</td>
+                    <td>Skybill Status</td>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>@m.Reference</td>
+                        <td>@m.CreateDate</td>
+                        <td>@m.Amount</td>
+                        <td>@m.Status</td>
+                        <td>@m.RawDataStatus</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="card mt-3">
+            <div class="card-body">
+                 <span><b>No search results found...</b></span><br />
+            </div>
+        </div>
+    }
+
+</div>
+

@@ -1,0 +1,72 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_VirtualMeters_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Data;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_VirtualMeters_Details.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select Company to begin...
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+
+                    <table class="table table-sm table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center border-table">Serial</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemCustomer in Model.A10_VirtualMeters_DetailsItems)
+                            {
+                                <tr onclick="RedirectToFilter('@itemCustomer.ID');" style="cursor:pointer;">
+                                    <td scope="col" class="text-center border-table">@itemCustomer.SerialNumber</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+
+                </div>
+                <div class="card-footer">
+
+                </div>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A10_VirtualMeters/A10_VirtualMeters_Edit/' + ID;
+        }
+    </script>
+}

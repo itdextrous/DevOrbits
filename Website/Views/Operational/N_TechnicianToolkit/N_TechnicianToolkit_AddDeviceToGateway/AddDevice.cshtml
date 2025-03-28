@@ -1,0 +1,37 @@
+@model MyVoltage.Models.OperationalModels.N_TechnicianToolkit.N_TechnicianToolkitModels.N_TechnicianToolkit_AddDeviceToGatewayModel
+@{
+    ViewData["Title"] = "Technician Toolkit - Add Device";
+}
+
+<form asp-action="AddDevice" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+
+                    <div class="row">
+                        <div class="col"><label asp-for="GatewayID" class="control-label"></label>:</div>
+                        <div class="col">
+                            <input class="form-group" type="text" asp-for="GatewayID" />
+                            <span asp-validation-for="GatewayID" class="text-red"></span>
+                        </div>
+                    </div>
+                    @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="row">
+                            <div class="col">
+                                @Model.ErrorMessage
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <input type="submit" value="Select Gateway" class="btn btn-outline-primary-sm" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>

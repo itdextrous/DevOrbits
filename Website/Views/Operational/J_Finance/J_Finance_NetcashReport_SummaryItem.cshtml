@@ -1,0 +1,24 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_NetcashReport_SummaryModel.J_Finance_NetcashReport_SummaryItem
+@using MyVoltage.Extensions;
+@{
+    string rowclass = "";
+    string cellClass = "";
+}
+<td scope="col">@Model.Name</td>
+@{
+    DateTime currentDate = Model.FromDate;
+}
+@while (currentDate <= Model.ToDate)
+{
+    var thisMonthItem = Model.J_Finance_NetcashReport_SummarySubItems.Where(p => p.Month == currentDate).SingleOrDefault();
+    <td title="@Model.Name - @currentDate.ToMonth() - Balance Sheet" class="text-right border-table-left" scope="col">@(thisMonthItem != null ? thisMonthItem.System.ToMoneyNoDecimal() : "")</td>
+    <td title="@Model.Name - @currentDate.ToMonth() - Income Statement" class="text-right border-table" scope="col">@(thisMonthItem != null ? thisMonthItem.Netcash.ToMoneyNoDecimal() : "")</td>
+    <td title="@Model.Name - @currentDate.ToMonth() - Total" class="text-right border-table-right" scope="col">@(thisMonthItem != null ? thisMonthItem.Total.ToMoneyNoDecimal() : "")</td>
+    <td scope="col">&nbsp;</td>
+    currentDate = currentDate.AddMonths(1);
+}
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+    });
+</script>

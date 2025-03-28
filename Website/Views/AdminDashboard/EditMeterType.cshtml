@@ -1,0 +1,161 @@
+@model MyVoltage.Models.AdminViewModels.EditMeterTypeViewModel
+@{
+    ViewData["Title"] = "Edit MeterType";
+}
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row">
+    <a href="/admin/MeterTypes" class="btn btn-outline-primary btn-sm float-right my-4">Back to List</a>
+</div>
+<form asp-action="EditMeterType" enctype="multipart/form-data">
+    <div class="row mt-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card bg-primary text-white">
+                <div class="p-3">
+                    <div class="row">
+                        <div class="col-md-12 form-group text-nowrap">
+                            @if (Model != null && Model.IsSuccess)
+                            {
+                                <div class="row">
+                                    @Model.TypeName successfully updated.
+                                </div>
+                                <div class="row">
+                                    <a href="/admin/MeterTypes" class="btn btn-secondary">Ok</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="TypeName" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="TypeName" />
+                                        <span asp-validation-for="TypeName" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="Port" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="Port" />
+                                        <span asp-validation-for="Port" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="Protocol" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="Protocol" />
+                                        <span asp-validation-for="Protocol" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RemoteAddress" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="RemoteAddress" />
+                                        <span asp-validation-for="RemoteAddress" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RemoteIndex" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="RemoteIndex" />
+                                        <span asp-validation-for="RemoteIndex" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="ProcessInterval" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="ProcessInterval" />
+                                        <span asp-validation-for="ProcessInterval" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="RequiresOdo" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="checkbox" asp-for="RequiresOdo" />
+                                        <span asp-validation-for="RequiresOdo" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="DeviceTypes" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        @Html.DropDownList("DeviceType", Model.DeviceTypes)
+                                        <span asp-validation-for="DeviceTypes" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="CreateOnMirror" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="checkbox" asp-for="CreateOnMirror" />
+                                        <span asp-validation-for="CreateOnMirror" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="Prefix" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="Prefix" />
+                                        <span asp-validation-for="Prefix" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="Config" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="Config" />
+                                        <span asp-validation-for="Config" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col text-uppercase font-weight-bold">
+                                        <label asp-for="GatewayHardwareType" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-group" type="text" asp-for="GatewayHardwareType" />
+                                        <span asp-validation-for="GatewayHardwareType" class="text-red"></span>
+                                    </div>
+                                </div>
+                                @if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            @Model.ErrorMessage
+                                        </div>
+                                    </div>
+                                }
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-md-4">
+                                        <input type="submit" value="Save Changes" class="btn btn-default" />
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

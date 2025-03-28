@@ -1,0 +1,109 @@
+@model MyVoltage.Models.CompanyAdminViewModels.ReceiptLogViewModel
+@{
+    ViewData["Title"] = "Receipt Log";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4">
+            <div class="card-body">
+                <div>
+                    <form asp-action="ReceiptLog" enctype="multipart/form-data">
+                        <div class="row"><label asp-for="CustomerNumber" class="control-label"></label>:</div>
+                        <div class="row">
+                            <div class="col-10">
+                                <input class="form-group" style="width:90%;" id="CustomerNumber_Search" asp-for="CustomerNumber" />
+                                <span asp-validation-for="CustomerNumber" class="text-red"></span>
+                            </div>
+                            <div class="row">
+                                <input asp-action="ReceiptLog" type="submit" value="Refresh Customer" class="btn btn-default" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table class="table table-responsive-xl">
+                    <thead>
+                        <tr>
+                            							
+                            <th scope="col">CreateDate</th>
+                            <th scope="col">Reference</th>
+                            <th scope="col">PaymentMethodID</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">CustomerNumber</th>
+                            <th scope="col">FullName</th>
+                            @*<th scope="col">CompanyName</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Model.ReceiptLogItems)
+                        {
+                        <tr>
+                            <td scope="row">@entry.CreateDate</td>
+                            <td scope="row">@entry.Reference</td>
+                            <td scope="row">@entry.PaymentMethod</td>
+                            <td scope="row">@entry.Amount</td>
+                            <td scope="row">@entry.Reason</td>
+                            <td scope="row">@entry.CustomerNumber</td>
+                            <td scope="row">@entry.FullName</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (Model.TotalEntries > 10)
+                {
+                    var prevDisabled = !Model.ReceiptLogItems.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.ReceiptLogItems.HasNextPage ? "disabled" : "";
+                    <div width="" 100%">
+                        <div style="float: left;">
+                            <a asp-route-pageIndex="@(Model.ReceiptLogItems.PageIndex - 1)"
+                               class="btn btn-default @prevDisabled">
+                                Previous
+                            </a>
+                        </div>
+                        <div style="float: right;">
+                            <a align="left" asp-route-pageIndex="@(Model.ReceiptLogItems.PageIndex + 1)"
+                               class="btn btn-default @nextDisabled">
+                                Next
+                            </a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CustomerNumber_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/companyadmin/ReceiptLogcustomersearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

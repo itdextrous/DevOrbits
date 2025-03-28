@@ -1,0 +1,166 @@
+@model MyVoltage.Models.OperationalModels.V02_Workflow_Allocations.V02_Workflow_AllocationsModels.V02_Workflow_Allocations_AllTaskAllocationsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V02_Workflow_Allocations_AllTaskAllocations.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="SecureAreaGroupID" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("SecureAreaGroupID", Model.SecureAreaGroupID, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="SecureAreaGroupID" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ResponsibleUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="ReportingToUser" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("ReportingToUser", Model.ReportingToUser, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="ReportingToUser" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col">
+                        <label asp-for="Priority" class="control-label"></label>
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("Priority", Model.Priority, new { @class = "browser-default custom-select form-control-trim js-select" })
+                        <span asp-validation-for="Priority" class="text-red"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-responsive-xl table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Workflow Group</th>
+                    <th scope="col">Business Department</th>
+                    <th scope="col">Business Pillar</th>
+                    <th scope="col">Identifier</th>
+                    <th scope="col">Heading</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Linked Secure Area</th>
+                    <th scope="col">Responsible User</th>
+                    <th scope="col">Reporting To User</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.V02_Workflow_Allocations_AllTaskAllocationsItems)
+                {
+                    <tr style="cursor:pointer;" title="View / Edit" onclick="RedirectToEditFlag('@item.ID');">
+                        <td scope="col" class="text-nowrap">@item.WorkflowGroupName</td>
+                        <td scope="col" class="text-nowrap">@item.BusinessDepartmentName</td>
+                        <td scope="col" class="text-nowrap">@item.BusinessPillarName</td>
+                        <td scope="col" class="text-nowrap">@item.Identifier</td>
+                        <td scope="col" class="text-nowrap">@item.Heading</td>
+                        <td scope="col">@item.Description</td>
+                        <td scope="col" class="text-nowrap">@item.SecureAreaName</td>
+                        <td scope="col" class="font-weight-bold text-nowrap">
+                            @if (item.ResponsibleUserAccepted.HasValue)
+                            {
+                                @if (item.ResponsibleUserAccepted.Value)
+                                {
+                                    <span class="text-green text-nowrap" title="@item.ResponsibleUsername approved"><i class="fas fa-check-circle"></i>&nbsp;@item.ResponsibleUsername</span>
+
+                                    <br />
+                                }
+                                else
+                                {
+                                    <span class="text-red text-nowrap" title="@item.ResponsibleUsername rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.ResponsibleUsername</span>
+
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-orange" title="@item.ResponsibleUsername pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.ResponsibleUsername</span>
+
+                                <br />
+                            }
+                        </td>
+                        <td scope="col" class="font-weight-bold">
+                            @if (item.ReportingToUserAccepted.HasValue)
+                            {
+                                @if (item.ReportingToUserAccepted.Value)
+                                {
+                                    <span class="text-green text-nowrap" title="@item.ReportingToUsername approved"><i class="fas fa-check-circle"></i>&nbsp;@item.ReportingToUsername</span>
+
+                                    <br />
+                                }
+                                else
+                                {
+                                    <span class="text-red text-nowrap" title="@item.ReportingToUsername rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.ReportingToUsername</span>
+
+                                    <br />
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-orange text-nowrap" title="@item.ReportingToUsername pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.ReportingToUsername</span>
+
+                                <br />
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/V02_Workflow_Allocations/V02_Workflow_Allocations_AllTaskAllocations?Department=' + $("#Department").val() + '&SecureAreaGroupID=' + $("#SecureAreaGroupID").val() + '&ResponsibleUser=' + $("#ResponsibleUser").val() + '&ReportingToUser=' + $("#ReportingToUser").val() + '&Priority=' + $("#Priority").val();
+        }
+        function RedirectToEditFlag(flagID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeTaskTypeID/' + flagID + '?R=@Html.UrlEncoder.Encode("/operational/V02_Workflow_Allocations/V02_Workflow_Allocations_ViewTaskAllocations")';
+        }
+    </script>
+}

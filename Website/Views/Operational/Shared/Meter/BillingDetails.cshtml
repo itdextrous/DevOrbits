@@ -1,0 +1,25 @@
+<div class="row col-12">
+    <h5 class="text-orange">Billing Details</h5>
+</div>
+<div class="row col-12">
+    <h6 class="text-orange">Past Week</h6>
+</div>
+<div id="billingDetailsPastWeek" class="row col-12">
+    <div class="text-orange">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Past Week...
+    </div>
+</div>
+<div class="row col-12">
+    <h6 class="text-orange">Past Year</h6>
+</div>
+<div id="billingDetailsPastYear" class="row col-12">
+    <div class="text-orange">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Past Year...
+    </div>
+</div>
+<script>
+        $(document).ready(function () {
+            $("#billingDetailsPastWeek").load('@Url.Content("/operational/shared/meter/billingDetailsPastWeek")');
+            $("#billingDetailsPastYear").load('@Url.Content("/operational/shared/meter/billingDetailsPastYear")');
+        });
+</script>

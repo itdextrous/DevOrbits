@@ -1,0 +1,55 @@
+@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_DeviceOverview_DeviceModel.H_Device_Administrator_DeviceOverview_DeviceItem
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@{
+    string rowclass = "";
+    //if (Model.deviceStatus != "offline")
+    //{
+    //    rowclass = "table-success";
+    //}
+    //else
+    //{
+    //    rowclass = "table-danger";
+    //}
+}
+<td title="@Model.name @Model.serial - ID" scope="col">@Model.id</td>
+<td title="@Model.name @Model.serial - Name" scope="col">@Model.name</td>
+<td title="@Model.name @Model.serial - Serial" scope="col">@Model.serial</td>
+<td title="@Model.name @Model.serial - Status" scope="col" class="@Model.deviceStatus.ToUpper()">@Model.deviceStatus</td>
+<td title="@Model.name @Model.serial - Since" scope="col" class="text-nowrap">@(Model.status != null ? Model.status.time.ToDateAndTimeShort() : "")</td>
+<td title="@Model.name @Model.serial - Offline Duration" scope="col" class="text-nowrap">@Model.OfflineDuration</td>
+<td title="@Model.name @Model.serial - Type ID" scope="col">@(Model.type != null ? Model.type.id.ToString() : "")</td>
+<td title="@Model.name @Model.serial - Type Name" scope="col">@Model.deviceType</td>
+<td title="@Model.name @Model.serial - Mapping Index" scope="col">@(Model.mapping != null ? Model.mapping.index.ToString() : "")</td>
+<td title="@Model.name @Model.serial - Port" scope="col">@(Model.mapping != null ? Model.mapping.port.ToString() : "")</td>
+<td title="@Model.name @Model.serial - Protocol" scope="col">@(Model.mapping != null ? Model.mapping.protocol.ToString() : "")</td>
+<td title="@Model.name @Model.serial - Remote Index" scope="col">@(Model.mapping != null ? Model.mapping.remote_index.ToString() : "")</td>
+<td title="@Model.name @Model.serial - Remote Address" scope="col">@(Model.mapping != null ? Model.mapping.remote_address.ToString() : "")</td>
+<td title="@Model.name @Model.serial - Process Interval" scope="col">@(Model.mapping != null ? Model.mapping.process_interval.ToString() : "")</td>
+
+<td title="@Model.name @Model.serial - Active Energy" scope="col">@Model.ActiveEnergy</td>
+<td title="@Model.name @Model.serial - Reactive Energy" scope="col">@Model.ReactiveEnergy</td>
+<td title="@Model.name @Model.serial - Max Demand" scope="col">@Model.MaxDemand</td>
+<td title="@Model.name @Model.serial - CT Ratio" scope="col">@Model.CTRatio</td>
+<td title="@Model.name @Model.serial - Remaining Credit" scope="col">@Model.WaterConsumption</td>
+<td title="@Model.name @Model.serial - Remaining Credit" scope="col">@Model.GasConsumption</td>
+<td title="@Model.name @Model.serial - Remaining Credit" scope="col">@Model.IsContactorInstalled.ToBoolean()</td>
+<td title="@Model.name @Model.serial - Contactor State" scope="col" class="@(Model.ContactorState != null ? Model.ContactorState.ToUpper() : "")">@(Model.ContactorState != null ? Model.ContactorState.ToUpper() : "")</td>
+
+<td title="@Model.name @Model.serial - Internal Battery V" scope="col" class="@(Model.ContactorState != null ? Model.ContactorState.ToUpper() : "")">@Model.InternalBatteryV</td>
+<td title="@Model.name @Model.serial - Signal RSSI" scope="col" class="@(Model.ContactorState != null ? Model.ContactorState.ToUpper() : "")">@Model.SignalRSSI</td>
+<td title="@Model.name @Model.serial - SNR" scope="col" class="@(Model.ContactorState != null ? Model.ContactorState.ToUpper() : "")">@Model.SNR</td>
+
+<td title="@Model.name @Model.serial - Temp" scope="col">@Model.Temp</td>
+<td title="@Model.name @Model.serial - Remaining Credit" scope="col">@Model.RemainingCredit</td>
+<td scope="col">
+    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_DeviceOverview, MyVoltage.Data.SecureAreaActionEnum.Delete))
+    {
+        <a title="Delete" href="#" onclick="ConfirmDelete('@Model.id', '@Model.name - @Model.serial');" class="btn btn-sm text-red"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+    }
+</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

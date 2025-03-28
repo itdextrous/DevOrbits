@@ -1,0 +1,220 @@
+@model MyVoltage.Models.ClientzoneModels.DashboardModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@{
+    ViewData["Title"] = "Recharge";
+    Layout = "LayoutClientzone";
+}
+
+<div class="container recharge">
+    <div class="pt_m_45 mb-m25">
+        <h3 class="text-center page_heading">Recharge options</h3>
+        <h4 class="text-plumber text-center m-0 mt-2 mt-sm-3 SemiBold font_20">Top up your account</h4>
+    </div>
+    <div class="mt-85 text-center">
+        <h3 class="text-grape text-black">Choose one of the following options:</h3>
+    </div>
+    <div class="mt-40 text-center">
+        <label class="d-block label_payment text-black">
+            Secure Netcash online payment options:
+        </label>
+        <button class="btn btn-islandsunrise bg-grape"  onclick="refreshAmount();" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Secure Netcash Payment
+        </button>
+    </div>
+    <div class="mt-50 text-center pb-md-2 d-flex align-items-center flex-column">
+        <label class="d-block label_payment text-black">Other payment options:</label>
+        <button class="btn btn-islandsunrise bg-londonsky" data-bs-toggle="modal" data-bs-target="#EftPaymentModal">
+            Traditional EFT Payment
+        </button>
+        <button class="btn btn-islandsunrise bg-greenapple mt-15" data-bs-toggle="modal" data-bs-target="#UniPinModal">
+            UniPin Voucher
+        </button>
+    </div>
+    <div class="text-grape queries_text mt-85 text-center">
+        <p class="m-0">Please email queries to: <a href="mailto:info@myvoltage.co.za?Subject=Website%20enquiry" class="decoration_none">info@myvoltage.co.za</a></p>
+    </div>
+    <div class="mt-45 text-center">
+        <img src="~/images/clientzone/Slogan_hi-quality.png" class="slogan_img" height="66" alt="">
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade paymentModal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-islandsunrise">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    Netcash payment
+                </h5>
+                <h6>Secure online payment</h6>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="recharge_payment pt_70">
+                    <form action="/payment" method="post">
+                        <div class="form-group text-center m-0">
+                            <label>Please Enter an Amount:</label>
+                            <input class="form-control-trim" 
+                                   id="refreshAmount"  
+                                   oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" 
+                                   placeholder="R 000" 
+                                   type="number"                       
+                                   required name="amount" 
+                                   min="1" maxlength="12" 
+                                   @*onkeypress="return isNumberKey(event)"*@
+                             />
+                        </div>
+                        <div class="text-center pt_40">
+                            <button type="submit" class="btn btn-islandsunrise">
+                                Make a Payment
+                            </button>
+                        </div>
+                    </form>
+                    <div class="pt_70 text-center">
+                        <p class="m-0">
+                            Take note of the following NetCash payment options:
+                        </p>
+                        <div class="pt_20">
+                            <img src="/images/ozone_visa_mastercard.png">
+                        </div>
+                        <div class="pt_20">
+                            <p>
+                                <b class="d-block mb-15 ExtraBold">Why are you charged a convenience fee?</b>
+                                When you opt to use a non-standard payment channel or
+                                method, a convenience fee is levied by the merchant offering
+                                the payment service to you.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade paymentModal" id="EftPaymentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header light-gray-bg">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    Traditional EFT
+                </h5>
+                <h6>
+                    0% Convenience fee
+                </h6>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body EFT_body">
+                <div class="recharge_payment pt_70">
+                    <div class="text-start max_w_380">
+                        <h4 class="m-0">
+                            Your EFT banking details:
+                        </h4>
+                        <div class="pt_20 bank_info">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="text-nowrap label">Bank:</div>
+                                <div class="text-nowrap">@clientzoneProvider.NetcashBankName</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="text-nowrap label">Account type:</div>
+                                <div class="text-nowrap">@clientzoneProvider.NetcashBankAccountType</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="text-nowrap label">Account no:</div>
+                                <div class="text-nowrap">@clientzoneProvider.NetcashBankAccountNo</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="text-nowrap label">Branch code:</div>
+                                <div class="text-nowrap">@clientzoneProvider.NetcashBankBranchCode</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="text-nowrap text-islandsunrise label">Your reference:</div>
+                                <div class="text-nowrap text-islandsunrise">@clientzoneProvider.CustomerNumber</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="EFT_note pt_20">
+                        <p class="mb-15">
+                            <b class="d-block mb-15 ExtraBold">
+                                Please note that:
+                            </b>
+                            EFT payments can take up to 3 business days to reflect.
+                        </p>
+                        <p class="mb-15">
+                            Make use of the <a href="JavaScript:Void(0);" onclick="NetcashModal();">Netcash recharge option</a> for instant
+                            reflection of your payment.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade paymentModal" id="UniPinModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header light-gray-bg">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    UniPin
+                </h5>
+                <h6>
+                    10% Convenience fee
+                </h6>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body EFT_body">
+                <div class="recharge_payment pt_70">
+                    <h4 class="mb-15 text-center">
+                        How to purchase a UniPin voucher:
+                    </h4>
+                    <p class="mb-15">
+                        A UniPIN voucher can be purchased from an electricity vendor such as Shoprite, Checkers, Spar, Engen/Shell garage, etc. using either cash or card facilities.
+                    </p>
+                    <p class="mb-15">
+                        Follow the instructions on the voucher to redeem your voucher on your smart meter wallet.
+                    </p>
+                    <p class="mb-15">
+                        <b class="mb-15 d-block ExtraBold">
+                            Why are you charged a convenience fee?
+                        </b>
+                        When you opt to use a non-standard payment channel or method, a convenience fee is levied by the merchant offering the payment service to you.
+                    </p>
+                    <div class="EFT_note">
+                        <p class="mb-15">
+                            <b class="mb-15 d-block ExtraBold">
+                                Be penny-wise!
+                            </b>Make use of the <a href="JavaScript:Void(0);" onclick="NetcashModal();">Netcash recharge option</a> with a 0% convencience fee.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+@section Scripts {
+    <script>
+        function NetcashModal() {
+            $("#EftPaymentModal").modal('hide');
+            $("#UniPinModal").modal('hide');
+            $("#exampleModal").modal('show');
+        }
+        function refreshAmount(){
+            $('#refreshAmount').val('');
+        }
+        $('#exampleModal').on('hidden.bs.modal', function () {
+            $('#refreshAmount').val('');
+        });
+    </script>
+}

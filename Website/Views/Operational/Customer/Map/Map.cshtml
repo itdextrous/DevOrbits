@@ -1,0 +1,420 @@
+﻿@model MyVoltage.Models.OperationalModels.Customer.CustomerMapModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+
+<style>
+    /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+    #map {
+        height: 100%;
+        background-color: lightblue;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<div id="map" class="mt-4" style="height:600px"></div>
+<div style="clear:both; height:50px"></div>
+<form>
+    <div>
+        <input class="custom-search-input d-inline" type="text" name="keyword" value="@ViewContext.HttpContext.Request.Query["keyword"]" placeholder="Serial Number/Meter Description"> <input class="custom-search-input d-inline" type="submit" value="Search" />
+    </div>
+</form>
+
+
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <td>Serial Number</td>
+                <td>Meter Description</td>
+                <td>Meter Type</td>
+                <td>Status</td>
+                <td>Last Communicated</td>
+                <td class="text-right">Odometer Reading</td>
+                <td>Base</td>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach:  model.Devices">
+            <tr style="cursor:pointer;" data-bind="click: function() {
+                    if(MapClikable())
+                    {
+                        document.location.href = Url()
+                    }
+                }">
+                <td data-bind="text: Serial"> </td>
+                <td data-bind="text: Name"> </td>
+                <td data-bind="text: DeviceType"> </td>
+                <td class="status font-weight-bold" data-bind="text: DeviceStatus"> </td>
+                <td data-bind="text: LastComunicated"> </td>
+                <td class="text-right" data-bind="text: MeterReading"> </td>
+                <td data-bind="text: PartnerCode"> </td>
+            </tr>
+        </tbody>
+    </table>
+    @if (@Model.total > @Model.pageSize)
+    {
+        var prevDisabled = !@Model.hasPreviousPage ? "disabled" : "";
+        var nextDisabled = !@Model.hasNextPage ? "disabled" : "";
+        var root = "";
+        var keyword = ViewContext.HttpContext.Request.Query["keyword"];
+        var firstPage = Model.pageIndex - 5;
+        var lastPage = Model.pageIndex + 5;
+
+        if(firstPage <= 0)
+        {
+            firstPage = 1;
+        }
+
+        if (lastPage > Model.totalPages + 1)
+        {
+            lastPage = Model.totalPages + 1;
+        }
+
+        if (keyword.Count > 0)
+        {
+            root = "/map?keyword=" +keyword+"&pageIndex=";
+        }
+        else
+        {
+            root = "/map?pageIndex=";
+        }
+
+<div class="custom-pagination">
+    <div style="float: left;">
+        <a href="@root@(Model.pageIndex - 1)"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+    </div>
+
+    @if ((firstPage != 1) && Model.pageIndex != 1)
+    {
+        var pageOne = 1;
+        <div style="float: left;">
+
+            <a href="@root@pageOne"
+               class="btn btn-default">
+
+                1
+            </a>
+        </div>
+        <div style="float: left;">
+            <a class="btn btn-default">
+                ...
+            </a>
+        </div>
+    }
+
+    @for (int i = firstPage; i < lastPage; i++)
+    {
+        <div style="float:left;">
+            <a href="@root@i" id="page-@i"
+               class="btn btn-default">
+
+                @i
+            </a>
+        </div>
+    }
+
+    @if ((lastPage != Model.totalPages + 1) && (Model.pageIndex != Model.totalPages))
+    {
+        <div style="float: left;">
+            <a class="btn btn-default">
+                ...
+            </a>
+        </div>
+        <div style="float: left;">
+            <a href="@root@Model.totalPages"
+               class="btn btn-default">
+
+                @Model.totalPages
+            </a>
+        </div>
+    }
+
+    <div style="float: left;">
+        <a align="left" href="@root@(Model.pageIndex + 1)"
+           class="btn btn-default @nextDisabled">
+
+            Next
+        </a>
+    </div>
+</div>
+    }
+</div>
+@section Scripts {
+    <script src="~/js/knockout.js"></script>
+    <script src="~/js/markerclusterer.js"></script>
+    <script src="~/js/date.format.js"></script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk"></script>
+    <script>
+        var mapDataModel = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        var meterNumber = "@(operationalProvider.CustomerMeterSerial)";
+
+        function toFixed(number, decimals)
+        {
+                var x = Math.pow(10, Number(decimals) + 1);
+                return (Number(number) + (1 / x)).toFixed(decimals)
+        }
+
+            function numberWithCommas(number)
+            {
+                if (number > 1)
+                    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            else
+                return number.toString()
+        }
+
+        function OverviewModel()
+        {
+            var self = this;
+            this.Devices = ko.observableArray([]);
+
+            ko.utils.arrayForEach(mapDataModel.devices, function (d)
+            {
+                var device = new Device(d);
+                self.Devices.push(ko.observable(device));
+            });
+        }
+
+        function Device(d)
+        {
+            var self = this;
+            this.ID = ko.observable(d.id);
+            this.Serial = ko.observable(d.serial);
+            this.Name = ko.observable(d.name);
+            this.DeviceTypeName = ko.observable(d.deviceTypeName);
+            this.DeviceStatus = ko.observable(d.deviceStatus);
+            this.PartnerCode = ko.observable(d.partner_code != "" ? d.partner_code : "ACTUAL");
+            this.DeviceType = ko.observable(d.deviceType == 'elec' ? 'Electricity' : (d.deviceType == 'water' ? 'Water' : (d.deviceType == 'control valve' ? 'Control Valve' : (d.deviceType == 'gas' ? 'Gas' : ''))));
+            this.Time = ko.observable(d.status != null ? d.status.time : new Date('0001-01-01T00:00:00Z'));
+            this.MeterReading = ko.observable("");
+            this.MapClikable = ko.observable(d.mapClickable);
+
+
+            this.LastComunicated = ko.computed(function ()
+            {
+                var d = new Date(self.Time());
+                return dateFormat(d, "yyyy-mm-dd HH:MM:ss");
+            });
+
+            var date = new Date();
+
+            var partnerCode = d.partner_code != "" ? d.partner_code : "ACTUAL";
+
+            $.get('/operational/customer/customer_map/usage/' + d.serial + '/' + partnerCode,
+                function (data)
+                {
+                    console.log(d.serial + " : " + d.id);
+
+                    var total = 0;
+                    var totaliUnits = self.DeviceType() == 'Electricity' ? 'kWh' : (self.DeviceType() == 'Water' ? 'kL' : (self.DeviceType() == 'Gas' ? 'm3' : ''))
+
+                    total = data / 1000
+
+                    self.MeterReading(numberWithCommas(toFixed(total, 2)) + ' ' + totaliUnits)
+                });
+
+            this.Url = ko.computed(function ()
+            {
+                var url = ""
+
+                @*if ('True' == '@User.IsInRole("CompanyAdmin")')
+                {
+                    url = '/companyAdmin/usage/' + self.Serial()
+                }
+                else
+                {
+                    url = '/usage/' + self.Serial() 
+                }*@
+
+                return url;
+            }, this);
+        }
+
+        var model = new OverviewModel();
+        $(function ()
+        {
+            ko.applyBindings(model);
+        });
+
+        function getRandomLocation(latitude, longitude, radiusInMeters)
+        {
+
+            var getRandomCoordinates = function (radius, uniform)
+            {
+                // Generate two random numbers
+                var a = Math.random(),
+                    b = Math.random();
+
+                // Flip for more uniformity.
+                if (uniform)
+                {
+                    if (b < a)
+                    {
+                        var c = b;
+                        b = a;
+                        a = c;
+                    }
+                }
+
+                // It's all triangles.
+                return [
+                    b * radius * Math.cos(2 * Math.PI * a / b),
+                    b * radius * Math.sin(2 * Math.PI * a / b)
+                ];
+            };
+
+            var randomCoordinates = getRandomCoordinates(radiusInMeters, true);
+
+            // Earths radius in meters via WGS 84 model.
+            var earth = 6378137;
+
+            // Offsets in meters.
+            var northOffset = randomCoordinates[0],
+                eastOffset = randomCoordinates[1];
+
+            // Offset coordinates in radians.
+            var offsetLatitude = northOffset / earth,
+                offsetLongitude = eastOffset / (earth * Math.cos(Math.PI * (latitude / 180)));
+
+            // Offset position in decimal degrees.
+            return {
+            latitude: latitude + (offsetLatitude * (180 / Math.PI)),
+                longitude: longitude + (offsetLongitude * (180 / Math.PI))
+            }
+        };
+
+        var map;
+        function initMap()
+        {
+             for (var i = 0; i < mapDataModel.devices.length; i++)
+            {
+                var dv = mapDataModel.devices[i];
+
+                if (meterNumber != "")
+                { 
+                    if (dv.serial == meterNumber)
+                    { 
+                        var longitude = "";
+                        var latitude = "";
+
+                        var gpCoordinates = dv.gps_coordinates;
+
+                        if (gpCoordinates != 'undefined' && gpCoordinates != '')
+                        {
+
+                           var longLat = gpCoordinates.split(',');
+
+                            var latitude = parseFloat(longLat[0]);
+                            var longitude = parseFloat(longLat[1]);
+
+                            var myLatLng = { lat: latitude, lng: longitude };
+
+                            var map = new google.maps.Map(document.getElementById('map'), {
+                                zoom: 20,
+                                center: myLatLng
+                            });
+
+                            var deviceIcon = "/images/red-dot.png"
+
+                            if (dv.deviceStatus == 'online')
+                            {
+                                deviceIcon = "/images/green-dot.png"
+                            }
+
+                            var marker = new google.maps.Marker({
+                                position: myLatLng,
+                                map: map,
+                                url: urlStr + dv.serial,
+
+                                title: 'Device ' + dv.serial + '\r\n' + dv.name,
+                                icon: deviceIcon
+                            })
+                        
+                        }
+                        return;
+                    }
+                }
+            }
+
+            var myLatLng = { lat: -26.195246, lng: 28.034088 };
+
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 6,
+                center: myLatLng
+            });
+
+            var markers = [];
+
+            var urlStr = "/operational/customer/customer_map/usage/"
+
+            for (var i = 0; i < mapDataModel.devices.length; i++)
+            {
+                var dv = mapDataModel.devices[i];
+
+               // var longLat = getRandomLocation(-26.195246, 28.034088, 200000);
+
+                var longitude = "";
+                var latitude = "";
+
+                var gpCoordinates = dv.gps_coordinates;
+
+                if (gpCoordinates != 'undefined' && gpCoordinates != '')
+               {
+                    var longLat = gpCoordinates.split(',');
+
+                    var latitude = parseFloat(longLat[0]);
+                    var longitude = parseFloat(longLat[1]);
+
+                    var myLatLng = { lat: latitude, lng: longitude };
+
+                    var deviceIcon = "/images/red-dot.png"
+
+                    if (dv.deviceStatus == 'online')
+                    {
+                        deviceIcon = "/images/green-dot.png"
+                    }
+
+                    var marker = new google.maps.Marker({
+                        position: myLatLng,
+                        map: map,
+                        url: urlStr + dv.serial,
+                        title: 'Device ' + dv.serial + '\r\n' + dv.name,
+                        icon: deviceIcon
+
+                    })
+
+                    google.maps.event.addListener(marker, 'click', function () { window.location.href = this.url; });
+
+                    markers.push(marker);
+               }
+            }
+
+            var options = {
+                imagePath: 'images/m'
+            };
+
+            var markerCluster = new MarkerClusterer(map, markers, options);
+
+        }
+
+
+        initMap();
+
+        $(document).ready(function ()
+        {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+            $('#page-' + @Model.pageIndex).attr("class", "btn btn-default active");
+        });
+    </script>
+}

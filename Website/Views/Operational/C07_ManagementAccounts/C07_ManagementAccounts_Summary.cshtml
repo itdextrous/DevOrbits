@@ -1,0 +1,85 @@
+@model MyVoltage.Models.OperationalModels.C07_ManagementAccounts.C07_ManagementAccounts_SummaryModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C07_ManagementAccounts_Summary.GetDescription();
+}
+@using MyVoltage.Extensions;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2" scope="col" class="text-center">Company Name</th>
+            <th rowspan="2" scope="col" class="text-center">
+                <a href="#" onclick="RedirectToRequestRerunAll();" class="btn btn-sm btn-outline-danger-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request Rerun ALL</a>
+            </th>
+            <th colspan="5" scope="col" class="text-center">@MyVoltage.Data.SecureAreaEnum.F_SystemGeneratedReports_ManagementAccounts.GetDescription()</th>
+            <th colspan="5" scope="col" class="text-center">@MyVoltage.Data.SecureAreaEnum.F_SystemGeneratedReports_GenLedgerSync.GetDescription()</th>
+        </tr>
+        <tr>
+            <th scope="col" class="text-center">Requested By</th>
+            <th scope="col" class="text-center">Requested Date</th>
+            <th scope="col" class="text-center">Started Date</th>
+            <th scope="col" class="text-center">Completed Date</th>
+            <th scope="col" class="text-center">Progress</th>
+            <th scope="col" class="text-center">Requested By</th>
+            <th scope="col" class="text-center">Requested Date</th>
+            <th scope="col" class="text-center">Started Date</th>
+            <th scope="col" class="text-center">Completed Date</th>
+            <th scope="col" class="text-center">Progress</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.C07_ManagementAccounts_SummaryItems)
+        {
+            string rowClass = "";
+            //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+            //{
+            //    rowClass = "table-danger";
+            //}
+
+            <tr class="@Html.Raw(rowClass)">
+                <td scope="col" style="cursor:pointer;" onclick="RedirectToDetails('@item.CompanyID');">@item.Name</td>
+                <td scope="col">
+                    <a href="#" onclick="RedirectToRequestRerun('@item.CompanyID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request Rerun</a>
+                </td>
+                <td scope="col">@item.LatestReportRequestedBy</td>
+                <td scope="col">@item.LatestReportRequestedDate.ToDateAndTimeShort(true)</td>
+                <td scope="col">@item.LatestReportStartedDate.ToDateAndTimeShort(true)</td>
+                <td scope="col">@item.LatestReportCompletedDate.ToDateAndTimeShort(true)</td>
+                <td scope="col">@item.LatestReportProgress.ToMoney()</td>
+                <td scope="col">@item.GenLatestReportRequestedBy</td>
+                <td scope="col">@item.GenLatestReportRequestedDate.ToDateAndTimeShort(true)</td>
+                <td scope="col">@item.GenLatestReportStartedDate.ToDateAndTimeShort(true)</td>
+                <td scope="col">@item.GenLatestReportCompletedDate.ToDateAndTimeShort(true)</td>
+                <td scope="col">@item.GenLatestReportProgress.ToMoney()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(serial) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + serial + '?R=/operational/C07_ManagementAccounts/C07_ManagementAccounts_Details';
+        }
+        function RedirectToRequestRerun(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C07_ManagementAccounts/C07_ManagementAccounts_RequestRerun/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToRequestRerunAll() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C07_ManagementAccounts/C07_ManagementAccounts_RequestRerunAll?R=' + encodeURIComponent(document.location.href);
+        }
+    </script>
+}

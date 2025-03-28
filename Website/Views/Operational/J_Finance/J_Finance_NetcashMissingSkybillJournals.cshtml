@@ -1,0 +1,276 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_NetcashMissingSkybillJournalsModel
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_NetcashMissingSkybillJournals.GetDescription()} - {operationalProvider.CompanyName}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            Please select company to begin...
+        </div>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-body">
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Created Between
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control" type="date" name="FromDate" id="FromDate" asp-for="FromDate" value="@(Model.FromDate.ToDateShort())" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            And
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control" type="date" name="ToDate" id="ToDate" asp-for="ToDate" value="@(Model.ToDate.ToDateShort())" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @Html.DropDownList("ShowSystemTransactions", Model.ShowSystemTransactions, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @Html.DropDownList("ShowErrorTransactions", Model.ShowErrorTransactions, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                            &nbsp;
+                            <a href="/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                            &nbsp;
+                            <a href="#" onclick="RedirectToRerun();" class="btn btn-outline-primary-sm"><i class="fas fa-dollar-sign"></i>&nbsp;Allocation Rerun</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+
+            <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+                <thead>
+                    <tr>
+
+                        <th scope="col">Date</th>
+                        <th scope="col">Transaction Code</th>
+                        <th scope="col">Transaction Code</th>
+                        <th scope="col">Internal DBID</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Transaction Type</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Balance</th>
+                        <th scope="col">Ledger Account Affected</th>
+                        <th scope="col">Date Synced</th>
+                        <th scope="col">Skybill Document No</th>
+                        <th scope="col">Payment ID</th>
+                        <th scope="col"></th>
+                        <th scope="col">GL Description</th>
+                        <th scope="col">GL Amount</th>
+                        <th scope="col">GL Diff</th>
+                        <th scope="col">GL Date</th>
+                        <th scope="col">GL Date Diff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.J_Finance_NetcashMissingSkybillJournalsItems.OrderByDescending(p => p.InternalDBID))
+                    {
+                        string rowClass = "";
+                        string cellClass = "";
+
+                        <tr id="row_@entry.ID">
+                            <td scope="col">@entry.Date.ToDateShort()</td>
+                            <td scope="col">@entry.TransactionCode</td>
+                            <td scope="col">@entry.TransactionCodeDescription</td>
+                            <td scope="col">@entry.InternalDBID</td>
+                            <td scope="col">@entry.Description</td>
+                            <td scope="col">@(entry.IsSystemTrans ? "System" : "Cash")</td>
+                            <td scope="col">@entry.RealAmount.ToMoney("R")</td>
+                            <td scope="col">@entry.Balance.ToMoney("R")</td>
+                            <td scope="col">@entry.LedgerAccountAffected</td>
+                            <td scope="col">@entry.DateSynced</td>
+                            <td scope="col">
+                                @if (entry.TransactionCode != "NSF" && entry.TransactionCode != "VAT")
+                                {
+                                    @if (!string.IsNullOrEmpty(entry.SkybillDocumentNo))
+                                    {
+                                        <span>@entry.SkybillDocumentNo</span>
+                                    }
+                                    else
+                                    {
+                                        @if (entry.PaymentID.HasValue && entry.Amount != 0)
+                                        {
+                                            <a href="#" onclick="RedirectToAction2('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_UpdatePaymentID/@entry.ID?P=@entry.PaymentID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-check"></i>&nbsp;Recheck</a>
+                                            <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_UpdateSkybillDocumentNo/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Update DocumentNo</a>
+                                        }
+                                        else if (entry.TransactionCode == "CRP")
+                                        {
+                                            <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_UpdateSkybillDocumentNo/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Update DocumentNo</a>
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td scope="col">
+                                @if (entry.TransactionCode != "NSF" && entry.TransactionCode != "VAT" && entry.TransactionCode != "BTR" && entry.TransactionCode != "DTT" && entry.TransactionCode != "INR" && entry.TransactionCode != "CRP" && entry.TransactionCode != "IAT")
+                                {
+                                    @if (!entry.PaymentID.HasValue && !entry.IsSystemTrans && entry.Amount != 0)
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_UpdatePaymentID/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Update PaymentID</a>
+                                    }
+                                    else
+                                    {
+                                        <span>@entry.PaymentID</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>@entry.PaymentID</span>
+                                }
+                            </td>
+                            <td scope="col">
+                                @if (string.IsNullOrEmpty(entry.SkybillDocumentNo) && !entry.IsSystemTrans && entry.Amount != 0)
+                                {
+                                    if (entry.TransactionCode == "BTR")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_BTR/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Transfer From Netcash to FNB</a>
+                                    }
+                                    else if (entry.TransactionCode == "DTT")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_DTT/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Transfer From Unipin to Netcash</a>
+                                    }
+                                    else if (entry.TransactionCode == "INR")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_INR/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Interest received on Netcash</a>
+                                    }
+                                    else if (entry.TransactionCode == "CRP")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_CRP/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Same day creditor payment</a>
+                                    }
+                                    else if (entry.TransactionCode == "IAT")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_IAT/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Inter-account transfer</a>
+                                    }
+                                    else if (entry.TransactionCode == "INP")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_INP/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Interest paid to Netcash</a>
+                                    }
+                                    else if (entry.TransactionCode == "ABR")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add_ABR/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Account Balance Recovery on Netcash</a>
+                                    }
+                                    else if (entry.TransactionCode != "VAT" && entry.TransactionCode != "NSF")
+                                    {
+                                        <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_Add/@entry.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Create Skybill Entry</a>
+                                    }
+                                }
+                                @if (!string.IsNullOrEmpty(entry.SkybillDocumentNo) || entry.PaymentID.HasValue)
+                                {
+                                    <a href="#" onclick="RedirectToAction('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_RemoveLink/@entry.ID');" class="btn btn-sm btn-outline-primary-sm" title="Remove Link"><i class="fas fa-minus-circle"></i></a>
+                                }
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItem_@entry.ID">
+                                    @if (!string.IsNullOrEmpty(entry.SkybillDocumentNo))
+                                    {
+                                        @Html.Raw("Loading...")
+                                    }
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemAmount_@entry.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemDiff_@entry.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemDate_@entry.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemDateDiff_@entry.ID">
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val() + '&ShowSystemTransactions=' + $("#ShowSystemTransactions").val() + '&ShowErrorTransactions=' + $("#ShowErrorTransactions").val();
+    }
+    function RedirectToAction(url) {
+        $("#loaderContent").css("display", "block");
+        document.location.href = url + "?R=" + encodeURIComponent(document.location.href);
+    }
+    function RedirectToAction2(url) {
+        $("#loaderContent").css("display", "block");
+        document.location.href = url + "&R=" + encodeURIComponent(document.location.href);
+    }
+    function RedirectToRerun() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/J_Finance/J_Finance_AllocationRerun?F=' + $("#FromDate").val() + '&T=' + $("#ToDate").val() + '&C=@operationalProvider.CompanyID';
+    }
+    $(document).ready(function () {
+        var items = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.J_Finance_NetcashMissingSkybillJournalsItems)));
+        $(items).each(function() {
+                var itemID = this.ID;
+                var thisAmount = this.Amount;
+                var skybillDocumentNo = this.SkybillDocumentNo;
+                if (skybillDocumentNo != null && skybillDocumentNo != '') {
+                    $.get('/operational/J_Finance/J_Finance_NetcashMissingSkybillJournals_SystemCheck/' + this.SkybillDocumentNo + '/' + this.ID, function (data, status) {
+                        $("#MeterOnManualSummaryItem_" + itemID).html(data.description);
+                        $("#MeterOnManualSummaryItemAmount_" + itemID).html('R ' + data.amount.toLocaleString('en-GB'));
+                        $("#MeterOnManualSummaryItemDiff_" + itemID).html('R ' + (data.amount - thisAmount).toLocaleString('en-GB'));
+                        $("#MeterOnManualSummaryItemDate_" + itemID).html(data.date);
+                        $("#MeterOnManualSummaryItemDateDiff_" + itemID).html(data.dateDiff);
+                        if (
+                            ((data.amount - thisAmount) > 1
+                            || (data.amount - thisAmount) < -1)
+                            || (data.dateDiffN > 7 || data.dateDiffN < -7)
+                        ) {
+                            $('#row_' + itemID).attr("class", 'table-danger');
+                        }
+                        }).done(function () {
+                        });
+                    }
+        });
+    });
+</script>
+}

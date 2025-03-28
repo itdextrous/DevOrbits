@@ -1,0 +1,487 @@
+﻿@model MyVoltage.Models.OperationalModels.A01_GatewayAndDeviceMonitoring.A01_GatewayAndDeviceMonitoring_DeviceDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.A01_GatewayAndDeviceMonitoring_DeviceDetails.GetDescription();
+}
+
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+
+                <div class="row">
+                    <div class="col">
+                        <div class="row mb-2">
+                            <div class="col">
+                                @Html.DropDownList("DeviceType", Model.DeviceType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col">
+                                @Html.DropDownList("OnlineType", Model.OnlineType, new { @class = "browser-default custom-select form-control-trim js-select" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-left">
+                                <a href="/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_DeviceSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                            </div>
+                            <div class="col-md-auto text-right">
+                                <a onclick="RedirectToFilter(1);" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" scope="col" class="text-center">Latest Accounting Checklist Rerun</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">Requested By</td>
+                                    <td scope="col" class="text-nowrap">@(Model.Latest_Request != null ? Model.Latest_Request.CreatedByUsername : "Not requested yet")</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">Requested Date</td>
+                                    <td scope="col" class="text-nowrap">@(Model.Latest_Request != null ? Model.Latest_Request.CreatedDate.ToDateAndTimeShort() : "Not requested yet")</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">Started Date</td>
+                                    <td scope="col" class="text-nowrap">@(Model.Latest_Request != null ? Model.Latest_Request.DateStarted.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">Ended Date</td>
+                                    <td scope="col" class="text-nowrap">@(Model.Latest_Request != null ? Model.Latest_Request.DateEnded.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="text-nowrap">Progress</td>
+                                    <td scope="col" class="text-nowrap">@(Model.Latest_Request != null ? Model.Latest_Request.Progress.ToMoney() : "Not requested yet")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" scope="col" class="text-nowrap text-right">
+                                        @if (Model.Latest_Request == null || Model.Latest_Request.DateEnded.HasValue)
+                                        {
+                                            <a href="#" onclick="RedirectToRequestRerun();" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request Rerun</a>
+                                        }
+                                        else
+                                        {
+                                            <span>Report in progress...</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var summaryBlock in Model.SummaryBlocks)
+                    {
+                        <div class="col">
+                            <div class="card p-md-1 mv-gradient">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col">
+                                            <canvas id="chart_@summaryBlock.DeviceTypeID" width="300" height="300"></canvas>
+                                        </div>
+                                        <div class="col">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        Online
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.OnlineCount
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.OnlineCount / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">
+                                                        Offline
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        &lt; 4 Hrs
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.LessThan4HoursCount
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.LessThan4HoursCount / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        &gt; 4 Hrs &lt; 24 Hrs
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.LessThan24HoursMoreThan4HoursCount
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.LessThan24HoursMoreThan4HoursCount / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        &gt; 24 Hrs &lt; 3 Days
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.LessThan3DaysMoreThan24HoursCount
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.LessThan3DaysMoreThan24HoursCount / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        &gt; 3 Days &lt; 7 Days
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.LessThan7DaysMoreThan3DaysCount
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.LessThan7DaysMoreThan3DaysCount / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        &gt; 7 Days
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.MoreThan7Days
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.MoreThan7Days / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        Total
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @summaryBlock.Total
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        @(summaryBlock.Total != 0 ? ((summaryBlock.Total / summaryBlock.Total) * 100.0m).ToDecimal(2) : "0")&nbsp;%
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card-body">
+                @if (Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.Count == 0)
+                {
+                    <span class="text-red font-weight-bold">No results found</span>
+                }
+                else
+                {
+                    <table class="table table-sm table-striped table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="cursor:pointer;">Device ID<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Device Name<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Device Serial<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Type<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Status<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Since<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Offline Duration<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Signal<span></span></th>
+                                <th scope="col" style="cursor:pointer;">SNR<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Battery<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Gateway ID<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Gateway Status<span></span></th>
+                                <th scope="col" style="cursor:pointer;">Flag ID<span></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var itemC in Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems)
+                            {
+                                string rowclass = "";
+                                string cellClass = "";
+                                <tr @Html.Raw(rowclass) @*style="cursor:pointer;"*@ title="@itemC.name" @*onclick="RedirectToVerification('@itemC.CustomerMeterSerial');"*@>
+                                    <td scope="col">@itemC.id</td>
+                                    <td scope="col">@itemC.name</td>
+                                    <td scope="col">@itemC.serial</td>
+                                    <td scope="col">
+                                        @switch ((MyVoltage.Data.DeviceType.DeviceTypeEnum)itemC.type.id)
+                                        {
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                <img src="/images/elec-icon-s.png" />
+                                                break;
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                <img src="/images/water-icon-s.png" />
+                                                break;
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                <img src="/images/gas-icon-s.png" />
+                                                break;
+                                        }
+                                        @itemC.deviceType
+                                    </td>
+                                    <td scope="col" class="font-weight-bold @((itemC.status != null && itemC.status.id == 1) ? "table-success text-green" : "table-danger text-red")">@itemC.deviceStatus</td>
+                                    <td scope="col">@itemC.status.time.ToDateAndTimeShort()</td>
+                                    <td scope="col">@itemC.OfflineDuration</td>
+                                    <td scope="col"><div id="signal_@itemC.id"><i class="fas fa-spinner"></i></div></td>
+                                    <td scope="col"><div id="snr_@itemC.id"><i class="fas fa-spinner"></i></div></td>
+                                    <td scope="col"><div id="battery_@itemC.id"><i class="fas fa-spinner"></i></div></td>
+                                    <td scope="col">@itemC.GatewayID</td>
+                                    <td scope="col" class="@itemC.GatewayStatus.ToUpper()">@itemC.GatewayStatus</td>
+                                    <td scope="col">
+                                        @foreach (var flag in itemC.A09_Flags)
+                                        {
+                                            <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@flag.FlagTypeID/@flag.FlagID" title="@flag.FlagTypeName">@flag.FlagID</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="card-footer">
+                @if (true@* Model.TotalEntries > Model.EntriesPerPage *@)
+                {
+                    var prevDisabled = !Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.HasNextPage ? "disabled" : "";
+                    <div class="row mt-2">
+                        <div class="d-flex align-items-center justify-content-between pager_btns mt-15">
+                            <div class="col-md-auto text-left">
+                                <a href="#" onclick="RedirectToFilter(@(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex - 1));"
+                                   class="btn btn-outline-primary-sm @prevDisabled">
+                                    <i class="fas fa-step-backward"></i>&nbsp;Previous Page
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            @for (int pageNumber = 1; pageNumber <= Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.TotalPages; pageNumber++)
+                            {
+                                var numberDisabled = Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex == pageNumber ? "btn-outline-warning disabled" : "btn-outline-primary-sm";
+                                <a href="#" onclick="RedirectToFilter(@(pageNumber));"
+                                   class="btn btn-sm @numberDisabled">
+                                    @pageNumber
+                                </a>
+                            }
+                        </div>
+                        <div class="col-md-auto">
+                            <select id="EntriesPerPage" class="form-control" onchange="RedirectToFilter(@(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex));">
+                                @if (Model.EntriesPerPage == 100)
+                                {
+                                    <option value="100" selected="selected">100</option>
+                                }
+                                else
+                                {
+                                    <option value="100">100</option>
+                                }
+                                @if (Model.EntriesPerPage == 500)
+                                {
+                                    <option value="500" selected="selected">500</option>
+                                }
+                                else
+                                {
+                                    <option value="500">500</option>
+                                }
+                                @if (Model.EntriesPerPage == 1000)
+                                {
+                                    <option value="1000" selected="selected">1000</option>
+                                }
+                                else
+                                {
+                                    <option value="1000">1000</option>
+                                }
+                                @if (Model.EntriesPerPage == Model.TotalEntries)
+                                {
+                                    <option value="@Model.TotalEntries" selected="selected">All (@(Model.TotalEntries))</option>
+                                }
+                                else
+                                {
+                                    <option value="@Model.TotalEntries">All (@(Model.TotalEntries))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-auto text-right">
+                            <a align="left" href="#" onchange="RedirectToFilter(@(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.PageIndex + 1));"
+                               class="btn btn-outline-primary-sm @nextDisabled">
+                                <i class="fas fa-step-forward"></i>&nbsp;Next Page
+                            </a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?DeviceType=' + $("#DeviceType").val() + '&OnlineType=' + $("#OnlineType").val() + '&EntriesPerPage=' + $("#EntriesPerPage").val() + '&pageIndex=' + pageIndex;
+        }
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification';
+        }
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.A01_GatewayAndDeviceMonitoring_DeviceDetailsItems.Select(p => p.id).ToList())));
+        $(companies).each(function () {
+            PopulateLabelsForUpdate(this);
+        });
+        function PopulateLabelsForUpdate(itemID) {
+            $.post('/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_GetRegisters',
+                {
+                    deviceid: itemID,
+                })
+                .done(function (data) {
+                    $("#signal_" + itemID).html(data.signal);
+                    $("#snr_" + itemID).html(data.snr);
+                    $("#battery_" + itemID).html(data.battery);
+                });
+        }
+        function RedirectToRequestRerun(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceCombinedRequestRerun?R=' + encodeURIComponent(document.location.href);
+        }
+
+        var charts = {};
+
+        const customLabel = function (tooltipItem, data) {
+            //debugger;
+            var dataset = data.datasets[tooltipItem.datasetIndex];
+            var label = data.labels[tooltipItem.index];
+            var value = dataset.data[tooltipItem.index];
+            var numString = value.toString();
+            var formattedNumber = "";
+
+            // Check if the number has more than 3 digits
+            if (numString.length > 3) {
+                formattedNumber = numString.substr(0, numString.length - 3); // Get first part of the number
+                formattedNumber += " " + numString.substr(numString.length - 3, 3); // Add space after last 3 digits
+            } else {
+                formattedNumber = numString; // Number has less than 4 digits, keep it as is
+            }
+            if (formattedNumber.length)
+                return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase() + ": " + formattedNumber;
+        };
+
+        function DisplayChart(data, name, deviceTypeName, BGColor) {
+
+            if (charts[name] != undefined)
+                charts[name].destroy();
+
+            const newData = {
+                labels: data.labels,
+                datasets: [
+                    data.datasets,
+                    {
+                        percentageInnerCutout: 50,
+                    }
+                ]
+            };
+
+            const ctx = document.getElementById(name);
+            var config = {
+                type: 'doughnut',
+                backgroundColor: BGColor,
+                data: newData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: deviceTypeName,
+                            font: "16px Roboto bold",
+                        }
+                    },
+                    maintainAspectRatio: false
+                },
+            };
+
+            var chart = new Chart(ctx, config);
+            charts[name] = chart;
+
+            // var width = chart.chart.width,
+            //     height = chart.chart.height,
+            //     ctx2 = chart.chart.ctx;
+
+            // ctx2.restore();
+            // ctx2.font = "16px Roboto bold";
+            // ctx2.textBaseline = "middle";
+
+            // var text = deviceTypeName,
+            //     textX = Math.round((width - ctx2.measureText(text).width) / 0),
+            //     textY = height / 0;
+
+            // ctx2.fillText(text, textX, textY);
+            // ctx2.save();
+
+        }
+
+
+        $(document).ready(function () {
+
+            var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SummaryBlocks)));
+            $(companies).each(function () {
+                if (this.DeviceTypeID != 0) {
+                    DisplayChart(this.ChartData, 'chart_' + this.DeviceTypeID, this.DeviceTypeName, this.BGColor);
+                }
+            });
+
+            $("th").click(function () {
+                var table = $(this).parents('table').eq(0)
+                var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+                this.asc = !this.asc
+                if (!this.asc) { rows = rows.reverse() }
+                for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
+                resetArrows($(this));
+            })
+            function resetArrows(clickedTh) {
+                $("th").not(clickedTh).find('span').html('');
+                if (clickedTh.find('span').html() === " ▲") {
+                    clickedTh.find('span').html(" ▼");
+                } else {
+                    clickedTh.find('span').html(" ▲");
+                }
+            }
+            function comparer(index) {
+                return function (a, b) {
+                    var valA = getCellValue(a, index), valB = getCellValue(b, index)
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+                }
+            }
+            function getCellValue(row, index) { return $(row).children('td').eq(index).text() }
+        });
+
+    </script>
+}

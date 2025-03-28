@@ -1,0 +1,822 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+@inject UserManager<ApplicationUser> userManager;
+@model MyVoltage.Models.OperationalModels.GameplanModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = "Gameplan";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+@if (Model.ShowUsers)
+{
+    <div class="row mb-4">
+        <div class="col">
+            @Html.DropDownList("Users", Model.Users, new { @class = "form-control", @onChange = "RedirectToFilter();" })
+        </div>
+    </div>
+}
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            Welcome @operationalProvider.OperationalProfile.FirstName @operationalProvider.OperationalProfile.LastName
+        </h4>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <p>This is what we suggest your game plan for the day should look like...</p>
+    </div>
+</div>
+
+
+@if (Model.A08_TaskItems_Active.Count != 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <h4 class="text-success">
+                Tasks currently active
+            </h4>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Task ID</th>
+                        <th scope="col">Workflow Group</th>
+                        <th scope="col">Task Type</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Responsible Person</th>
+                        <th scope="col">Reporting To Person</th>
+                        <th scope="col">Last Comment</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A08_TaskItems_Active)
+                    {
+                        string companyName = item.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" title="View @item.ID Task Details" style="max-width:150px;">
+                                <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A08_Tasks/A08_Task_Review/@item.TaskTypeID/@item.ID">@item.ID</a>
+                            </td>
+                            <td scope="col" title="Workflow Group">@item.A08_Tasks_TypeItem.SecureAreaGroup.GetDescription()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @item.A08_Tasks_TypeItem.Heading." href="/operational/changeTaskTypeID/@item.TaskTypeID?R=/operational/A08_Tasks/A08_Tasks_Type_Details">@item.A08_Tasks_TypeItem.Heading</a>
+                            </td>
+                            <td scope="col" title="Level">@item.Level</td>
+                            <td scope="col">
+                                @if (item.CompanyID.HasValue)
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/@item.CompanyID.Value?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/0?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                            </td>
+                            <td scope="col" title="Created @((DateTime.Now - item.DateCreated).TotalDays.ToString("N")) days ago">@item.DateCreated.ToDateAndTimeShort()</td>
+                            <td scope="col" title="Due Date">@item.DueDate.ToDateShort()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ResponsibleUserUsername is responsible for." href="/operational/changeTaskResponsibleUserID/@item.ResponsibleUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ResponsibleUserUsername</a>
+                            </td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ReportingToUserUsername is reporting on." href="/operational/changeTaskReportingToUserID/@item.ReportingToUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ReportingToUserUsername</a>
+                            </td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col">@(item.A08_Tasks_TypeItem.SiteAdmin_Priority != null ? item.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                            <td scope="col">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+
+@if (Model.A09_FlagItem_Active.Count != 0)
+{
+    <div class="row mb-4">
+        <div class="col">
+            <h4 class="text-success">
+                Flags currently active
+            </h4>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap">Flag ID</th>
+                        <th scope="col" class="text-nowrap">Flag Type</th>
+                        <th scope="col" class="text-nowrap">Level</th>
+                        <th scope="col" class="text-nowrap">Linked to</th>
+                        <th scope="col" class="text-nowrap">Customer No</th>
+                        <th scope="col" class="text-nowrap">Reason For Flag</th>
+                        <th scope="col" class="text-nowrap">Last Comment</th>
+                        <th scope="col" class="text-nowrap">Created</th>
+                        <th scope="col" class="text-nowrap">Due Date</th>
+                        <th scope="col" class="text-nowrap">Responsible Person</th>
+                        <th scope="col" class="text-nowrap">Priority</th>
+                        <th scope="col" class="text-nowrap">Status</th>
+                        <th scope="col" class="text-nowrap">Last Viewed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A09_FlagItem_Active)
+                    {
+                        string lastViewed = "";
+
+                        if (item.DateLastViewed.HasValue)
+                        {
+                            lastViewed = item.DateLastViewed.ToDateAndTimeShort();
+                            lastViewed = lastViewed + " - " + userManager.FindByIdAsync(item.DateLastViewdBy).Result.UserName;
+                        }
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" class="text-nowrap" title="Flag ID"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.FlagTypeID/@item.ID">@item.ID</a></td>
+                            <td scope="col" class="text-nowrap">@item.A09_Flags_TypeItem.FlagTypeName</td>
+                            <td scope="col" class="text-nowrap">@item.Level</td>
+                            <td scope="col" class="text-nowrap">@item.LinkedObjectDBTableName - @item.LinkedObjectUniqueID</td>
+                            <td scope="col" class="text-nowrap">@item.CustomerNo</td>
+                            <td scope="col">@item.ReasonForFlag</td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col" class="text-nowrap" title="Created @((DateTime.Now - item.Created).TotalDays.ToString("N")) days ago">@item.Created.ToDateAndTimeShort()</td>
+                            <td scope="col" class="text-nowrap">@item.DueDate.ToDateShort()</td>
+                            <td scope="col" class="text-nowrap"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/changeFlagUserID/@item.AssignedToID?R=/operational/A09_Flags/A09_Flags_UserDetails">@item.AssignedToUsername</a></td>
+                            <td scope="col" class="text-nowrap">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "Unknown")</td>
+                            <td scope="col" class="text-nowrap">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                            <td scope="col" class="text-nowrap">@lastViewed</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            Tasks for after Breakfast
+        </h4>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (Model.A08_TaskItems_Urgent.Count == 0)
+        {
+            <span>Well done, there are no urgent tasks left for today.</span>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Task ID</th>
+                        <th scope="col">Workflow Group</th>
+                        <th scope="col">Task Type</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Responsible Person</th>
+                        <th scope="col">Reporting To Person</th>
+                        <th scope="col">Last Comment</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A08_TaskItems_Urgent)
+                    {
+                        string companyName = item.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" title="View @item.ID Task Details" style="max-width:150px;">
+                                <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A08_Tasks/A08_Task_Review/@item.TaskTypeID/@item.ID">@item.ID</a>
+                            </td>
+                            <td scope="col" title="Workflow Group">@item.A08_Tasks_TypeItem.SecureAreaGroup.GetDescription()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @item.A08_Tasks_TypeItem.Heading." href="/operational/changeTaskTypeID/@item.TaskTypeID?R=/operational/A08_Tasks/A08_Tasks_Type_Details">@item.A08_Tasks_TypeItem.Heading</a>
+                            </td>
+                            <td scope="col" title="Level">@item.Level</td>
+                            <td scope="col">
+                                @if (item.CompanyID.HasValue)
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/@item.CompanyID.Value?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/0?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                            </td>
+                            <td scope="col" title="Created @((DateTime.Now - item.DateCreated).TotalDays.ToString("N")) days ago">@item.DateCreated.ToDateAndTimeShort()</td>
+                            <td scope="col" title="Due Date">@item.DueDate.ToDateShort()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ResponsibleUserUsername is responsible for." href="/operational/changeTaskResponsibleUserID/@item.ResponsibleUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ResponsibleUserUsername</a>
+                            </td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ReportingToUserUsername is reporting on." href="/operational/changeTaskReportingToUserID/@item.ReportingToUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ReportingToUserUsername</a>
+                            </td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col">@(item.A08_Tasks_TypeItem.SiteAdmin_Priority != null ? item.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                            <td scope="col">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+
+
+
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            Flags for after Breakfast
+        </h4>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (Model.A09_FlagItem_Urgent.Count == 0)
+        {
+            <span>Well done, there are no urgent flags left for today.</span>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap">Flag ID</th>
+                        <th scope="col" class="text-nowrap">Flag Type</th>
+                        <th scope="col" class="text-nowrap">Level</th>
+                        <th scope="col" class="text-nowrap">Linked to</th>
+                        <th scope="col" class="text-nowrap">Customer No</th>
+                        <th scope="col" class="text-nowrap">Reason For Flag</th>
+                        <th scope="col" class="text-nowrap">Last Comment</th>
+                        <th scope="col" class="text-nowrap">Created</th>
+                        <th scope="col" class="text-nowrap">Due Date</th>
+                        <th scope="col" class="text-nowrap">Responsible Person</th>
+                        <th scope="col" class="text-nowrap">Priority</th>
+                        <th scope="col" class="text-nowrap">Status</th>
+                        <th scope="col" class="text-nowrap">Last Viewed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A09_FlagItem_Urgent)
+                    {
+                        string lastViewed = "";
+
+                        if (item.DateLastViewed.HasValue)
+                        {
+                            lastViewed = item.DateLastViewed.ToDateAndTimeShort();
+                            lastViewed = lastViewed + " - " + userManager.FindByIdAsync(item.DateLastViewdBy).Result.UserName;
+                        }
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" class="text-nowrap" title="Flag ID"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.FlagTypeID/@item.ID">@item.ID</a></td>
+                            <td scope="col" class="text-nowrap">@item.A09_Flags_TypeItem.FlagTypeName</td>
+                            <td scope="col" class="text-nowrap">@item.Level</td>
+                            <td scope="col" class="text-nowrap">@item.LinkedObjectDBTableName - @item.LinkedObjectUniqueID</td>
+                            <td scope="col" class="text-nowrap">@item.CustomerNo</td>
+                            <td scope="col">@item.ReasonForFlag</td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col" class="text-nowrap" title="Created @((DateTime.Now - item.Created).TotalDays.ToString("N")) days ago">@item.Created.ToDateAndTimeShort()</td>
+                            <td scope="col" class="text-nowrap">@item.DueDate.ToDateShort()</td>
+                            <td scope="col" class="text-nowrap"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/changeFlagUserID/@item.AssignedToID?R=/operational/A09_Flags/A09_Flags_UserDetails">@item.AssignedToUsername</a></td>
+                            <td scope="col" class="text-nowrap">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "Unknown")</td>
+                            <td scope="col" class="text-nowrap">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                            <td scope="col" class="text-nowrap">@lastViewed</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            Tasks for after Tea Time
+        </h4>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (Model.A08_TaskItems_Normal.Count == 0)
+        {
+            <span>Well done, there are no tasks left for today.</span>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Task ID</th>
+                        <th scope="col">Workflow Group</th>
+                        <th scope="col">Task Type</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Responsible Person</th>
+                        <th scope="col">Reporting To Person</th>
+                        <th scope="col">Last Comment</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A08_TaskItems_Normal)
+                    {
+                        string companyName = item.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" title="View @item.ID Task Details" style="max-width:150px;">
+                                <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A08_Tasks/A08_Task_Review/@item.TaskTypeID/@item.ID">@item.ID</a>
+                            </td>
+                            <td scope="col" title="Workflow Group">@item.A08_Tasks_TypeItem.SecureAreaGroup.GetDescription()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @item.A08_Tasks_TypeItem.Heading." href="/operational/changeTaskTypeID/@item.TaskTypeID?R=/operational/A08_Tasks/A08_Tasks_Type_Details">@item.A08_Tasks_TypeItem.Heading</a>
+                            </td>
+                            <td scope="col" title="Level">@item.Level</td>
+                            <td scope="col">
+                                @if (item.CompanyID.HasValue)
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/@item.CompanyID.Value?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/0?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                            </td>
+                            <td scope="col" title="Created @((DateTime.Now - item.DateCreated).TotalDays.ToString("N")) days ago">@item.DateCreated.ToDateAndTimeShort()</td>
+                            <td scope="col" title="Due Date">@item.DueDate.ToDateShort()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ResponsibleUserUsername is responsible for." href="/operational/changeTaskResponsibleUserID/@item.ResponsibleUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ResponsibleUserUsername</a>
+                            </td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ReportingToUserUsername is reporting on." href="/operational/changeTaskReportingToUserID/@item.ReportingToUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ReportingToUserUsername</a>
+                            </td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col">@(item.A08_Tasks_TypeItem.SiteAdmin_Priority != null ? item.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                            <td scope="col">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            Tasks for the rest of the day
+        </h4>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (Model.A08_TaskItems_LeftOver.Count == 0)
+        {
+            <span>Well done, there are no tasks left for today.</span>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Task ID</th>
+                        <th scope="col">Workflow Group</th>
+                        <th scope="col">Task Type</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Responsible Person</th>
+                        <th scope="col">Reporting To Person</th>
+                        <th scope="col">Last Comment</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A08_TaskItems_LeftOver)
+                    {
+                        string companyName = item.CompanyID.HasValue ? operationalProvider.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" title="View @item.ID Task Details" style="max-width:150px;">
+                                <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A08_Tasks/A08_Task_Review/@item.TaskTypeID/@item.ID">@item.ID</a>
+                            </td>
+                            <td scope="col" title="Workflow Group">@item.A08_Tasks_TypeItem.SecureAreaGroup.GetDescription()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @item.A08_Tasks_TypeItem.Heading." href="/operational/changeTaskTypeID/@item.TaskTypeID?R=/operational/A08_Tasks/A08_Tasks_Type_Details">@item.A08_Tasks_TypeItem.Heading</a>
+                            </td>
+                            <td scope="col" title="Level">@item.Level</td>
+                            <td scope="col">
+                                @if (item.CompanyID.HasValue)
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/@item.CompanyID.Value?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/0?R=/operational/A08_Tasks/A08_Tasks_Company_Details">@companyName</a>
+                                }
+                            </td>
+                            <td scope="col" title="Created @((DateTime.Now - item.DateCreated).TotalDays.ToString("N")) days ago">@item.DateCreated.ToDateAndTimeShort()</td>
+                            <td scope="col" title="Due Date">@item.DueDate.ToDateShort()</td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ResponsibleUserUsername is responsible for." href="/operational/changeTaskResponsibleUserID/@item.ResponsibleUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ResponsibleUserUsername</a>
+                            </td>
+                            <td scope="col">
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ReportingToUserUsername is reporting on." href="/operational/changeTaskReportingToUserID/@item.ReportingToUserID?R=/operational/A08_Tasks/A08_Tasks_User_Details">@item.ReportingToUserUsername</a>
+                            </td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col">@(item.A08_Tasks_TypeItem.SiteAdmin_Priority != null ? item.A08_Tasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                            <td scope="col">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+
+
+
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            Flags for after Tea Time
+        </h4>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        @if (Model.A09_FlagItem_Normal.Count == 0)
+        {
+            <span>Well done, there are no flags left for today.</span>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap">Flag ID</th>
+                        <th scope="col" class="text-nowrap">Flag Type</th>
+                        <th scope="col" class="text-nowrap">Level</th>
+                        <th scope="col" class="text-nowrap">Linked to</th>
+                        <th scope="col" class="text-nowrap">Customer No</th>
+                        <th scope="col" class="text-nowrap">Reason For Flag</th>
+                        <th scope="col" class="text-nowrap">Last Comment</th>
+                        <th scope="col" class="text-nowrap">Created</th>
+                        <th scope="col" class="text-nowrap">Due Date</th>
+                        <th scope="col" class="text-nowrap">Responsible Person</th>
+                        <th scope="col" class="text-nowrap">Priority</th>
+                        <th scope="col" class="text-nowrap">Status</th>
+                        <th scope="col" class="text-nowrap">Last Viewed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.A09_FlagItem_Normal)
+                    {
+                        string lastViewed = "";
+
+                        if (item.DateLastViewed.HasValue)
+                        {
+                            lastViewed = item.DateLastViewed.ToDateAndTimeShort();
+                            lastViewed = lastViewed + " - " + userManager.FindByIdAsync(item.DateLastViewdBy).Result.UserName;
+                        }
+                        string rowclass = "";
+                        if (item.Level.HasValue)
+                        {
+                            switch (item.Level.Value)
+                            {
+                                case 5:
+                                    rowclass = "table-danger";
+                                    break;
+                                case 4:
+                                    rowclass = "table-primary";
+                                    break;
+                                case 3:
+                                    rowclass = "table-warning";
+                                    break;
+                                case 2:
+                                    rowclass = "table-success";
+                                    break;
+                                case 1:
+                                    rowclass = "table-info";
+                                    break;
+                            }
+                        }
+                        <tr class="@Html.Raw(rowclass)">
+                            <td scope="col" class="text-nowrap" title="Flag ID"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.FlagTypeID/@item.ID">@item.ID</a></td>
+                            <td scope="col" class="text-nowrap">@item.A09_Flags_TypeItem.FlagTypeName</td>
+                            <td scope="col" class="text-nowrap">@item.Level</td>
+                            <td scope="col" class="text-nowrap">@item.LinkedObjectDBTableName - @item.LinkedObjectUniqueID</td>
+                            <td scope="col" class="text-nowrap">@item.CustomerNo</td>
+                            <td scope="col">@item.ReasonForFlag</td>
+                            <td scope="col">@Html.Raw(item.LatestComment)</td>
+                            <td scope="col" class="text-nowrap" title="Created @((DateTime.Now - item.Created).TotalDays.ToString("N")) days ago">@item.Created.ToDateAndTimeShort()</td>
+                            <td scope="col" class="text-nowrap">@item.DueDate.ToDateShort()</td>
+                            <td scope="col" class="text-nowrap"><a class="btn btn-outline-primary-sm btn-sm" href="/operational/changeFlagUserID/@item.AssignedToID?R=/operational/A09_Flags/A09_Flags_UserDetails">@item.AssignedToUsername</a></td>
+                            <td scope="col" class="text-nowrap">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "Unknown")</td>
+                            <td scope="col" class="text-nowrap">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                            <td scope="col" class="text-nowrap">@lastViewed</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+
+
+
+<div class="row mb-4">
+    <div class="col">
+        <h4>
+            What does your Task backlog look like?
+        </h4>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover">
+            <thead>
+                <tr>
+                    <th rowspan="3" scope="col" class="border-table">User Name</th>
+                    <th rowspan="3" scope="col" class="border-table">Status</th>
+
+                    <th rowspan="2" colspan="7" scope="col" class="border-table text-center">Unresolved Older Than Count</th>
+
+                    <th colspan="@Model.A08_Tasks_User_SummaryStatusItems.Where(p => !p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value).Count()" scope="col" class="border-table text-center">Unresolved</th>
+                    <th colspan="@Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).Count()" scope="col" class="border-table text-center">Resolved</th>
+                    <th rowspan="3" scope="col" class="border-table">Total</th>
+                </tr>
+                <tr>
+                    @foreach (var sG in Model.A08_Tasks_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                    {
+                        var sgName = Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                        <th colspan="@Model.A08_Tasks_User_SummaryStatusItems.Where(p => (!p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value) && p.StatusGroupID == sG).Count()" scope="col" class="border-table text-center">@sgName</th>
+                    }
+                    @foreach (var sG in Model.A08_Tasks_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                    {
+                        var sgName = Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                        <th colspan="@Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value && p.StatusGroupID == sG).Count()" scope="col" class="border-table text-center">@sgName</th>
+                    }
+                </tr>
+                <tr>
+                    <th scope="col" class="border-table text-nowrap text-center">Today Count</th>
+                    <th scope="col" class="border-table text-nowrap text-center">1 Day</th>
+                    <th scope="col" class="border-table text-nowrap text-center">3 Days</th>
+                    <th scope="col" class="border-table text-nowrap text-center">7 Days</th>
+                    <th scope="col" class="border-table text-nowrap text-center">14 Days</th>
+                    <th scope="col" class="border-table text-nowrap text-center">1 Month</th>
+                    <th scope="col" class="border-table text-nowrap text-center">Oldest</th>
+
+                    @foreach (var sG in Model.A08_Tasks_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                    {
+                        var sgName = Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                        @foreach (var status in Model.A08_Tasks_User_SummaryStatusItems.Where(p => (!p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value) && p.StatusGroupID == sG).ToList())
+                        {
+                            <th scope="col" class="border-table text-nowrap">@status.ActionName<br />@status.ReportingName</th>
+                        }
+                    }
+                    @foreach (var sG in Model.A08_Tasks_User_SummaryStatusItems.Select(p => p.StatusGroupID).Distinct())
+                    {
+                        var sgName = Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.StatusGroupID == sG).FirstOrDefault().GroupName;
+                        @foreach (var status in Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value && p.StatusGroupID == sG).ToList())
+                        {
+                            <th scope="col" class="border-table text-nowrap">@status.ActionName<br />@status.ReportingName</th>
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var resolvedStatuses = Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).ToList();
+                }
+                @foreach (var item in Model.A08_Tasks_User_SummaryItems)
+                {
+                    string rowclass = "";
+                    string cellClass = "";
+                    string statusText = "";
+                    if (item.A08_Tasks_User_SummaryItemStatuses.Where(p => resolvedStatuses.Select(c => c.ID).Contains(p.StatusID)).Select(p => p.Count).Sum() == item.A08_Tasks_User_SummaryItemStatuses.Select(p => p.Count).Sum())
+                    {
+                        cellClass = "text-green font-weight-bold";
+                        rowclass = " class=\"table-success\"";
+                        statusText = "Completed";
+                    }
+                    else
+                    {
+                        cellClass = "text-red font-weight-bold";
+                        rowclass = " class=\"table-danger\"";
+                        statusText = "Due";
+                    }
+                    <tr style="cursor:pointer;" title="View @item.UserName" onclick="RedirectToDetails('@item.UserID');" @Html.Raw(rowclass)>
+                        <td class="border-table text-nowrap" scope="col">@item.UserName</td>
+                        <td title="@item.UserName - Status" scope="col" class="border-table text-nowrap @Html.Raw(cellClass)">@statusText</td>
+
+                        <td class="border-table text-nowrap" title="@item.UserName - Older Than 3 Days Count" scope="col">@item.TodayCount</td>
+                        <td class="border-table text-nowrap" title="@item.UserName - Older Than 1 Day Count" scope="col">@item.OlderThan1DayCount</td>
+                        <td class="border-table text-nowrap" title="@item.UserName - Older Than 3 Days Count" scope="col">@item.OlderThan3DaysCount</td>
+                        <td class="border-table text-nowrap" title="@item.UserName - Older Than 7 Days Count" scope="col">@item.OlderThan7DaysCount</td>
+                        <td class="border-table text-nowrap" title="@item.UserName - Older Than 14 Days Count" scope="col">@item.OlderThan14DaysCount</td>
+                        <td class="border-table text-nowrap" title="@item.UserName - Older Than 1 Month Count" scope="col">@item.OlderThan1MonthCount</td>
+                        <td class="border-table text-nowrap" title="@item.UserName - Oldest Unresolved Ticket" scope="col">
+                            @if (item.OldestUnresolvedTaskCreateDate.HasValue)
+                            {
+                                <span>@item.OldestUnresolvedTaskCreateDate.ToDateAndTimeShort(true) (<a href="/operational/A08_Tasks/A08_Task_Review/@item.OldestUnresolvedTaskTypeID/@item.OldestUnresolvedTaskID">@item.OldestUnresolvedTaskID</a>)</span>
+                            }
+                        </td>
+
+                        @foreach (var status in Model.A08_Tasks_User_SummaryStatusItems.Where(p => !p.IsResolvedStatus.HasValue || !p.IsResolvedStatus.Value).ToList())
+                        {
+                            var statusItem = item.A08_Tasks_User_SummaryItemStatuses.Where(p => p.StatusID == status.ID).SingleOrDefault();
+                            <td title="@item.UserName - @status.GroupName - @status.ActionName - @status.ReportingName" class="border-table text-nowrap" scope="col">@(statusItem != null ? statusItem.Count.ToString() : "0")</td>
+                        }
+                        @foreach (var status in Model.A08_Tasks_User_SummaryStatusItems.Where(p => p.IsResolvedStatus.HasValue && p.IsResolvedStatus.Value).ToList())
+                        {
+                            var statusItem = item.A08_Tasks_User_SummaryItemStatuses.Where(p => p.StatusID == status.ID).SingleOrDefault();
+                            <td title="@item.UserName - @status.GroupName - @status.ActionName - @status.ReportingName" class="border-table text-nowrap" scope="col">@(statusItem != null ? statusItem.Count.ToString() : "0")</td>
+                        }
+                        <td title="@item.UserName - Total Tickets" scope="col" class="border-table text-nowrap">@item.Total</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        });
+        function RedirectToFilter() {
+            document.location.href = "/operational/gameplan?U=" + $("#Users").val();
+        }
+    </script>
+}

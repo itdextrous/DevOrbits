@@ -1,0 +1,103 @@
+@model MyVoltage.Models.AdminViewModels.UsageCalcAssetViewModels.ViewModel
+@{
+    ViewData["Title"] = "Usage Calculator Asset Management";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row mt-0 mt-md-5 mb-4">
+    <div class="col">
+        <a href="/admin/usagecalcassets/create" class="btn btn-outline-primary"><i class="fas fa-plus-circle"></i>&nbsp;ADD NEW USAGE CALCULATOR ASSET</a>
+    </div>
+    @*<div class="col text-right">
+            <a href="/companyadmin/pqallocation/downloadxlsx" class="btn btn-outline-primary"><i class="fas fa-file-excel"></i>&nbsp;DOWNLOAD EXCEL</a>
+        </div>*@
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                Welcome to the @(ViewData["Title"])
+                <br />
+                Below are the current assets allowed to be used for the usage calculator.
+                <br />
+            </div>
+            <div class="card-body bg-white" style=" background: rgba(203, 203, 210, 0.15);">
+                <table class="table table-responsive-xl table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Icon</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Average kWh</th>
+                            <th scope="col">Date Created</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var asset in Model.UsageCalc_Assets)
+                        {
+                            <tr
+                                @if (asset.IsDeleted)
+                                {
+                                    <text>style="color:red;"</text>
+                                }
+                                >
+                                <td scope="col">@asset.UsageCalc_AssetID</td>
+                                <td scope="col"><i class="fas fa-@asset.AssetIcon"></i></td>
+                                <td scope="col">@asset.AssetName</td>
+                                <td scope="col">
+                                    @switch (asset.AssetTypeID)
+                                    {
+                                        case (int)MyVoltage.Controllers.AccountController.DeviceType.Electricity:
+                                            <img src="~/images/elec-icon-s.png" /> <text>Electricity</text>
+                                            break;
+                                        case (int)MyVoltage.Controllers.AccountController.DeviceType.Water:
+                                            <img src="~/images/water-icon-s.png" /> <text>Water</text>
+                                            break;
+                                        case (int)MyVoltage.Controllers.AccountController.DeviceType.Gas:
+                                            <img src="~/images/gas-icon-s.png" /> <text>Gas</text>
+                                            break;
+                                    }
+                                </td>
+                                <td scope="col">@(asset.AverageKWH.ToString("N"))</td>
+                                <td scope="col">@(asset.CreatedDate.ToString("yyyy/MM/dd HH:mm"))</td>
+                                <td scope="col">
+                                    <a href="/admin/usagecalcassets/edit/@asset.UsageCalc_AssetID" title="Edit"><i class="fas fa-edit"></i></a>
+                                    &nbsp;
+                                    @if (!asset.IsDeleted)
+                                    {
+                                        <a href="/admin/usagecalcassets/delete/@asset.UsageCalc_AssetID" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                                    }
+                                    else
+                                    {
+                                        <a href="/admin/usagecalcassets/restore/@asset.UsageCalc_AssetID" title="Restore"><i class="fas fa-reply"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                Total Entries: @Model.UsageCalc_Assets.Count
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToEdit(id) {
+            document.location.href = '/admin/usagecalcassets/edit/' + id;
+        }
+    </script>
+}

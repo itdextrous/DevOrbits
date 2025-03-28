@@ -1,0 +1,58 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@using MyVoltage.Data;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_MeterOnManualSummary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Company Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Customer Count</th>
+                    <th scope="col">Meter Count</th>
+                    <th scope="col">Elec Meters On Manual</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var uC in operationalProvider.UserCompanies)
+                {
+                    var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                    <tr id="MeterOnManualSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                        <td scope="col">
+                            <div class="text-orange">
+                                @company.Name
+                            </div>
+                        </td>
+                        <td scope="col" colspan="5">
+                            <div class="text-orange">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function() {
+            $("#MeterOnManualSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualSummaryItem/"))' + this.CompanyID + '/' + "MeterOnManualSummaryItem_" + this.CompanyID, function() {
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

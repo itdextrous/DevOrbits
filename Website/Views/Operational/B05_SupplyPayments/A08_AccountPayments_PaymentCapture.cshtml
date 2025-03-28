@@ -1,0 +1,153 @@
+@model MyVoltage.Models.OperationalModels.B05_SupplyPayments.B05_SupplyPaymentsModels.B05_AccountPayments_PaymentCaptureModel
+@{
+    ViewData["Title"] = "Account Payments - Payment Capture";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else if (Model.InvalidBuildingCouncilDetails)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Building Council Details incorrect or not found. Please check the <a href="/operational/A08_AccountPayments/A08_AccountPayments_AccountPaymentCapture">Account Payments - Account Payment Details</a>.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                }
+                else
+                {
+
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="B05_AccountPayments_PaymentCapture" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingNo
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingName
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="BuildingSkybillName" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Model.BuildingSkybillName
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="AccountNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("AccountNo", Model.AccountNo)
+                                            <span asp-validation-for="AccountNo" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="TAXInvoiceNo" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("TAXInvoiceNo", Model.TAXInvoiceNo)
+                                            <span asp-validation-for="TAXInvoiceNo" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="PaymentDate" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="PaymentDate" type="date" />
+                                            <span asp-validation-for="PaymentDate" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="PaymentAmount" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="PaymentAmount" />
+                                            <span asp-validation-for="PaymentAmount" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="POP" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-group" asp-for="POP" />
+                                            <span asp-validation-for="POP" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.B05_AccountPayments_PaymentCapture, MyVoltage.Data.SecureAreaActionEnum.Add))
+                            {
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            }
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

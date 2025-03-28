@@ -1,0 +1,37 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.D01_Leads_SnapshotsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Snapshots.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row col-12 mt-md-2">
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Snapshot Date</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.D01_Leads_SnapshotsItems)
+            {
+                <tr>
+                    <td scope="col">@item.SnapshotDate.ToDateAndTimeShort()</td>
+                    <td scope="col">
+                        <a target="_blank" class="btn btn-sm btn-outline-primary-sm" href="/operational/D01_Leads/D01_Leads_Snapshots_Download/@item.ID"><i class="fas fa-file-excel"></i>&nbsp;Download</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+</script>

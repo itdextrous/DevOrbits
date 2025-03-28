@@ -1,0 +1,370 @@
+@model MyVoltage.Models.OperationalModels.C02_GeneralLedgerReportModels.C02_GeneralLedgerReport_GLAuditUpdateModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate.GetDescription()} - {Model.C02_GeneralLedgerReport_GLAuditUpdateItem.CompanyName} - {Model.C02_GeneralLedgerReport_GLAuditUpdateItem.LedgerNo} - {Model.C02_GeneralLedgerReport_GLAuditUpdateItem.Date.ToDateShort()}";
+}
+@using MyVoltage.Extensions;
+<div id="formDiv" class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <form asp-action="C02_GeneralLedgerReport_GLAuditUpdate" enctype="multipart/form-data">
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Company</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.CompanyName
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.Date.ToDateShort()
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Ledger No</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.LedgerNo
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Ledger Name</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.LedgerName
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <hr />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Snapshot Movement Amount</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.MovementAmount.ToMoney()
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ConfirmedMovementAmount" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @if (Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedDate.HasValue && !string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedBy.Trim()))
+                            {
+                                <span>@Model.ConfirmedMovementAmount.ToMoney()</span>
+                            }
+                            else
+                            {
+                                <input asp-for="ConfirmedMovementAmount" class="form-control" />
+                                <span asp-validation-for="ConfirmedMovementAmount" class="text-red"></span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Reviewed By Username</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ReviewedByUsername
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Reviewed Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ReviewedDate.ToDateAndTimeShort(true)
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Approved By Username</label>
+                        </div>
+                        <div class="col-6">
+                            @if (Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedDate.HasValue && !string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedBy.Trim()))
+                            {
+                                <span>@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedByUsername</span>
+                            }
+                            else if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate, MyVoltage.Data.SecureAreaActionEnum.Approval)
+                            && Model.C02_GeneralLedgerReport_GLAuditUpdateItem.MovementAmountConfirmed.HasValue
+                            && userManager.GetUserId(User) != Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ReviewedBy.Trim()
+                            && Model.C02_GeneralLedgerReport_GLAuditUpdateItem.MovementAmount == Model.C02_GeneralLedgerReport_GLAuditUpdateItem.MovementAmountConfirmed.Value
+                            )
+                            {
+                                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_Approve/@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ID" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Approve</a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Approved Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedDate.ToDateAndTimeShort(true)
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Audit By Username</label>
+                        </div>
+                        <div class="col-6">
+                            @if (Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditDate.HasValue && !string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditBy.Trim()))
+                            {
+                                <span>@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditByUsername</span>
+                            }
+                            else if (Model.JobTitle == "Auditor"
+                            && Model.C02_GeneralLedgerReport_GLAuditUpdateItem.MovementAmountConfirmed.HasValue
+                            )
+                            {
+                                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_Audit/@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ID" class="btn btn-outline-info"><i class="fas fa-check-circle"></i>&nbsp;Audit</a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Audit Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditDate.ToDateAndTimeShort(true)
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <hr />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Snapshot Balance Amount</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.BalanceAmount.ToMoney()
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ConfirmedBalanceAmount" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @if (Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedDateBalance.HasValue && !string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedByBalance.Trim()))
+                            {
+                                <span>@Model.ConfirmedBalanceAmount.ToMoney()</span>
+                            }
+                            else
+                            {
+                                <input asp-for="ConfirmedBalanceAmount" class="form-control" />
+                                <span asp-validation-for="ConfirmedBalanceAmount" class="text-red"></span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Reviewed By Username</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ReviewedByUsernameBalance
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Reviewed Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ReviewedDateBalance.ToDateAndTimeShort(true)
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Approved By Username</label>
+                        </div>
+                        <div class="col-6">
+                            @if (Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedDateBalance.HasValue && !string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedByBalance.Trim()))
+                            {
+                                <span>@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedByUsernameBalance</span>
+                            }
+                            else if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate, MyVoltage.Data.SecureAreaActionEnum.Approval)
+                            && Model.C02_GeneralLedgerReport_GLAuditUpdateItem.BalanceAmountConfirmed.HasValue
+                            && userManager.GetUserId(User) != Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ReviewedByBalance.Trim()
+                            && Model.C02_GeneralLedgerReport_GLAuditUpdateItem.BalanceAmount == Model.C02_GeneralLedgerReport_GLAuditUpdateItem.BalanceAmountConfirmed.Value
+                            )
+                            {
+                                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_ApproveBalance/@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ID" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Approve</a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Approved Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ApprovedDateBalance.ToDateAndTimeShort(true)
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Audit By Username</label>
+                        </div>
+                        <div class="col-6">
+                            @if (Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditDateBalance.HasValue && !string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditByBalance.Trim()))
+                            {
+                                <span>@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditByUsernameBalance</span>
+                            }
+                            else if (Model.JobTitle == "Auditor"
+                            && Model.C02_GeneralLedgerReport_GLAuditUpdateItem.BalanceAmountConfirmed.HasValue
+                            )
+                            {
+                                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_AuditBalance/@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ID" class="btn btn-outline-info"><i class="fas fa-check-circle"></i>&nbsp;Audit</a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label class="control-label">Audit Date</label>
+                        </div>
+                        <div class="col-6">
+                            @Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditDateBalance.ToDateAndTimeShort(true)
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <hr />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="PendingIssue" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input asp-for="PendingIssue" class="form-control" />
+                            <span asp-validation-for="PendingIssue" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="Comments" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <textarea asp-for="Comments" class="form-control"></textarea>
+                            <span asp-validation-for="Comments" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="AuditComments" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            @if (
+                                (!string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditBy) && userManager.GetUserId(User) == Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditBy.Trim())
+                                || (!string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditByBalance) && userManager.GetUserId(User) == Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AuditByBalance.Trim())
+                            )
+                            {
+                                <textarea asp-for="AuditComments" class="form-control"></textarea>
+                            }
+                            else
+                            {
+                                <textarea asp-for="AuditComments" class="form-control" readonly></textarea>
+                            }
+                            <span asp-validation-for="AuditComments" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="Attachment" class="control-label"></label>
+                            @if (!string.IsNullOrEmpty(Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AttachmentFileName))
+                            {
+                                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAudit_GetAttachment/@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-download"></i>&nbsp;@Model.C02_GeneralLedgerReport_GLAuditUpdateItem.AttachmentFileName</a>
+                            }
+                        </div>
+                        <div class="col-6">
+                            <input asp-for="Attachment" class="form-control" />
+                            <span asp-validation-for="Attachment" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            <hr />
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="FlagID" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input asp-for="FlagID" class="form-control" />
+                            <span asp-validation-for="FlagID" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="TaskID" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input asp-for="TaskID" class="form-control" />
+                            <span asp-validation-for="TaskID" class="text-red"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-md-2">
+                        <div class="col-6 text-left">
+                            <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

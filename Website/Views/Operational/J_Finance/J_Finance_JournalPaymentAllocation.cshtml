@@ -1,0 +1,114 @@
+﻿@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_JournalPaymentAllocationModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.J_Finance_JournalPaymentAllocation.GetDescription()} - {operationalProvider.CompanyName} - {operationalProvider.CustomerNumber}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-4 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    Select customer to start...
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                if (Model.IsSuccess)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Journal successfully added.
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col">
+                                <a href="/Operational/J_Finance/J_Finance_JournalPaymentAllocation" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Capture New</a>
+                            </div>
+                            <div class="col">
+                                <a href="/operational/Customer/Customer_Billing" class="btn btn-outline-primary"><i class="fas fa-dollar-sign"></i>&nbsp;Customer Billing</a>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+                else
+                {
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="J_Finance_JournalPaymentAllocation" enctype="multipart/form-data">
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label" asp-for="PostingDate"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="date" class="form-control" asp-for="PostingDate" />
+                                    <span asp-validation-for="PostingDate"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label" asp-for="Description"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" asp-for="Description" />
+                                    <span asp-validation-for="Description"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label" asp-for="Amount"></label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" asp-for="Amount" />
+                                    <span asp-validation-for="Amount"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col">
+                                    <label class="label" asp-for="BalAccountNo"></label>
+                                </div>
+                                <div class="col">
+                                    @Html.DropDownList("BalAccountNo", Model.BalAccountNo, new { @class = "form-control" })
+                                    <span asp-validation-for="BalAccountNo"></span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-12 text-red font-weight-bold">
+                                        @Model.ErrorMessage
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row mb-2 mt-2">
+                                <div class="col-12 text-right">
+                                    <button type="submit" class="btn btn-outline-primary float-right"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

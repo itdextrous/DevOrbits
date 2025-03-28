@@ -1,0 +1,66 @@
+﻿@using SkyBillCustomer = MyVoltage.Api.SkyBill.Customer;
+@model List<SkyBillCustomer>
+@{
+    ViewData["Title"] = "Customer Meters";
+    var keyword = (string)ViewData["Keyword"];
+}
+
+<div>
+    @if (Model != null && Model.Count != 0)
+    {
+        <form>
+            <p class="font-weight-bold mb-1">Search</p>
+            <div class="clearfix">
+                <div class="form-group">
+                    <input class="form-control" type="text" name="keyword" value="@ViewContext.HttpContext.Request.Query["keyword"]" placeholder="Serial Number, Customer Name or Customer Number"> 
+                </div>
+                <input class="btn btn-primary float-right" type="submit" value="Search" />
+            </div>    
+        </form>
+        <table id="GatewayDetails" class="table table-repsonsive-sm table-bordered table-hover admin-table table-fixed mt-3">
+            <thead>
+                <tr>
+                    <td>Customer Number</td>
+                    <td>Serial No</td>
+                    <td>Partner Code</td>
+                    <td>Customer Name</td>
+                    <td>Address</td>
+                    <td>Balance_LCY (in Rands)</td>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>@m.Customer_No</td>
+                        <td>@m.Serial_No</td>
+                        <td>@m.Partner_Code</td>
+                        <td>@m.Customer_Name</td>
+                        <td>@m.Address</td>
+                        <td>@m.Balance_LCY</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        if (keyword != null)
+        {
+            <form>
+                <div class="mt-3">
+                    <input class="custom-search-input d-inline" type="text" name="keyword" value="@ViewContext.HttpContext.Request.Query["keyword"]" placeholder="Serial Number, Customer Name or Customer Number"> <input class="custom-search-input d-inline" type="submit" value="Search" />
+                </div>
+            </form>
+        }
+
+        <div class="card mt-3">
+            <div class="card-body">
+                 <span><b>No search results found...</b></span><br />
+            </div>
+        </div>
+    }
+
+</div>
+

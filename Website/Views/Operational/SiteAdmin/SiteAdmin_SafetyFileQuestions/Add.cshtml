@@ -1,0 +1,103 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_SafetyFileQuestionsModels.SiteAdmin_SafetyFileQuestionsAddModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_SafetyFileQuestions.GetDescription()} - Add";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Safety File Question successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/SiteAdmin/SiteAdmin_SafetyFileQuestions" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    SafetyFileQuestion Details:
+                </div>
+                <form asp-action="SiteAdmin_SafetyFileQuestions_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Heading" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="Heading" />
+                                <span asp-validation-for="Heading" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Description" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea type="text" class="form-control" asp-for="Description"></textarea>
+                                <span asp-validation-for="Description" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="QuestionTypeID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("QuestionTypeID", Model.QuestionTypeID, new { @class = "form-control" })
+                                <span asp-validation-for="QuestionTypeID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LinkedSecureArea" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("LinkedSecureArea", Model.LinkedSecureArea, new { @class = "form-control" })
+                                <span asp-validation-for="LinkedSecureArea" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/SiteAdmin/SiteAdmin_SafetyFileQuestions" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Safety File Questions</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

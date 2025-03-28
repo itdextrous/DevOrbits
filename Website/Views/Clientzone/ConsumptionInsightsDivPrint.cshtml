@@ -1,0 +1,544 @@
+@model MyVoltage.Models.ClientzoneModels.ConsumptionInsightsModel;
+@using MyVoltage.Extensions;
+@using System.Globalization;
+@using MyVoltage.Models.ClientzoneModels;
+@{
+    ViewData["Title"] = "Consumption Insights";
+    if (Model.ShowingPrintView)
+    {
+        Layout = "LayoutPrint";
+    }
+
+    var startBillingData = Model.ProductItemData.MonthlyBillingItems.OrderBy(x => x.Date).FirstOrDefault();
+    var endBillingData = Model.ProductItemData.MonthlyBillingItems.OrderByDescending(x => x.Date).FirstOrDefault();
+
+    var monthlyItems = Model.ProductItemData.MonthlyBillingItems;
+
+    DateTime startDate;
+    if (Model.ProductItemData.IsDailyBilling.HasValue && Model.ProductItemData.IsDailyBilling.Value)
+    {
+        startDate = new DateTime(Model.SelectedMonth.Year, Model.SelectedMonth.Month, 1);
+        monthlyItems = Model.ProductItemData.MonthlyBillingItems.OrderBy(x => x.Date).ToList();
+    }
+    else
+    {
+        startDate = new DateTime(Model.SelectedMonth.Year, 1, 1);
+        monthlyItems = Model.ProductItemData.MonthlyBillingItems.OrderByDescending(x => x.Date).ToList();
+    }
+     
+    DateTime endDate = new DateTime(Model.SelectedMonth.Year, Model.SelectedMonth.Month, 1);
+
+    startDate = startBillingData != null ? startBillingData.Date : startDate;
+    endDate = endBillingData != null ? endBillingData.Date : startDate;
+
+}
+
+
+@if (!string.IsNullOrEmpty(ViewData["myhead"].ToString()))
+{
+    <div class="row pdf_header align-items-center pdf_mb_28">
+        <div class="col">
+            <img src="~/images/Clientzone/logo_alt.png" height="71" />
+        </div>
+        <div class="col text-end">
+            <h3 class="text-islandsunrise">@Model.CustomerNumber</h3>
+            @if (Model.ProductItemData.IsDailyBilling.HasValue && Model.ProductItemData.IsDailyBilling.Value)
+            {
+                <h2>Daily consumption insights</h2>
+            }
+            else
+            {
+                <h2>Monthly consumption insights</h2>
+            }
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(ViewData["myFooter"].ToString()))
+{
+    <div class="row g-0 align-items-end pdf-footer pdf_pt_50">
+        <div class="col-9">
+            <div class="heading">@Model.SupplierName @Model.SupplierVATNumber</div>
+            <div class="sub_heading">
+                @if (!string.IsNullOrEmpty(Model.SupplierAddress))
+                {
+                    <img src="/images/icons/address.png" height="20" />
+                    @Model.SupplierAddress
+                }
+            </div>
+            <div class="d-flex">
+                @if (!string.IsNullOrEmpty(Model.SupplierPostal))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/Postal.png" height="20" />
+                        @Model.SupplierPostal
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.SupplierPhone))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/telephone.png" height="20">
+                        @Model.SupplierPhone
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.SupplierURL))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/web.png" height="20">
+                        <a href="http://@Model.SupplierURL">
+                            @Model.SupplierURL
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-3 text-end">
+            <img src="~/images/Clientzone/InvoiceFooterR.svg" />
+        </div>
+    </div>
+}
+else if (Model.ProductItemData == null || Model.ProductItemData.MonthlyBillingItems.Count == 0 || Model.ProductItemData.MonthlyBillingItems.Select(p => Math.Round(p.Amount)).Sum() == 0)
+{
+    <h5 class="m-0 text-center py-1 bold">
+        No data to display.
+    </h5>
+}
+else
+{
+    
+    <div class="pdf_views_style pdf_preview">
+        @{
+            string blockClass = "londonsky";
+        }
+        @switch (Model.ProductItemData.DeviceTypeID)
+        {
+            case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                blockClass = "greenapple";
+                break;
+            case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                blockClass = "tropicalwave";
+                break;
+            case (int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                blockClass = "tequilasunrise";
+                break;
+        }
+
+        @if (Model.ProductItemData.ProductName.Trim().ToLower() == ClientzoneSD.Sanitation_Consumption)
+        {
+            blockClass = "darkblue";
+        }
+        @if (Model.ProductItemData.ProductName.Trim().ToLower() == ClientzoneSD.Water_Consumption)
+        {
+            blockClass = "tropicalwave";
+        }
+        
+        <h4 class="text-uppercase customer_head m-0 pdf_pb_20 text-islandsunrise">@Model.CustomerName</h4>
+        <div class="row pdf_pb_28">
+            <div class="col address">
+                @Model.RecipientName <br />
+                @if (!string.IsNullOrEmpty(Model.UnitNumber))
+                {
+                    @Model.UnitNumber <br />
+                }
+                else
+                {
+                    @Model.CompanyName <br />
+                }
+                @*@Model.CustomerNumber @Model.CompanyName <br />*@
+                <p class="pdf-address-text">@Model.Address1</p>
+               @* @Model.Address1<br />
+                @Model.Address2 @Model.Address3<br />
+                @Model.Address4 @Model.Address5<br />*@
+            </div>
+            <div class="col-md-auto text-end">
+                <div class="days_months">@((new DateTime(startDate.Year, startDate.Month, 1)).ToString("d MMM yyyy")) - @((new DateTime(endDate.Year, endDate.Month, DateTime.DaysInMonth(endDate.Year, endDate.Month))).ToString("d MMM yyyy"))</div>
+                <div class="type">
+                    <b>Product type:</b> @Model.ProductItemData.ProductName.Split(' ')[0]
+                </div>
+            </div>
+        </div>
+        <hr class="pdf_mb_25" />
+        <div class="gray_bg">
+            <div id="entirePage" class="mt-1">
+                <div class="row g-0">
+                    <div class="col">
+                        <i class="fas fa-circle text-@blockClass"></i>&nbsp;<span class="sentence_case d-inline-block">@Model.ProductItemData.ProductName.Split(' ')[0]</span>
+                        &nbsp;
+                        <i class="fas fa-circle text-grape"></i>&nbsp;<span class="sentence_case d-inline-block">Units</span>
+                    </div>
+                    <div class="col text-end">
+                        (Hover over units and graph blocks to view more information)
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="overflow-auto">
+                    <div class="insights_chart">
+                        <canvas id="monthlyChart" height="200" style="width:100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="pdf_mt_28" />
+
+        <div class="overflow_auto_mobile">
+            <table class="table table-hover table-bordered table-striped table-design mb-0">
+                <thead style="display: table-header-group;">
+                    <tr class="pdf_table_head">
+                        <th colspan="4">
+                            @if (Model.ProductItemData.IsDailyBilling.HasValue && Model.ProductItemData.IsDailyBilling.Value)
+                            {
+                                <h5 class="m-0 pdf_pb_20 pdf_pt_20">Daily consumption insights</h5>
+                            }
+                            else
+                            {
+                                <h5 class="m-0 pdf_pb_20 pdf_pt_20">Previous months' consumption insights</h5>
+                            }
+                        </th>
+                    </tr>
+                    <tr>
+                        <th scope="col" class="text-start">Month</th>
+                        <th scope="col" class="text-end">Units</th>
+                        @*<th scope="col" class="text-end">Unit price</th>*@
+                        <th scope="col" class="text-end">
+                            Total<br />
+                            @if (Model.ShowIncVAT)
+                            {
+                                <span class="SemiBold text-green">(Incl VAT)</span>
+                            }
+                            else
+                            {
+                                <span class="SemiBold text-green">(Excl VAT)</span>
+                            }
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var billingItem in monthlyItems)
+                    {
+                        <tr>
+                            @if (Model.ProductItemData.IsDailyBilling.HasValue && Model.ProductItemData.IsDailyBilling.Value)
+                            {
+                                <td scope="col" class="text-start">@($"{billingItem.Date.ToString("MMM")} {billingItem.Date.Day}")</td>
+                            }
+                            else
+                            {
+                                <td scope="col" class="text-start">@billingItem.Date.ToMonth()</td>
+                            }
+                            <td scope="col" class="text-end">@billingItem.Units.ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</td>
+                            @*<td scope="col" class="text-end">R @billingItem.CostPerUnit.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>*@
+                            <td scope="col" class="text-end">R @billingItem.Amount.ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col" class="text-start">Total</td>
+                        <td scope="col" class="text-end">@Model.ProductItemData.MonthlyBillingItems.Select(p => p.Units).Sum().ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</td>
+                        @*<td scope="col" class="text-end">R @Model.ProductItemData.MonthlyBillingItems.Select(p => p.CostPerUnit).Average().ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>*@
+                        <td scope="col" class="text-end">R @Math.Round(Model.ProductItemData.MonthlyBillingItems.Select(p => p.Amount).Sum()).ToString("N0", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        //function done() {
+        //    if (document.getElementById("url").src == '') {
+        //        var url=charts["monthlyChart"].toBase64Image();
+        //        document.getElementById("url").src = url;
+        //        $("#monthlyChart").css("display", "none");
+        //    }
+        //}
+        $("#loaderContent").css("display", "block");
+
+        function formatLabels(label, index, labels) {
+            label = parseFloat(label)
+
+            if (Math.max.apply(Math, this.ticks) <= 5) {
+                label = toFixed(label, 2)
+            }
+            else {
+                label = toFixed(label, 0)
+            }
+
+            return numberWithCommas(label)
+        }
+
+        function formatToolTips(tooltipItem, data) {
+            var label = parseFloat(tooltipItem.yLabel)
+
+            if (Math.max.apply(Math, this.ticks) <= 5) {
+                label = toFixed(label, 2)
+            }
+            else {
+                label = toFixed(label, 0)
+            }
+
+            return data.datasets[tooltipItem.datasetIndex].label + " " + numberWithCommas(label)
+        }
+
+        var config = {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: null,
+                    borderColor: '#6E328A',
+                    label: 'Units',
+                    type: 'line',
+                    backgroundColor: '#6E328A',
+                    fill: false,
+                },
+                {
+                    data: null,
+                    backgroundColor: [],
+                    borderWidth: 0,
+                    label: 'Units'
+                }]
+                ,
+                labels: null
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                //animation: {
+                //    onComplete: done
+                //},
+                tooltips: {
+                    callbacks: {
+                        label: formatToolTips
+                    }
+                },
+                title: {
+                    display: false,
+                    text: 'Main Colours'
+                },
+                scales: {
+                    xAxes: [{
+
+                        //display: false,
+                        ticks: {
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            autoSkip: false,
+                        },
+
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 1,
+                            zeroLineWidth: 0
+                        },
+
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            callback: formatLabels,
+                            beginAtZero: true,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)'
+                        },
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    }]
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Disable animation
+            },
+        };
+
+        var charts = {};
+
+        function DisplayChart(data, name, years, months, days, deviceTypeID) {
+
+            if (charts[name] != undefined)
+                charts[name].destroy();
+
+            var ctx = document.getElementById(name).getContext("2d");
+            var newConfig = $.extend(true, {}, config);
+
+            newConfig.data.datasets[1].data = data.Data.Item1;
+            newConfig.data.labels = data.Labels;
+
+            //if (data.Data.Item3 != null)
+            //{
+            //    data.Data.Item2 = data.Data.Item3
+            //    newConfig.data.datasets[0].label = "kVA"
+            //}
+
+            //if (data.Data.Item4 != null) {
+            //    data.Data.Item2 = data.Data.Item4
+            //    newConfig.data.datasets[0].label = "kWh"
+            //}
+
+            newConfig.data.dataAvgs = data.Avgs;
+            newConfig.data.dataTotals = data.Totals;
+
+            if (years != '') {
+                newConfig.data.datasets[1].Years = years
+            }
+            if (months != '') {
+                newConfig.data.datasets[1].Months = months
+            }
+            if (days != '') {
+                newConfig.data.datasets[1].Days = days
+            }
+
+            // Tooltips
+            newConfig.options.tooltips = {
+                callbacks: {
+                    title: function (tooltipItem, data) {
+                        return "";
+                    },
+                    afterLabel: function (tooltipItem, data) {
+                        if (tooltipItem.datasetIndex === 1) {
+                            var label = tooltipItem.yLabel
+                            var x = label + " " + data.datasets[tooltipItem.datasetIndex].label
+                            var y = data.dataAvgs[tooltipItem.index]
+                            var z = data.dataTotals[tooltipItem.index]
+
+                            var str = ["Cost: R " + toFixed(z, 2)]
+                            str.push("Cost Per Unit: R " + toFixed(y, 2))
+                            return str;
+                        }
+                    }
+                }
+            };
+
+            // Line graph
+            if (data.Data.Item2 != null) {
+                // Balances - Only for Daily chart
+                newConfig.data.datasets[0].yAxisID = "y-axis-0";
+                newConfig.data.datasets[1].yAxisID = "y-axis-1";
+                newConfig.data.datasets[0].data = data.Data.Item2;
+                newConfig.options.scales.yAxes = [
+                    {
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                        },
+                        id: "y-axis-0",
+                        position: 'right',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0.2)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0.2)'
+                        }
+                    },
+                    {
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            fontColor: 'rgba(0,0,0, 0.7)',
+                            callback: formatLabels,
+                        },
+                        id: "y-axis-1",
+                        position: 'left',
+                        gridLines: {
+                            color: 'rgba(0,0,0, 0)',
+                            lineWidth: 0.5,
+                            zeroLineColor: 'rgba(0,0,0, 0)'
+                        }
+                    }]
+            }
+
+            var waterColor = '#39BEAE'
+            var electrictyColor = '#A6CE39'
+            var gasColor = '#ED1A3A'
+            var sanitationColor = '#0b1d5a'
+
+            var waterLastColor = '#39BEAE'
+            var electrictyLastColor = '#A6CE39'
+            var gasLastColor = '#ED1A3A'
+            var sanitationLastColor = '#0b1d5a'
+
+            var color = '#4E5375';
+            var lastColor = '#4E5375';
+
+            if (deviceTypeID == '@((int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Water)') {
+                color = waterColor;
+                lastColor = waterLastColor;
+            }
+            else if (deviceTypeID == '@((int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)') {
+                color = gasColor;
+                lastColor = gasLastColor;
+            }
+            else if (deviceTypeID == '@((int)MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity)') {
+                color = electrictyColor;
+                lastColor = electrictyLastColor;
+            }
+
+            if ("@Model.ProductItemData.ProductName.Trim().ToLower()" == "@ClientzoneSD.Sanitation_Consumption") {
+                color = sanitationColor;
+                lastColor = sanitationLastColor;
+            }
+
+            if ('@Model.ProductItemData.ProductName.Trim().ToLower()' == '@ClientzoneSD.Water_Consumption') {
+                color = waterColor;
+                lastColor = waterLastColor;
+            }
+
+            for (var itm in data.Labels) {
+                newConfig.data.datasets[1].backgroundColor.push(color);
+            }
+
+            newConfig.data.datasets[1].backgroundColor[data.Labels.length - 1] = lastColor;
+
+            newConfig.data.datasets[1].MeterNumber = ''
+            newConfig.data.datasets[1].Name = ''
+
+            var chart = new Chart(ctx, newConfig);
+            charts[name] = chart;
+            $("#loaderContent").css("display", "none");
+        }
+
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+        function monthNameToNum(monthname) {
+            var month = months.indexOf(monthname);
+            return month + 1;
+        }
+
+        function numberWithCommas(number) {
+            //if (number > 1)
+            //return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            //else
+            return number;//Number.parseFloat(number).toFixed(2);
+        }
+
+        function toFixed(number, decimals) {
+            //var x = Math.pow(10, Number(decimals) + 1);
+            //return (Number(number) + (1 / x)).toFixed(decimals)
+            return number;//Number.parseFloat(number).toFixed(decimals);
+        }
+
+        DisplayChart(@(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ProductItemData.MonthlyBillingData))), 'monthlyChart', '', '', '', '@(Model.ProductItemData != null ? Model.ProductItemData.DeviceTypeID.ToString() : "")');
+        $(document).ready(function () {
+            incrementTimer();
+        });
+
+        var timer = 0;
+
+        function incrementTimer() {
+            timer = timer + 1;
+
+            if (timer == 3) {
+                // 3 seconds elapsed - start conversion
+                if (typeof (selectpdf) == "object") {
+                    selectpdf.start();
+                }
+            }
+            else {
+                // wait another second
+                setTimeout("incrementTimer()", 1000);
+            }
+
+        }
+    </script>
+}

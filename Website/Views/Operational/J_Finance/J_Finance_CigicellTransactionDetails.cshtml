@@ -1,0 +1,141 @@
+@model MyVoltage.Models.OperationalModels.J_Finance.J_FinanceModels.J_Finance_CigicellTransactionDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.J_Finance_CigicellTransactionDetails.GetDescription();
+    if (operationalProvider.CompanyID > 0)
+    {
+        ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.J_Finance_CigicellTransactionDetails.GetDescription() + " - " + operationalProvider.CompanyName;
+    }
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <div class="row mb-md-2">
+                    <div class="col-12">
+                        From:
+                        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+                        &nbsp;
+                        To:
+                        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        @Html.DropDownList("Company", Model.Company, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        @Html.DropDownList("ShowVendingIncorrectOnly", Model.ShowVendingIncorrectOnly, new { @class = "form-control" })
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+
+                <div class="row mb-md-2">
+                    <div class="col-12 text-left">
+                        <a href="/operational/J_Finance/J_Finance_CigicellTransactionDetails" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+                        &nbsp;
+                        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col" class="text-nowrap">UniPin ID</th>
+            <th scope="col" class="text-nowrap text-right">Loaded Amount</th>
+            <th scope="col" class="text-nowrap">Meter Number</th>
+            <th scope="col" class="text-nowrap text-right">Paid Amount</th>
+            <th scope="col" class="text-nowrap text-right">Vending Amount</th>
+            <th scope="col" class="text-nowrap text-right">Nett Amount Received</th>
+            <th scope="col" class="text-nowrap text-right">Paid %</th>
+            <th scope="col" class="text-nowrap text-right">Vending %</th>
+            <th scope="col" class="text-nowrap text-right">Nett % Received</th>
+            <th scope="col" class="text-nowrap">Reference ID</th>
+            <th scope="col" class="text-nowrap text-right">Request Date</th>
+            <th scope="col" class="text-nowrap">Response Status</th>
+            <th scope="col" class="text-nowrap">User Address</th>
+            <th scope="col" class="text-nowrap">User Name</th>
+            <th scope="col" class="text-nowrap">Skybill Customer Number</th>
+            <th scope="col" class="text-nowrap">Skybill Company Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.J_Finance_CigicellTransactionDetailsProductItems)
+        {
+            string rowClass = "";
+            if (Math.Round(item.VendingPerc, 2) != -4.60m)
+            {
+                rowClass = "table-danger";
+            }
+            <tr class="@Html.Raw(rowClass)" style="cursor:pointer;" onclick="RedirectToReceiptLog('@item.CreateDate.ToDateShort()', '@item.CreateDate.ToDateShort()', '@(item.CompanyID.HasValue ? item.CompanyID.Value : 0)');">
+                <td scope="col" class="text-nowrap">@item.UniPinID</td>
+                <td scope="col" class="text-nowrap text-right">@item.LoadedAmount.ToMoney()</td>
+                <td scope="col" class="text-nowrap">@item.MeterNumber</td>
+                <td scope="col" class="text-nowrap text-right">@item.PaidAmount.ToMoney()</td>
+                <td scope="col" class="text-nowrap text-right">@item.VendingAmount.ToMoney()</td>
+                <td scope="col" class="text-nowrap text-right">@((item.VendingAmount + item.PaidAmount).ToMoney())</td>
+                <td scope="col" class="text-nowrap text-right">@item.PaidPerc.ToMoney()</td>
+                <td scope="col" class="text-nowrap text-right">@item.VendingPerc.ToMoney()</td>
+                <td scope="col" class="text-nowrap text-right">@(item.NettPerc.ToMoney())</td>
+                <td scope="col" class="text-nowrap">@item.ReferenceID</td>
+                <td scope="col" class="text-nowrap text-right">@item.RequestDate.ToDateAndTimeShort()</td>
+                <td scope="col" class="text-nowrap">@item.ResponseStatus</td>
+                <td scope="col" class="text-nowrap">@item.UserAddress</td>
+                <td scope="col" class="text-nowrap">@item.UserName</td>
+                <td scope="col" class="text-nowrap">@item.SkybillCustomerNo</td>
+                <td scope="col" class="text-nowrap">@item.SkybillCompanyName</td>
+            </tr>
+        }
+        <tr>
+            <td scope="col" class="text-nowrap border-table-total">Total</td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@Model.J_Finance_CigicellTransactionDetailsProductItems.Select(p => p.LoadedAmount).Sum().ToMoney()</td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@Model.J_Finance_CigicellTransactionDetailsProductItems.Select(p => p.PaidAmount).Sum().ToMoney()</td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@Model.J_Finance_CigicellTransactionDetailsProductItems.Select(p => p.VendingAmount).Sum().ToMoney()</td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@((Model.J_Finance_CigicellTransactionDetailsProductItems.Select(p => p.PaidAmount).Sum() + Model.J_Finance_CigicellTransactionDetailsProductItems.Select(p => p.VendingAmount).Sum()).ToMoney())</td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@Model.PaidPerc.ToMoney()</td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@Model.VendingPerc.ToMoney()</td>
+            <td scope="col" class="text-nowrap border-table-total text-right">@Model.NettPerc.ToMoney()</td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+            <td scope="col" class="text-nowrap border-table-total"></td>
+        </tr>
+    </tbody>
+</table>
+
+@section Scripts {
+<script>
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/J_Finance/J_Finance_CigicellTransactionDetails?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&Company=' + $("#Company").val() + '&ShowVendingIncorrectOnly=' + $("#ShowVendingIncorrectOnly").val();
+    }
+    function RedirectToReceiptLog(fromDate, toDate, companyID) {
+        $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=' + encodeURIComponent('/operational/J_Finance/J_Finance_ReceiptLog?FromDate=' + fromDate + '&ToDate=' + toDate + '&CustomerNumber=&IncludeFailed=true&PaymentMethodID=0&ShowOnlyMissing=true');
+    }
+</script>
+}

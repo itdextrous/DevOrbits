@@ -1,0 +1,99 @@
+@model MyVoltage.Models.OperationalModels.E02_SafetyFileModels.E02_SafetyFile_Answers_Update_FUModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E02_SafetyFile_Answers.GetDescription()} - {operationalProvider.CompanyName}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Safety File Answer successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/E01_BuildingOnboarding/E02_SafetyFile_Answers" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row mb-md-2">
+                        <div class="col-12 text-orange">
+                            <h5>@Model.SafetyFileQuestion.Heading</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-12">
+                            @Model.SafetyFileQuestion.Description
+                        </div>
+                    </div>
+                </div>
+                <form asp-action="E02_SafetyFile_Answers_Update_FU" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <label asp-for="Attachment" class="control-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <input type="file" class="form-control" asp-for="Attachment" />
+                                <span asp-validation-for="Attachment" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <label asp-for="Answer" class="control-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <textarea type="text" class="form-control" asp-for="Answer"></textarea>
+                                <span asp-validation-for="Answer" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/E01_BuildingOnboarding/E02_SafetyFile_Answers" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Safety File Answers</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+    </script>
+}

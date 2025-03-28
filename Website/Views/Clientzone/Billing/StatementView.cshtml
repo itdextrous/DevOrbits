@@ -1,0 +1,236 @@
+@model MyVoltage.Models.ClientzoneModels.Statement_ViewModel;
+@using MyVoltage.Extensions;
+@using System.Globalization;
+@inject MyVoltage.Services.ClientzoneProvider clientzoneProvider;
+@{
+    ViewData["Title"] = $"Billing - Statement - {Model.SelectedMonth.ToMonth()}";
+    if (Model.ShowingPrintView)
+    {
+        Layout = "LayoutPrint";
+    }
+}
+
+@if (!string.IsNullOrEmpty(ViewData["myhead"].ToString()))
+{
+    <div class="row pdf_header align-items-center pdf_mb_28">
+        <div class="col">
+            <img src="~/images/Clientzone/logo_alt.png" height="71" />
+        </div>
+        <div class="col text-end">
+            <h3 class="text-londonsky">@Model.TaxInvoiceTemplate.CustomerNo</h3>
+            <h2>Account statement</h2>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(ViewData["myFooter"].ToString()))
+{
+    <div class="row g-0 align-items-end pdf-footer pdf_pt_50">
+        <div class="col-9">
+            <div class="heading">@Model.TaxInvoiceTemplate.SupplierName @Model.TaxInvoiceTemplate.SupplierVATNumber</div>
+            <div class="sub_heading">
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierAddress))
+                {
+                    <img src="/images/icons/address.png" height="20" />
+                    @Model.TaxInvoiceTemplate.SupplierAddress
+                }
+            </div>
+            <div class="d-flex">
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierPostal))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/Postal.png" height="20" />
+                        @Model.TaxInvoiceTemplate.SupplierPostal
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierPhone))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/telephone.png" height="20">
+                        @Model.TaxInvoiceTemplate.SupplierPhone
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.TaxInvoiceTemplate.SupplierURL))
+                {
+                    <div class="sub_heading">
+                        <img src="~/images/icons/web.png" height="20">
+                        <a href="http://@Model.TaxInvoiceTemplate.SupplierURL">
+                            @Model.TaxInvoiceTemplate.SupplierURL
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-3 text-end">
+            <img src="~/images/Clientzone/InvoiceFooterR.svg" />
+        </div>
+    </div>
+}
+else if (Model.TaxInvoiceTemplate == null)
+{
+    <h5 class="m-0 text-center py-1 bold">
+        No data to display.
+    </h5>
+    <script type="text/javascript">
+        $(function () {
+            $("#PDFButton").removeClass('PDFButtonDiv');
+        });
+    </script>
+}
+else
+{
+    <div class='text-londonsky pdf_views_style @(Model.ShowingPrintView?"pdf_preview":string.Empty)'>
+        @if (!Model.ShowingPrintView)
+        {
+            <div class="row pdf_header align-items-center pdf_pb_28">
+                <div class="col">
+                    <img src="~/images/Clientzone/logo_alt.png" height="71" />
+                </div>
+                <div class="col text-end">
+                    <h3 class="text-plumber">@Model.TaxInvoiceTemplate.CustomerNo</h3>
+                    <h2>Account statement</h2>
+                </div>
+            </div>
+        }
+        <h4 class="text-uppercase customer_head m-0 pdf_pb_20 text-londonsky">@ViewData["CustomerName"]</h4>
+        <div class="row pdf_pb_28">
+            <div class="col address">
+
+                @ViewData["BusinessName"] <br />
+                @if (ViewData["UnitNumber"] != null && !string.IsNullOrEmpty(ViewData["UnitNumber"].ToString()))
+                {
+                    @ViewData["UnitNumber"] <br />
+                }
+                else
+                {
+                    @ViewData["CompanyName"] <br />
+                }
+                <p class="pdf-address-text">@Model.TaxInvoiceTemplate.Address1</p>
+
+                @*@Model.TaxInvoiceTemplate.Address1<br />
+                @Model.TaxInvoiceTemplate.Address2 @Model.TaxInvoiceTemplate.Address3<br />
+                @Model.TaxInvoiceTemplate.Address4 @Model.TaxInvoiceTemplate.Address5<br />*@
+            </div>
+            <div class="col-md-auto text-end">
+                <div class="max_w_300">
+                    <table class="invoice_table">
+                        <tr>
+                            <td>Statement date:</td>
+                            <td style="min-width:100px;" class="text-end">@Model.TaxInvoiceTemplate.StartDate.ToString()</td>
+                        </tr>
+                        <tr>
+                            <td>Invoice #:</td>
+                            <td style="min-width:100px;" class="text-end">@Model.TaxInvoiceTemplate.InvoiceNo</td>
+                        </tr>
+                        <tr>
+                            <td>Recipient VAT#:</td>
+                            <td class="text-end" style="min-width:100px;">@Model.TaxInvoiceTemplate.RecipientVATNumber</td>
+                        </tr>
+                        <tr>
+                            <td>Recipient Ref #:</td>
+                            <td class="text-end">@Model.TaxInvoiceTemplate.CustomerNo</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-end pdf_pb_20">
+            <div class="col-md-6 col_md_5"> 
+            <h5 class="text-londonsky mb-1">Billing period: @Html.Raw(new DateTime(Model.SelectedMonth.Year, Model.SelectedMonth.Month, 1).ToString("dd MMM yyyy")) - @Html.Raw(new DateTime(Model.SelectedMonth.Year, Model.SelectedMonth.Month, DateTime.DaysInMonth(Model.SelectedMonth.Year, Model.SelectedMonth.Month)).ToString("dd MMM yyyy"))</h5>
+            </div>
+            <div class="col-md-6 col_md_7">
+                <table class="table table-sm table-londonsky m-0 table-border-none">
+                    <tr>
+                        <th>Opening balance</th>
+                        <th style="min-width:100px;" class="text-end">R @Model.TaxInvoiceTemplate.OpeningBalance.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</th>
+                    </tr>
+                    <tr class="bold">
+                        <td>Payments made and convenience fees charged</td>
+                        <td class="text-end">R @Model.TaxInvoiceTemplate.PaymentsReceived.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                    <tr class="bold">
+                        <td>Current charges</td>
+                        <td class="text-end">R @((Model.TaxInvoiceTemplate.Total * 1.15m).ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                    </tr>
+                    <tr class="bold">
+                        <td>Closing balance</td>
+                        <td class="text-end">R @Model.TaxInvoiceTemplate.ClosingBalance.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="overflow_auto_mobile">
+            <table class="table table-sm table-londonsky table-striped">
+                <tr>
+                    <th>Item</th>
+                    <th>Meter serial #</th>
+                    <th>Initial reading</th>
+                    <th>Final reading</th>
+                    <th># of units</th>
+                    <th>Unit types</th>
+                    <th>Unit price</th>
+                    <th class="text-end">Sub total</th>
+                </tr>
+                @foreach (var item in Model.TaxInvoiceTemplate.Items)
+                {
+                    <tr>
+                        <td>@item.Description</td>
+                        <td class="text-nowrap">@item.MeterSerial</td>
+                        <td>@(item.MeterSerial == "Other Charges" ? "" : item.OpeningReading.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                        <td>@(item.MeterSerial == "Other Charges" ? "" : item.ClosingReading.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                        <td>@(item.MeterSerial == "Other Charges" ? "" : item.Consumption.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                        <td>
+                            @switch (item.ItemResourceType)
+                            {
+                                case MyVoltage.Api.SkyBill.TenantConsumptionStatementItem.ResourceType.ELECTRICITY:
+                                    <span>kWh</span>
+                                    break;
+                                case MyVoltage.Api.SkyBill.TenantConsumptionStatementItem.ResourceType.WATER:
+                                    <span>kL</span>
+                                    break;
+                            }
+                        </td>
+                        <td>@item.Tariff.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                        <td class="text-end">R @item.TotalExVAT.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                }
+
+                <tr class="bg-white table-borderless bold font_14 text-nowrap">
+                    <td colspan="7" class="text-end text-londonsky">TOTAL (EXCL. VAT)</td>
+                    <td class="text-end text-londonsky">R @((Model.TaxInvoiceTemplate.Total * -1.0m).ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                </tr>
+                <tr class="bg-white table-borderless bold font_14 text-nowrap">
+                    <td colspan="7" class="text-end text-londonsky">VAT</td>
+                    <td class="text-end text-londonsky">R @(((Model.TaxInvoiceTemplate.Total * 0.15m) * -1.0m).ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                </tr>
+                <tr class="table-borderless text-nowrap">
+                    <th colspan="7" class="text-end">TOTAL (INCL. VAT)</th>
+                    <th class="text-end">R @(((Model.TaxInvoiceTemplate.Total * 1.15m) * -1.0m).ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</th>
+                </tr>
+
+                <tr class="bg-white table-borderless">
+                    <td colspan="8" class="p-0">&nbsp;</td>
+                </tr>
+
+                <tr class="table-secondary SemiBold">
+                    <td colspan="5" class="text-start">Payments made and convenience fees charged</td>
+                    <td colspan="2" class="text-start">Date</td>
+                    <td class="text-end">Amount</td>
+                </tr>
+
+                @foreach (var item in Model.TaxInvoiceTemplate.LedgerItems)
+                {
+                    <tr class="bg-white">
+                        <td colspan="5" class="text-start">@item.Description</td>
+                        <td colspan="2" class="text-start">@item.Date.ToDateShort()</td>
+                        <td class="text-end">R @item.TotalExVAT.ToString("N2", new CultureInfo("en-US")).Replace(",", " ")</td>
+                    </tr>
+                }
+                <tr class="table-secondary bold">
+                    <td colspan="7" class="text-end">TOTAL</td>
+                    <td class="text-end">R @(Model.TaxInvoiceTemplate.PaymentsReceived.ToString("N2", new CultureInfo("en-US")).Replace(",", " "))</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+}

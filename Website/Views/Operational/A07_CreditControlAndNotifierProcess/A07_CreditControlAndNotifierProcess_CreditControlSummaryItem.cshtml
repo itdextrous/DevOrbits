@@ -1,0 +1,36 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_CreditControlSummaryModel
+@using MyVoltage.Extensions; 
+@using MyVoltage.Data;
+@{
+    string rowclass = "";
+    string cellClass = "";
+    if (Model.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.Problematic)
+    {
+        rowclass = "table-danger";
+        cellClass = " class=\"text-red font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.AttentionRequired)
+    {
+        rowclass = "table-warning";
+        cellClass = " class=\"text-orange font-weight-bold\"";
+    }
+    else if (Model.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.Ok)
+    {
+        rowclass = "table-success";
+        cellClass = " class=\"text-green font-weight-bold\"";
+    }
+}
+<td scope="col">@Model.CompanyName</td>
+<td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>
+<td scope="col">@Model.CustomersCount</td>
+@foreach (AccountTypeEnum accountType in (AccountTypeEnum[])Enum.GetValues(typeof(AccountTypeEnum)))
+{
+    var entry = Model.A07_CreditControlAndNotifierProcess_CreditControlSummaryItems.Where(p => p.AccountType == accountType).FirstOrDefault();
+    <td title="@accountType - Count" scope="col">@(entry != null ? entry.Count.ToString() : "")</td>
+    <td title="@accountType - Count" scope="col">@(entry != null ? entry.Amount.ToMoney("R") : "")</td>
+}
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        });
+</script>

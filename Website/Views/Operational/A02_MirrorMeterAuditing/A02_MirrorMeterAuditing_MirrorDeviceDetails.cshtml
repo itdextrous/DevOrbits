@@ -1,0 +1,131 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorDeviceDetailsModel
+@{
+    ViewData["Title"] = "Mirror Meter Auditing - Mirror Device Details";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorDeviceSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.A02_MirrorMeterAuditing_MirrorDeviceDetailsItems.Count == 0)
+                    {
+                        <span>There are no entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer Number</th>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Meter Name</th>
+                                    <th scope="col">Meter Serial</th>
+                                    <th scope="col">Latest Reading</th>
+                                    <th scope="col">Latest Odo</th>
+                                    <th scope="col">Latest Capture</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.A02_MirrorMeterAuditing_MirrorDeviceDetailsItems)
+                                {
+                                    <tr style="cursor:pointer;" title="View @item.SkybillCustomer.Serial_No" onclick="RedirectToVerification('@item.SkybillCustomer.Serial_No');">
+                                        <td scope="col">@item.SkybillCustomer.Customer_No</td>
+                                        <td scope="col">@item.SkybillCustomer.Customer_Name</td>
+                                        <td scope="col">@item.Device.Name</td>
+                                        <td scope="col">
+                                            @switch (item.Device.MeterType)
+                                            {
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                    <img src="~/images/elec-icon-s.png" /> 
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                    <img src="~/images/water-icon-s.png" />
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                    <img src="~/images/gas-icon-s.png" />
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas_Modem:
+                                                    <img src="~/images/gas-icon-s.png" />
+                                                    break;
+                                            }
+
+                                            @item.SkybillCustomer.Serial_No
+                                        </td>
+                                        <td scope="col" class="text-right">
+                                            @if (item.LatestReading != null)
+                                            {
+                                                <span>@item.LatestReading.VirtualOdoReading.ToReading()<br />@item.LatestReading.TimeLogged.ToDateAndTimeShort()</span>
+                                            }
+                                        </td>
+                                        <td scope="col" class="text-right">
+                                            @if (item.OdoReading != null)
+                                            {
+                                                string spanClass = "";
+                                                if (item.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                                {
+                                                    if (item.OdoReading.OdometerReading != item.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                                    {
+                                                        spanClass = "text-red font-weight-bold";
+                                                    }
+                                                }
+                                                <span class="@Html.Raw(spanClass)">@item.OdoReading.OdometerReading.ToReading()<br />@item.OdoReading.TimeLogged.ToDateAndTimeShort()</span>
+                                            }
+                                        </td>
+                                        <td scope="col" class="text-right">
+                                            @if (item.A02_MirrorMeterAuditing_MirrorReadingUpdate != null)
+                                            {
+                                                string spanClass = "";
+                                                if (item.OdoReading != null)
+                                                {
+                                                    if (item.OdoReading.OdometerReading != item.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading)
+                                                    {
+                                                        spanClass = "text-red font-weight-bold";
+                                                    }
+                                                }
+
+                                                <span class="@Html.Raw(spanClass)">
+                                                    @item.A02_MirrorMeterAuditing_MirrorReadingUpdate.OdoReading.ToReading()
+                                                    <br />
+                                                    @item.A02_MirrorMeterAuditing_MirrorReadingUpdate.TimeLogged.ToDateAndTimeShort()
+                                                    <br />
+                                                    @(((MyVoltage.Data.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusTypes)item.A02_MirrorMeterAuditing_MirrorReadingUpdate.StatusID).GetDescription())
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorDeviceReview';
+        }
+    </script>
+}

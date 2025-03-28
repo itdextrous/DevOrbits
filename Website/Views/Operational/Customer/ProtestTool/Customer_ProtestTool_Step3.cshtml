@@ -1,0 +1,110 @@
+@model MyVoltage.Models.OperationalModels.Customer.CustomerProtestToolModels.Customer_ProtestToolStep3Model
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Customer_ProtestTool.GetDescription()} - Step 3";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+            {
+                <div class="card-header"></div>
+                <div class="card-body">Select Customer to begin.</div>
+                <div class="card-footer"></div>
+            }
+            else
+            {
+                <div class="card-header">
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            You have selected to view
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Meter @(Model.Meter.Serial) (@operationalProvider.CustomerNumber)
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @switch (Model.Meter.Type)
+                            {
+                                case "Electricity":
+                                    <img src="~/images/elec-icon-s.png" />
+                                    <span>Electricity</span>
+                                    break;
+                                case "Water":
+                                    <img src="~/images/water-icon-s.png" />
+                                    <span>Water</span>
+                                    break;
+                                case "Gas":
+                                    <img src="~/images/gas-icon-s.png" />
+                                    <span>Gas</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            @if (Model.Meter.Status.ToUpper().Contains("ON"))
+                            {
+                                <i class="fas fa-lightbulb text-green"></i> <span>Online</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-power-off text-red"></i> <span>Offline</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Click <a href="/operational/Customer/Customer_ProtestTool_Step2">here</a> to go back.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            [Rates Explanation]
+                        </div>
+                    </div>
+                    <div class="row mt-4 mb-4">
+                        <div class="col-12">
+                            Your current Tariff rate is: <strong>@(Model.LatestTariffDescription)</strong>
+                        </div>
+                    </div>
+                    <div class="row mt-4 mb-4">
+                        <div class="col-12">
+                            [Link To NERSA rates]
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="/operational/Customer/Customer_Dashboard" class="btn btn-outline-primary-sm"><i class="fas fa-smile"></i>&nbsp;I AM SATISFIED</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a href="/operational/Customer/Customer_UsageCalculator" class="btn btn-outline-primary-sm"><i class="fas fa-calculator"></i>&nbsp;CALCULATOR</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

@@ -1,0 +1,335 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.UserAdminEditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.UserAdmin.GetDescription()} - Edit";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <div class="row col-12">
+                    <h6>Currently Editing:</h6>
+                </div>
+                <div class="row col-12">
+                    <h4>@(Model.FirstName + " " + Model.LastName) - @(Model.Email)</h4>
+                </div>
+            </div>
+            <form asp-action="SiteAdmin_UserAdmin_Edit" enctype="multipart/form-data">
+                <div class="card-body">
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="FirstName" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="FirstName" />
+                            <span asp-validation-for="FirstName" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="LastName" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="LastName" />
+                            <span asp-validation-for="LastName" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="JobTitle" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="JobTitle" />
+                            <span asp-validation-for="JobTitle" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="InternalChargeOutRatePerHour" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="InternalChargeOutRatePerHour" />
+                            <span asp-validation-for="InternalChargeOutRatePerHour" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ExternalChargeOutRatePerHour" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="ExternalChargeOutRatePerHour" />
+                            <span asp-validation-for="ExternalChargeOutRatePerHour" class="text-red"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ThreeCxRatePerMin" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="ThreeCxRatePerMin" />
+                            <span asp-validation-for="ThreeCxRatePerMin" class="text-red"></span>
+                        </div>
+                    </div>
+
+
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="PhoneNumber" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="PhoneNumber" />
+                            <span asp-validation-for="PhoneNumber" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="ThreeCxVOIPExt" class="control-label"></label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control" asp-for="ThreeCxVOIPExt" />
+                            <span asp-validation-for="ThreeCxVOIPExt" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="HasAccessToAllCompanies" class="control-label"></label>
+                        </div>
+                        <div class="col-6 text-center">
+                            <label class="switch">
+                                <input type="checkbox" asp-for="HasAccessToAllCompanies">
+                                <span class="slider round"></span>
+                            </label>
+                            <span asp-validation-for="HasAccessToAllCompanies" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="HasAccessToAllMetersInLinkedCompanies" class="control-label"></label>
+                        </div>
+                        <div class="col-6 text-center">
+                            <label class="switch">
+                                <input type="checkbox" asp-for="HasAccessToAllMetersInLinkedCompanies">
+                                <span class="slider round"></span>
+                            </label>
+                            <span asp-validation-for="HasAccessToAllMetersInLinkedCompanies" class="text-red"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <label asp-for="SiteAdmin_Partners" class="control-label"></label>
+                        </div>
+                        <div class="col-6 text-center">
+                            @Html.DropDownList("SiteAdmin_Partners", Model.SiteAdmin_Partners, new { @class = "form-control" })
+                            <span asp-validation-for="SiteAdmin_Partners" class="text-red"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row col-12 mb-md-2">
+                        <h6>Companies Linked: (Not applicable if &quot;<label asp-for="HasAccessToAllCompanies" class="control-label"></label>&quot; is selected)</h6>
+                    </div>
+                    @if (!Model.HasAccessToAllCompanies)
+                    {
+                        <div class="row col-12 mb-md-2">
+                            @foreach (var userCompany in Model.UserCompanies)
+                            {
+                                var company = Model.Companies.Where(p => p.CompanyID == userCompany.CompanyID).SingleOrDefault();
+                                <div class="border border-primary rounded p-2 m-1">
+                                    @company.Name
+                                    @if (Model.UserCompanies.Count > 1)
+                                    {
+                                        <text>&nbsp;</text>
+                                        <a href="/operational/siteadmin/useradmin/deletecompany/@userCompany.UserID/@userCompany.CompanyID" title="Remove @company.Name from @Model.Email"><i class="fas fa-trash-alt"></i></a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-3 text-right">
+                                <select id="addCompanyDropDown" class="dropdown">
+                                    @foreach (var company in Model.Companies)
+                                    {
+                                        if (Model.UserCompanies.Where(p => p.CompanyID == company.CompanyID).Count() == 0)
+                                        {
+                                            <option value="@company.CompanyID">@company.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col"><a href="#" onclick="AddCompany('@Model.UserID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Company</a></div>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-body">
+                    <div class="row col-12 mb-md-2">
+                        <h6>Meters Linked: (Not applicable if &quot;<label asp-for="HasAccessToAllCompanies" class="control-label"></label>&quot; is selected)</h6>
+                    </div>
+                    <div class="row col-12 mb-md-2">
+                        If the meter you are looking for does not appear on the list, check if the company is added.
+                    </div>
+                    @if (!Model.HasAccessToAllCompanies || !Model.HasAccessToAllMetersInLinkedCompanies)
+                    {
+                        <div class="row col-12 mb-md-2">
+                            @foreach (var userMeter in Model.UserMeterSerials)
+                            {
+                                <div class="border border-primary rounded p-2 m-1">
+                                    @userMeter.DisplayName
+                                    @if (Model.UserMeterSerials.Count > 1)
+                                    {
+                                        <text>&nbsp;</text>
+                                        <a href="/operational/siteadmin/useradmin/deletemeter/@userMeter.UserID/@userMeter.MeterSerial" title="Remove @userMeter.MeterSerial from @Model.Email"><i class="fas fa-trash-alt"></i></a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="row mb-md-2">
+                            @*<div class="col-2">Add Meter:</div>*@
+                            <div class="col-5 text-center">
+                                <select id="addMeterDropDown" class="dropdown">
+                                    @foreach (var meter in Model.MeterSerials)
+                                    {
+                                        if (Model.UserMeterSerials.Where(p => p.MeterSerial == meter.Key).Count() == 0)
+                                        {
+                                            <option value="@meter.Key">@meter.Value</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col"><a href="#" onclick="AddMeter('@Model.UserID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add Meter</a></div>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-body">
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            <a href="/operational/siteadmin/useradmin" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to User Admin</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                        </div>
+                    </div>
+                    <div class="row col-12 mb-md-2">
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <h5>Rights currently assigned:</h5>
+                    @if (operationalProvider.IsDeveloper)
+                    {
+                        <a href="/operational/SiteAdmin/UserAdmin/AddAllRights/@Model.UserID" class="btn btn-sm btn-outline-success"><i class="fas fa-plus-circle"></i>&nbsp;Add All</a>
+                        <a href="/operational/SiteAdmin/UserAdmin/RemoveAllRights/@Model.UserID" class="btn btn-sm btn-outline-danger-sm"><i class="fas fa-minus-circle"></i>&nbsp;Remove All</a>
+                    }
+                    <table class="table table-responsive-xl table-striped table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parent </th>
+                                <th scope="col">Secure Area</th>
+                                @foreach (var saa in operationalProvider.SecureAreaActions)
+                                {
+                                    <th scope="col" class="text-center">@saa.SecureAreaActionDisplayName</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ps in operationalProvider.ParentSecureAreas)
+                            {
+                                foreach (var sa in operationalProvider.SecureAreas.Where(p => p.ParentSecureAreaID == ps.ParentSecureAreaID).ToList())
+                                {
+                                    <tr>
+                                        <td scope="col">
+                                            <i class="fas fa-@(ps.ParentSecureAreaDisplayIcon)"></i>&nbsp;@ps.ParentSecureAreaDisplayName
+                                        </td>
+                                        <td scope="col">
+                                            <i class="fas fa-@(sa.SecureAreaDisplayIcon)"></i>&nbsp;@sa.SecureAreaDisplayName
+                                        </td>
+                                        @foreach (var saa in operationalProvider.SecureAreaActions)
+                                        {
+                                            string checkedState = "";
+                                            <td scope="col" class="text-center" title="@saa.SecureAreaActionDisplayName">
+                                                @if (Model.UserSecureAreaActions.Where(p => p.SecureAreaID == sa.SecureAreaID && p.SecureAreaActionID == saa.SecureAreaActionID).Count() > 0)
+                                                {
+                                                    <i class="fas fa-check-circle text-green" title="Click to Disable Access to @ps.ParentSecureAreaDisplayName - @sa.SecureAreaDisplayName - @saa.SecureAreaActionDisplayName" onclick="RemoveSecureArea('@sa.SecureAreaID', '@saa.SecureAreaActionID', '@Model.UserID');" style="cursor:pointer;"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-times-circle text-red" title="Click to Enable Access to @ps.ParentSecureAreaDisplayName - @sa.SecureAreaDisplayName - @saa.SecureAreaActionDisplayName" onclick="AddSecureArea('@sa.SecureAreaID', '@saa.SecureAreaActionID', '@Model.UserID');" style="cursor:pointer;"></i>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function AddCompany(userID) {
+            var companyID = $("#addCompanyDropDown").val();
+            document.location.href = '/operational/SiteAdmin/UserAdmin/AddCompany/' + userID + '/' + companyID;
+        }
+        function AddMeter(userID) {
+            var companyID = $("#addMeterDropDown").val();
+            document.location.href = '/operational/SiteAdmin/UserAdmin/AddMeter/' + userID + '/' + companyID;
+        }
+        function AddSecureArea(secureAreaID, secureAreaActionID, userID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post('/operational/SiteAdmin/UserAdmin/AddSecureArea/' + secureAreaID + '/' + secureAreaActionID + '/' + userID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+        function RemoveSecureArea(secureAreaID, secureAreaActionID, userID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post('/operational/SiteAdmin/UserAdmin/RemoveSecureArea/' + secureAreaID + '/' + secureAreaActionID + '/' + userID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    </script>
+}

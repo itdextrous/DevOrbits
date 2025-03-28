@@ -1,0 +1,150 @@
+@model MyVoltage.Models.OperationalModels.ModulesModels.AddTravelAllocationModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{Model.ActivityType.GetDescription()} - Add Travel Allocation";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Travel Allocated successfully added
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col">
+                            @switch (Model.ActivityType)
+                            {
+                                case MyVoltage.Data.ActivityTypeEnum.A08_Task:
+                                    <a href="/operational/A08_Tasks/A08_Task_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.A09_Flag:
+                                    <a href="/operational/A09_Flags/A09_Flags_CompanyReview" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Flag</a>
+                                    break;
+                                case MyVoltage.Data.ActivityTypeEnum.D02_SaleTask:
+                                    <a href="/operational/D02_Sale/D02_SaleTask_Review" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Task</a>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <form asp-action="AddTravelAllocation" enctype="multipart/form-data">
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="DescriptionOfTravelAllocation" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <textarea class="form-control" asp-for="DescriptionOfTravelAllocation"></textarea>
+                                <span asp-validation-for="DescriptionOfTravelAllocation" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="DateOfTravelAllocation" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="date" class="form-control" asp-for="DateOfTravelAllocation" />
+                                <span asp-validation-for="DateOfTravelAllocation" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="VehicleTypeID" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("VehicleTypeID", Model.VehicleTypeID, new { @class = "form-control" })
+                                <span asp-validation-for="VehicleTypeID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="VehicleID" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                @Html.DropDownList("VehicleID", Model.VehicleID, new { @class = "form-control" })
+                                <span asp-validation-for="VehicleID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="VehicleOdoStart" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="text" class="form-control" asp-for="VehicleOdoStart" />
+                                <span asp-validation-for="VehicleOdoStart" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="VehicleOdoEnd" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="text" class="form-control" asp-for="VehicleOdoEnd" />
+                                <span asp-validation-for="VehicleOdoEnd" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="VehicleDistanceKm" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="text" class="form-control" asp-for="VehicleDistanceKm" />
+                                <span asp-validation-for="VehicleDistanceKm" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-md-2">
+                            <div class="">
+                                <label asp-for="PhotoURL" class="control-label"></label>
+                            </div>
+                            <div class="">
+                                <input type="file" class="form-control" asp-for="PhotoURL" />
+                                <span asp-validation-for="PhotoURL" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+

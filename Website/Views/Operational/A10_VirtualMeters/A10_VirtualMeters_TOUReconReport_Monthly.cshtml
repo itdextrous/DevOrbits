@@ -1,0 +1,173 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_VirtualMeters_TOUReconReport_MonthlyModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_VirtualMeters_TOUReconReport_Monthly.GetDescription()} - {opProv.CompanyName}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        @if (!string.IsNullOrEmpty(opProv.CustomerMeterSerial))
+                        {
+                            <h4 class="text-orange">@opProv.CustomerMeterSerial - @opProv.CustomerNumber</h4>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col">Reading From</div>
+                            <div class="col"><input type="month" name="fromDate" id="fromDate" value="@(Model.FromDate.ToString("yyyy-MM"))" />&nbsp;00:00 (Midnight)</div>
+                            <div class="col">To</div>
+                            <div class="col"><input type="month" name="toDate" id="toDate" value="@(Model.ToDate.ToString("yyyy-MM"))" />&nbsp;00:00 (Midnight)</div>
+                            <div class="col"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-hover table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center text-nowrap border-table">Customer No</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Customer Name</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Serial</th>
+
+                    <th scope="col" class="text-center text-nowrap border-table">From Date</th>
+                    <th scope="col" class="text-center text-nowrap border-table">To Date</th>
+
+                    <th scope="col" class="text-center text-nowrap border-table-left">Serial</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Opening Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Closing Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Difference</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Tariff</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Cost</th>
+
+                    <th scope="col" class="text-center text-nowrap border-table-left">Serial</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Opening Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Closing Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Difference</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Tariff</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Cost</th>
+
+                    <th scope="col" class="text-center text-nowrap border-table-left">Serial</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Opening Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Closing Reading</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Difference</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Tariff</th>
+                    <th scope="col" class="text-center text-nowrap border-table-right">Cost</th>
+
+                    <th scope="col" class="text-center text-nowrap border-table">Total</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Counter</th>
+                    <th scope="col" class="text-center text-nowrap border-table">Difference</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    string masterSerial = "";
+                }
+                @foreach (var item in Model.A10_VirtualMeters_TOUReconReport_MonthlyItems)
+                {
+                    string rowclass = "";
+                    if (!string.IsNullOrEmpty(masterSerial) && masterSerial != item.MasterSerial)
+                    {
+                        <tr>
+                            <td colspan="26" class="text-left text-nowrap border-table">&nbsp;</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col" class="text-left text-nowrap border-table @Html.Raw(rowclass)">@item.SkybillCustomer.Customer_No</td>
+                        <td scope="col" class="text-left text-nowrap border-table @Html.Raw(rowclass)">@item.SkybillCustomer.Customer_Name</td>
+                        <td scope="col" class="text-left text-nowrap border-table @Html.Raw(rowclass)">@item.MasterSerial</td>
+                        <td scope="col" class="text-left text-nowrap border-table @Html.Raw(rowclass)">@(item.OpeningReading != null ? item.OpeningReading.TimeLogged.ToDateAndTimeShort() : "")</td>
+                        <td scope="col" class="text-left text-nowrap border-table @Html.Raw(rowclass)">@(item.ClosingReading != null ? item.ClosingReading.TimeLogged.ToDateAndTimeShort() : "")</td>
+                        @foreach (var serial in item.LinkedSerials)
+                        {
+                            string cellClass = "";
+                            if (serial.ToUpper().Contains("OffPeak".ToUpper()))
+                            {
+                                cellClass = "table-success";
+                            }
+                            else if (serial.ToUpper().Contains("Standard".ToUpper()))
+                            {
+                                cellClass = "table-warning";
+                            }
+                            else if (serial.ToUpper().Contains("Peak".ToUpper()))
+                            {
+                                cellClass = "table-danger";
+                            }
+                            <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-left text-nowrap border-table-left @Html.Raw(cellClass)">@(serial)</td>
+                            @if (item.OpeningReading != null)
+                            {
+                                var virtualOdo = item.OpeningReading.A10_VirtualMeters_TOUReconReport_ReviewItem_Meters.Where(p => p.Serial == serial).SingleOrDefault();
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">@(virtualOdo != null ? virtualOdo.VirtualOdoReading.ToReading() : "Missing")</td>
+                            }
+                            else
+                            {
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">Missing</td>
+                            }
+                            if (item.ClosingReading != null)
+                            {
+                                var virtualOdo = item.ClosingReading.A10_VirtualMeters_TOUReconReport_ReviewItem_Meters.Where(p => p.Serial == serial).SingleOrDefault();
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">@(virtualOdo != null ? virtualOdo.VirtualOdoReading.ToReading() : "Missing")</td>
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">@(virtualOdo != null ? virtualOdo.Difference.ToReading() : "Missing")</td>
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">@(virtualOdo != null ? virtualOdo.Tariff.ToMoney("R") : "Missing")</td>
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table-right @Html.Raw(cellClass)">@(virtualOdo != null ? (virtualOdo.Difference * virtualOdo.Tariff).ToMoney("R") : "Missing")</td>
+                            }
+                            else
+                            {
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">Missing</td>
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">Missing</td>
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table @Html.Raw(cellClass)">Missing</td>
+                                <td style="cursor:pointer;" title="View @serial" onclick="RedirectToDetails('@serial');" scope="col" class="text-right text-nowrap border-table-right @Html.Raw(cellClass)">Missing</td>
+                            }
+                        }
+                        <td scope="col" class="text-right text-nowrap border-table @Html.Raw(rowclass)">@item.ClosingReading.VirtualOdoTotal.ToReading()</td>
+                        <td scope="col" class="text-right text-nowrap border-table @Html.Raw(rowclass)">@item.ClosingReading.Counter.ToReading()</td>
+                        <td scope="col" class="text-right text-nowrap border-table @Html.Raw(rowclass)">@item.ClosingReading.CounterDiff.ToReading()</td>
+                    </tr>
+                    masterSerial = item.MasterSerial;
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/A10_VirtualMeters/A10_VirtualMeters_TOUReconReport_Monthly?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+        function RedirectToDetails(companyID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActiveMeter/' + companyID + '?R=/operational/A10_VirtualMeters/A10_VirtualMeters_TOUReconReport_Review';
+        }
+    </script>
+}

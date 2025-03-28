@@ -1,0 +1,256 @@
+﻿@model MyVoltage.Models.CompanyAdminViewModels.WelcomePageViewModel
+@{
+    ViewData["Title"] = "Welcome Page";
+}
+@using (Html.BeginForm())
+{
+    <div class="dash-block">
+        <div class="row mb-4">
+            <div class="col">
+
+                <div class="card p-md-4">
+                    <div class="card-content">
+                        <div>
+                            <h4>Search</h4>
+                        </div>
+                        <div class="row">
+                            <input id="DeviceSearch_Serial" asp-for="Serial" class="form-control border" />
+                            <span asp-validation-for="Serial" class="text-red"></span>
+                        </div>
+                        <div class="row">
+                            <button type="submit" asp-action="WelcomePage" class="btn btn-link">Show Customer Detail</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                @if (Model != null && Model.CustomerLookupResult != null)
+                {
+                    <div class="card p-md-4">
+                        <div class="card-content">
+                            <div class="row">
+                                <h5>Customer Details</h5>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <strong>@Model.CustomerLookupResult.CustomerDetails.CustomerName</strong>
+                                </div>
+                                <div class="col">
+                                    @Model.CustomerLookupResult.CustomerDetails.CustomerNo
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Address
+                                </div>
+                                <div class="col">
+                                    @Model.CustomerLookupResult.CustomerDetails.CustomerCompanyName
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Phone
+                                </div>
+                                <div class="col">
+                                    @Model.CustomerLookupResult.CustomerDetails.CustomerPhone
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Email
+                                </div>
+                                <div class="col">
+                                    @Model.CustomerLookupResult.CustomerDetails.CustomerEmail
+                                </div>
+                            </div>
+                            <div class="row">
+                                &nbsp;
+                            </div>
+                            <div class="row">
+                                <h5>Usage</h5>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Balance
+                                </div>
+                                <div class="col">
+                                    R @Model.CustomerLookupResult.CustomerDetails.Balance.ToString("N")
+                                </div>
+                            </div>
+                            @{
+                                string lastPaymentDate = "N/A";
+                                string lastPaymentMethod = "N/A";
+                                string lastPaymentAmount = "N/A";
+                                if (Model.CustomerLookupResult.PaymentInfo.Length > 0)
+                                {
+                                    var latestPayment = Model.CustomerLookupResult.PaymentInfo.OrderByDescending(p => p.PaymentDate).FirstOrDefault();
+                                    lastPaymentDate = latestPayment.PaymentDate.ToString("yyyy/MM/dd - HH:mm");
+                                    lastPaymentMethod = latestPayment.PaymentMethod;
+                                    lastPaymentAmount = "R " + latestPayment.PaymentAmount.ToString("N");
+                                }
+                            }
+                            <div class="row">
+                                <div class="col">
+                                    Last Payment
+                                </div>
+                                <div class="col">
+                                    @lastPaymentDate
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Method
+                                </div>
+                                <div class="col">
+                                    @lastPaymentMethod
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Amount
+                                </div>
+                                <div class="col">
+                                    @lastPaymentAmount
+                                </div>
+                            </div>
+                            <div class="row">
+                                &nbsp;
+                            </div>
+                            <div class="row">
+                                <h5>Meters</h5>
+                            </div>
+                            @if (Model.CustomerLookupResult.MetersLinked.Length > 0)
+                            {
+                                foreach (var meterInfo in Model.CustomerLookupResult.MetersLinked)
+                                {
+                                    <div class="row">
+                                        <div class="col">
+                                            @switch (meterInfo.TypeName)
+                                            {
+                                                case "Electricity":
+                                                    <img src="~/images/elec-icon-s.png" />
+                                                    break;
+                                                case "Water":
+                                                    <img src="~/images/water-icon-s.png" />
+                                                    break;
+                                                case "Gas":
+                                                    <img src="~/images/gas-icon-s.png" />
+                                                    break;
+                                            }
+                                            <strong>@meterInfo.TypeName</strong>
+                                        </div>
+                                        <div class="col">
+                                            @meterInfo.LastCommunicated.ToString("yyyy/MM/dd - HH:mm")
+                                            @if (meterInfo.Status.ToUpper().Contains("ON"))
+                                            {
+                                                <i class="fas fa-lightbulb text-green"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-power-off text-red"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            @meterInfo.SerialNumber
+                                        </div>
+                                        <div class="col">
+                                            @meterInfo.Connected
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        &nbsp;
+                                    </div>
+                                }
+                            }
+
+
+                            @*Show All*@
+                            @*<div>
+                                    <h5>Customer Details</h5>
+                                </div>
+                                @foreach (System.Reflection.PropertyInfo p in Model.CustomerLookupResult.CustomerDetails.GetType().GetProperties())
+                                {
+                                    <div class="row">
+                                        <div class="col">
+                                            <label class="control-label">@p.Name</label>
+                                        </div>
+                                        <div class="col">
+                                            <span>@p.GetValue(Model.CustomerLookupResult.CustomerDetails, null)</span>
+                                        </div>
+                                    </div>
+                                }
+                                <div>
+                                    <h5>Meter Details</h5>
+                                </div>
+                                @if (Model.CustomerLookupResult.MetersLinked.Length > 0)
+                                {
+                                    foreach (var meterInfo in Model.CustomerLookupResult.MetersLinked)
+                                    {
+                                        @foreach (System.Reflection.PropertyInfo p in meterInfo.GetType().GetProperties())
+                                        {
+                                            <div class="row">
+                                                <div class="col">
+                                                    <label class="control-label">@p.Name</label>
+                                                </div>
+                                                <div class="col">
+                                                    <span>@p.GetValue(meterInfo, null)</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+                                <div>
+                                    <h5>Payment Details</h5>
+                                </div>
+                                @if (Model.CustomerLookupResult.PaymentInfo.Length > 0)
+                                {
+                                    foreach (var paymentInfo in Model.CustomerLookupResult.PaymentInfo)
+                                    {
+                                        @foreach (System.Reflection.PropertyInfo p in paymentInfo.GetType().GetProperties())
+                                        {
+                                            <div class="row">
+                                                <div class="col">
+                                                    <label class="control-label">@p.Name</label>
+                                                </div>
+                                                <div class="col">
+                                                    <span>@p.GetValue(paymentInfo, null)</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }*@
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#DeviceSearch_Serial").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/companyadmin/welcomepagecustomersearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

@@ -1,0 +1,41 @@
+@model MyVoltage.Models.OperationalModels.C06_LedgerReconReportModels.C06_LedgerReconReport_SummaryModel.C06_LedgerReconReport_SummaryItem
+@using MyVoltage.Extensions;
+@{
+    string rowClass = "table-success";
+    string cellClass = "text-green font-weight-bold";
+    string status = "Ok";
+    if (Model.Diff < 20 && Model.Diff > -20)
+    {
+        rowClass = "table-success";
+        cellClass = "text-green font-weight-bold";
+        status = "Ok";
+    }
+    else if (Model.CoaDiff > 20 || Model.CoaDiff < -20)
+    {
+        rowClass = "table-warning";
+        cellClass = "text-yellow font-weight-bold";
+        status = "Sync Mismatch";
+    }
+    else if (Model.Diff > 20 || Model.Diff < -20)
+    {
+        rowClass = "table-danger";
+        cellClass = "text-red font-weight-bold";
+        status = "Un-reconciled";
+    }
+
+}
+<td scope="col">@Model.CompanyName</td>
+<td scope="col" class="@Html.Raw(cellClass)">@status</td>
+<td scope="col" class="text-right">@Model.CoaDiff.ToMoneyNoDecimal()</td>
+<td scope="col" class="text-right">@Model.CoaTotal.ToMoneyNoDecimal()</td>
+<td scope="col" class="text-right">@Model.LedgerTotal.ToMoneyNoDecimal()</td>
+<td scope="col" class="text-right">@Model.ProductsTotal.ToMoneyNoDecimal()</td>
+<td scope="col" class="text-right">@Model.Diff.ToMoneyNoDecimal()</td>
+<td scope="col">@Model.LatestSyncDate.ToDateAndTimeShort()</td>
+<td scope="col">@Model.LatestSyncDate_Monthly.ToDateAndTimeShort()</td>
+
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowClass');
+    });
+</script>

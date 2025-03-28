@@ -1,0 +1,49 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_BModels.B1_021_Supply_Cost_Settings_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsSummary.GetDescription() Details</h5>
+</div>
+@if (Model.B01_AccountPayments_SupplyCostSettingsSummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Month</th>
+                <th scope="col" class="text-nowrap">Default Cost Per<br />Unit Elec (kWh)</th>
+                <th scope="col" class="text-nowrap">Default Cost Per<br />Unit Water (kL)</th>
+                <th scope="col" class="text-nowrap">Default Cost Per<br />Unit Gas (m3)</th>
+                <th scope="col">Monthly Items Count</th>
+                <th scope="col">Meter Items Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.B01_AccountPayments_SupplyCostSettingsSummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td title="@item.Name " scope="col">@item.Name</td>
+                    <td title="@item.Name - Status" scope="col" font-weight-bold">@item.Status.GetDescription()</td>
+                    <td title="@item.Name - Month" scope="col">@(item.Company_CostSetting_Monthly != null ? item.Company_CostSetting_Monthly.BillingMonth.ToMonth() : "")</td>
+                    <td title="@item.Name - Default Cost Per Unit Elec (kWh)" scope="col">@(item.Company_CostSetting != null ? item.Company_CostSetting.DefaultCostPerUnitElec.ToMoney() : "")</td>
+                    <td title="@item.Name - Default Cost Per Unit Water (kL)" scope="col">@(item.Company_CostSetting != null ? item.Company_CostSetting.DefaultCostPerUnitWater.ToMoney() : "")</td>
+                    <td title="@item.Name - Default Cost Per Unit Gas (m3)" scope="col">@(item.Company_CostSetting != null ? item.Company_CostSetting.DefaultCostPerUnitGas.ToMoney() : "")</td>
+                    <td title="@item.Name - Monthly Items Count" scope="col">@item.MonthlyItemCount</td>
+                    <td title="@item.Name - Meter Items Count" scope="col">@item.MeterItemCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

@@ -1,0 +1,53 @@
+﻿@using MyVoltage.Api.SkyBill
+@model List<Ledger>
+@{
+    ViewData["Title"] = "Customer Ledger Entries";
+    var companyName = (string)ViewData["CompanyName"];
+    var customerNumber = (string)ViewData["CustomerNumber"];
+}
+
+<h4 class="mt-4">Company: @companyName</h4>
+<h4>Customer number: @customerNumber</h4>
+
+<div>
+    @if (Model != null && Model.Count != 0)
+    {
+        <table id="GatewayDetails" class="table table-repsonsive-sm table-bordered table-hover admin-table table-fixed mt-3">
+            <thead>
+                <tr>
+                    <td>Entry No</td>
+                    <td>Document Type</td>
+                    <td>Original Amount</td>
+                    <td>Amount</td>
+                    <td>Remaining Amount</td>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>@m.Entry_No</td>
+                        <td>@m.Document_Type</td>
+                        <td>@m.Original_Amount</td>
+                        <td>@m.Amount</td>
+                        <td>@m.Remaining_Amount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        @if (ViewBag.ErrorMessage == null)
+        {
+            <span><b>No results found...</b></span><br />
+        }
+        else
+        {
+            <span><b>@ViewBag.ErrorMessage</b></span><br />
+        }
+    }
+
+</div>
+

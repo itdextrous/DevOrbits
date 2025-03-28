@@ -1,0 +1,26 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div class="paymentMobilePage account_form error2">
+    <div class="py-4 text-center">
+        <h2 class="payment_heading mb-4">@ViewData["Title"]</h2>
+        <p class="lead m-0">Oh dear. An error seems to have occured. Please try again. If the problem persist please contact <b><a href="mailto:info@myvoltage.co.za?Subject=WebsiteError">info@myvoltage.co.za</a></b></p>
+        <a href="/clientzone/recharge" class="btn btn-default mt-30 try_again_btn" id="redirectPayment">I want to try again</a>
+    </div>
+</div>
+
+
+@section Scripts
+    {
+    <script>
+        if (window.location.pathname === '/payment/decline') {
+            $("#redirectPayment").show();
+        }
+        else {
+            $("#redirectPayment").hide();
+        }
+    </script>
+}

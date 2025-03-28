@@ -1,0 +1,179 @@
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> _userManager;
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorDeviceAddModel
+@{
+    ViewData["Title"] = "Mirror Meter Auditing - Mirror Device Search";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <form>
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-header text-orange">
+                    <h5>Serial Number:</h5>
+                </div>
+                <div class="card-body">
+                    <input id="txtSearch" name="txtSearch" type="text" class="form-control" asp-for="SerialNumber" />
+                </div>
+                <div class="card-footer">
+                    <a id="btnSearch" name="btnSearch" href="#" onclick="Search();" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@if (!string.IsNullOrEmpty(Model.SerialNumber))
+{
+    <div class="row mb-4">
+        <div class="col">
+            @if (Model.m2mDevice == null)
+            {
+                <span class="text-red font-weight-bold">Could not locate device on Metering Database. Device can be added using the "<a href="/operational/N_TechnicianToolkit/N_TechnicianToolkit_AddDeviceToGateway">N3.011 Add Device To Gateway</a>" tool.</span>
+            }
+            else
+            {
+                <div class="card p-md-1 mv-gradient">
+                    <div class="card-header text-orange">
+                        <h4>
+                            @if (Model.Device != null)
+                            {
+                                @switch (Model.Device.MeterType)
+                                {
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                        <img src="~/images/elec-icon-s.png" />
+                                        break;
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                        <img src="~/images/water-icon-s.png" />
+                                        break;
+                                    case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                        <img src="~/images/gas-icon-s.png" />
+                                        break;
+                                }
+                            }
+                            @(Model.m2mDevice.type.id == 20 ? Model.m2mDevice.reference : Model.m2mDevice.serial)
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+
+
+                            <div class="col border border-primary rounded p-2 m-2">
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <h6>Skybill Customer Details:</h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Company Name:
+                                    </div>
+                                    <div class="col-6">
+                                        @(Model.Company != null ? Model.Company.Name : "Unknown")
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Customer No:
+                                    </div>
+                                    <div class="col-6">
+                                        @(Model.SkybillCustomer != null ? Model.SkybillCustomer.Customer_No : "Unknown")
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Customer Name:
+                                    </div>
+                                    <div class="col-6">
+                                        @(Model.SkybillCustomer != null ? Model.SkybillCustomer.Customer_Name : "Unknown")
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Account Type:
+                                    </div>
+                                    <div class="col-6">
+                                        @(Model.SkybillCustomer != null ? Model.SkybillCustomer.AccountType.GetDescription() : "Unknown")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col border border-primary rounded p-2 m-2">
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <h6 title="Gateways and Devices Sync">Metering Database Details:</h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Device ID Linked:
+                                    </div>
+                                    <div class="col-6">
+                                        @Model.m2mDevice.id
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Serial:
+                                    </div>
+                                    <div class="col-6">
+                                        @(Model.m2mDevice.type.id == 20 ? Model.m2mDevice.reference : Model.m2mDevice.serial)
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Name:
+                                    </div>
+                                    <div class="col-6">
+                                        @Model.m2mDevice.name
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Type:
+                                    </div>
+                                    <div class="col-6">
+                                        @Model.m2mDevice.deviceType
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        @if (Model.MirrorDevice != null)
+                        {
+                            @*@if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A02_MirrorMeterAuditing_MirrorDeviceAdd, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+                            {
+                                <span class="text-red">Note: Device already exists on Mirror. You have been granted management rights to create duplicates. Please double check before clicking the button. Ignorance != Innocence</span>
+                                <a href="#" onclick="CreateDevice('@Model.m2mDevice.serial', '@Model.m2mDevice.name', '@Model.m2mDevice.deviceType');" class="btn btn-outline-danger float-right"><i class="fas fa-exclamation-circle"></i>&nbsp;Create</a>
+                            }
+                            else
+                            {*@
+                                <span class="text-red font-weight-bold">Cannot create a device that already exists.</span>
+                            //}
+                        }
+                        else
+                        {
+                            <a href="#" onclick="CreateDevice('@(Model.m2mDevice.type.id == 20 ? Model.m2mDevice.reference : Model.m2mDevice.serial)', '@Model.m2mDevice.name', '@Model.m2mDevice.deviceType');" class="btn btn-outline-primary-sm float-right"><i class="fas fa-plus-circle"></i>&nbsp;Create</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function Search() {
+            document.location.href = '/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorDeviceAdd?txtSearch=' + encodeURIComponent($("#txtSearch").val());
+        }
+        function CreateDevice(serial, name, type) {
+            if (confirm('Are you sure you wish to create a "' + type + '" meter using Serial Number "' + serial + '" and the Name "' + name + '"?')) {
+                document.location.href = '/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorDeviceAdd/' + serial;
+            }
+        }
+    </script>
+}

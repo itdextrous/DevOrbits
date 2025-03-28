@@ -1,0 +1,75 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = "Smart View";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerNumber))
+            {
+                <div class="card-header">
+                    Welcome to the My Voltage System.
+                </div>
+                <div class="card-body">
+                    Select a customer to start...
+                </div>
+            }
+            else
+            {
+                <div class="card-body">
+                    <h5 class="text-orange">Details for: @operationalProvider.CustomerNumber (@operationalProvider.CompanyName)</h5>
+                </div>
+                <div id="customerDetails" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Details...
+                    </div>
+                </div>
+
+                <div id="customerUsage" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Usage...
+                    </div>
+                </div>
+
+                <div id="customerProductsResourcesThisMonth" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Product Resources...
+                    </div>
+                </div>
+
+                <div id="customerProductsResourcesLastMonth" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Product Resources...
+                    </div>
+                </div>
+
+                <div id="customerMeterList" class="card-body">
+                    <div class="text-orange">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Customer Meter List...
+                    </div>
+                </div>
+
+            }
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+
+            </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#customerDetails").load('@Url.Content("/operational/shared/customer/customerdetails")');
+            $("#customerUsage").load('@Url.Content("/operational/shared/customer/customerusage")');
+            $("#customerProductsResourcesThisMonth").load('@Url.Content("/operational/shared/customer/customerproductsresourceledgersformonth")');
+            $("#customerProductsResourcesLastMonth").load('@Url.Content($"/operational/shared/customer/customerproductsresourceledgersformonth/{DateTime.Now.AddMonths(-1).Year}/{DateTime.Now.AddMonths(-1).Month}")');
+            $("#customerMeterList").load('@Url.Content("/operational/shared/customer/customermeterlist?V=true")');
+        });
+    </script>
+}

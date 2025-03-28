@@ -1,0 +1,77 @@
+﻿@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@model MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilReconReportModel
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B03_SupplyCouncilStatements_CouncilReconReport.GetDescription() + " - " + operationalProvider.CompanyName;
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-4 mv-gradient">
+
+            <div class="card-header text-orange">
+                <div class="row mb-2 mt-2">
+                    <div class="col">
+                        @if (operationalProvider.CompanyID == 0)
+                        {
+                            <span>Select Company to request report...</span>
+                        }
+                        else
+                        {
+                            <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilReconReportRequest" class="btn btn-outline-primary"><i class="fas fa-envelope"></i>&nbsp;Request new report for @operationalProvider.CompanyName</a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 text-left">
+                        <h5>Your Request History:</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <table class="table table-responsive-xl table-striped table-hover table-sm table-bordered rounded">
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th>Date Requested</th>
+                                    <th>Date Started</th>
+                                    <th>Date Completed</th>
+                                    <th>Sent To</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.B03_SupplyCouncilStatements_CouncilReconReportItems)
+                                {
+                                    <tr>
+                                        <td class="text-nowrap text-left">@item.CompanyName</td>
+                                        <td class="text-nowrap text-left">@item.DateRequested.ToDateAndTimeShort()</td>
+                                        <td class="text-nowrap text-left">@item.DateStarted.ToDateAndTimeShort(true)</td>
+                                        <td class="text-nowrap text-left">@item.DateCompleted.ToDateAndTimeShort(true)</td>
+                                        <td class="text-nowrap text-left">@item.ToSendTo</td>
+                                        <td class="text-nowrap text-right">
+                                            @if (!string.IsNullOrEmpty(item.ReportURL))
+                                            {
+                                                <a title="Download" href="@item.ReportURL" class="btn btn-sm" target="_blank"><i class="fas fa-file-download"></i>&nbsp;Download</a>
+                                            }
+                                            else
+                                            {
+                                                <span>404</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+</div>
+

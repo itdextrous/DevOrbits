@@ -1,0 +1,107 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+@inject UserManager<ApplicationUser> userManager;
+@model MyVoltage.Models.OperationalModels.ActiveTimeLogModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = "Active Time Log";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <tr>
+        <th>Task/Flag ID</th>
+        <th>Reason For Flag/Task</th>
+        <th>Created By</th>
+        <th>Description</th>
+        <th>Responsible User</th>
+        <th>Start Time</th>
+        <th>End time</th>
+        <th>Time Allocated (HH:mm)</th>
+        <th>Internal RPH</th>
+        <th>External RPH</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Module_TimeOfWorkAllocateds)
+    {
+        string aClass = "";
+        if (item.IsDeleted)
+        {
+            aClass = "table-danger";
+        }
+        <tr class="@Html.Raw(aClass)">
+            <td class="text-nowrap">
+                @switch ((MyVoltage.Data.ActivityTypeEnum)item.ActivityTypeID)
+                {
+                    case MyVoltage.Data.ActivityTypeEnum.A08_Task:
+                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A08_Tasks/A08_Task_Review/@item.ActivityTypeTypeID/@item.ActivityID">@item.ActivityID</a>
+                        break;
+                    case MyVoltage.Data.ActivityTypeEnum.A09_Flag:
+                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/A09_Flags/A09_Flags_CompanyReview/@item.ActivityTypeTypeID/@item.ActivityID">@item.ActivityID</a>
+                        break;
+                    case MyVoltage.Data.ActivityTypeEnum.E01_BuildingOnboardingTask:
+                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review/@item.ActivityTypeTypeID/@item.ActivityID">@item.ActivityID</a>
+                        break;
+                    case MyVoltage.Data.ActivityTypeEnum.D02_SaleTask:
+                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/D02_Sale/D02_SaleTask_Review/@item.ActivityTypeTypeID/@item.ActivityID">@item.ActivityID</a>
+                        break;
+                }
+            </td>
+            <td class="">
+                @item.ReasonForFlag
+            </td>
+            <td class="text-nowrap">
+                @item.CreatedByUsername
+                <br />
+                @item.DateCreated.ToDateAndTimeShort()
+            </td>
+            <td>@item.DescriptionOfWorkAllocated</td>
+            <td class="text-nowrap">
+                @item.ResponsibleUserUsername
+            </td>
+            <td>@item.StartTime.ToDateAndTimeShort()</td>
+            <td>
+                @item.EndTime.ToDateAndTimeShort()
+                @if (!item.EndTime.HasValue)
+                {
+                    <a class="btn btn-sm btn-outline-danger-sm" href="/operational/A08_Tasks/A08_Task_ReviewStopTimeAllocated/@(item.ID)"><i class="fas fa-stop-circle"></i></a>
+                }
+            </td>
+            <td>@item.TimeAllocated.Hours.ToString("00"):@item.TimeAllocated.Minutes.ToString("00")</td>
+            <td>@item.InternalChargeOutRatePerHour.ToDecimal(2) (@(item.InternalChargeOutRatePerHour.HasValue ? (item.InternalChargeOutRatePerHour.Value * Convert.ToDecimal(item.TimeAllocated.TotalHours)).ToDecimal(2) : ""))</td>
+            <td>@item.ExternalChargeOutRatePerHour.ToDecimal(2) (@(item.ExternalChargeOutRatePerHour.HasValue ? (item.ExternalChargeOutRatePerHour.Value * Convert.ToDecimal(item.TimeAllocated.TotalHours)).ToDecimal(2) : ""))</td>
+            <td class="text-right">
+                @if (item.CreatedByUserID == userManager.GetUserId(User))
+                {
+                    <a href="/operational/Modules/EditTimeOfWorkAllocated/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                    @if (!item.IsDeleted)
+                    {
+                        <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" onclick="ConfirmDeleteTimeOfWorkAllocated('@item.ID', '@item.DescriptionOfWorkAllocated - Added by @item.CreatedByUsername on @item.DateCreated.ToDateAndTimeShort()');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                    else
+                    {
+                        <a id="deletebtn_@item.ID" href="#deletebtn_@item.ID" title="Item Already Deleted" class="btn btn-sm btn-outline-primary-sm disabled"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                }
+            </td>
+        </tr>
+    }
+</table>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        });
+        function RedirectToFilter() {
+            document.location.href = "/operational/ActiveTimeLog?U=" + $("#Users").val();
+        }
+    </script>
+}

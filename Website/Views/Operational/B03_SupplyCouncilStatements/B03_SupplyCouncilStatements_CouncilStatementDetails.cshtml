@@ -1,0 +1,201 @@
+@model MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B03_SupplyCouncilStatements_CouncilStatementDetails.GetDescription() + " - " + operationalProvider.CompanyName;
+    bool isFirst = true;
+}
+@using MyVoltage.Extensions;
+@using System.Linq;
+
+@if (operationalProvider.CompanyID == 0)
+{
+    <span>Please select a company from the sidebar to see results.</span>
+}
+else if (Model.InvalidBuildingCouncilDetails)
+{
+    <span>Building Council Details incorrect or not found. Please check the <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_AccountPaymentCapture">Account Payments - Account Payment Details</a>.</span>
+}
+else
+{
+    <div class="row">
+        <div class="col-12 text-left">
+            <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture" class="btn text-success"><i class="fas fa-plus-circle"></i>&nbsp;New Invoice</a>
+            @if (Model.B03_SupplyCouncilStatements_CouncilStatementDetailsItems.Count > 0)
+            {
+                <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_CloneInvoice/@(Model.B03_SupplyCouncilStatements_CouncilStatementDetailsItems[0].InvoiceID)" class="btn text-orange"><i class="fas fa-copy"></i>&nbsp;Clone Latest Invoice</a>
+
+            }
+        </div>
+    </div>
+    <div class="row mt-2 mb-2">
+        <div class="col text-left">
+            <select class="form-control" id="buildingCouncilID" onchange="RedirectToFilter();">
+                <option value="">[All Account Numbers]</option>
+                @foreach (SelectListItem item in Model.AccountNo)
+                {
+                    @if (item.Selected)
+                    {
+                        <option value="@item.Value" selected="selected">@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 table-success">
+            Legend: Invoices approved.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 table-warning">
+            Legend: Invoices pending approval.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            @if (Model.B03_SupplyCouncilStatements_CouncilStatementDetailsItems.Count == 0)
+            {
+                <span>There are no outstanding entries for @operationalProvider.CompanyName</span>
+            }
+            else
+            {
+                <table class="table table-responsive-xl table-striped table-hover table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Account No</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">TAX Invoice No</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">TAX Invoice Date</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Final Date For Payment</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Status</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table-spanned">Opening</th>
+                            <th colspan="@(Model.BuildingCouncilInvoiceResourceTypes.Count + 1)" scope="col" class="text-nowrap text-center border-table-spanned">Transactions</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table-spanned">Closing</th>
+                            <th colspan="4" scope="col" class="text-nowrap text-center border-table-spanned">Service Provider</th>
+                            <th colspan="4" scope="col" class="text-nowrap text-center border-table-spanned">Client</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">Diff</th>
+                            <th rowspan="2" scope="col" class="text-nowrap text-center border-table">&nbsp;</th>
+                        </tr>
+                        <tr>
+                            @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                            {
+                                if (resourceType.SortOrder == 1)
+                                {
+                                    continue;
+                                }
+                                <th scope="col" class="text-nowrap text-center border-table">@resourceType.ResourceTypeName</th>
+                            }
+                            <th scope="col" class="text-nowrap text-center border-table">Total</th>
+                            <th scope="col" class="text-nowrap text-center border-table-left">Opening</th>
+                            <th scope="col" class="text-nowrap text-center border-table">Payments</th>
+                            <th scope="col" class="text-nowrap text-center border-table">Transactions</th>
+                            <th scope="col" class="text-nowrap text-center border-table-right">Total</th>
+                            <th scope="col" class="text-nowrap text-center border-table-left">Opening</th>
+                            <th scope="col" class="text-nowrap text-center border-table">Payments</th>
+                            <th scope="col" class="text-nowrap text-center border-table">Transactions</th>
+                            <th scope="col" class="text-nowrap text-center border-table-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.B03_SupplyCouncilStatements_CouncilStatementDetailsItems)
+                        {
+                            var previousItem = (from p in Model.B03_SupplyCouncilStatements_CouncilStatementDetailsItems
+                                                where p.AccountNo == item.AccountNo
+                                                && p.TAXInvoiceDate < item.TAXInvoiceDate
+                                                orderby p.TAXInvoiceDate descending
+                                                select p).FirstOrDefault();
+
+                            string cellClass = "";
+                            string pickedUpPrevious = "";
+                            string pickedUpDiff = "";
+                            if (previousItem != null)
+                            {
+                                if (Convert.ToInt32(item.OpeningBalance) != Convert.ToInt32(previousItem.ClosingBalance))
+                                {
+                                    cellClass = "text-red font-weight-bold";
+                                    pickedUpPrevious = previousItem.ClosingBalance.ToMoneyNoDecimal("R");
+                                    pickedUpDiff = (item.OpeningBalance - previousItem.ClosingBalance).ToMoneyNoDecimal("R");
+                                }
+                            }
+                            string rowClass = "";
+                            @if (item.Status == MyVoltage.Data.BuildingCouncilDetails_Invoice.StatusEnum.New)
+                            {
+                                rowClass = "table-warning";
+                            }
+                            else if (item.Status == MyVoltage.Data.BuildingCouncilDetails_Invoice.StatusEnum.Approved)
+                            {
+                                rowClass = "table-success";
+                            }
+                            <tr class="@Html.Raw(rowClass)">
+                                <td scope="col" class="text-nowrap text-left border-table">@item.AccountNo</td>
+                                <td scope="col" class="text-nowrap text-left border-table">
+                                    <a title="Edit" href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.InvoiceID" class="btn btn-sm">@item.TAXInvoiceNo</a>
+                                </td>
+                                <td scope="col" class="text-nowrap text-left border-table">@item.TAXInvoiceDate.ToDateShort()</td>
+                                <td scope="col" class="text-nowrap text-left border-table">@item.FinalDateForPayment.ToDateShort()</td>
+                                <td scope="col" class="text-nowrap text-left border-table-right">@item.Status.GetDescription()</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Opening Balance" class="text-right text-nowrap border-table-right @Html.Raw(cellClass)">
+                                    @item.OpeningBalance.ToMoneyNoDecimal("R")
+                                    @if (!string.IsNullOrEmpty(cellClass))
+                                    {
+                                        <br /><span title="Picked up value: @pickedUpPrevious">(Diff: @pickedUpDiff)</span>
+                                    }
+                                </td>
+                                @foreach (var resourceType in Model.BuildingCouncilInvoiceResourceTypes.OrderBy(p => p.SortOrder).ThenBy(p => p.ResourceTypeName))
+                                {
+                                    if (resourceType.SortOrder == 1)
+                                    {
+                                        continue;
+                                    }
+                                    if (item.Resourcees.ContainsKey(resourceType.ResourceTypeName))
+                                    {
+                                        <td scope="col" title="@item.TAXInvoiceNo - @resourceType.ResourceTypeName" class="text-right text-nowrap border-table">@item.Resourcees[resourceType.ResourceTypeName].ToMoneyNoDecimal("R")</td>
+                                    }
+                                    else
+                                    {
+                                        <td scope="col" class="text-nowrap text-center border-table">-</td>
+                                    }
+                                }
+                                <td scope="col" title="@item.TAXInvoiceNo - Total Charges" class="text-right text-nowrap border-table-left">@item.TotalCharges.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Closing Balance" class="text-right text-nowrap border-table-left">@item.ClosingBalance.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Service Provider Opening Balance" class="text-right text-nowrap border-table-left">@item.OpeningBalanceServiceProvider.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Service Provider Movement" class="text-right text-nowrap border-table">@item.PaidByServiceProvider.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Service Provider Movement" class="text-right text-nowrap border-table">@item.PayableByServiceProvider.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Service Provider Total" class="text-right text-nowrap border-table-right">@item.ClosingBalanceServiceProvider.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Client Opening Balance" class="text-right text-nowrap border-table-left">@item.OpeningBalanceClient.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Client Movement" class="text-right text-nowrap border-table">@item.PaidByClient.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Client Movement" class="text-right text-nowrap border-table">@item.PayableByClient.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Client Total" class="text-right text-nowrap border-table-right">@item.ClosingBalanceClient.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo - Client Total" class="text-right text-nowrap border-table @((item.Diff > 5 || item.Diff < -5) ? "text-red font-weight-bold" : "")">@item.Diff.ToMoneyNoDecimal("R")</td>
+                                <td scope="col" title="@item.TAXInvoiceNo" class="text-right text-nowrap border-table">
+                                    <a title="Edit @item.TAXInvoiceNo" href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.InvoiceID" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+                                    |
+                                    <a title="Delete @item.TAXInvoiceNo" href="#" onclick="ConfirmDelete('@item.InvoiceID');" class="btn btn-sm text-red"><i class="fas fa-trash-alt"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial, companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/' + serial;
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementDetails?AccountNo=' + $("#buildingCouncilID").val();
+        }
+        function ConfirmDelete(itemID) {
+            if (confirm('Are you use you want to delete this item?')) {
+                document.location.href = "/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_Delete/" + itemID;
+            }
+        }
+    </script>
+}

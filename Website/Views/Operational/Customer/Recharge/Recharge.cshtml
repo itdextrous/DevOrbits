@@ -1,0 +1,170 @@
+﻿@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.Customer.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.Customer_Recharge.GetDescription()} - {opProv.CustomerNumber}";
+}
+
+@if (string.IsNullOrEmpty(opProv.CustomerNumber))
+{
+    <span>Select Customer to begin.</span>
+}
+else
+{
+    var company = opProv.Companies.Where(p => p.CompanyID == opProv.CompanyID).SingleOrDefault();
+    <section class="pt-4">
+        <div class="row mt-5 dash-stats recharge">
+            <div class="col">
+                <div class="card mx-auto">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col dash-details">
+                                <div class="row">
+                                    <div class="col">
+                                        @if (company != null && !string.IsNullOrEmpty(company.NetcashBankName))
+                                        {
+                                            <div id="rechargeLanding">
+                                                <div class="form-group">
+                                                    <label for="">Select Option</label>
+                                                </div>
+                                                <div class="form-group mt-4">
+                                                    <a onclick="InstantRecharge();" href="#" class="btn btn-primary d-block w-100">
+                                                        <div class="row">
+                                                            <div class="col-1"><i class="far fa-credit-card"></i></div>
+                                                            <div class="col">Instant recharge</div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                                <div class="form-group mt-4">
+                                                    <a onclick="InstantEFT();" href="#" class="btn btn-primary d-block w-100">
+                                                        <div class="row">
+                                                            <div class="col-1"><i class="fas fa-money-check-alt"></i></div>
+                                                            <div class="col">EFT recharge</div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <div id="rechargeMain" style="display:none;">
+                                                <form action="/operational/Customer/Customer_Recharge/Payment" method="post">
+                                                    <div class="form-group">
+                                                        <label for="">Amount to Add</label>
+                                                        <input class="form-control" type="number" required name="amount" min="0" value="0" id="inpAmount" onkeypress="return isNumberKey(event)">
+                                                        <span>R</span>
+                                                        <span class="field-validation-error d-none" id="spnAmount">Please enter a valid amount</span>
+                                                    </div>
+                                                    <p class="text-muted">Current Balance <span class="text-dark pl-4"><b>@opProv.CustomerBalance</b></span></p>
+                                                    <p class="small text-muted">Instant EFT payment with Ozow will have no additional charges and all other payment methods has a 10% convenience fee.</p>
+                                                    <div class="form-group mt-4">
+                                                        <button type="submit" onclick="return CheckValidation()" class="btn btn-primary d-block w-100">PAY NOW</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <div id="rechargeEFT" style="display:none;">
+                                                <div class="form-group">
+                                                    <label for="">EFT recharge</label>
+                                                </div>
+                                                <div class="form-group mt-4 text-nowrap">
+                                                    <div class="row">
+                                                        <div class="col text-nowrap">Bank:</div>
+                                                        <div class="col text-nowrap">@company.NetcashBankName</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col text-nowrap">Bank Account Type:</div>
+                                                        <div class="col text-nowrap">@company.NetcashBankAccountType</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col text-nowrap">Bank Account No:</div>
+                                                        <div class="col text-nowrap">@company.NetcashBankAccountNo</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col text-nowrap">Bank Branch Code:</div>
+                                                        <div class="col text-nowrap">@company.NetcashBankBranchCode</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col text-nowrap">Reference:</div>
+                                                        <div class="col text-nowrap">@opProv.CustomerNumber</div>
+                                                    </div>
+                                                </div>
+                                                <p class="text-muted">
+                                                    Please note that EFT payment will not reflect immediately on your statement and will only be allocated once funds have cleared in the bank account, this can take <strong>1 to 2 business days</strong>, payments done during the weekend will be allocated on the following Monday or when funds are cleared. To ensure correct allocation, please use the correct reference number as displayed. <strong>If you need instant allocation of the funds transferred and reconnection of your utilities, please use the Instant Recharge options available.</strong>
+                                                </p>
+                                            </div>
+
+                                        }
+                                        else
+                                        {
+                                            <form action="/operational/Customer/Customer_Recharge/Payment" method="post">
+                                                <div class="form-group">
+                                                    <label for="">Amount to Add</label>
+                                                    <input class="form-control" type="number" required name="amount" min="0" value="0" id="inpAmount" onkeypress="return isNumberKey(event)">
+                                                    <span>R</span>
+                                                    <span class="field-validation-error d-none" id="spnAmount">Please enter a valid amount</span>
+                                                </div>
+                                                <p class="text-muted">Current Balance <span class="text-dark pl-4"><b>@opProv.CustomerBalance</b></span></p>
+                                                <p class="small text-muted">Instant EFT payment with Ozow will have no additional charges and all other payment methods has a 10% convenience fee.</p>
+                                                <div class="form-group mt-4">
+                                                    <button type="submit" onclick="return CheckValidation()" class="btn btn-primary d-block w-100">PAY NOW</button>
+                                                </div>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recharge Modal -->
+    <div class="modal fade px-5" id="recharge" tabindex="-1" role="dialog" aria-labelledby="recharge" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content text-center px-5">
+                <div class="modal-body">
+                    <p class="font-weight-bold"><span class="text-orange">R200 </span><span>has been added to your account</span></p>
+                    <p class="text-muted">Total Balance <span class="text-dark pl-4"><b>R321.00</b></span></p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-primary btn-block" data-dismiss="modal"><b>DONE</b></button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts
+    {
+    <script>
+        function CheckValidation() {
+            if ($('#inpAmount').val() > 0)
+                return true;
+            else {
+                $('#spnAmount').removeClass('d-none');
+                return false;
+            }
+
+        }
+
+        function InstantRecharge() {
+            $('#rechargeMain').css('display', 'block');
+            $('#rechargeLanding').css('display', 'none');
+            $('#rechargeEFT').css('display', 'none');
+        }
+
+        function InstantEFT() {
+            $('#rechargeMain').css('display', 'none');
+            $('#rechargeLanding').css('display', 'none');
+            $('#rechargeEFT').css('display', 'block');
+        }
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+
+    </script>
+}

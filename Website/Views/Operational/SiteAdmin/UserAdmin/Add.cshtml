@@ -1,0 +1,189 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.UserAdminAddModel
+@{
+    ViewData["Title"] = "User Administration - Create User";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    User successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/siteadmin/useradmin/edit/@Model.ResultUserID" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    User Details:
+                </div>
+                <form asp-action="SiteAdmin_UserAdmin_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+
+
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Email" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="Email" />
+                                <span asp-validation-for="Email" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="FirstName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="FirstName" />
+                                <span asp-validation-for="FirstName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LastName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="LastName" />
+                                <span asp-validation-for="LastName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="JobTitle" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="JobTitle" />
+                                <span asp-validation-for="JobTitle" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="InternalChargeOutRatePerHour" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="InternalChargeOutRatePerHour" />
+                                <span asp-validation-for="InternalChargeOutRatePerHour" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ExternalChargeOutRatePerHour" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="ExternalChargeOutRatePerHour" />
+                                <span asp-validation-for="ExternalChargeOutRatePerHour" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PhoneNumber" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-group" asp-for="PhoneNumber" />
+                                <span asp-validation-for="PhoneNumber" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultCompany" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultCompany", Model.DefaultCompany)
+                                <span asp-validation-for="DefaultCompany" class="text-red"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-responsive-xl table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Parent </th>
+                                    <th scope="col">Secure Area</th>
+                                    @foreach (var saa in operationalProvider.SecureAreaActions)
+                                    {
+                                        <th scope="col">@saa.SecureAreaActionDisplayName</th>
+                                    }
+                                </tr>
+                                @foreach (var ps in operationalProvider.ParentSecureAreas)
+                                {
+                                    foreach (var sa in operationalProvider.SecureAreas.Where(p => p.ParentSecureAreaID == ps.ParentSecureAreaID).ToList())
+                                    {
+                                        <tr>
+                                            <td scope="col">
+                                                <i class="fas fa-@(ps.ParentSecureAreaDisplayIcon)"></i>&nbsp;@ps.ParentSecureAreaDisplayName
+                                            </td>
+                                            <td scope="col">
+                                                <i class="fas fa-@(sa.SecureAreaDisplayIcon)"></i>&nbsp;@sa.SecureAreaDisplayName
+                                            </td>
+                                            @foreach (var saa in operationalProvider.SecureAreaActions)
+                                            {
+                                                <td scope="col">
+                                                    <input type="checkbox"
+                                                           name="saa_@(sa.SecureAreaID)_@(saa.SecureAreaActionID)"
+                                                           title="@ps.ParentSecureAreaDisplayName - @sa.SecureAreaDisplayName - @saa.SecureAreaActionDisplayName" />
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="card-footer">
+                        @if (Model != null)
+                        {
+                            if (Model.IsSuccess)
+                            {
+                                <div class="row col-12 mb-md-2">
+                                    User has been sucessfully created.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row col-12 mb-md-2 ui-state-error">
+                                    <div class="ui-state-error-text">
+                                        @Model.ErrorMessage
+                                    </div>
+                                </div>
+                            }
+                        }
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/siteadmin/useradmin" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back to User Admin</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+

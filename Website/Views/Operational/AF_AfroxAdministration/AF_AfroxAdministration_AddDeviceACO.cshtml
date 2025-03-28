@@ -1,0 +1,53 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_AddDeviceACOModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_AddDeviceACO.GetDescription()}";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+
+            <div class="card-body">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <label asp-for="GatewayID" class="control-label"></label>:
+                    </div>
+                    <div class="col">
+                        @Html.DropDownList("GatewayID", Model.GatewayID, new { @class = "form-control" })
+                        <span asp-validation-for="GatewayID" class="text-red"></span>
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col-12 text-right">
+                        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;Select Gateway</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/AF_AfroxAdministration/AF_AfroxAdministration_AddDeviceACO_Step3/' + $("#GatewayID").val() + '/40';
+        }
+    </script>
+}

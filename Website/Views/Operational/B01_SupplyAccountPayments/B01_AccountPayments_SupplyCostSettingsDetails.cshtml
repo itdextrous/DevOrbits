@@ -1,0 +1,759 @@
+@model MyVoltage.Models.OperationalModels.B01_SupplyAccountPaymentsModels.B01_AccountPayments_SupplyCostSettingsDetailsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B01_AccountPayments_SupplyCostSettingsDetails.GetDescription() + " - " + opProv.CompanyName;
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row col-12">
+    <ol>
+        <li>First it checks if there is a custom value for meter for month</li>
+        <li>Second it checks if there is a custom value for month</li>
+        <li>Last it uses default values</li>
+    </ol>
+</div>
+
+@if (opProv.CompanyID == 0)
+{
+    <div class="row col-12">
+        Select company to see results...
+    </div>
+}
+else
+{
+    <form asp-action="B01_AccountPayments_SupplyCostSettingsDetails" enctype="multipart/form-data">
+        <div class="p-2 align-middle">
+            <div class="row col-12 align-middle">
+                <h5>Default Values</h5>
+            </div>
+            <div class="row mt-md-2 align-middle">
+                <div class="col">
+                    <h6>Description</h6>
+                </div>
+                <div class="col-2 text-right">
+                    <h6>Cost Per Unit</h6>
+                </div>
+                <div class="col-2 text-right">
+                    <h6>@DateTime.Now.AddMonths(-1).ToMonth()<br />Total Units</h6>
+                </div>
+                <div class="col-2 text-right">
+                    <h6>@DateTime.Now.AddMonths(-1).ToMonth()<br />Total Cost</h6>
+                </div>
+            </div>
+            <div class="row mt-md-2 align-middle">
+                <div class="col">
+                    <img src="~/images/elec-icon-s.png" />
+                    <label asp-for="DefaultCostPerUnitElec"></label>&nbsp;for @opProv.CompanyName:
+                    <ul>
+                        @foreach (var meter in Model.BuildingCouncilMeters.Where(p => p.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity).ToList())
+                        {
+                            <li>
+                                @meter.Name - @meter.MyVoltageSerial - @meter.CouncilSerial
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-2 text-right">
+                    <input type="text" asp-for="DefaultCostPerUnitElec" class="form-control" />
+                    <span asp-validation-for="DefaultCostPerUnitElec" class="text-red"></span>
+                </div>
+                <div class="col-2 text-right">
+                    @Model.DefaultCostPerUnitElec_LastMonthUnits.ToReading("kWh")
+                </div>
+                <div class="col-2 text-right">
+                    @Model.DefaultCostPerUnitElec_LastMonthAmount.ToMoney("R")
+                </div>
+            </div>
+            <div class="row mt-md-2 align-middle">
+                <div class="col">
+                    <img src="~/images/water-icon-s.png" />
+                    <label asp-for="DefaultCostPerUnitWater"></label>&nbsp;for @opProv.CompanyName:
+                    <ul>
+                        @foreach (var meter in Model.BuildingCouncilMeters.Where(p => p.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Water).ToList())
+                        {
+                            <li>
+                                @meter.Name - @meter.MyVoltageSerial - @meter.CouncilSerial
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-2 text-right">
+                    <input type="text" asp-for="DefaultCostPerUnitWater" class="form-control" />
+                    <span asp-validation-for="DefaultCostPerUnitWater" class="text-red"></span>
+                </div>
+                <div class="col-2 text-right">
+                    @Model.DefaultCostPerUnitWater_LastMonthUnits.ToReading("kL")
+                </div>
+                <div class="col-2 text-right">
+                    @Model.DefaultCostPerUnitWater_LastMonthAmount.ToMoney("R")
+                </div>
+            </div>
+            <div class="row mt-md-2 align-middle">
+                <div class="col">
+                    <img src="~/images/gas-icon-s.png" />
+                    <label asp-for="DefaultCostPerUnitGas"></label>&nbsp;for @opProv.CompanyName:
+                    <ul>
+                        @foreach (var meter in Model.BuildingCouncilMeters.Where(p => p.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas).ToList())
+                        {
+                            <li>
+                                @meter.Name - @meter.MyVoltageSerial - @meter.CouncilSerial
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-2 text-right">
+                    <input type="text" asp-for="DefaultCostPerUnitGas" class="form-control" />
+                    <span asp-validation-for="DefaultCostPerUnitGas" class="text-red"></span>
+                </div>
+                <div class="col-2 text-right">
+                    @Model.DefaultCostPerUnitGas_LastMonthUnits.ToReading("m3")
+                </div>
+                <div class="col-2 text-right">
+                    @Model.DefaultCostPerUnitGas_LastMonthAmount.ToMoney("R")
+                </div>
+            </div>
+            <div class="row mt-md-2 text-right">
+                <div class="col-12">
+                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update Defaults</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-1 mv-gradient">
+                <div class="card-body">
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            Between
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control rounded" type="date" name="FromDate" id="FromDate" asp-for="FromDate" value="@(Model.FromDate.ToDateShort())" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            And
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <input class="form-control rounded" type="date" name="ToDate" id="ToDate" asp-for="ToDate" value="@(Model.ToDate.ToDateShort())" />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12">
+                            <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                            &nbsp;
+                            <a href="/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (Model.Company_CostSettings == null)
+    {
+        <span>Cost per meter will be avaiable once defaults above has been saved</span>
+    }
+    else
+    {
+        <div class="p-2">
+            <h5>Per Month Custom Values</h5>
+            <table class="table table-bordered table-responsive-xl table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th rowspan="2" scope="col">Device Type</th>
+                        <th rowspan="2" scope="col">Product</th>
+                        <th rowspan="2" scope="col">Resource Type</th>
+                        <th rowspan="2" scope="col" class="text-right">Month</th>
+                        <th rowspan="2" scope="col" style="min-width:220px!important;width:220px!important;">Account No</th>
+                        <th rowspan="2" scope="col" class="text-right">Average Rate Per Unit</th>
+                        <th rowspan="2" scope="col" class="text-right">Total Number Of Units Used During Month</th>
+                        <th rowspan="2" scope="col" class="text-right">Amount Excl</th>
+                        <th rowspan="2" scope="col">Skybill Document No</th>
+                        <th rowspan="2" scope="col">GL Description (5310)</th>
+                        <th rowspan="2" scope="col">Creditor Amount (5310)</th>
+                        <th rowspan="2" scope="col">Vendors, Intercompany (5425)</th>
+                        <th rowspan="2" scope="col">VAT Amount (5621)</th>
+                        <th rowspan="2" scope="col">COS (7110)</th>
+                        <th rowspan="2" scope="col">Rental (7150)</th>
+                        <th rowspan="2" style="min-width:220px!important;width:220px!important;" scope="col">
+                            <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="RedirectToSkybillPost_Bulk();"><i class="fas fa-dollar-sign"></i>&nbsp;Bulk Post Journal</a>
+                        </th>
+                        @*<th rowspan="2" scope="col" class="text-right">Council Reading Diff</th>*@
+                        @*<th colspan="4" scope="col" class="text-center">Council Reading</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    @*<tr>
+            <td scope="col">
+            <select id="add_month_deviceType" class="form-control">
+            @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+            {
+            if (dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Unknown
+            || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.GPS
+            || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Valve)
+            {
+            continue;
+            }
+            <option value="@((int)dt)">@dt</option>
+            }
+            </select>
+            </td>
+            <td scope="col">
+            <select id="add_month_product" class="form-control">
+            @foreach (var bCT in Model.SiteAdmin_Products)
+            {
+            <option value="@(bCT.ID)">@bCT.ProductName</option>
+            }
+            </select>
+            </td>
+            <td scope="col" class="text-right" title="Day will be ignored"><input id="add_month_month" type="date" class="form-control" /></td>
+            <td scope="col" class="text-right"><input id="add_month_rate" type="text" class="form-control" /></td>
+            <td scope="col" class="text-right"><input id="add_month_units" type="text" class="form-control" /></td>
+            <td scope="col"></td>
+            <td scope="col" class="text-right"><a onclick="DoAddMonth();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add / Update</a></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            </tr>*@
+                    @foreach (var item in Model.Company_CostSetting_Monthly_Items.OrderByDescending(p => p.BillingMonth))
+                    {
+                        string rowClass = "";
+                        if (!item.HasTemplate || item.ReversalDetected)
+                        {
+                            rowClass = "table-danger";
+                        }
+                        <tr class="@Html.Raw(rowClass)" id="MeterOnManualSummaryItemRow_@item.ID">
+                            <td scope="col" class="text-nowrap" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">
+                                @if (((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) == MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity)
+                                {
+                                    <img src="~/images/elec-icon-s.png" />
+                                }
+                                @if (((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) == MyVoltage.Data.DeviceType.DeviceTypeEnum.Water)
+                                {
+                                    <img src="~/images/water-icon-s.png" />
+                                }
+                                @if (((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas)
+                                {
+                                    <img src="~/images/gas-icon-s.png" />
+                                }
+                                @((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID)
+                            </td>
+                            <td scope="col" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">@(item.SiteAdmin_Product != null ? item.SiteAdmin_Product.ProductName : "")</td>
+                            <td scope="col" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">@(item.ResourceType)</td>
+                            <td scope="col" class="text-right" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">@item.BillingMonth.ToString("yyyy MMM")</td>
+                            <td scope="col">
+                                @if (item.ProductID.HasValue && item.ProductID.Value == 7@*Monthly Meter Rental*@)
+                                {
+
+                                }
+                                else
+                                {
+                                    @if (item.BuildingCouncilDetailID.HasValue && Model.BuildingCouncilDetails.Where(p => p.ID == item.BuildingCouncilDetailID.Value).SingleOrDefault() != null)
+                                    {
+                                        <span>@Model.BuildingCouncilDetails.Where(p => p.ID == item.BuildingCouncilDetailID.Value).SingleOrDefault().CouncilElecAccNo</span>
+                                    }
+                                }
+                            </td>
+                            <td scope="col" data-toggle="tooltip" data-placement="left" title="@((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) - @item.BillingMonth.ToString("yyyy MMM") - Average Rate Per Unit (@item.CostPerUnit.ToString("N6"))" class="text-right" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">@item.CostPerUnit.ToString("N6")</td>
+                            <td scope="col" data-toggle="tooltip" data-placement="left" title="@((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) - @item.BillingMonth.ToString("yyyy MMM") - Total Number Of Units Used During Month (@item.Units.ToReading())" class="text-nowrap text-right" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">@item.Units.ToReading()</td>
+                            <td scope="col" data-toggle="tooltip" data-placement="left" title="@((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) - @item.BillingMonth.ToString("yyyy MMM") - Amount Excl (@item.CostPerUnit_Amount.ToMoney("R"))" class="text-nowrap text-right" style="cursor:pointer;" onclick="RedirectToTemplate('@item.BillingMonth.ToDateShort()', '@item.BillingMonth.ToDateShort()', '@item.ProductID');">@item.CostPerUnit_Amount.ToMoney("R")</td>
+                            <td scope="col" class="text-nowrap">
+                                @item.SkybillDocumentNo
+                                @if (item.ReversalDetected)
+                                {
+                                    <span>- Reversal Detected</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.SkybillDocumentNo))
+                                {
+                                    <a href="#" onclick="RedirectToAction('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_RemoveLink/@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i></a>
+                                }
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItem_@item.ID">
+                                    @if (!string.IsNullOrEmpty(item.SkybillDocumentNo))
+                                    {
+                                        @Html.Raw("Loading...")
+                                    }
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemAmount_5310_@item.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemAmount_5425_@item.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemAmount_5621_@item.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemAmount_7110_@item.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-nowrap">
+                                <span id="MeterOnManualSummaryItemAmount_7150_@item.ID">
+                                </span>
+                            </td>
+                            <td scope="col" class="text-right text-nowrap">
+                                @if (!item.HasTemplate)
+                                {
+                                    <span class="text-red font-weight-bold">Calculation Missing</span>
+                                }
+                                @if (string.IsNullOrEmpty(item.SkybillDocumentNo))
+                                {
+                                    if (item.SiteAdmin_Product.CostOfSalesLink == MyVoltage.Data.SiteAdmin_ProductLinkEnum.L_MeterRentals_Accounting)
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="RedirectToSkybillPost('@item.ID', '@item.CostPerUnit_Amount');"><i class="fas fa-dollar-sign"></i>&nbsp;Create 5425-7150 Journal</a>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary-sm" href="#" onclick="RedirectToSkybillPost('@item.ID', '@item.CostPerUnit_Amount');"><i class="fas fa-dollar-sign"></i>&nbsp;Create 5310-7110 Journal</a>
+                                    }
+                                    <span>&nbsp;|&nbsp;</span>
+                                }
+                                <a onclick="DoDeleteMonth('@item.ID', '@((MyVoltage.Data.DeviceType.DeviceTypeEnum)item.DeviceTypeID) - @item.BillingMonth.ToString("yyyy MMM") - @item.CostPerUnit.ToString("N6")');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="p-2">
+            <h5>Per Meter Per Month Custom Values</h5>
+            <table class="table table-responsive-xl table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Customer No</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Resource Type</th>
+                        <th scope="col">Serial</th>
+                        <th scope="col" class="text-right">Month</th>
+                        <th scope="col" class="text-right">Average Rate Per Unit</th>
+                        <th scope="col" class="text-right">Total Number Of Units Used During Month</th>
+                        <th scope="col" class="text-right">Amount Excl</th>
+                        <th style="min-width:220px!important;width:220px!important;" scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td scope="col"><span id="add_customerno" type="text"></span></td>
+                        <td scope="col">
+                            <select id="add_product" class="form-control">
+                                @foreach (var bCT in Model.SiteAdmin_Products)
+                                {
+                                    <option value="@(bCT.ID)">@bCT.ProductName</option>
+                                }
+                            </select>
+                        </td>
+                        <td scope="col"></td>
+                        <td scope="col"><input id="add_serial" type="text" class="form-control" /></td>
+                        <td scope="col" class="text-right" title="Day will be ignored"><input id="add_month" type="date" class="form-control" /></td>
+                        <td scope="col" class="text-right"><input id="add_rate" type="text" class="form-control" /></td>
+                        <td scope="col" class="text-right"><input id="add_units" type="text" class="form-control" /></td>
+                        <td scope="col"></td>
+                        <td scope="col"><a onclick="DoAdd();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add / Update</a></td>
+                    </tr>
+                    @foreach (var item in Model.B01_AccountPayments_SupplyCostSettingsDetails_Items.OrderByDescending(p => p.BillingMonth))
+                    {
+                        <tr style="cursor:pointer;" onclick="AutoFillPerMeterPerMonthEditValues('@item.SerialNo', '@item.BillingMonth.ToString("yyyy-MM-dd")', '@item.CostPerUnit.ToString("N6")', '@item.Units.ToString("N0")', '@item.ProductID');">
+                            <td scope="col">@item.CustomerNo</td>
+                            <td scope="col">@(item.SiteAdmin_Product != null ? item.SiteAdmin_Product.ProductName : "")</td>
+                            <td scope="col">@(item.ResourceType)</td>
+                            <td scope="col">@Html.Raw(item.IconURL) - @item.SerialNo</td>
+                            <td scope="col" class="text-right">@item.BillingMonth.ToString("yyyy MMM")</td>
+                            <td scope="col" class="text-right">@item.CostPerUnit.ToString("N6")</td>
+                            <td scope="col" class="text-nowrap text-right">@item.Units.ToReading()</td>
+                            <td scope="col" class="text-nowrap text-right">@item.CostPerUnit_Amount.ToMoney("R")</td>
+                            <td scope="col" class="text-nowrap text-right"><a onclick="DoDelete('@item.ID', '@item.SerialNo - @item.BillingMonth.ToString("yyyy MMM") - @item.CostPerUnit.ToString("N6")');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+
+}
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var items = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Company_CostSetting_Monthly_Items)));
+            $(items).each(function () {
+                var itemID = this.ID;
+                var thisAmount = this.CostPerUnit_Amount;
+                var skybillDocumentNo = this.SkybillDocumentNo;
+                var accountNo = this.AccountNo;
+                var resourceType = this.ResourceType;
+                var productName = this.SiteAdmin_Product.ShortName;
+                if (skybillDocumentNo != null && skybillDocumentNo != '') {
+                    $.get('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_SystemCheck/' + this.SkybillDocumentNo + '/' + this.ID + '/5310', function (data, status) {
+                        $("#MeterOnManualSummaryItem_" + itemID).html(data.description);
+                        if (data.amount != '') {
+                            $("#MeterOnManualSummaryItemAmount_5310_" + itemID).html('R ' + data.amount.toLocaleString('en-GB'));
+                        }
+                        else {
+                            $("#bcd_" + itemID).css('display', 'none');
+                        }
+                        //$("#MeterOnManualSummaryItemDiff_" + itemID).html('R ' + (data.amount - thisAmount).toLocaleString('en-GB'));
+                        //$("#MeterOnManualSummaryItemDate_" + itemID).html(data.date);
+                        //$("#MeterOnManualSummaryItemDateDiff_" + itemID).html(data.dateDiff);
+                        //if (
+                        //    ((data.amount - thisAmount) > 1
+                        //    || (data.amount - thisAmount) < -1)
+                        //    || (data.dateDiffN > 7 || data.dateDiffN < -7)
+                        //) {
+                        //    $('#row_' + itemID).attr("class", 'table-danger');
+                        //}
+                        if (
+                            (data.description.indexOf(accountNo) == -1 && $("#MeterOnManualSummaryItemRow_" + itemID).html().indexOf(accountNo) != -1)
+                        ) {
+                            $("#MeterOnManualSummaryItemRow_" + itemID).addClass("table-danger");
+                            $("#MeterOnManualSummaryItemAmount_5310_" + itemID).attr('title', accountNo + "; not found.");
+                        }
+                        else {
+                            if ($("#bcd_" + itemID).val() != '') {
+                                $("#bcd_" + itemID).attr('disabled', 'disabled');
+                            }
+                        }
+                        if (
+                            (data.description.indexOf(resourceType) == -1 && $("#MeterOnManualSummaryItemRow_" + itemID).html().indexOf(resourceType) != -1)
+                        ) {
+                            $("#MeterOnManualSummaryItemRow_" + itemID).addClass("table-danger");
+                            $("#MeterOnManualSummaryItemAmount_5310_" + itemID).attr('title', resourceType + "; not found.");
+                        }
+                        if (
+                            (data.description.indexOf(productName) == -1 && $("#MeterOnManualSummaryItemRow_" + itemID).html().indexOf(productName) != -1)
+                        ) {
+                            $("#MeterOnManualSummaryItemRow_" + itemID).addClass("table-danger");
+                            $("#MeterOnManualSummaryItemAmount_5310_" + itemID).attr('title', productName + "; not found.");
+                        }
+                        if ($("#bcd_" + itemID).val() == '') {
+                            $("#MeterOnManualSummaryItemRow_" + itemID).addClass("table-danger");
+                        }
+                    }).done(function () {
+                    });
+
+                    $.get('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_SystemCheck/' + this.SkybillDocumentNo + '/' + this.ID + '/5425', function (data, status) {
+                        if (data.description.indexOf('Not Found') == -1 && $("#MeterOnManualSummaryItem_" + itemID).html().indexOf('Not Found') != -1) {
+                            $("#MeterOnManualSummaryItem_" + itemID).html(data.description);
+                        }
+                        if (data.amount != '') {
+                            $("#MeterOnManualSummaryItemAmount_5425_" + itemID).html('R ' + data.amount.toLocaleString('en-GB'));
+                        }
+                    }).done(function () {
+                    });
+
+                    $.get('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_SystemCheck/' + this.SkybillDocumentNo + '/' + this.ID + '/5621', function (data, status) {
+                        if (data.description.indexOf('Not Found') == -1 && $("#MeterOnManualSummaryItem_" + itemID).html().indexOf('Not Found') != -1) {
+                            $("#MeterOnManualSummaryItem_" + itemID).html(data.description);
+                        }
+                        if (data.amount != '') {
+                            $("#MeterOnManualSummaryItemAmount_5621_" + itemID).html('R ' + data.amount.toLocaleString('en-GB'));
+                        }
+                    }).done(function () {
+                    });
+
+                    $.get('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_SystemCheck/' + this.SkybillDocumentNo + '/' + this.ID + '/7110', function (data, status) {
+                        if (data.description.indexOf('Not Found') == -1 && $("#MeterOnManualSummaryItem_" + itemID).html().indexOf('Not Found') != -1) {
+                            $("#MeterOnManualSummaryItem_" + itemID).html(data.description);
+                        }
+                        if (data.amount != '') {
+                            $("#MeterOnManualSummaryItemAmount_7110_" + itemID).html('R ' + data.amount.toLocaleString('en-GB'));
+                            if (parseFloat(thisAmount).toFixed(2) != parseFloat(data.amount).toFixed(2)) {
+                                $("#MeterOnManualSummaryItemAmount_7110_" + itemID).addClass("text-red");
+                                $("#MeterOnManualSummaryItemAmount_7110_" + itemID).addClass("font-weight-bold");
+                            }
+                        }
+                    }).done(function () {
+                    });
+
+                    $.get('/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_SystemCheck/' + this.SkybillDocumentNo + '/' + this.ID + '/7150', function (data, status) {
+                        if (data.description.indexOf('Not Found') == -1 && $("#MeterOnManualSummaryItem_" + itemID).html().indexOf('Not Found') != -1) {
+                            $("#MeterOnManualSummaryItem_" + itemID).html(data.description);
+                        }
+                        if (data.amount != '') {
+                            $("#MeterOnManualSummaryItemAmount_7150_" + itemID).html('R ' + data.amount.toLocaleString('en-GB'));
+                            if (parseFloat(thisAmount).toFixed(2) != parseFloat(data.amount).toFixed(2)) {
+                                $("#MeterOnManualSummaryItemAmount_7150_" + itemID).addClass("text-red");
+                                $("#MeterOnManualSummaryItemAmount_7150_" + itemID).addClass("font-weight-bold");
+                            }
+                        }
+                    }).done(function () {
+                    });
+
+                }
+                else {
+                    $("#MeterOnManualSummaryItemRow_" + itemID).addClass("table-danger");
+                }
+            });
+        });
+        function RedirectToSkybillPost(ID, amount) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetailsSkybillPost/' + ID + '/' + amount + "?R=" + encodeURIComponent(document.location.href);;
+        }
+        function RedirectToSkybillPost_Bulk() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetailsSkybillPost_Bulk?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val() + "&R=" + encodeURIComponent(document.location.href);;
+        }
+        $("#add_serial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_SerialSearch",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            }
+        });
+
+        function AutoFillPerMonthEditValues(deviceType, month, rate, units, product) {
+            $("#add_month_deviceType").val(deviceType);
+            $("#add_month_month").val(month);
+            $("#add_month_rate").val(rate);
+            $("#add_month_units").val(units);
+            $("#add_month_product").val(product);
+        }
+
+        function AutoFillPerMeterPerMonthEditValues(serial, month, rate, units, product) {
+            $("#add_serial").val(serial);
+            $("#add_month").val(month);
+            $("#add_rate").val(rate);
+            $("#add_units").val(units);
+            $("#add_product").val(product);
+        }
+
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_serial").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter serial');
+                $("#add_serial").focus();
+                return;
+            }
+
+            if ($("#add_month").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter month');
+                $("#add_month").focus();
+                return;
+            }
+
+            if ($("#add_rate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter rate');
+                $("#add_rate").focus();
+                return;
+            }
+
+            if ($("#add_units").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter units');
+                $("#add_units").focus();
+                return;
+            }
+
+            if ($("#add_product").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter product');
+                $("#add_product").focus();
+                return;
+            }
+
+            $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_ItemAdd",
+                {
+                    add_serial: $("#add_serial").val(),
+                    add_month: $("#add_month").val(),
+                    add_rate: $("#add_rate").val(),
+                    add_units: $("#add_units").val(),
+                    add_product: $("#add_product").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_ItemDelete/" + ItemID,
+                    {
+                        add_serial: $("#add_serial").val(),
+                        add_month: $("#add_month").val(),
+                        add_rate: $("#add_rate").val(),
+                        add_units: $("#add_units").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+        function DoAddMonth() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_month_month").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter month');
+                $("#add_month_month").focus();
+                return;
+            }
+
+            if ($("#add_month_rate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter rate');
+                $("#add_month_rate").focus();
+                return;
+            }
+
+            if ($("#add_month_units").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter units');
+                $("#add_month_units").focus();
+                return;
+            }
+
+            if ($("#add_month_product").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter product');
+                $("#add_month_product").focus();
+                return;
+            }
+
+            $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_MonthlyAdd",
+                {
+                    add_month_deviceType: $("#add_month_deviceType").val(),
+                    add_month_month: $("#add_month_month").val(),
+                    add_month_rate: $("#add_month_rate").val(),
+                    add_month_units: $("#add_month_units").val(),
+                    add_month_product: $("#add_month_product").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDeleteMonth(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+                $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_MonthlyDelete/" + ItemID,
+                    {
+                        add_month_deviceType: $("#add_month_deviceType").val(),
+                        add_month_month: $("#add_month_month").val(),
+                        add_month_rate: $("#add_month_rate").val(),
+                        add_month_units: $("#add_month_units").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            $("#loaderContent").css("display", "block");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+
+        function UpdateBCD(itemID, bcdID) {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_month_month").val() == '') {
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            $.post("/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails_UpdateBCD",
+                {
+                    itemID: itemID,
+                    bcdID: bcdID
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function RedirectToTemplate(fromDate, toDate, productID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsTemplates?from=' + fromDate + '&to=' + toDate + '&Products=' + productID;
+        }
+
+        function RedirectToAction(url) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = url + "?R=" + encodeURIComponent(document.location.href);
+        }
+
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B01_SupplyAccountPayments/B01_AccountPayments_SupplyCostSettingsDetails?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val();
+        }
+    </script>
+}

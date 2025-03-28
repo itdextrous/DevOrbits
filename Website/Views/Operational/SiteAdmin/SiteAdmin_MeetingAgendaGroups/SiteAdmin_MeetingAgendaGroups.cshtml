@@ -1,0 +1,77 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_MeetingAgendaGroupsModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_MeetingAgendaGroups.GetDescription();
+}
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New</a>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-responsive-xl table-hover table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Meeting Agenda Group Name</th>
+                    <th scope="col">Meeting Agendas</th>
+                    <th scope="col">Created By</th>
+                    <th scope="col">Updated By</th>
+                    <th scope="col">Deleted</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.SiteAdmin_MeetingAgendaGroupItems)
+                {
+                    <tr>
+                        <td scope="row">
+                            @if (entry.IsDeleted)
+                            {
+                                <del>@entry.MeetingAgendaGroupName</del>
+                            }
+                            else
+                            {
+                                <text>@entry.MeetingAgendaGroupName</text>
+                            }
+                        </td>
+                        <td>
+                            @foreach (var item in entry.SiteAdmin_MeetingAgendaGroupItemMeetingAgendaItems)
+                            {
+                                <div class="row flex-nowrap">
+                                    <div class="col">
+                                        @if (item.IsDeleted)
+                                        {
+                                            <del>@item.SiteAdmin_MeetingAgendaAction.MeetingAgendaActionName - @item.SiteAdmin_MeetingAgendaReporting.MeetingAgendaReportingName</del>
+                                        }
+                                        else
+                                        {
+                                            <span>@item.SiteAdmin_MeetingAgendaAction.MeetingAgendaActionName - @item.SiteAdmin_MeetingAgendaReporting.MeetingAgendaReportingName</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </td>
+                        <td scope="row" title="@entry.CreatedDate.ToDateAndTimeShort()">@entry.CreatedByUsername</td>
+                        <td scope="row" title="@entry.UpdatedDate.ToDateAndTimeShort(true)">@entry.UpdatedByUsername</td>
+                        <td scope="row">@entry.IsDeleted.ToBoolean()</td>
+                        <td scope="row">
+                            <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_Edit/@entry.ID" title="Edit @entry.MeetingAgendaGroupName"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                            <text>&nbsp;</text>
+                            @if (entry.IsDeleted)
+                            {
+                                <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_Restore/@entry.ID" title="Restore @entry.MeetingAgendaGroupName"><i class="fas fa-undo"></i>&nbsp;Restore</a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-outline-primary-sm" href="/operational/SiteAdmin/SiteAdmin_MeetingAgendaGroups_Delete/@entry.ID" title="Delete @entry.MeetingAgendaGroupName"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>

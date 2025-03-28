@@ -1,0 +1,190 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_OverallStatsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_OverallStats.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-hover table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th scope="col" rowspan="2" class="text-center border-table">Region</th>
+                    <th scope="col" colspan="3" class="text-center border-table-spanned"><h6>Sites</h6></th>
+                    <th scope="col" colspan="3" class="text-center border-table-spanned"><h6>Units</h6></th>
+                    <th scope="col" colspan="@(Model.Manufacturers.Count + 1)" class="text-center border-table-spanned"><h6>Meter Make</h6></th>
+                </tr>
+                <tr>
+                    <th scope="col" class="border-table-left text-center">Total</th>
+                    <th scope="col" class="border-table text-center">Information Complete</th>
+                    @*<th scope="col" class="border-table text-center">System Setup Sign Off</th>
+                    <th scope="col" class="border-table text-center">Meter Serial No Check</th>
+                    <th scope="col" class="border-table text-center">Customer Setup Sign Off</th>*@
+                    <th scope="col" class="border-table text-center">Verification</th>
+                    @*<th scope="col" class="border-table text-center">Occupied</th>
+                    <th scope="col" class="border-table text-center">Vacant</th>
+                    <th scope="col" class="border-table text-center">Service Meter</th>
+                    <th scope="col" class="border-table text-center">Low Usage</th>
+                    <th scope="col" class="border-table text-center">Manual Readings</th>
+                    <th scope="col" class="border-table text-center">Replace Meters</th>
+                    <th scope="col" class="border-table-right text-center">No Information</th>*@
+
+                    <th scope="col" class="border-table-left text-center">Total</th>
+                    <th scope="col" class="border-table text-center">Information Complete</th>
+                    @*<th scope="col" class="border-table text-center">System Setup Sign Off</th>
+                    <th scope="col" class="border-table text-center">Meter Serial No Check</th>
+                    <th scope="col" class="border-table text-center">Customer Setup Sign Off</th>*@
+                    <th scope="col" class="border-table-right text-center">Verification</th>
+                    @*<th scope="col" class="border-table text-center">Occupied</th>
+                    <th scope="col" class="border-table text-center">Vacant</th>
+                    <th scope="col" class="border-table text-center">Service Meter</th>
+                    <th scope="col" class="border-table text-center">Low Usage</th>
+                    <th scope="col" class="border-table text-center">Manual Readings</th>
+                    <th scope="col" class="border-table text-center">Replace Meters</th>
+                    <th scope="col" class="border-table-right text-center">No Information</th>*@
+
+                    <th scope="col" class="border-table-left text-center">Total</th>
+                    @{
+                        int manCount = 0;
+                    }
+                    @foreach (var man in Model.Manufacturers)
+                    {
+                        manCount++;
+                        if (manCount == Model.Manufacturers.Count)
+                        {
+                            <th scope="col" class="text-center text-nowrap border-table-right">@man</th>
+                        }
+                        else
+                        {
+                            <th scope="col" class="text-center text-nowrap border-table">@man</th>
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.AF_AfroxAdministration_OverallStatsItems)
+                {
+                    <tr onclick="PartnerChange('@entry.PartnerID');" style="cursor:pointer;">
+                        <td scope="col" class="text-nowrap border-table">@entry.PartnerName</td>
+
+                        <td scope="col" class="text-nowrap font-weight-bold text-center border-table-left table-info">@entry.CompanyCount</td>
+                        <td scope="col" class="text-nowrap text-center border-table">@entry.InformationCompleteCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.InformationCompleteCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                        @*<td scope="col" class="text-nowrap text-center border-table">@entry.SystemSetupSignOffCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.SystemSetupSignOffCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.MeterSerialNoCheckCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.MeterSerialNoCheckCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.CustomerSetupSignOffCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.CustomerSetupSignOffCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>*@
+                        <td scope="col" class="text-nowrap text-center border-table">@entry.VerificationCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.VerificationCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                        @*<td scope="col" class="text-nowrap text-center border-table">@entry.OccupiedCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.OccupiedCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.VacantCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.VacantCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.ServiceMeterCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.ServiceMeterCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.LowUsageCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.LowUsageCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.ManualReadingsCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.ManualReadingsCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.ReplaceMetersCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.ReplaceMetersCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table-right">@entry.NoInformationCompanyCount (@((entry.CompanyCount == 0 ? 0 : (Convert.ToDecimal(entry.NoInformationCompanyCount) / Convert.ToDecimal(entry.CompanyCount)) * 100.0m).ToReading())%)</td>*@
+
+                        <td scope="col" class="text-nowrap font-weight-bold text-center border-table-left table-info">@entry.CustomerCount</td>
+                        <td scope="col" class="text-nowrap text-center border-table">@entry.InformationCompleteCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.InformationCompleteCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                        @*<td scope="col" class="text-nowrap text-center border-table">@entry.SystemSetupSignOffCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.SystemSetupSignOffCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.MeterSerialNoCheckCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.MeterSerialNoCheckCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.CustomerSetupSignOffCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.CustomerSetupSignOffCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>*@
+                        <td scope="col" class="text-nowrap text-center border-table-right">@entry.VerificationCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.VerificationCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                        @*<td scope="col" class="text-nowrap text-center border-table">@entry.OccupiedCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.OccupiedCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.VacantCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.VacantCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.ServiceMeterCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.ServiceMeterCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.LowUsageCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.LowUsageCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.ManualReadingsCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.ManualReadingsCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table">@entry.ReplaceMetersCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.ReplaceMetersCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap text-center border-table-right">@entry.NoInformationCustomerCount (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(entry.NoInformationCustomerCount) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>*@
+
+                        <td scope="col" class="text-nowrap font-weight-bold text-center border-table-left table-info">@entry.CustomerCount</td>
+                        @{
+                            manCount = 0;
+                        }
+                        @foreach (var man in Model.Manufacturers)
+                        {
+                            manCount++;
+                            int count = 0;
+                            if (entry.MeterManufacturers.ContainsKey(man))
+                                count = entry.MeterManufacturers[man];
+                            if (manCount == Model.Manufacturers.Count)
+                            {
+                                <td scope="col" class="text-nowrap text-center border-table-right">@count (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(count) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                            }
+                            else
+                            {
+                                <td scope="col" class="text-nowrap text-center border-table">@count (@((entry.CustomerCount == 0 ? 0 : (Convert.ToDecimal(count) / Convert.ToDecimal(entry.CustomerCount)) * 100.0m).ToReading())%)</td>
+                            }
+                        }
+                    </tr>
+                }
+                <tr class="border-table-total">
+                    <td scope="col" class="text-nowrap font-weight-bold border-table">Total</td>
+
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table-left table-info">@Model.CompanyCount</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.InformationCompleteCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.InformationCompleteCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    @*<td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.SystemSetupSignOffCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.SystemSetupSignOffCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.MeterSerialNoCheckCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.MeterSerialNoCheckCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.CustomerSetupSignOffCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.CustomerSetupSignOffCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>*@
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.VerificationCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.VerificationCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    @*<td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.OccupiedCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.OccupiedCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.VacantCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.VacantCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.ServiceMeterCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.ServiceMeterCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.LowUsageCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.LowUsageCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.ManualReadingsCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.ManualReadingsCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.ReplaceMetersCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.ReplaceMetersCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table-right">@Model.NoInformationCompanyCount (@((Model.CompanyCount == 0 ? 0 : (Convert.ToDecimal(Model.NoInformationCompanyCount) / Convert.ToDecimal(Model.CompanyCount)) * 100.0m).ToReading())%)</td>*@
+
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table-left table-info">@Model.CustomerCount</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.InformationCompleteCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.InformationCompleteCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    @*<td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.SystemSetupSignOffCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.SystemSetupSignOffCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.MeterSerialNoCheckCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.MeterSerialNoCheckCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.CustomerSetupSignOffCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.CustomerSetupSignOffCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>*@
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table-right">@Model.VerificationCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.VerificationCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    @*<td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.OccupiedCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.OccupiedCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.VacantCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.VacantCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.ServiceMeterCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.ServiceMeterCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.LowUsageCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.LowUsageCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.ManualReadingsCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.ManualReadingsCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@Model.ReplaceMetersCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.ReplaceMetersCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table-right">@Model.NoInformationCustomerCount (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(Model.NoInformationCustomerCount) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>*@
+
+                    <td scope="col" class="text-nowrap font-weight-bold text-center border-table-left table-info">@Model.CustomerCount</td>
+                    @{
+                        manCount = 0;
+                    }
+                    @foreach (var man in Model.Manufacturers)
+                    {
+                        manCount++;
+                        int countTotal = 0;
+                        if (Model.MeterManufacturers.ContainsKey(man))
+                            countTotal = Model.MeterManufacturers[man];
+                        if (manCount == Model.Manufacturers.Count)
+                        {
+                            <td scope="col" class="text-nowrap font-weight-bold text-center border-table-right">@countTotal (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(countTotal) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                        }
+                        else
+                        {
+                            <td scope="col" class="text-nowrap font-weight-bold text-center border-table">@countTotal (@((Model.CustomerCount == 0 ? 0 : (Convert.ToDecimal(countTotal) / Convert.ToDecimal(Model.CustomerCount)) * 100.0m).ToReading())%)</td>
+                        }
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function PartnerChange(value) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeActivePartner/' + value + '?R=' + encodeURIComponent('/operational/AF_AfroxAdministration/AF_AfroxAdministration_Metering_Summary');
+        }
+    </script>
+}

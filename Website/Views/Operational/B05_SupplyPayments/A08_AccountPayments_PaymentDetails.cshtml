@@ -1,0 +1,145 @@
+@model MyVoltage.Models.OperationalModels.B05_SupplyPayments.B05_SupplyPaymentsModels.B05_AccountPayments_PaymentDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B05_AccountPayments_PaymentDetails.GetDescription() + " - " + operationalProvider.CompanyName;
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mt-2 mb-2">
+    <div class="col text-left">
+        <select class="form-control" id="buildingCouncilID" onchange="RedirectToFilter();">
+            <option value="">[All Account Numbers]</option>
+            @foreach (SelectListItem item in Model.AccountNo)
+            {
+                @if (item.Selected)
+                {
+                    <option value="@item.Value" selected="selected">@item.Text</option>
+                }
+                else
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+
+@if (Model.B05_AccountPayments_PaymentDetailsItems.Count == 0)
+{
+    <span>There are no entries for @operationalProvider.CompanyName</span>
+}
+else
+{
+    <table class="table table-sm table-striped table-hover table-bordered">
+        <thead>
+            <tr>
+                <th scope="col" rowspan="2" class="text-left border-table">Company Name</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Account No</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Tax Invoice No</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Tax Invoice Date</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Description</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Payment Date</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Payment Amount</th>
+                <th scope="col" colspan="2" class="text-center border-table-spanned">Paid By</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Document No</th>
+                <th scope="col" rowspan="2" class="text-left border-table">Description</th>
+                <th scope="col" rowspan="2" class="text-left border-table"></th>
+            </tr>
+            <tr>
+                <th scope="col" class="text-left border-table-left">Service Provider</th>
+                <th scope="col" class="text-left border-table-right">Client</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.B05_AccountPayments_PaymentDetailsItems)
+            {
+                string rowclass = "";
+                @if ((item.PayableByServiceProvider != 0 && item.PayableByClient == 0 && string.IsNullOrEmpty(item.SkybillDocumentNo)) || item.ReversalDetected)
+                {
+                    rowclass = "table-danger";
+                }
+                <tr class="@Html.Raw(rowclass)">
+                    <td scope="col" class="text-nowrap text-left border-table">@operationalProvider.CompanyName</td>
+                    <td scope="col" class="text-nowrap text-left border-table">@($"{item.BuildingCouncilDetail.CouncilElecAccNo}")</td>
+                    <td scope="col" class="text-nowrap text-left border-table">@item.BuildingCouncilDetails_Invoice.TAXInvoiceNo</td>
+                    <td scope="col" class="text-nowrap text-left border-table">@item.BuildingCouncilDetails_Invoice.TAXInvoiceDate.ToDateShort()</td>
+                    <td scope="col" class="text-left border-table">@item.Description</td>
+                    <td scope="col" class="text-nowrap text-left border-table">@item.ActionDate.ToDateShort()</td>
+                    <td scope="col" class="text-nowrap text-right border-table">@item.AmountExclVAT.ToMoney("R")</td>
+                    <td scope="col" class="text-nowrap text-right border-table-left">@item.PayableByServiceProvider.ToMoney("R")</td>
+                    <td scope="col" class="text-nowrap text-right border-table-right">@item.PayableByClient.ToMoney("R")</td>
+                    <td scope="col" class="text-nowrap text-left border-table">
+                        @item.SkybillDocumentNo                                
+                        @if (item.ReversalDetected)
+                        {
+                            <span>- Reversal Detected</span>
+                        }
+                    </td>
+                    <td scope="col" class="text-nowrap text-left border-table">@item.SkybillDescription</td>
+                    <td scope="col" class="text-nowrap text-left border-table">
+                        @if (!string.IsNullOrEmpty(item.SkybillDocumentNo))
+                        {
+                            <a title="Delete DocumentNo" href="/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDeleteDocumentNo/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete DocumentNo</a>
+                            <span>&nbsp;|&nbsp;</span>
+                        }
+                        @if (!string.IsNullOrEmpty(item.ReferencedDocumentURL))
+                        {
+                            <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementItemReferencedDocument/@item.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-download"></i>&nbsp;Download POP</a>
+                            <span>&nbsp;|&nbsp;</span>
+                        }
+                        else
+                        {
+                            <a title="Edit" href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture_InvoiceItemA/@item.BuildingCouncilDetails_InvoiceID/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Upload POP</a>
+                            <span>&nbsp;|&nbsp;</span>
+                        }
+                        @if (item.BuildingCouncilDetails_Invoice.Status == MyVoltage.Data.BuildingCouncilDetails_Invoice.StatusEnum.Approved)
+                        {
+                            @if (string.IsNullOrEmpty(item.SkybillDocumentNo))
+                            {
+                                <a href="#" onclick="RedirectToSkybillPost('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-dollar-sign"></i>&nbsp;Post Payment via FNB</a>
+                                <span>&nbsp;|&nbsp;</span>
+                                <a href="#" onclick="RedirectToSkybillPostNetcash('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-dollar-sign"></i>&nbsp;Post Payment via Netcash</a>
+                                <span>&nbsp;|&nbsp;</span>
+                                <a href="/operational/B05_SupplyPayments/B05_AccountPayments_UpdatePaymentID/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Update DocumentNo</a>
+                                <span>&nbsp;|&nbsp;</span>
+                            }
+
+                        }
+                        else
+                        {
+                            <span class="text-red">Invoice not approved</span>
+                            <span>&nbsp;|&nbsp;</span>
+                        }
+                        <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementCapture/@item.BuildingCouncilDetails_InvoiceID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-invoice"></i>&nbsp;View Invoice</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script>
+        function RedirectToDownload(serial) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDownload/' + serial;
+        }
+        function RedirectToSkybillPost(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B05_SupplyPayments/B05_AccountPayments_PaymentSkybillPost/' + ID;
+        }
+        function RedirectToSkybillPostNetcash(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/B05_SupplyPayments/B05_AccountPayments_PaymentSkybillPostNetcash/' + ID;
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/B05_SupplyPayments/B05_AccountPayments_PaymentDetails?AccountNo=' + $("#buildingCouncilID").val();
+        }
+    </script>
+}

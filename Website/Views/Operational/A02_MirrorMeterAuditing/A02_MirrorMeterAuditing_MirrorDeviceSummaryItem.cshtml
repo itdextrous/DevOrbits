@@ -1,0 +1,18 @@
+@model MyVoltage.Models.OperationalModels.A02_MirrorMeterAuditing.A02_MirrorMeterAuditing_MirrorDeviceSummaryModel
+
+@{
+    string rowclass = "";
+    string cellClass = "";
+}
+<td scope="col">@Model.CompanyName</td>
+@*<td id="@(Model.TableRowID)_col" scope="col" @Html.Raw(cellClass)>@Model.Status</td>*@
+<td scope="col">@Model.MetersCount</td>
+<td scope="col">@Model.CustomersCount</td>
+<script>
+    $(document).ready(function () {
+        $('#@Model.TableRowID').attr("class", '@rowclass');
+        if (@Model.MetersCount == 0) {
+        $('#@Model.TableRowID').css("display", "none");
+        }
+    });
+</script>

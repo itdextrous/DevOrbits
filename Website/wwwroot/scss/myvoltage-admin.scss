@@ -1,0 +1,31 @@
+/*!
+ * My Voltage v1.0.0 (https://getbootstrap.com)
+ * Copyright 2011-2018 Dot Slash
+ */
+
+// Font Smoothing 
+html, html a, body {
+    -webkit-font-smoothing: antialiased;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.004); 
+}
+
+@import url('https://fonts.googleapis.com/css?family=Maven+Pro:400,700|Raleway:400,700,900');
+
+// Theme
+@import "bootstrap/functions";
+@import "bootstrap/variables";
+
+// Bootstrap
+@import "bootstrap/bootstrap";  
+
+//Navigation 
+@import "sidebaradmin";    
+
+// Skin
+@import "skin";
+
+//Pages
+@import "dashboard";
+
+//Layout
+@import "layoutadmin";

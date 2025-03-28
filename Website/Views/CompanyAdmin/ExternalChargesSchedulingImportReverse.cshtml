@@ -1,0 +1,129 @@
+@model MyVoltage.Models.CompanyAdminViewModels.ExternalChargesSchedulingImportReverseModel
+@using MyVoltage.Extensions
+@{
+    ViewData["Title"] = "External Charges Reverse";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+@*<div class="row">
+        <a href="/billing/getexternalchargesschedulingimports" class="btn btn-outline-primary btn-sm float-right my-4">Download Scheduled &amp; Processed</a>
+    </div>*@
+<form asp-action="ExternalChargesSchedulingImportReverse" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+                    @if (Model == null || !Model.IsSuccess)
+                    {
+                        <div class="row"><label asp-for="ReferenceNumber" class="control-label"></label>:</div>
+                        <div class="row">
+                            <div class="col-10">
+                                <input class="form-group" style="width:90%;" id="ReferenceNumber_Search" asp-for="ReferenceNumber" />
+                                <span asp-validation-for="ReferenceNumber" class="text-red"></span>
+                            </div>
+                            <div class="row">
+                                <input asp-action="ExternalChargesSchedulingImportReverse" type="submit" value="Show Details" class="btn btn-default" />
+                            </div>
+                        </div>
+                        @if (Model != null && Model.ExternalChargesSchedulingImport != null)
+                        {
+                            <div class="row">
+                                <div class="col">Customer Number:</div>
+                                <div class="col">@Model.ExternalChargesSchedulingImport.SkybillCustomerNo</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Posting Date:</div>
+                                <div class="col">@Model.ExternalChargesSchedulingImport.PostingDate.DateTime()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Reference Number:</div>
+                                <div class="col">@Model.ExternalChargesSchedulingImport.ReferenceNumber</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Amount:</div>
+                                <div class="col">@Model.ExternalChargesSchedulingImport.Amount.Money()</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Upload Confirmation Email:</div>
+                                <div class="col">@Model.ExternalChargesSchedulingImport.UploadConfirmationEmail</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Uploaded File:</div>
+                                <div class="col">
+                                    @if (!string.IsNullOrEmpty(Model.UploadURL))
+                                    {
+                                        <span>Yes (<a href="@Model.UploadURL">Download</a>)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>No</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">Notify Client:</div>
+                                <div class="col">
+                                    @if (!string.IsNullOrEmpty(Model.ExternalChargesSchedulingImport.ClientConfirmationEmail))
+                                    {
+                                        <span>Yes (@Model.ExternalChargesSchedulingImport.ClientConfirmationEmail)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>No</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row">
+                                @if (!Model.ExternalChargesSchedulingImport.HasBeenReversed)
+                                {
+                                    <a asp-action="ExternalChargesSchedulingImportReverse" asp-route-id="@Model.ExternalChargesSchedulingImport.ID" class="btn btn-default">Reverse Entry</a>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="row">
+                            @Model.Result
+                        </div>
+                        <div class="row">
+                            <a href="/billing/externalchargesschedulingimport" class="btn btn-default">Ok</a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#ReferenceNumber_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/billing/externalchargesschedulingimportreferencesearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

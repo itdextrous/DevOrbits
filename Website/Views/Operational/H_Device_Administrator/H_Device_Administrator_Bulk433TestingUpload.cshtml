@@ -1,0 +1,83 @@
+﻿@model MyVoltage.Models.OperationalModels.H_Device_AdministratorModels.H_Device_Administrator_Bulk433TestingUploadModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.H_Device_Administrator_Bulk433TestingUpload.GetDescription();
+}
+@using (Html.BeginForm())
+{
+
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4 mv-gradient">
+
+                <div class="card-body">
+                    <div class="row mt-2 mb-2">
+                        <div class="col">
+                            <span>Gateway ID</span>
+                        </div>
+                        <div class="col">
+                            @Html.DropDownList("GatewayID", Model.GatewayID, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col">
+                            <span>Create Pulse 2 Input</span>
+                        </div>
+                        <div class="col">
+                            @Html.DropDownList("DoSecondInput", Model.DoSecondInput, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col">
+                            <span>433 Pulse Unit IDs</span>
+                        </div>
+                        <div class="col">
+                            <textarea asp-for="SerialNos" class="form-control" type="" title="Meter Serial Numbers"></textarea>
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col text-left">
+                            @*<button type="button" class="btn btn-outline-primary" onclick="DeleteAllDevicesOn515()"><b>Delete All Devices on 433 WATER TEST GATEWAY</b></button>*@
+                        </div>
+                        <div class="col text-right">
+                            <button type="submit" class="btn btn-outline-primary">Import</button>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="row mt-2 mb-2">
+                            <div class="col-12">
+                                <span class="text-red">@Model.ErrorMessage</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+}
+@section Scripts
+{
+    <script>
+        function DeleteAllDevicesOn515() {
+
+            if (confirm('Are you sure you want to delete all devices on 433 WATER TEST GATEWAY')) {
+                $.ajax({
+                    url: '/operational/H_Device_Administrator/DeleteAllDevicesOn515',
+                    type: 'POST',
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        if (data == true) {
+                            alert("Devices successfully deleted.\nPLEASE NOTE: Devices might take a few minutes to delete.");
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

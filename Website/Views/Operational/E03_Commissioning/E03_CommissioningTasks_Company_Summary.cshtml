@@ -1,0 +1,51 @@
+@model MyVoltage.Models.OperationalModels.E03_CommissioningModels.E03_CommissioningTasks_Company_SummaryModel
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E03_CommissioningTasks_Company_Summary.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <table class="table table-bordered table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="text-nowrap text-center">Company Name</th>
+                <th scope="col" class="text-nowrap text-center">Meter Count</th>
+                <th scope="col" class="text-nowrap text-center">Online</th>
+                <th scope="col" class="text-nowrap text-center">Offline</th>
+                <th scope="col" class="text-nowrap text-center">Calibrated</th>
+                <th scope="col" class="text-nowrap text-center">Uncalibrated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.E03_CommissioningTasks_CompanySummaryItems)
+            {
+                string rowclass = "";
+                string cellClass = "";
+                <tr style="cursor:pointer;" title="View @item.CompanyName" onclick="RedirectToDetails('@item.CompanyID');" @Html.Raw(rowclass)>
+                    <td class="text-nowrap" scope="col">@item.CompanyName</td>
+                    <td title="@item.CompanyName - Meter Count" scope="col" class="text-nowrap text-right @Html.Raw(cellClass)">@item.MeterCount</td>
+                    <td title="@item.CompanyName - Online" scope="col" class="text-nowrap text-right @Html.Raw(cellClass) text-success">@item.OnlineCount <i class="fa fa-power-off" aria-hidden="true"></i></td>
+                    <td title="@item.CompanyName - Offline" scope="col" class="text-nowrap text-right @Html.Raw(cellClass) text-red">@item.OfflineCount <i class="fa fa-power-off" aria-hidden="true"></i></td>
+                    <td title="@item.CompanyName - Calibrated" scope="col" class="text-nowrap text-right @Html.Raw(cellClass) text-success">@item.CalibratedCount <i class="fa fa-balance-scale" aria-hidden="true"></i></td>
+                    <td title="@item.CompanyName - Uncalibrated" scope="col" class="text-nowrap text-right @Html.Raw(cellClass) text-red">@item.UnCalibratedCount <i class="fa fa-balance-scale" aria-hidden="true"></i></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/E03_Commissioning/E03_CommissioningTasks_Company_Details';
+        }
+    </script>
+}

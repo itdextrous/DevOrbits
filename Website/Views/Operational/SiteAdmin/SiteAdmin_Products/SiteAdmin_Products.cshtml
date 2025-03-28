@@ -1,0 +1,382 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_ProductsModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_Products.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Short Name</th>
+            <th scope="col">Sales Link</th>
+            <th scope="col">Cost of Sales Link</th>
+            <th scope="col">Include In C6.02x Report</th>
+            <th scope="col">Device Type (Graph Colors)</th>
+            <th scope="col">Charge Type</th>
+            <th scope="col">Resource Type</th>
+            <th scope="col">Linked Items</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col"><input id="add_name" type="text" class="form-control" /></td>
+            <td scope="col"><input id="add_shortname" type="text" class="form-control" /></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"><a onclick="DoAdd();" href="#" class="btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add</a></td>
+        </tr>
+        <tr><td colspan="8">&nbsp;</td></tr>
+        @foreach (var item in Model.SiteAdmin_ProductsItems)
+        {
+            <tr title="@item.ProductName Created: @item.CreatedByUsername - @item.DateCreated.ToDateAndTimeShort(). Updated: @item.UpdatedByUsername - @item.DateUpdated.ToDateAndTimeShort(true).">
+                <td scope="col" class="text-nowrap">
+                    <input id="productNameUpdate_@item.ID" type="text" value="@item.ProductName" class="form-control" />
+                </td>
+                <td scope="col" class="text-nowrap">
+                    <input id="shortNameUpdate_@item.ID" type="text" value="@item.ShortName" class="form-control" />
+                </td>
+                <td scope="col">
+                    <select id="sLink_@item.ID" onchange="DoUpdateS('@item.ID');" class="form-control">
+                        @foreach (MyVoltage.Data.SiteAdmin_ProductLinkEnum bCT in (MyVoltage.Data.SiteAdmin_ProductLinkEnum[])Enum.GetValues(typeof(MyVoltage.Data.SiteAdmin_ProductLinkEnum)))
+                        {
+                            @if (item.SalesLinkID == (int)bCT)
+                            {
+                                <option value="@((int)bCT)" selected="selected">@bCT.GetDescription()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)bCT)">@bCT.GetDescription()</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select id="cosLink_@item.ID" onchange="DoUpdateCOS('@item.ID');" class="form-control">
+                        @foreach (MyVoltage.Data.SiteAdmin_ProductLinkEnum bCT in (MyVoltage.Data.SiteAdmin_ProductLinkEnum[])Enum.GetValues(typeof(MyVoltage.Data.SiteAdmin_ProductLinkEnum)))
+                        {
+                            @if (item.CostOfSalesLinkID == (int)bCT)
+                            {
+                                <option value="@((int)bCT)" selected="selected">@bCT.GetDescription()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)bCT)">@bCT.GetDescription()</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select id="includeInC602x_@item.ID" onchange="DoUpdateIncludeInC602x('@item.ID');" class="form-control">
+                        @if (item.IncludeInC602x)
+                        {
+                            <option value="true" selected="selected">Yes</option>
+                            <option value="false">No</option>
+                        }
+                        else
+                        {
+                            <option value="true">Yes</option>
+                            <option value="false" selected="selected">No</option>
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select id="deviceTypeID_@item.ID" onchange="DoUpdateDeviceTypeID('@item.ID');" class="form-control">
+                        @if (!item.DeviceTypeID.HasValue)
+                        {
+                            <option selected="selected" value="0">None</option>
+                        }
+                        else
+                        {
+                            <option value="0">None</option>
+                        }
+                        @foreach (MyVoltage.Data.DeviceType.DeviceTypeEnum dt in (MyVoltage.Data.DeviceType.DeviceTypeEnum[])Enum.GetValues(typeof(MyVoltage.Data.DeviceType.DeviceTypeEnum)))
+                        {
+                            if (dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas
+                            || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Water
+                            || dt == MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity
+                            )
+                            {
+                                @if (item.DeviceTypeID.HasValue && item.DeviceTypeID.Value == (int)dt)
+                                {
+                                    <option selected="selected" value="@((int)dt)">@dt</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int)dt)">@dt</option>
+                                }
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select id="ChargeTypeID_@item.ID" onchange="DoUpdateChargeTypeID('@item.ID');" class="form-control">
+                        @foreach (MyVoltage.Data.SiteAdmin_ProductChargeType dt in (MyVoltage.Data.SiteAdmin_ProductChargeType[])Enum.GetValues(typeof(MyVoltage.Data.SiteAdmin_ProductChargeType)))
+                        {
+                            @if (item.ChargeType == dt)
+                            {
+                                <option selected="selected" value="@((int)dt)">@dt</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)dt)">@dt</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col">
+                    <select id="ResourceTypeID_@item.ID" onchange="DoUpdateResourceTypeID('@item.ID');" class="form-control">
+                        @if (!item.BuildingCouncilInvoiceResourceTypeID.HasValue)
+                        {
+                            <option selected="selected" value="0">None</option>
+                        }
+                        else
+                        {
+                            <option value="0">None</option>
+                        }
+                        @foreach (var dt in Model.BuildingCouncilInvoiceResourceTypes)
+                        {
+                            @if (item.BuildingCouncilInvoiceResourceTypeID.HasValue && item.BuildingCouncilInvoiceResourceTypeID.Value == (int)dt.ID)
+                            {
+                                <option selected="selected" value="@((int)dt.ID)">@dt.ResourceTypeName</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)dt.ID)">@dt.ResourceTypeName</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td scope="col" class="text-nowrap">@item.LinkedItems</td>
+                <td scope="col">
+                    <a onclick="DoUpdate('@item.ID', 'productNameUpdate_@item.ID');" href="#" class="btn-sm btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Update</a>
+                    &nbsp;
+                    @if (item.LinkedItems == 0)
+                    {
+                        <a onclick="DoDelete('@item.ID', '@item.ProductName');" href="#" class="btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                    else
+                    {
+                        <span>Used by @item.LinkedItems linked items</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+<script>
+    function AutoFillEditValues(add_name) {
+        $("#add_name").val(add_name);
+    }
+
+    function DoAdd() {
+        $("#loaderContent").css("display", "block");
+
+        if ($("#add_name").val() == '') {
+            $("#loaderContent").css("display", "none");
+            alert('Please enter name');
+            $("#add_name").focus();
+            return;
+        }
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemAdd",
+            {
+                add_name: $("#add_name").val(),
+                add_shortname: $("#add_shortname").val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                }
+            });
+
+    }
+
+    function DoDelete(ItemID, infoMessage) {
+        if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+            $("#loaderContent").css("display", "block");
+
+
+            $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemDelete/" + ItemID,
+                {
+                    add_name: $("#add_name").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    }
+
+    function DoUpdate(ItemID, textboxID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdate/" + ItemID,
+            {
+                add_name: $("#" + textboxID).val(),
+                add_shortname: $("#shortNameUpdate_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateCOS(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdateCOS/" + ItemID,
+            {
+                cosLink: $("#cosLink_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateS(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdateS/" + ItemID,
+            {
+                sLink: $("#sLink_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateIncludeInC602x(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdateIncludeInC602x/" + ItemID,
+            {
+                includeInC602x: $("#includeInC602x_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateDeviceTypeID(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdateDeviceTypeID/" + ItemID,
+            {
+                deviceTypeID: $("#deviceTypeID_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateChargeTypeID(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdateChargeTypeID/" + ItemID,
+            {
+                ChargeTypeID: $("#ChargeTypeID_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+    function DoUpdateResourceTypeID(ItemID) {
+        $("#loaderContent").css("display", "block");
+
+        $.post("/operational/SiteAdmin/SiteAdmin_Products_ItemUpdateResourceTypeID/" + ItemID,
+            {
+                ResourceTypeID: $("#ResourceTypeID_" + ItemID).val()
+            })
+            .done(function (data) {
+                $("#loaderContent").css("display", "none");
+                if (data == "true") {
+                    alert("Success");
+                    $("#loaderContent").css("display", "block");
+                    window.location.reload();
+                }
+                else {
+                    alert("There was a problem completing requested action.");
+                }
+            });
+    }
+
+</script>
+}

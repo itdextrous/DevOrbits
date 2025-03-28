@@ -1,0 +1,29 @@
+@model MyVoltage.Models.OperationalModels.AccessDeniedViewModel
+@{
+    ViewData["Title"] = "Acceses Denied";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                Oh dear. It seems you do not have access to @(Model.SecureAreaAction.SecureAreaActionDisplayName) - @(Model.ParentSecureArea.ParentSecureAreaDisplayName) - @(Model.SecureArea.SecureAreaDisplayName)
+                <br />
+                Please contact <a href="mailto:info@myvoltage.co.za?subject=Website Access Request&body=Hi, Could I kindly gain access to @(Model.SecureAreaAction.SecureAreaActionDisplayName) - @(Model.ParentSecureArea.ParentSecureAreaDisplayName) - @(Model.SecureArea.SecureAreaDisplayName)">info@myvoltage.co.za</a> to gain access.
+            </div>
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+

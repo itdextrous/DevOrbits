@@ -1,0 +1,86 @@
+@model MyVoltage.Models.LeaduserModels.Contacts_AddModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"Contacts - Add";
+    Layout = "LayoutLeaduser";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Contact successfully added. Click Ok to update Contact Details
+                </div>
+                <div class="card-footer">
+                    <a href="/leaduser/D01_Leads_Contacts_Edit/@Model.ResultContactID" class="btn btn-grape"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="D01_Leads_Contacts_Add" enctype="multipart/form-data">
+                    <div class="card-body">
+                        <input type="hidden" id="hidden-BackToLead" name="hidden-BackToLead" value="@(Model.BackToLead.ToString())">
+                        <input type="hidden" id="hidden-PropertyID" name="hidden-PropertyID" value="@(Model.PropertyID.ToString())">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="FullName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control mb-2" asp-for="FullName" />
+                                <span asp-validation-for="FullName" class="text-red"></span>
+                            </div>
+                        </div>
+
+@*                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control" })
+                                <span asp-validation-for="ResponsibleUser" class="text-red"></span>
+                            </div>
+                        </div>
+*@
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/leaduser/D01_Leads_Contacts" class="btn btn-grape"><i class="fas fa-chevron-left"></i>&nbsp;Back to Contacts</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-grape"><i class="fas fa-save"></i>&nbsp;Add Contact</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+    </script>
+}

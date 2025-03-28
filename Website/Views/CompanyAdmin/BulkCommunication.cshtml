@@ -1,0 +1,92 @@
+@model MyVoltage.Models.CompanyAdminViewModels.BulkCommunicationModel
+@{
+    ViewData["Title"] = "Bulk Communication";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<form asp-action="BulkCommunication" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+                    @if (Model == null || !Model.IsSuccess)
+                    {
+                        <div class="row">
+                            <div class="col text-right">
+                                <input type="submit" value="Send" class="btn btn-default" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="EmailSubject" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="EmailSubject" />
+                                <span asp-validation-for="EmailSubject" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="EmailBody" class="control-label"></label>:</div>
+                            <div class="col">
+                                <textarea class="form-group" asp-for="EmailBody"></textarea>
+                                <span asp-validation-for="EmailBody" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="file" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="file" />
+                                <span asp-validation-for="file" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="SMSBody" class="control-label"></label>:</div>
+                            <div class="col">
+                                <textarea class="form-group" asp-for="SMSBody"></textarea>
+                                <span asp-validation-for="SMSBody" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label asp-for="SkybillCustomerNos" class="control-label"></label>:
+                                (&nbsp;<input name="RemoveAll" id="RemoveAll" type="checkbox" />&nbsp;Select All&nbsp;)
+                            </div>
+                        </div>
+                        @foreach (var item in Model.SkybillCustomerNos)
+                        {
+                            <div class="row">
+                                <div class="form-check form-check-inline">
+                                    <text>&nbsp;</text><input class="form-check-input" type="checkbox" name="selectedSkybillCustomerNos" value="@item.Value" @(item.Selected ? "checked" : "") /> <text>&nbsp;</text>@item.Text
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="row">
+                            Your Bulk Communication has been added to the schedule successfully.
+                        </div>
+                        <div class="row">
+                            <a href="/companyAdmin/bulkcommunication" class="btn btn-default">Ok</a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $("#RemoveAll").click(function () {
+            if ($(this).is(':checked'))
+                $('[name="selectedSkybillCustomerNos"]').attr("checked", "checked");
+            else
+                $('[name="selectedSkybillCustomerNos"]').removeAttr("checked");
+        });
+    </script>
+}

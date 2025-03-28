@@ -1,0 +1,154 @@
+@model MyVoltage.Models.OperationalModels.Y01_UserAdmin.Y01_UserAdmin_UserAddModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Y01_UserAdmin_UserAdd.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    User successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="#" onclick="RedirectToEdit('@Model.ResultUserID');" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    User Details:
+                </div>
+                <form asp-action="Y01_UserAdmin_UserAdd" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="Email" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="Email" />
+                                <span asp-validation-for="Email" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="FirstName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="FirstName" />
+                                <span asp-validation-for="FirstName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="LastName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="LastName" />
+                                <span asp-validation-for="LastName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="JobTitle" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="JobTitle" />
+                                <span asp-validation-for="JobTitle" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="InternalChargeOutRatePerHour" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="InternalChargeOutRatePerHour" />
+                                <span asp-validation-for="InternalChargeOutRatePerHour" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="ExternalChargeOutRatePerHour" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="ExternalChargeOutRatePerHour" />
+                                <span asp-validation-for="ExternalChargeOutRatePerHour" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="PhoneNumber" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" asp-for="PhoneNumber" />
+                                <span asp-validation-for="PhoneNumber" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DefaultCompany" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("DefaultCompany", Model.DefaultCompany, new { @class = "browser-default custom-select form-control-trim js-select" })
+                                <span asp-validation-for="DefaultCompany" class="text-red"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                        @if (Model != null && Context.Request.Method == "POST")
+                        {
+                            if (Model.IsSuccess)
+                            {
+                                <div class="row col-12 mb-md-2">
+                                    User has been sucessfully created.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row col-12 mb-md-2 ui-state-error">
+                                    <div class="ui-state-error-text">
+                                        @Model.ErrorMessage
+                                    </div>
+                                </div>
+                            }
+                        }
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/Y01_UserAdmin/Y01_UserAdmin_UserSearch" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to User Admin</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToEdit(userID) {
+            document.location.href = '/operational/changeY01_USERADMIN_USEREDITID/' + userID + '?R=' + encodeURIComponent('/operational/Y01_UserAdmin/Y01_UserAdmin_UserEdit');
+        }
+    </script>
+}

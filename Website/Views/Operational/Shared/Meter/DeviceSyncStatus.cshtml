@@ -1,0 +1,3 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedMeterModels.DeviceSyncStatusModel
+@using MyVoltage.Extensions;
+<div>Latest Successful M2M Sync: @Model.StartTime.ToDateAndTimeShort() - @Model.EndTime.ToDateAndTimeShort()</div>

@@ -1,0 +1,195 @@
+@model MyVoltage.Models.OperationalModels.E01_BuildingOnboardingModels.E01_BuildingOnboardingTasks_Company_OnboardingModel
+@using MyVoltage.Extensions;
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.E01_BuildingOnboardingTasks_Company_Onboarding.GetDescription()} - {(opProv.CompanyID == 0 ? "Select a Company" : opProv.CompanyName)}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h3>Page Filters</h3>
+            </div>
+            <div class="card-body text-left">
+                <div class="row mt-2 mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
+                            <div class="col">
+                                @Html.DropDownList("DisplayType", Model.DisplayType, new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col text-right"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered" style="border-collapse: separate; border-spacing: 0;">
+            <thead>
+                <tr>
+                    <th scope="col">Workflow Group Parent Name</th>
+                    <th scope="col">Workflow Group Name</th>
+                    <th scope="col">Check</th>
+                    @foreach (var department in Model.BusinessDepartmentItems)
+                    {
+                        <th scope="col" style="@department.HeaderClass">@department.DisplayName</th>
+                    }
+                    <th scope="col">Deadline</th>
+                    <th scope="col">Date Completed</th>
+                    <th scope="col">Comments</th>
+                    <th scope="col">Responsible Person</th>
+                    <th scope="col">Reporting To Person</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var workgroupParent in Model.WorkflowGroupParentItems)
+                {
+                    bool isFirstParentItem = true;
+                    var workgroupitems = Model.WorkflowGroupItems.Where(p => p.WorkflowGroupParentID.HasValue && p.WorkflowGroupParentID.Value == workgroupParent.ID).ToList();
+                    int workflowParentRowSpan = workgroupitems.Count != 0 ? 0 : 1;
+                    if (workgroupitems.Count == 0)
+                    {
+                        continue;
+                    }
+                    bool isAllTasksCompleted = true;
+                    @foreach (var workgroup in workgroupitems)
+                    {
+                        var items = Model.E01_BuildingOnboardingTasks_CompanyDetailsItems.Where(p => p.E01_BuildingOnboardingTasks_TypeItem.WorkflowGroupID == workgroup.ID).ToList();
+                        int workflowRowSpan = items.Count != 0 ? items.Count : 1;
+                        workflowParentRowSpan = workflowParentRowSpan + workflowRowSpan;
+                    }
+                    @foreach (var workgroup in workgroupitems.OrderBy(p => p.DisplayName))
+                    {
+                        var items = Model.E01_BuildingOnboardingTasks_CompanyDetailsItems.Where(p => p.E01_BuildingOnboardingTasks_TypeItem.WorkflowGroupID == workgroup.ID).ToList();
+                        if (items.Count == 0)
+                        {
+                            <tr>
+                                @if (isFirstParentItem)
+                                {
+                                    <td class="align-middle" rowspan="@workflowParentRowSpan">
+                                        @workgroupParent.DisplayName
+                                    </td>
+                                }
+                                <td scope="col">@workgroup.DisplayName</td>
+                                <td scope="col"></td>
+                                @foreach (var department in Model.BusinessDepartmentItems)
+                                {
+                                    <td scope="col" style="@department.CellClass"></td>
+                                }
+                                <td scope="col"></td>
+                                <td scope="col"></td>
+                                <td scope="col"></td>
+                                <td scope="col"></td>
+                                <td scope="col"></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int workflowRowSpan = items.Count != 0 ? items.Count : 1;
+                            bool isFirstItem = true;
+                            @foreach (var item in items)
+                            {
+                                string companyName = item.CompanyID.HasValue ? opProv.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                                string rowclass = "";
+                                if (item.Status.IsResolvedStatus.HasValue && item.Status.IsResolvedStatus.Value)
+                                {
+                                    rowclass = "table-success";
+                                }
+                                else
+                                {
+                                    isAllTasksCompleted = false;
+                                }
+                                <tr>
+                                    @if (isFirstParentItem)
+                                    {
+                                        <td class="align-middle" rowspan="@workflowParentRowSpan">
+                                            @workgroupParent.DisplayName
+                                        </td>
+                                    }
+                                    @if (isFirstItem)
+                                    {
+                                        <td class="align-middle" rowspan="@workflowRowSpan">
+                                            @workgroup.DisplayName
+                                        </td>
+                                    }
+                                    <td class="@Html.Raw(rowclass)">
+                                        <a class="btn btn-outline-primary-sm btn-sm" href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review/@item.TaskTypeID/@item.ID" target="_blank"><i class="fas fa-search"></i></a>
+                                    </td>
+                                    @foreach (var department in Model.BusinessDepartmentItems)
+                                    {
+                                        if (department.ID == item.E01_BuildingOnboardingTasks_TypeItem.BusinessDepartmentID)
+                                        {
+                                            <td style="@(department.CellClass)" class="@Html.Raw(rowclass)">
+                                                <a href="/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTask_Review/@item.TaskTypeID/@item.ID" target="_blank" title="@(item.E01_BuildingOnboardingTasks_TypeItem.Heading) - @(item.E01_BuildingOnboardingTasks_TypeItem.Description) (Click to View)">@Html.Raw(item.Status.WIPTypeIcon)</a>
+                                                    &nbsp;@(item.E01_BuildingOnboardingTasks_TypeItem.Identifier)
+                                                @if (string.IsNullOrEmpty(Model.DisplayTypeFilter) || Model.DisplayTypeFilter == "1")
+                                                {
+                                                    <span> - @(item.E01_BuildingOnboardingTasks_TypeItem.Heading)</span>
+                                                }
+                                                @if (string.IsNullOrEmpty(Model.DisplayTypeFilter))
+                                                {
+                                                    <span> - @(item.E01_BuildingOnboardingTasks_TypeItem.Description)</span>
+                                                }
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="@department.CellClass" class="@Html.Raw(rowclass)"></td>
+                                        }
+                                    }
+                                    <td class="@Html.Raw(rowclass)" title="Due Date">@item.DueDate.ToDateShort()</td>
+                                    <td class="@Html.Raw(rowclass)">@item.DateEnded.ToDateShort(true)</td>
+                                    <td class="@Html.Raw(rowclass)">@item.LatestComment</td>
+                                    <td class="@Html.Raw(rowclass)">
+                                        @item.ResponsibleUserUsername
+                                    </td>
+                                    <td class="@Html.Raw(rowclass)">
+                                        @item.ReportingToUserUsername
+                                    </td>
+                                </tr>
+                                isFirstItem = false;
+                                isFirstParentItem = false;
+                            }
+                        }
+                        isFirstParentItem = false;
+                    }
+                    @if (isAllTasksCompleted)
+                    {
+                        <tr class="table-success">
+                            <td colspan="@(Model.BusinessDepartmentItems.Count + 9)" class="text-center font-weight-bold">READY TO START THE MEETING</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr class="table-danger">
+                            <td colspan="@(Model.BusinessDepartmentItems.Count + 9)" class="text-center font-weight-bold">NOT READY TO START MEETING</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/E01_BuildingOnboarding/E01_BuildingOnboardingTasks_Company_Onboarding?DisplayType=' + $("#DisplayType").val();
+        }
+    </script>
+}

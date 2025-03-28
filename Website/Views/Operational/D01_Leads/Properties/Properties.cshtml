@@ -1,0 +1,260 @@
+@model MyVoltage.Models.OperationalModels.D01_Leads.D01_LeadsModels.PropertiesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_Properties.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+@if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.D01_Leads_MyLeads, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval))
+{
+    <div class="row col-12 mt-2 mb-2">
+        @Html.DropDownList("User", Model.User, new { @class = "form-control" })
+    </div>
+}
+<div class="row col-12 mt-2 mb-2">
+    @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+</div>
+
+<div class="row col-12 mt-2 mb-2">
+    @Html.DropDownList("Province", Model.Province, new { @class = "form-control", @onChange = "DoSelectedProvince();" })
+</div>
+
+<div class="row col-12 mt-2 mb-2">
+    @Html.DropDownList("Town", Model.Town, new { @class = "form-control", @onChange = "DoSelectedTown();" })
+</div>
+
+<div class="row col-12 mt-2 mb-2">
+    @Html.DropDownList("Suburb", Model.Suburb, new { @class = "form-control" })
+</div>
+
+<div class="row col-12 mt-2 mb-2">
+    @Html.DropDownList("ActiveStatus", Model.ActiveStatus, new { @class = "form-control" })
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <a href="/operational/D01_Leads/D01_Leads_Properties" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        <a href="#" onclick="RedirectToUserFilter();" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+        <a href="/operational/D01_Leads/D01_Leads_Properties_Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Property</a>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th rowspan="2" scope="col">Name</th>
+                    <th rowspan="2" scope="col">Description</th>
+                    <th rowspan="2" scope="col">Responsible</th>
+                    <th rowspan="2" scope="col">Active / Inactive</th>
+                    <th rowspan="2" scope="col">Activity Status</th>
+                    <th rowspan="2" scope="col">Last Changed Date</th>
+                    <th rowspan="2" scope="col">Type</th>
+                    <th rowspan="2" scope="col">No Of Registered Units</th>
+                    <th rowspan="2" scope="col">No Of Metering Points</th>
+                    <th rowspan="2" scope="col">Partner</th>
+                    <th rowspan="2" scope="col">Overall Status</th>
+                    <th rowspan="2" scope="col">Province</th>
+                    <th rowspan="2" scope="col">Town</th>
+                    <th rowspan="2" scope="col">Suburb</th>
+                    <th rowspan="2" scope="col">Total calculated expected monthly gross profit</th>
+                    <th rowspan="2" scope="col">Total calculated expected average capital cost</th>
+                    <th colspan="3" scope="col" class="text-center">Linked Contacts</th>
+                    <th rowspan="2" scope="col"></th>
+                </tr>
+                <tr>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Number</th>
+                    <th scope="col">Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PropertiesItems)
+                {
+                    string rowClass = "";
+                    string title = $"{item.Name}";
+                    int rowSpan = item.ContactsItems.Count;
+                    bool isFirst = true;
+                    foreach (var itemC in item.ContactsItems)
+                    {
+                        @if (isFirst)
+                        {
+                            isFirst = false;
+                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.Name
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.Description
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                    @Html.Raw(item.ResponsibleUsername)
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.Active.ToActiveStatus()
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.Status
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.UpdatedByUserTimestamp.ToDateAndTimeShort(true)
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="text-nowrap">
+                                    @item.CompanyTypeName
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                    @item.NoOfRegisteredUnits
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                    @item.NoOfMeteringPoints
+                                </td>
+                                <td rowspan="@rowSpan" scope="col">
+                                    @if (!item.PartnerID.HasValue)
+                                    {
+                                        <span>None</span>
+                                    }
+                                    else
+                                    {
+                                        var partner = Model.SiteAdmin_Partners.Where(p => p.ID == item.PartnerID.Value).SingleOrDefault();
+                                        <span>@(partner != null ? partner.PartnerName : "Partner Removed") </span>
+                                    }
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.OverallStatus
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.ProvinceName
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.TownName
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="">
+                                    @item.SuburbName
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                    @if (item.NoOfRegisteredUnits.HasValue && item.ExpectedMonthlyGrossProfitPerRegisteredUnit.HasValue)
+                                    {
+                                        <span>@((item.NoOfRegisteredUnits.Value * item.ExpectedMonthlyGrossProfitPerRegisteredUnit.Value).ToMoney())</span>
+                                    }
+                                </td>
+                                <td rowspan="@rowSpan" scope="col" class="text-nowrap text-right">
+                                    @if (item.NoOfMeteringPoints.HasValue && item.ExpectedAverageCapitalCostPerMeteringPoint.HasValue)
+                                    {
+                                        <span>@((item.NoOfMeteringPoints.Value * item.ExpectedAverageCapitalCostPerMeteringPoint.Value).ToMoney())</span>
+                                    }
+                                </td>
+                                <td scope="col" class="">
+                                    @itemC.FullName
+                                </td>
+                                <td scope="col" class="">
+                                    @itemC.PhoneNumber
+                                </td>
+                                <td scope="col" class="">
+                                    @itemC.Email
+                                </td>
+                                <td rowspan="@rowSpan" scope="col">
+                                    @if (opProv.HasAccess(MyVoltage.Data.SecureAreaEnum.D01_Leads_Properties, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                                    {
+                                        <a href="/operational/D01_Leads/D01_Leads_Properties_Edit/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr class="@Html.Raw(rowClass)" title="@title">
+                                <td scope="col" class="">
+                                    @itemC.FullName
+                                </td>
+                                <td scope="col" class="">
+                                    @itemC.PhoneNumber
+                                </td>
+                                <td scope="col" class="">
+                                    @itemC.Email
+                                </td>
+                            </tr>
+
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (Model.TotalEntries > 10)
+        {
+            var prevDisabled = !Model.PropertiesItems.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.PropertiesItems.HasNextPage ? "disabled" : "";
+            <div width="100%">
+                <div style="float: left;">
+                    <a href="#" onclick="RedirectToPageNumber(@(Model.PropertiesItems.PageIndex - 1));" class="btn btn-outline-primary-sm @prevDisabled">
+                        <i class="fas fa-chevron-left"></i>&nbsp;Previous
+                    </a>
+                </div>
+                <div style="float: right;">
+                    <a align="left" href="#" onclick="RedirectToPageNumber(@(Model.PropertiesItems.PageIndex + 1));" class="btn btn-outline-primary-sm @nextDisabled">
+                        Next&nbsp;<i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToUserFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeLeadUserID/' + $('#User').val() + '?R=' + encodeURIComponent(window.location.href.split('?')[0] + '?Status=' + $("#Status").val() + '&Province=' + $("#Province").val() + '&Town=' + $("#Town").val() + '&Suburb=' + $("#Suburb").val() + '&ActiveStatus=' + $("#ActiveStatus").val());
+        }
+        function RedirectToPageNumber(pageNumber) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeLeadUserID/' + $('#User').val() + '?R=' + encodeURIComponent(window.location.href.split('?')[0] + '?Status=' + $("#Status").val() + '&Province=' + $("#Province").val() + '&Town=' + $("#Town").val() + '&Suburb=' + $("#Suburb").val() + '&ActiveStatus=' + $("#ActiveStatus").val() + '&pageIndex=' + pageNumber);
+        }
+        $("#Province").val('@(Model.ProvinceID)');
+        DoSelectedProvince();
+        $("#Town").val('@(Model.TownID)');
+        DoSelectedTown();
+        $("#Suburb").val('@(Model.SuburbID)');
+        function DoSelectedProvince() {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+
+            $('#Town').prop('disabled', false);
+            $("#Town").empty();
+            $("#Town").append(`<option value="">[All Towns]</option>`);
+            $(towns).each(function () {
+                if (this.ProvinceID == $("#Province").val()) {
+                    $("#Town").append(`<option value="${this.ID}">${this.TownName}</option>`);
+                }
+            });
+
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[All Suburbs]</option>`);
+            $('#Suburb').prop('disabled', 'disabled');
+        }
+
+        function DoSelectedTown() {
+            var suburbs = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Suburbs)));
+            var towns = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SiteAdmin_Towns)));
+
+            $('#Suburb').prop('disabled', false);
+            $("#Suburb").empty();
+            $("#Suburb").append(`<option value="">[All Suburbs]</option>`);
+            $(suburbs).each(function () {
+                if (this.TownID == $("#Town").val()) {
+                    $("#Suburb").append(`<option value="${this.ID}">${this.SuburbName}</option>`);
+                }
+            });
+        }
+
+    </script>
+}

@@ -1,0 +1,166 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_BuildingCyclesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.SiteAdmin_BuildingCycles.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Code</th>
+            <th scope="col">Month</th>
+            <th scope="col">Reading Start Date</th>
+            <th scope="col">Reading End Date</th>
+            <th scope="col">Billing Date</th>
+            <th style="min-width:220px!important;width:220px!important;" scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col">
+                <select class="form-control" id="add_counciltype">
+                    @foreach (var bCT in Model.BuildingCouncilTypes)
+                    {
+                        <option value="@(bCT.ID)">@bCT.BuildingCouncilTypeCode - @bCT.BuildingCouncilTypeName</option>
+                    }
+                </select>
+            </td>
+            <td scope="col"><input class="form-control" id="add_code" type="text" /></td>
+            <td scope="col" title="Day will be ignored"><input class="form-control" id="add_month" type="date" /></td>
+            <td scope="col"><input class="form-control" id="add_readingstartdate" type="date" /></td>
+            <td scope="col"><input class="form-control" id="add_readingenddate" type="date" /></td>
+            <td scope="col"><input class="form-control" id="add_billingdate" type="date" /></td>
+            <td scope="col"><a onclick="DoAdd();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add / Update</a></td>
+        </tr>
+        @foreach (var item in Model.SiteAdmin_BuildingCyclesItems)
+        {
+            <tr style="cursor:pointer;" onclick="AutoFillEditValues('@item.BuildingCouncilTypeID', '@item.BuildingCycleCode', '@item.BuildingCycleMonth.ToString("yyyy-MM-dd")', '@item.BuildingCycleReadingStartDate.ToString("yyyy-MM-dd")', '@item.BuildingCycleReadingEndDate.ToString("yyyy-MM-dd")', '@item.BuildingCycleBillingDate.ToString("yyyy-MM-dd")');">
+                <td scope="col">
+                    @item.BuildingCouncilType.BuildingCouncilTypeCode - @item.BuildingCouncilType.BuildingCouncilTypeName
+                </td>
+                <td scope="col">@item.BuildingCycleCode</td>
+                <td scope="col">@item.BuildingCycleMonth.ToMonth()</td>
+                <td scope="col" class="text-nowrap">@item.BuildingCycleReadingStartDate.ToDateShort()</td>
+                <td scope="col" class="text-nowrap">@item.BuildingCycleReadingEndDate.ToDateShort()</td>
+                <td scope="col" class="text-nowrap">@item.BuildingCycleBillingDate.ToDateShort()</td>
+                <td scope="col">
+                    @if (item.LinkedItems == 0)
+                    {
+                        <a onclick="DoDelete('@item.ID', '@item.BuildingCouncilType.BuildingCouncilTypeCode - @item.BuildingCouncilType.BuildingCouncilTypeName - @item.BuildingCycleCode - @item.BuildingCycleMonth.ToMonth()');" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                    }
+                    else
+                    {
+                        <span>Used by @item.LinkedItems linked items</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function AutoFillEditValues(add_counciltype, add_code, add_month, add_readingstartdate, add_readingenddate, add_billingdate) {
+            $("#add_counciltype").val(add_counciltype);
+            $("#add_code").val(add_code);
+            $("#add_month").val(add_month);
+            $("#add_readingstartdate").val(add_readingstartdate);
+            $("#add_readingenddate").val(add_readingenddate);
+            $("#add_billingdate").val(add_billingdate);
+        }
+
+        function DoAdd() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#add_code").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter code');
+                $("#add_code").focus();
+                return;
+            }
+
+            if ($("#add_month").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter month');
+                $("#add_month").focus();
+                return;
+            }
+
+            if ($("#add_readingstartdate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter reading start date');
+                $("#add_readingstartdate").focus();
+                return;
+            }
+
+            if ($("#add_readingenddate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter reading end date');
+                $("#add_readingenddate").focus();
+                return;
+            }
+
+            if ($("#add_billingdate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter billing date');
+                $("#add_billingdate").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_BuildingCycles_ItemAdd",
+                {
+                    add_counciltype: $("#add_counciltype").val(),
+                    add_code: $("#add_code").val(),
+                    add_month: $("#add_month").val(),
+                    add_readingstartdate: $("#add_readingstartdate").val(),
+                    add_readingenddate: $("#add_readingenddate").val(),
+                    add_billingdate: $("#add_billingdate").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+        function DoDelete(ItemID, infoMessage) {
+            if (confirm('Are you sure you want to delete ' + infoMessage + '?')) {
+                $("#loaderContent").css("display", "block");
+
+
+                $.post("/operational/SiteAdmin/SiteAdmin_BuildingCycles_ItemDelete/" + ItemID,
+                    {
+                        add_serial: $("#add_serial").val(),
+                        add_month: $("#add_month").val(),
+                        add_rate: $("#add_rate").val()
+                    })
+                    .done(function (data) {
+                        $("#loaderContent").css("display", "none");
+                        if (data == "true") {
+                            alert("Success");
+                            window.location.reload();
+                        }
+                        else {
+                            alert("There was a problem completing requested action.");
+                        }
+                    });
+            }
+        }
+
+    </script>
+}

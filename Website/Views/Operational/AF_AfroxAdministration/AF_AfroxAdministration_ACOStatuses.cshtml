@@ -1,0 +1,117 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_ACOStatusesModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_ACOStatuses.GetDescription();
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Status</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td scope="col" class="text-nowrap">
+                -
+            </td>
+            <td scope="col">
+                <input type="text" id="status_" class="form-control" />
+            </td>
+            <td scope="col" class="text-nowrap">
+                <a href="#" onclick="DoAddStatus();" class="btn btn-sm btn-outline-primary-sm" title="Add"><i class="fas fa-plus-circle"></i>&nbsp;Add</a>
+            </td>
+        </tr>
+        @foreach (var item in Model.AF_AfroxAdministration_ACOStatusesItems)
+        {
+            <tr>
+                <td scope="col" class="text-nowrap">
+                    @item.ID
+                </td>
+                <td scope="col">
+                    <input type="text" id="status_@item.ID" class="form-control" value="@item.Status" />
+                </td>
+                <td scope="col" class="text-nowrap">
+                    <a href="#" onclick="DoUpdateStatus('@item.ID');" class="btn btn-sm btn-outline-primary-sm" title="Update"><i class="fas fa-edit"></i>&nbsp;Update</a>
+                    &nbsp;
+                    <a href="#" onclick="DoDeleteStatus('@item.ID');" class="btn btn-sm btn-outline-primary-sm" title="Delete"><i class="fas fa-trash-alt"></i>&nbsp;Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function DoAddStatus() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/AF_AfroxAdministration/AF_AfroxAdministration_ACOStatuses_Add",
+                {
+                    status: $("#status_").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoUpdateStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/AF_AfroxAdministration/AF_AfroxAdministration_ACOStatuses_Update/" + ItemID,
+                {
+                    status: $("#status_" + ItemID).val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+        function DoDeleteStatus(ItemID) {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/operational/AF_AfroxAdministration/AF_AfroxAdministration_ACOStatuses_Delete/" + ItemID,
+                {
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+
+
+    </script>
+}

@@ -1,0 +1,110 @@
+@model MyVoltage.Models.OperationalModels.Customer.Customer_UsageCalculatorModels.UsageCalcViewModel
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.Customer_UsageCalculator.GetDescription()}";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+            {
+                <div class="card-header"></div>
+                <div class="card-body">Select Customer to begin.</div>
+                <div class="card-footer"></div>
+            }
+            else
+            {
+                <div class="card-header">
+                    To get started please choose a meter below.
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl table-striped">
+                        <thead>
+                            <tr>
+                                <th>Serial</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var meter in Model.Meters)
+                            {
+                                <tr style="cursor:pointer;" onclick="RedirectToCreate('@meter.Serial');" title="Click to Select">
+                                    <td scope="col">@meter.Serial</td>
+                                    <td scope="col">@meter.Description</td>
+                                    <td scope="col">
+                                        @switch (meter.Type)
+                                        {
+                                            case "Electricity":
+                                                <img src="~/images/elec-icon-s.png" />
+                                                break;
+                                            case "Water":
+                                                <img src="~/images/water-icon-s.png" />
+                                                break;
+                                            case "Gas":
+                                                <img src="~/images/gas-icon-s.png" />
+                                                break;
+                                        }
+                                        @meter.Type
+                                    </td>
+                                    <td scope="col">
+                                        @if (meter.Status.ToUpper().Contains("ON"))
+                                        {
+                                            <i class="fas fa-lightbulb text-green"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-power-off text-red"></i>
+                                        }
+                                        @meter.Status
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer">
+                </div>
+            }
+            @if (Model.UsageCalcs.Count > 0)
+            {
+                <div class="card-body">
+                    Your previous calculations:
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive-xl table-striped">
+                        <tbody>
+                            @foreach (var calc in Model.UsageCalcs)
+                            {
+                                <tr style="cursor:pointer;" onclick="RedirectToEdit('@calc.UsageCalcID');" title="Click to Edit">
+                                    <td scope="col">@calc.MeterSerial</td>
+                                    <td scope="col">@calc.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToCreate(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=' + encodeURIComponent('/operational/Customer/Customer_UsageCalculator_Create');
+        }
+        function RedirectToEdit(id) {
+            document.location.href = '/operational/Customer/Customer_UsageCalculator_Edit/' + id;
+        }
+    </script>
+}

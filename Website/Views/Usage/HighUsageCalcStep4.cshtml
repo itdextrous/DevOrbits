@@ -1,0 +1,121 @@
+@model MyVoltage.Models.UsageViewModels.HighUsageStep4ViewModel
+@{
+    ViewData["Title"] = "Protest Tool - Step 4";
+}
+<div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                You have selected to view
+                @switch (Model.Meter.Type)
+                {
+                    case "Electricity":
+                        <img src="~/images/elec-icon-s.png" />
+                        break;
+                    case "Water":
+                        <img src="~/images/water-icon-s.png" />
+                        break;
+                    case "Gas":
+                        <img src="~/images/gas-icon-s.png" />
+                        break;
+                }
+                @(Model.Meter.Serial)
+                @if (Model.Meter.Status.ToUpper().Contains("ON"))
+                {
+                    <i class="fas fa-lightbulb text-green"></i>
+                }
+                else
+                {
+                    <i class="fas fa-power-off text-red"></i>
+                }
+                <br />
+                Click <a href="@Model.BackURL">here</a> to go back.
+            </div>
+
+            <div class="card-body bg-white" style=" background: rgba(203, 203, 210, 0.15);">
+                <div class="row">
+                    <div class="col-12">
+                        [Rates Explanation]
+                    </div>
+                </div>
+                <div class="row mt-4 mb-4">
+                    <div class="col-12">
+                        Your current Tariff rate is: <strong>@(Model.LatestTariffDescription)</strong>
+                    </div>
+                </div>
+                <div class="row mt-4 mb-4">
+                    <div class="col-12">
+                        [Link To NERSA rates]
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-6">
+                        <a href="/dashboard" class="btn btn-outline-primary"><i class="fas fa-smile"></i>&nbsp;I AM SATISFIED</a>
+                    </div>
+                    <div class="col-6 text-right">
+                        <a href="/usagecalccreate/@Model.Meter.Serial" class="btn btn-outline-primary"><i class="fas fa-calculator"></i>&nbsp;CALCULATOR</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function SwitchTest(serial) {
+            // Show loader
+            $(".loader-overlay").css("display", "block");
+            // Switch off
+            $.get('/highusagecalc/switchoff/' + serial,
+                function (data) {
+                    // Hide loader
+                    $(".loader-overlay").css("display", "none");
+                    var result = data.result;
+                    if (result) {
+                        if (confirm("Your meter has been switched off. To switch it back on press OK.")) {
+                            // Ok
+                            // Show loader
+                            $(".loader-overlay").css("display", "block");
+                            // Switch on
+                            $.get('/highusagecalc/switchon/' + serial,
+                                function (data) {
+                                    // Hide Loader
+                                    $(".loader-overlay").css("display", "none");
+                                    var result = data.result;
+                                    if (result) {
+                                        alert("Your meter has been switched back on.");
+                                        // Show next button
+                                        $("#nextButton").css("display", "block");
+                                    }
+                                    else {
+                                        alert("An error occured. Please try again. Contact support if the problem persists.");
+                                    }
+                                });
+                        }
+                        else {
+                            // Cancel
+                        }
+                    }
+                    else {
+                        alert("An error occured. Please try again. Contact support if the problem persists.");
+                    }
+                });
+        }
+    </script>
+}

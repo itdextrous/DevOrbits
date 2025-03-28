@@ -1,0 +1,165 @@
+@model MyVoltage.Models.OperationalModels.V01_Policies.V01_PoliciesModels.V01_Policies_ViewModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V01_Policies_View.GetDescription()}";
+}
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header">
+                Policy Details:
+            </div>
+            <div class="card-body">
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Heading
+                    </div>
+                    <div class="col-6">
+                        @Model.V01_Policy.Heading
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Description
+                    </div>
+                    <div class="col-6">
+                        @Model.V01_Policy.Description
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Linked Secure Area
+                    </div>
+                    <div class="col-6">
+                        @{
+                            string dashboardURL = "";
+                            string desc = "";
+                            if (Model.V01_Policy.LinkedSecureAreaID.HasValue)
+                            {
+                                var sa = (MyVoltage.Data.SecureAreaEnum)Model.V01_Policy.LinkedSecureAreaID.Value;
+                                foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                                {
+                                    foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                                    {
+                                        if (sa == dsa.Item1)
+                                        {
+                                            desc = $"{psa.Key.Item3} - {dsa.Item3}";
+                                            dashboardURL = $"/operational/{psa.Key.Item1}/{dsa.Item1}";
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        @if (!string.IsNullOrEmpty(dashboardURL))
+                        {
+                            <a class="btn btn-sm btn-outline-primary-sm" href="@dashboardURL">@(desc)</a>
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Policy Type
+                    </div>
+                    <div class="col-6">
+                        @Model.V01_Policy.PolicyType.GetDescription()
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Active From Date
+                    </div>
+                    <div class="col-6">
+                        @Model.V01_Policy.ActiveFromDate.ToDateShort(true)
+                    </div>
+                </div>
+
+                <div class="row mb-md-2">
+                    <div class="col-6">
+                        Active To Date
+                    </div>
+                    <div class="col-6">
+                        @Model.V01_Policy.ActiveToDate.ToDateShort(true)
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mt-2 mb-2">
+                    <div class="col-12 text-left">
+                        <h5 class="text-orange">Policy Attachments</h5>
+                    </div>
+                </div>
+
+                <div class="row col-12">
+                    <table class="table table-responsive-xl table-striped table-hover">
+                        <tr>
+                            <th>Description</th>
+                            <th>File Type</th>
+                            <th></th>
+                        </tr>
+
+                        @foreach (var item in Model.V01_Policy.V01_Policies_AttachmentItems)
+                        {
+                            string aClass = "";
+                            if (item.IsDeleted)
+                            {
+                                continue;
+                            }
+                            <tr class="@Html.Raw(aClass)">
+                                <td>@item.Description</td>
+                                <td>@item.AttachmentType.GetDescription()</td>
+                                <td class="text-right">
+                                    <a href="/operational/V01_Policies/V01_Policies_All_GetAttachment/@item.ID" target="_blank" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-download"></i>&nbsp;Download</a>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <div class="row mt-2 mb-2">
+                    <div class="col-12 text-center">
+                        <a href="/operational/V01_Policies/V01_Policies_MyPolicies" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Policies</a>
+                        &nbsp;
+                        @{
+                            var linkedItem = Model.V01_Policy.V01_Policies_ResponsibleUserItems.Where(p => p.UserID == userManager.GetUserId(User)).SingleOrDefault();
+                        }
+                        @if (linkedItem != null && linkedItem.DateApproved.HasValue)
+                        {
+                            <a href="#" onclick="ConfirmDeleteAttachment();" class="btn btn-outline-success disabled"><i class="fas fa-check-circle"></i>&nbsp;Accept policy</a>
+                        }
+                        else
+                        {
+                            <a href="#" onclick="ConfirmDeleteAttachment();" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Accept policy</a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ConfirmDeleteAttachment() {
+            if (confirm('By clicking this button you agree that you have read and understand the "@Model.V01_Policy.Heading" policy. This action cannot be undone. Are you sure you wish to continue?')) {
+                document.location.href = '/operational/V01_Policies/V01_Policies_Agree';
+            }
+        }
+    </script>
+}

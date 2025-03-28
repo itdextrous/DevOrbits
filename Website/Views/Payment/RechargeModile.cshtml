@@ -1,0 +1,81 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+    var type = ViewData["PaymentType"];
+}
+<div>
+    <div class="paymentMobilePage account_form app_payment_page">
+        <h2>
+            Recharge your account
+        </h2>
+        <h3>
+            Netcash payment
+        </h3>
+        <form id="form" action="/paymentmobile" method="post" class="mt-75">
+            <div class="form-group text-center m-0">
+                <label>Enter an Amount:</label>
+                <input class="form-control-trim" placeholder="R 000" type="number" required name="amount" id="inpAmount" onkeypress="return isNumberKey(event)" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                       min="1" maxlength="12">
+                <span class="field-validation-error d-none" id="spnAmount">Please enter a valid amount.</span>
+            </div>
+            <div class="text-center mt-4">
+                <button id="payBtn" type="submit" onclick="return CheckValidation()" class="btn btn-sm btn-default">Make a Payment</button>
+            </div>
+        </form>
+        <div class="mt-30 text-start pb_70">
+            <h4>
+                Please take note of the following Netcash payment
+                options before you proceed with your payment:
+            </h4>
+            <div class="mt-25">
+                <img src="/images/ozone_visa_mastercard.png" />
+            </div>
+            <h4 class="mt-25 mb_10">
+                <b>Why are you charged a convenience fee?</b>
+            </h4>
+            <h4>When you opt to use a non-standard payment channel or method, a convenience fee is levied by the merchant offering the payment service to you.</h4>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts
+    {
+    <script>
+        //$("#form").attr("action", "/paymentmobile@(@Html.Raw(ViewContext.HttpContext.Request.QueryString))");
+
+        $(function(){
+            let queryString = '@Html.Raw(ViewContext.HttpContext.Request.QueryString)';
+            if (!queryString || queryString == '') {
+                queryString = '?token='+ localStorage.getItem('rechargeToken');
+            }else{
+                let params = new URLSearchParams(queryString);
+                let token = params.get('token');
+                localStorage.setItem('rechargeToken', encodeURIComponent(token));
+            }
+            $("#form").attr("action", "/paymentmobile" + queryString);
+        })
+        
+
+        function CheckValidation() {
+            if ($('#inpAmount').val() > 0){
+                $('#payBtn').attr('style', 'background:#F7931D');
+                return true;
+            }
+            else {
+                $('#spnAmount').removeClass('d-none');
+                return false;
+            }
+
+        }
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+
+    </script>
+}
+

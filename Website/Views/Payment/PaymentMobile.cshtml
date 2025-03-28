@@ -1,0 +1,34 @@
+﻿@model MyVoltage.Models.PaymentViewModels.PaymentViewModel
+
+@{
+    ViewBag.Title = "Payment Gateway";
+    Layout = "~/Views/Shared/LayoutEmptyNew.cshtml";
+}
+
+<div>
+    <div class="paymentMobilePage account_form app_payment_page">
+        <div class="mt-75 pt-4">
+            <h1 class="h1_head">Please stand by</h1>
+            <form id="formPaymentGateway" method="POST" action=" https://paynow.netcash.co.za/site/paynow.aspx">
+
+                <input name="m1" type="hidden" value="@Model.m1">
+                <input name="m2" type="hidden" value="24ade73c-98cf-47b3-99be-cc7b867b3080">
+                <input name="p2" type="hidden" value="@Model.p2">
+                <input name="p3" type="hidden" value="@Model.p3">
+                <input name="p4" type="hidden" value="@Model.p4.00">
+                <input name="Budget" type="hidden" value="@Model.Budget">
+                <input name="m4" type="hidden" value="@Model.m4">
+                <input name="m5" type="hidden" value="@Model.m5">
+                <input name="m6" type="hidden" value="@Model.m6">
+                <input name="m9" type="hidden" value="@Model.m9">
+                <input name="m10" type="hidden" value="@Model.m10">
+
+                <h3>Please wait a moment while you are being redirected to the Netcash payment gateway...</h3>
+                <script>
+                    //ga('send', 'pageview', '/donate/success');
+                    document.getElementById('formPaymentGateway').submit();
+                </script>
+            </form>
+        </div>
+    </div>
+</div>

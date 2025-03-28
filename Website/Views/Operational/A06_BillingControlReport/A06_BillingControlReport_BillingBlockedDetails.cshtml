@@ -1,0 +1,69 @@
+@model MyVoltage.Models.OperationalModels.A06_BillingControlReport.A06_BillingControlReport_BillingBlockedDetailsModel
+@{
+    ViewData["Title"] = "Billing Control Report - Billing Blocked Details";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            <div class="card-header text-left">
+                <a href="/operational/A06_BillingControlReport/A06_BillingControlReport_BillingBlockedSummary" class="btn btn-outline-primary"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+                &nbsp;(Tip: Use Ctrl + F to search)
+            </div>
+            <div class="card-body">
+                @if (operationalProvider.CompanyID == 0)
+                {
+                    <span>Please select a company from the sidebar to see results.</span>
+                }
+                else
+                {
+                    if (Model.A06_BillingControlReport_BillingBlockedDetailsItems.Count == 0)
+                    {
+                        <span>There are no entries for @operationalProvider.CompanyName</span>
+                    }
+                    else
+                    {
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer No</th>
+                                    <th scope="col">Meter Serial</th>
+                                    <th scope="col">Account Type</th>
+                                    <th scope="col">Blocked</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itemC in Model.A06_BillingControlReport_BillingBlockedDetailsItems)
+                                {
+                                    <tr style="cursor:pointer;" title="@itemC.Customer_No" onclick="RedirectToReview('@itemC.Serial_No');">
+                                        <td scope="col">@itemC.Customer_No</td>
+                                        <td scope="col">@itemC.Serial_No</td>
+                                        <td scope="col">@itemC.BILLING_CYCLE</td>
+                                        <td scope="col">@itemC.Blocked</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToReview(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A06_BillingControlReport/A06_BillingControlReport_BillingBlockedDetails';
+        }
+    </script>
+}

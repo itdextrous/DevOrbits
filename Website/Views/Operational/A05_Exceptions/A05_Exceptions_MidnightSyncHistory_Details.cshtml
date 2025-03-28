@@ -1,0 +1,352 @@
+@model MyVoltage.Models.OperationalModels.A05_Exceptions.A05_ExceptionsModels.A05_Exceptions_MidnightSyncHistory_DetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A05_Exceptions_MidnightSyncHistory_Details.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        @if (string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+        {
+            <span>Select customer to start...</span>
+        }
+        else
+        {
+            @if (Model.DeviceReadingsMidnightSync == null)
+            {
+                <span class="text-red font-weight-bold">Error loading selected meter details...</span>
+            }
+            else
+            {
+                <div class="row mb-4">
+                    <div class="col">
+                        <div class="card p-md-4 mv-gradient">
+                            <div class="card-header text-orange">
+                                <h4>
+                                    @if (Model.Device != null)
+                                    {
+                                        @switch (Model.Device.MeterType)
+                                        {
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                <img src="~/images/elec-icon-s.png" />
+                                                break;
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                <img src="~/images/water-icon-s.png" />
+                                                break;
+                                            case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                <img src="~/images/gas-icon-s.png" />
+                                                break;
+                                        }
+                                    }
+                                    @operationalProvider.CustomerMeterSerial - Summary
+                                </h4>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="col border border-primary rounded p-2 m-2">
+                                    <div class="row">
+                                        <div class="col-12 text-center">
+                                            <h6>Skybill Customer Details:</h6>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Company Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @operationalProvider.CompanyName
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Customer No:
+                                        </div>
+                                        <div class="col-6">
+                                            @(Model.SkybillCustomer != null ? Model.SkybillCustomer.Customer_No : "Unknown")
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Customer Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @(Model.SkybillCustomer != null ? Model.SkybillCustomer.Customer_Name : "Unknown")
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Account Type:
+                                        </div>
+                                        <div class="col-6">
+                                            @(Model.SkybillCustomer != null ? Model.SkybillCustomer.AccountType.GetDescription() : "Unknown")
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                            <div class="card-footer">
+
+                                <div class="col border border-primary rounded p-2 m-2">
+                                    <div class="row">
+                                        <div class="col-12 text-center">
+                                            <h6>Midnight Sync Details:</h6>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Device Type:
+                                        </div>
+                                        <div class="col-6">
+                                            @switch (Model.Device.MeterType)
+                                            {
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity:
+                                                    <img src="~/images/elec-icon-s.png" />
+                                                    <span>Electricity</span>
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Water:
+                                                    <img src="~/images/water-icon-s.png" />
+                                                    <span>Water</span>
+                                                    break;
+                                                case MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas:
+                                                    <img src="~/images/gas-icon-s.png" />
+                                                    <span>Gas</span>
+                                                    break;
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            M2M Device ID:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.m2mDeviceID
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Mirror Device ID:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.mirrorDeviceID
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            M2M Serial:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.m2mSerial
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Mirror Serial:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.mirrorSerial
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            M2M Device Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.m2mDeviceName
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Mirror Device Name:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.mirrorDeviceName
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Time Logged:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.TimeLogged.ToDateAndTimeShort()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Reading:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.Reading.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Live Reading:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.LiveReading.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Where Did I Find This:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.WhereDidIFindThis
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Original Time:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.OriginalTime.ToDateAndTimeShort()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Sync ID:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.ID
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            First Average Per Day:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.FirstAveragePerDay.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Second Average Per Day:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.SecondAveragePerDay.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Third Average Per Day:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.ThirdAveragePerDay.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Last 7 Average Per Day:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.Last7AveragePerDay.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Highest Average Per Day:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.HighestAveragePerDay.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Ceiling Min:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.CeilingMin.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Ceiling:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.Ceiling.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Ceiling Calculation From:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.CeilingCalculationFrom
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Previous Plus Ceiling:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.PreviousPlusCeiling.ToReading()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Use Old Reading:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.UseOldReading.ToBoolean()
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            Reason For Old Reading:
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DeviceReadingsMidnightSync.ReasonForOldReading
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            }
+        }
+
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        function RedirectToVerification(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A05_Exceptions/A05_Exceptions_MidnightSyncHistory_Details';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}

@@ -1,0 +1,143 @@
+@model MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementSummaryModel
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.B03_SupplyCouncilStatements_CouncilStatementSummary.GetDescription();
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        @Html.DropDownList("PartnerID", Model.PartnerID, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        @Html.DropDownList("Status", Model.Status, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        @Html.DropDownList("PaymentType", Model.PaymentType, new { @class = "form-control" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+                <div class="row mt-2 mb-2">
+                    <div class="col-12">
+                        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                        &nbsp;
+                        <a href="/operational/B03_SupplyCouncilStatements/B03_SupplyCouncilStatements_CouncilStatementSummary" class="btn btn-outline-primary-sm"><i class="fas fa-redo"></i>&nbsp;Reset Filters</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 table-danger">
+        Legend: Outdated.
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 table-warning">
+        Legend: Unknown status.
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 table-success">
+        Legend: Current.
+    </div>
+</div>
+<div class="row mb-4 mt-4">
+    <div class="col">
+
+<table class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th class="text-center" rowspan="2" scope="col">Company Name</th>
+            <th class="text-center" rowspan="2" scope="col">Status</th>
+            <th class="text-center" rowspan="2" scope="col">Payment Type</th>
+            <th class="text-center" rowspan="2" scope="col">Council Account No</th>
+            <th class="text-center" rowspan="2" scope="col">Council Invoices Loaded</th>
+            <th class="text-center" rowspan="2" scope="col">Council Billing Date</th>
+            <th class="text-center" colspan="5">Latest Invoice</th>
+            <th class="text-center" colspan="2">Amount Due</th>
+        </tr>
+        <tr>
+            <th class="text-center">Status</th>
+            <th class="text-center">Tax Invoice No</th>
+            <th class="text-center">Tax Invoice Date</th>
+            <th class="text-center">Final Date For Payment</th>
+            <th class="text-center">Amount Incl</th>
+            <th class="text-center">By Service Provider</th>
+            <th class="text-center">By Client</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.B03_SupplyCouncilStatements_CouncilStatementSummaryItems)
+        {
+            string rowClass = "";
+
+            if (item.Status == MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementSummaryModel.B03_SupplyCouncilStatements_CouncilStatementSummaryItem.StatusType.Current)
+            {
+                rowClass = "table-success";
+            }
+            else if (item.Status == MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementSummaryModel.B03_SupplyCouncilStatements_CouncilStatementSummaryItem.StatusType.Unknown)
+            {
+                rowClass = "table-warning";
+            }
+            else if (item.Status == MyVoltage.Models.OperationalModels.B03_SupplyCouncilStatementsModels.B03_SupplyCouncilStatements_CouncilStatementSummaryModel.B03_SupplyCouncilStatements_CouncilStatementSummaryItem.StatusType.Outdated)
+            {
+                rowClass = "table-danger";
+            }
+
+            <tr style="cursor:pointer;" title="View @item.PropertyLinked" onclick="RedirectToDetails('@item.CompanyID');" class="@Html.Raw(rowClass)">
+                <td title="@item.PropertyLinked - Company Name" scope="col">@item.PropertyLinked</td>
+                <td title="@item.PropertyLinked - Status" scope="col">@item.Status.GetDescription()</td>
+                <td title="@item.PropertyLinked - Payment Type" scope="col">@(item.BuildingCouncilDetail != null && item.BuildingCouncilDetail.PaymentType.HasValue ? item.BuildingCouncilDetail.PaymentType.Value.GetDescription() : "")</td>
+                <td title="@item.PropertyLinked - Council Details Loaded" scope="col">@item.BuildingCouncilDetail.CouncilElecAccNo</td>
+                <td title="@item.PropertyLinked - Council Invoices Loaded" scope="col">@item.CouncilInvoicesLoaded</td>
+                <td title="@item.PropertyLinked - Council Billing Date" class="text-right">@(item.CurrentCycleBillingDate.ToDateShort(true))</td>
+                <td title="@item.PropertyLinked - Latest Invoice - Status" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.Status.GetDescription() : "")</td>
+                <td title="@item.PropertyLinked - Latest Invoice - Tax Invoice No" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.TAXInvoiceNo : "")</td>
+                <td title="@item.PropertyLinked - Latest Invoice - Tax Invoice Date" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.TAXInvoiceDate.ToDateShort() : "")</td>
+                <td title="@item.PropertyLinked - Latest Invoice - Final Date For Payment" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.FinalDateForPayment.ToDateShort() : "")</td>
+                <td title="@item.PropertyLinked - Latest Invoice - Amount Incl" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.BuildingCouncilDetails_InvoiceItems.Select(p => p.AmountInclVAT).Sum().ToMoneyNoDecimal() : "")</td>
+                <td title="@item.PropertyLinked - Amount Due By Service Provider" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.ClosingBalanceServiceProvider.ToMoneyNoDecimal() : "")</td>
+                <td title="@item.PropertyLinked - Amount Due By Client" class="text-right">@(item.Latest_Invoice != null ? item.Latest_Invoice.ClosingBalanceClient.ToMoneyNoDecimal() : "")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        document.location.href = '/operational/changeActivePartner/' + $("#PartnerID").val() + "?R=" + encodeURIComponent(window.location.href.split('?')[0] + '?Status=' + $("#Status").val() + '&PaymentType=' + $("#PaymentType").val());
+    }
+    function RedirectToDetails(companyID) {
+        document.location.href = '/operational/changeActiveCompany/' + companyID + "?R=" + encodeURIComponent(document.location.href);
+    }
+</script>
+}

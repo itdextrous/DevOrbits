@@ -1,0 +1,1691 @@
+@model MyVoltage.Models.LeaduserModels.Properties_EditModel
+@using MyVoltage.Extensions;
+@{
+    //ViewData["Title"] = $"Properties - Edit{(Model != null ? $" - {Model.Name}" : "")}";
+    ViewData["Title"] = $"Properties [{(Model != null ? $"{Model.Name}" : "")}]";
+    Layout = "LayoutLeaduser";
+}
+
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+
+<div class="generate_lead pt_m_45 pb-45">
+    <div class="container md_container">
+        @if (Model.PropertyID == 0)
+        {
+            <div class="text-center">
+                <h3 class="page_heading">lead creation</h3>
+                <h4 class="sub_heading mt_27">Fill in the form fields to log a potential lead</h4>
+            </div>
+        }
+        else
+        {
+            <div class="text-center">
+                <h3 class="page_heading">lead portfolio</h3>
+                <h4 class="sub_heading mt_27 h_1">&nbsp;</h4>
+            </div>
+        }
+
+
+        <div class="collapse_btn d-flex align-items-center justify-content-center mt_32">
+            <button type="button" class="btn_link" onClick="expandAll();">Expand all</button>
+            <span>|</span>
+            <button type="button" class="btn_link" onClick="collapseAll();">Contract all</button>
+        </div>
+
+        <div class="collapse_type d-flex align-items-center justify-content-center mt-20">
+            <label><span class="box"></span>Incomplete</label>
+            <label><span class="box light_gray"></span>Partially completed</label>
+            <label><span class="box dark_gray"></span>Completed</label>
+        </div>
+
+        <div class="mt_100">
+            <div class="property_info">
+                <h3 id="headerPropName">@Model.Name</h3>
+                <div class="d-flex align-items-center">
+                    <p><b>Lead ID:</b> @Model.PropertyID</p>
+                    <span>|</span>
+                    <p><b>Status:</b> <span id="headerBlockStatus"></span></p>
+                </div>
+            </div>
+
+            <div class="accordion" id="leadAccordion">
+
+                @if (Model.PropertyID == 0)
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header propertiesInfo-item">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1">
+                                1. Property name
+                            </button>
+                        </h2>
+                        <div id="step1" class="accordion-collapse collapse show" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="addPropertyId" method="post" asp-action="D01_Leads_Properties_Add" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Name" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="Name" />
+                                                <span asp-validation-for="Name" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Add Property</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header propertiesInfo-item">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1">
+                                1. Property name
+                            </button>
+                        </h2>
+                        <div id="step1" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="propNameForm" method="post" asp-action="D01_Leads_Properties_Edit_PropertyInformation" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Name" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="Name" />
+                                                <span asp-validation-for="Name" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header propertiesInfo-item">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#prop_info">
+                                2. Property information
+                            </button>
+                        </h2>
+                        <div id="prop_info" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="propertiesInfo" method="post" asp-action="D01_Leads_Properties_Edit_PropertyInformation" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Understand the property lead by collecting info such as name, property type, size, location, and any other relevant details.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Description" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="Description" />
+                                                <span asp-validation-for="Description" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="PropertyTypeID" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                @Html.DropDownList("PropertyTypeID", Model.PropertyTypeID, new { @class = "form-control-trim" })
+                                                <span asp-validation-for="PropertyTypeID" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="NoOfRegisteredUnits" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="number" class="form-control-trim" asp-for="NoOfRegisteredUnits" min="0" max="@Int32.MaxValue" />
+                                                <span asp-validation-for="NoOfRegisteredUnits" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="NoOfMeteringPoints" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="number" class="form-control-trim" asp-for="NoOfMeteringPoints" min="0" max="@Int32.MaxValue" />
+                                                <span asp-validation-for="NoOfMeteringPoints" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="StreetAddress" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="StreetAddress" />
+                                                <span asp-validation-for="StreetAddress" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Suburb" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="Suburb" />
+                                                <span asp-validation-for="Suburb" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="TownOrCity" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="TownOrCity" />
+                                                <span asp-validation-for="TownOrCity" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label class="control-label required">Province</label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input class="form-control-trim" asp-for="@Model.Property.ProvinceName" disabled />
+                                                @* @(!string.IsNullOrEmpty(Model.Property.ProvinceName) ? Model.Property.ProvinceName : "NULL")*@
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="LocalMunicipality" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                @Html.DropDownList("LocalMunicipality", Model.LocalMunicipality, new { @class = "form-control-trim", @onchange = "setProvinceName()" })
+                                                <span asp-validation-for="LocalMunicipality" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Website" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="Website" />
+                                                <span asp-validation-for="Website" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="GPSLat" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="GPSLat" asp-format="{0:n6}" />
+                                                <span asp-validation-for="GPSLat" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="GPSLong" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="text" class="form-control-trim" asp-for="GPSLong" asp-format="{0:n6}" />
+                                                <span asp-validation-for="GPSLong" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end mt-30 mb-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                    <div class="map_div">
+                                        <div id="map" style="height:375px"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step2">
+                                3. Tracking information
+                            </button>
+                        </h2>
+                        <div id="step2" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form id="trackingInfo" class="form-submit" autocomplete="off" method="post" asp-action="D01_Leads_Properties_Edit_TrackingInformation" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-5 col-sm-5">
+                                                <label class="control-label">Property Lead Id</label>
+                                            </div>
+                                            <div class="col-7 col-sm-7">
+                                                <div class="data_value">@Model.Property.ID</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ResponsibleUser" class="control-label"></label>
+                                            </div>
+                                            @{
+                                                var ResponsibleUser = Model.ResponsibleUser.Where(x => x.Selected).FirstOrDefault();
+                                            }
+                                            <div class="col-sm-7">
+                                                @*@Html.DropDownList("ResponsibleUser", Model.ResponsibleUser, new { @class = "form-control-trim" })*@
+                                                <div class="data_value">@(ResponsibleUser != null ? ResponsibleUser.Text : string.Empty)</div>
+                                                @*<span asp-validation-for="ResponsibleUser" class="text-red"></span>*@
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Status" class="control-label"></label>
+                                            </div>
+                                            @{
+                                                var status = Model.Status.Where(x => x.Selected).FirstOrDefault();
+                                            }
+                                            <div class="col-sm-7">
+                                                @*@Html.DropDownList("Status", Model.Status, new { @class = "form-control-trim" })*@
+                                                @*<span asp-validation-for="Status" class="text-red"></span>*@
+                                                <div id="trackStatus" class="data_value">@(status != null ? status.Text : string.Empty)</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label class="control-label">Latest Status Change</label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <div class="data_value">@Model.Property.StatusChangeUserName - @Model.Property.StatusChangeDate.ToDateAndTimeShort(true)</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="OverallStatus" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="OverallStatus"></textarea>
+                                                <span asp-validation-for="OverallStatus" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Active" class="control-label"></label>
+                                            </div>
+                                            @{
+                                                var Active = Model.Active.Where(x => x.Selected).FirstOrDefault();
+                                            }
+                                            <div class="col-sm-7">
+                                                @* @Html.DropDownList("Active", Model.Active, new { @class = "form-control-trim" })
+                                            <span asp-validation-for="Active" class="text-red"></span>*@
+                                                <div class="data_value">@(Active != null ? Active.Text : string.Empty)</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header completed">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step3">
+                                4. Origin of the lead
+                            </button>
+                        </h2>
+                        <div id="step3" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <p>Track how the lead was generated (e.g., website form, referral, event) to evaluate the effectiveness of your lead generation strategies. (i.e. Record how the lead was generated or acquired. This information helps you assess the effectiveness of different marketing and lead generation strategies and optimize your efforts in the future.)</p>
+                                <div class="form_style">
+                                    <div class="row mb-10">
+                                        <div class="col-5 col-sm-5">
+                                            <label class="control-label">Lead Generator</label>
+                                        </div>
+                                        <div class="col-7 col-sm-7">
+                                            <div class="data_value">@Model.Property.CreatedByUsername</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-10">
+                                        <div class="col-5 col-sm-5">
+                                            <label class="control-label">Lead Source</label>
+                                        </div>
+                                        <div class="col-7 col-sm-7">
+                                            <div class="data_value">@Model.Property.LeadGeneratorName</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step4">
+                                5. Needs identified
+                            </button>
+                        </h2>
+                        <div id="step4" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="painPoints" method="post" asp-action="D01_Leads_Properties_Edit_PainPointsAndNeeds" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Recognize the challenges, pain points, or objectives the property seeks to resolve. Utilizing this information will enable customizing the sales pitch to cater to their specific needs. The objective is to comprehend their precise requirements and the issues they aim to overcome or the goals they aspire to achieve.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfIdentifiedPainPoints" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfIdentifiedPainPoints"></textarea>
+                                                <span asp-validation-for="DetailsOfIdentifiedPainPoints" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="NeedsIdentified" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="NeedsIdentified"></textarea>
+                                                <span asp-validation-for="NeedsIdentified" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="KeyObjectivesIdentified" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="KeyObjectivesIdentified"></textarea>
+                                                <span asp-validation-for="KeyObjectivesIdentified" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step5">
+                                6. Product solution
+                            </button>
+                        </h2>
+                        <div id="step5" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="leadProducts" method="post" asp-action="D01_Leads_Properties_Edit_Products" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Choose potential products or services that have been recognized to meet the requirements of the property.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-15">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ProductID" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                @*@Html.DropDownList("ProductID", Model.ProductID, new { @class = "form-control-trim" })*@
+                                                <div class="checkbox_list d-flex flex-column align-items-start">
+                                                    @foreach(var prod in Model.ProductID.Skip(1))
+                                                    {
+                                                        <label>
+                                                            @Html.RadioButton("ProductID", prod.Value, prod.Selected)
+                                                            @prod.Text
+                                                        </label>
+                                                    }
+                                                 </div>
+                                                <span asp-validation-for="ProductID" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-15">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ServiceID" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                @*@Html.DropDownList("ServiceID", Model.ServiceID, new { @class = "form-control-trim" })*@
+                                                <div class="checkbox_list d-flex flex-column align-items-start">
+                                                    @foreach (var ser in Model.ServiceID.Skip(1))
+                                                    {
+                                                        <label>
+                                                            @Html.RadioButton("ServiceID", ser.Value, ser.Selected)
+                                                            @ser.Text
+                                                        </label>
+                                                    }
+                                                </div>
+                                                <span asp-validation-for="ServiceID" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ProductComments" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="ProductComments"></textarea>
+                                                @*<span asp-validation-for="ProductComments" class="text-red"></span>*@
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step6">
+                                7. Contact details
+                            </button>
+                        </h2>
+                        <div id="step6" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+
+                                <div id="Properties_ContactDetailsForm">
+                                </div>
+
+                                <div class="table-responsive mt-2 mb-15">
+                                    <table id="contactsTblID" class="table table-design table-striped table-hover mb-5">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Contact Number</th>
+                                                <th>Email</th>
+                                                <th>Property Name</th>
+                                                <th class="w_75"></th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="propContTblBdy">
+                                            @foreach (var item in Model.ContactsItems)
+                                            {
+                                                <tr>
+                                                    <td class="text-nowrap">@item.FullName</td>
+                                                    <td class="text-nowrap">@item.PhoneNumber</td>
+                                                    <td class="text-nowrap">@item.Email</td>
+                                                    <td class="text-nowrap">@Model.Property.Name</td>
+                                                    <td class="text-nowrap">
+                                                        <div class="d-flex action_btns">
+                                                            <span title="Edit Agents" onclick="loadProptertyContacts('@item.ID')"><i class="fas fa-pen"></i></span>
+                                                            <span title="Delete Agents" onclick="removeContactLink('@item.ID')"><i class="fas fa-trash-alt"></i></span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @*<h6 class="mb-15">Linked To Managing Agents</h6>
+                                <div class="form_style">
+                                    <div class="row mb-10">
+                                        <div class="col-sm-5">
+                                            <label class="control-label">Managing Agents</label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <select class="form-control-trim">
+                                                <option>Select Agents</option>
+                                                <option>Agency 1</option>
+                                                <option>Agency 2</option>
+                                                <option>Agency 3</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="text-end mt-30 mb-15">
+                                        <button class="btn btn-grape">Save Changes</button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive mt-2">
+                                    <table id="agentsTblID" class="table table-design table-striped table-hover mb-5">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Contact Number</th>
+                                                <th>Email</th>
+                                                <th>Property Name</th>
+                                                <th class="w_75"></th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="propAgentsTblBdy">
+                                            <tr>
+                                                <td class="text-nowrap">Test</td>
+                                                <td class="text-nowrap">0876549043</td>
+                                                <td class="text-nowrap">test123@testc.com</td>
+                                                <td class="text-nowrap">test123</td>
+                                                <td class="text-nowrap">
+                                                    <div class="d-flex action_btns">
+                                                        <span title="Edit Agents"><i class="fas fa-pen"></i></span>
+                                                        <span title="Delete Agents"><i class="fas fa-trash-alt"></i></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                *@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step7">
+                                8. Influencers and decision makers
+                            </button>
+                        </h2>
+                        <div id="step7" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="influencers" method="post" asp-action="D01_Leads_Properties_Edit_InfluencersAndDecisionMakers" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Identify the individuals involved in the decision-making process within the property lead's organization. Recognize the key stakeholders and influencers to effectively address their concerns and secure their support. This includes assessing the property lead's authority to make purchasing decisions independently or if they require approval from higher-ups or a procurement department.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfInfluencersIdentified" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfInfluencersIdentified"></textarea>
+                                                <span asp-validation-for="DetailsOfInfluencersIdentified" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOnDecisionMakersIdentified" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOnDecisionMakersIdentified"></textarea>
+                                                <span asp-validation-for="DetailsOnDecisionMakersIdentified" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfDecisionMakingProcess" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfDecisionMakingProcess"></textarea>
+                                                <span asp-validation-for="DetailsOfDecisionMakingProcess" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ManagingAgent" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="ManagingAgent"></textarea>
+                                                <span asp-validation-for="ManagingAgent" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="BodyCorp" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="BodyCorp"></textarea>
+                                                <span asp-validation-for="BodyCorp" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="InformationOnLandlord" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="InformationOnLandlord"></textarea>
+                                                <span asp-validation-for="InformationOnLandlord" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step8">
+                                9. Budget and purchasing authority
+                            </button>
+                        </h2>
+                        <div id="step8" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="budgetAuthority" method="post" asp-action="D01_Leads_Properties_Edit_BudgetAndPurchasingAuthority" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Determine the property lead's budget range and their decision-making authority. This information will help gauge the potential for a sale and tailor the offerings accordingly. i.e. Determine the property lead's budget or financial capabilities to ensure that the product or service aligns with their financial capacity.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="LeadsBudgetRequirements" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="LeadsBudgetRequirements"></textarea>
+                                                <span asp-validation-for="LeadsBudgetRequirements" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="LeadsPurchasingAuthority" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="LeadsPurchasingAuthority"></textarea>
+                                                <span asp-validation-for="LeadsPurchasingAuthority" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step9">
+                                10. Communication preference
+                            </button>
+                        </h2>
+                        <div id="step9" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="communicationPreferences" method="post" asp-action="D01_Leads_Properties_Edit_CommunicationPreferences" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Inquire about the property lead's preferred communication channels and frequency of contact (e.g., email, phone, in-person). Respecting these preferences fosters better relationship-building. Additionally, gather information on any past interactions with our company, such as previous communication, inquiries, or engagement with the website, events, or arketing materials. This insight will help inform our approach and provide valuable context.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="CommunicationPreferences" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="CommunicationPreferences"></textarea>
+                                                <span asp-validation-for="CommunicationPreferences" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfPreviousInteractions" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfPreviousInteractions"></textarea>
+                                                <span asp-validation-for="DetailsOfPreviousInteractions" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step10">
+                                11. Viability analysis
+                            </button>
+                        </h2>
+                        <div id="step10" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="salesAnalysis" method="post" asp-action="D01_Leads_Properties_Edit_SalesViabilityAnalysis" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-6 col-sm-5">
+                                                <label class="control-label">No. of Registered Units</label>
+                                            </div>
+                                            <div class="col-6 col-sm-7">
+                                                <div class="data_value" id="viaRegUnit">
+                                                    @Model.Property.NoOfRegisteredUnits
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-6 col-sm-5">
+                                                <label class="control-label">No. of Metering Points</label>
+                                            </div>
+                                            <div class="col-6 col-sm-7">
+                                                <div class="data_value" id="viaMetPt">
+                                                    @Model.Property.NoOfMeteringPoints
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10 align-items-end">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ExpectedMonthlyGrossProfitPerRegisteredUnit" class="control-label pb-sm-0"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="number" class="form-control-trim" asp-for="ExpectedMonthlyGrossProfitPerRegisteredUnit" max="@Int32.MaxValue" />
+                                                <span asp-validation-for="ExpectedMonthlyGrossProfitPerRegisteredUnit" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10 align-items-end">
+                                            <div class="col-sm-5">
+                                                <label asp-for="ExpectedAverageCapitalCostPerMeteringPoint" class="control-label pb-sm-0"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input type="number" class="form-control-trim" asp-for="ExpectedAverageCapitalCostPerMeteringPoint" max="@Int32.MaxValue" />
+                                                <span asp-validation-for="ExpectedAverageCapitalCostPerMeteringPoint" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10 align-items-end">
+                                            <div class="col-sm-5">
+                                                <label class="control-label pb-sm-0">Total calculated expected monthly gross profit</label>
+                                            </div>
+                                            <div class="col-sm-7 total-gross-profit">
+                                                @if (Model.Property.NoOfRegisteredUnits.HasValue && Model.ExpectedMonthlyGrossProfitPerRegisteredUnit.HasValue)
+                                                {
+                                                    <div class="data_value">
+                                                        @((Model.Property.NoOfRegisteredUnits.Value * Model.ExpectedMonthlyGrossProfitPerRegisteredUnit.Value).ToMoney())
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="data_value">
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10 align-items-end">
+                                            <div class="col-sm-5">
+                                                <label class="control-label pb-sm-0">Total calculated expected average capital cost</label>
+                                            </div>
+                                            <div class="col-sm-7 avg-cap-cost">
+                                                @if (Model.Property.NoOfMeteringPoints.HasValue && Model.ExpectedAverageCapitalCostPerMeteringPoint.HasValue)
+                                                {
+                                                    <div class="data_value">
+                                                        @((Model.Property.NoOfMeteringPoints.Value * Model.ExpectedAverageCapitalCostPerMeteringPoint.Value).ToMoney())
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="data_value">
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step11">
+                                12. Current provider
+                            </button>
+                        </h2>
+                        <div id="step11" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="solutionProvider" method="post" asp-action="D01_Leads_Properties_Edit_CurrentSolutionProvider" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Determine if the property lead is currently using a similar product or service and gather information about their satisfaction level. This knowledge can help to position the offering as a better alternative. (i.e. Find out if the lead is currently using any alternative solutions or providers for the problem you aim to solve. Knowing this will allow you to highlight the unique value your offering brings.)</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfCurrentSolution" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfCurrentSolution"></textarea>
+                                                <span asp-validation-for="DetailsOfCurrentSolution" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfCurrentServiceProvider" class="control-label required"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfCurrentServiceProvider"></textarea>
+                                                <span asp-validation-for="DetailsOfCurrentServiceProvider" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step12">
+                                13. Competition
+                            </button>
+                        </h2>
+                        <div id="step12" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="competition" method="post" asp-action="D01_Leads_Properties_Edit_Competition" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Identify any competitors that the property lead is currently considering or has previously considered. This will enable us to emphasize our unique value proposition and set ourselves apart from the competition. For instance, determine if the lead is contemplating or utilizing products/services from our competitors. This information will aid in customizing the sales pitch and distinguishing our offering.</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="DetailsOfCompetitionInMarket" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="DetailsOfCompetitionInMarket"></textarea>
+                                                <span asp-validation-for="DetailsOfCompetitionInMarket" class="text-red"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step13">
+                                14. Timelines
+                            </button>
+                        </h2>
+                        <div id="step13" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <form class="form-submit" autocomplete="off" id="timelines" method="post" asp-action="D01_Leads_Properties_Edit_Timelines" asp-route-propertyID="@Model.PropertyID" enctype="multipart/form-data">
+                                    <p>Understand the property lead's timeline for making a purchase decision. Knowing when they intend to implement a solution can help prioritize and manage sales pipeline effectively. (i.e. Determine the prospect's timeframe for making a decision or implementing a solution. This will help you prioritize and align your sales process accordingly.)</p>
+                                    <div class="form_style">
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="Comments" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <textarea type="text" class="form-control" asp-for="Comments"></textarea>
+                                                <span asp-validation-for="Comments" class="text-red"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-10">
+                                            <div class="col-sm-5">
+                                                <label asp-for="NextFollowUpDate" class="control-label"></label>
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <input onkeydown="return false" type="text" name="date" class="form-control-trim invoiceDataDate datePicker_input"
+                                                       placeholder="yyyy-mm-dd" value="@(Model.NextFollowUpDate.HasValue?Model.NextFollowUpDate.Value.ToString("yyyy-MM-dd"):string.Empty)">
+                                                <input type="date" class="form-control-trim" asp-for="NextFollowUpDate" hidden />
+                                                @*<span asp-validation-for="NextFollowUpDate" class="text-red"></span>*@
+                                            </div>
+                                        </div>
+                                        <div class="text-end mt-30">
+                                            <button class="btn btn-grape">Save Changes</button>
+                                        </div>
+                                        <h6 class="mt-15">Tracking information</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-design table-striped table-hover mb-5">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>User</th>
+                                                        <th>Changed from</th>
+                                                        <th>To</th>
+                                                        <th>Days In Status</th>
+                                                    </tr>
+                                                </thead>
+
+
+                                                @foreach (var item in Model.D01_Property_Status_LogItems)
+                                                {
+                                                    <tr>
+                                                        <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                                        <td>@item.Username</td>
+                                                        <td>
+                                                            @(Html.Raw(item.StatusBeforeText))
+                                                        </td>
+                                                        <td>
+                                                            @(Html.Raw(item.StatusAfterText))
+                                                        </td>
+                                                        <td>@item.DaysInStatus.ToString("N2")</td>
+                                                    </tr>
+                                                }
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="editHistAccod">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step14">
+                                15. Edit history
+                            </button>
+                        </h2>
+                        <div id="step14" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body">
+                                <div class="table-responsive">
+                                    <table class="table table-design table-striped table-hover mb-5 edit-history-tbl">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>User</th>
+                                                <th>Changes</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="editHistRows">
+                                            @foreach (var item in Model.SiteAdmin_Property_LogItems.OrderByDescending(p => p.DateCreated))
+                                            {
+                                                <tr>
+                                                    <td class="text-nowrap">@item.DateCreated.ToDateAndTimeShort()</td>
+                                                    <td class="text-nowrap">@item.Username</td>
+                                                    <td>
+                                                        <div class="edit-history-overflow">
+                                                            @(Html.Raw(item.SystemDescription))
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step15">
+                                16. Prospecting meeting outcomes
+                            </button>
+                        </h2>
+                        <div id="step15" class="accordion-collapse collapse" data-bs-parent="#leadAccordion">
+                            <div class="accordion-body mt-5">
+                                <p>
+                                    Please indicate what the outcomes of the prospecting meeting was.
+                                </p>
+                                <div class="form_style">
+                                    <div class="row mb-10">
+                                        <div class="col-sm-5">
+                                            <label class="control-label">Decision</label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <div class="checkbox_list d-flex flex-column align-items-start">
+                                                <label><input type="checkbox" />Denied</label>
+                                                <label><input type="checkbox" />Approved</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-10">
+                                        <div class="col-sm-5">
+                                            <label asp-for="DetailsOfDecision" class="control-label"></label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <textarea type="text" class="form-control" asp-for="DetailsOfDecision"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="text-end mt-30">
+                                        <button class="btn btn-grape">Save Changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form_submit_step d-flex flex-column align-items-start mt-20">
+                        <p class="mb-20 note_msg">Please ensure that all required fields are completed before you can submit a lead to the prospecting meeting.</p>
+                        <label class="radio_btns cond1form"><input type="checkbox" name="formConditions1" /> I hereby affirm the accuracy of all provided information</label>
+                        <label class="radio_btns cond2form"><input type="checkbox" name="formConditions2" /> I agree to the terms and conditions.</label>
+                        <a class="btn btn-grape mt-20 disabled prospectMeet">Send to Prospecting Meeting Agenda</a>
+                    </div>
+
+                }
+            </div>
+
+            @if(Model.PropertyID != 0){
+                <div class="text-center pt-35">
+                    @*<a href="/leaduser/D01_Leads_Properties" class="btn btn-islandsunrise">Back to Property List</a>*@
+                    <a href="/leaduser/D01_Leads_Properties" class="btn btn-islandsunrise">Back to Lead Portfolio</a>
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade filter_modal" id="addAnotherContactID" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Another Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addContactForm" asp-action="D01_Leads_Contacts_Add" enctype="multipart/form-data">
+                    <input type="hidden" id="hidden-PropertyID" name="hidden-PropertyID" value="@(Model.PropertyID.ToString())">
+                    <div class="mb-20">
+                        <label class="control-label mb-1">Full Name</label>
+                        <input type="text" class="form-control" name="FullName" id="contFullName" />
+                        <span id="contFullNameError" class="text-red"></span>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-grape add-contact-property">Add Contact</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({
+            key: "AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk",
+            v: "weekly",
+        });
+    </script>
+    <script>
+        const pageLength = 5;
+
+        $(async function () {
+            //$('#Properties_ContactDetailsForm').load('@Url.Content($"/leaduser/D01_Leads_Properties_ContactDetailsForm/{Html.Raw(Model.PropertyID)}")');
+            loadProptertyContacts();
+            
+
+            //$('#addAnotherContactBdy').load("/leaduser/D01_Leads_Contacts_Add?P=t&PropertyID=@Model.ProductID&Modal=t", () => {
+            //});
+
+            checkForms();
+            enableProspectBtn(); 
+
+            $(".invoiceDataDate").datepicker({
+                format: "yyyy-mm-dd",
+                //startView: "months",
+                //minViewMode: "months",
+                autoclose: "true",
+                startDate: '0d',
+                clearBtn: true,
+            });
+            setHeaderStatus();
+
+            $('.accordion-collapse').on('shown.bs.collapse', function (e) {
+                var $panel = $(this).closest('.accordion-item');
+                $('html,body').animate({
+                    scrollTop: $panel.offset().top - 30
+                }, 50);
+            });
+
+            $('.edit-history-tbl').DataTable({
+                ordering: false,
+                "searching": false,
+                "pageLength": pageLength,
+                "pagingType": "simple",
+                "lengthChange": false,
+            })
+
+        })
+
+        function loadProptertyContacts(contactID){
+            if (contactID)
+                $("#loaderContent").css("display", "block");
+
+            $('#Properties_ContactDetailsForm').load(`@Url.Content($"/leaduser/D01_Leads_Properties_ContactDetailsForm/{Model.PropertyID}")/${contactID}`, () => {
+                $.validator.unobtrusive.parse('#Properties_ContactDetailsForm');
+                checkForms();
+                enableProspectBtn();
+                $('.add-ano-cont').click(() => {
+                    $('#contFullName').val('');
+                });
+
+                $('#contactPropName').val($('#Name').val());
+                $("#loaderContent").css("display", "none");
+            });
+        }
+
+        $(document).on('submit', '.form-submit', function (event) {
+            $("#loaderContent").css("display", "block");
+            let formId = event.target.id;
+            if (formId == "addPropertyId") return;
+            event.preventDefault();
+            var form = $(this);
+
+            if (!form.valid()) {
+                $("#loaderContent").css("display", "none");
+                return;
+            }
+
+            var actionUrl = form.attr('action') + "?formSubmit=t";
+
+            $.post(actionUrl, form.serialize())
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data != undefined) {
+                        if (formId == "trackingInfo" && data == false) {
+                            toastr.info("No data to update.")
+                        } else {
+
+                            if (formId == "salesAnalysis"){
+                                calcSales();
+                            }
+
+                            toastr.success("Successfully updated.");
+                        }
+
+                        checkForms();
+                        //collapseAll();
+                        if (data?.name) {
+                            $('#headerPropName').text(data?.name);
+                        }
+                        if (formId == "propertiesInfo") {
+                            $("#viaRegUnit").text($("#NoOfRegisteredUnits").val());
+                            $("#viaMetPt").text($("#NoOfMeteringPoints").val());
+                            calcSales();
+                        }
+
+                        if (formId == 'contactDetails') {
+                            fetchLinkedContacts();
+                        }
+                        setHeaderStatus();
+
+                        fetchEditHistory();                     //fetching latest edit history data
+
+                        enableProspectBtn();
+                    }
+                })
+            });
+
+        $('.datePicker_input').change((event) => {
+            $('#NextFollowUpDate').val($(".invoiceDataDate").val());
+        })
+
+        $('#leadAccordion').click(() => {
+            //reset validations
+            resetValidation();
+        })
+        function setProvinceName() {
+            let text = $('#LocalMunicipality :selected').text();
+            let val = text.slice(text.indexOf('-') + 1).trim();
+            $('#Property_ProvinceName').val(val);
+        }
+        function resetValidation() {
+            $('.field-validation-error').addClass('field-validation-valid');
+            $('.field-validation-error').empty();
+            $('.field-validation-error').removeClass('field-validation-error');
+        }
+        function setHeaderStatus() {
+            $('#headerBlockStatus').text($('#trackStatus').text());
+        }
+
+        function calcSales(){
+            let regUnit = parseInt($('#viaRegUnit').text()) || 0;
+            let metPt = parseInt($('#viaMetPt').text()) || 0;
+            let expectedMonthlyGrossProfitPerRegisteredUnit = parseFloat($('#ExpectedMonthlyGrossProfitPerRegisteredUnit').val()) || 0;
+            let expectedAverageCapitalCostPerMeteringPoint = parseFloat($('#ExpectedAverageCapitalCostPerMeteringPoint').val()) || 0;
+
+            let totalGrossProfit = regUnit * expectedMonthlyGrossProfitPerRegisteredUnit;
+            let avgCapCost = metPt * expectedAverageCapitalCostPerMeteringPoint;
+
+            $('.total-gross-profit').text(totalGrossProfit||'');
+            $('.avg-cap-cost').text(avgCapCost||'');
+        }
+
+        async function initMap() {
+
+            const { Map } = await google.maps.importLibrary("maps");
+            map = new Map(document.getElementById("map"), {
+                center: { lat: -25.8092082, lng: 28.2957713 },
+                zoom: 15,
+            });
+
+            infoWindow = new google.maps.InfoWindow();
+
+            if ("@(Model.Property.GPSLat.HasValue && Model.Property.GPSLong.HasValue)" == "True") {
+
+                const SystemButton = document.createElement("button");
+
+                SystemButton.textContent = "System Location";
+                SystemButton.classList.add("custom-map-control-button");
+                SystemButton.classList.add("btn");
+                SystemButton.classList.add("btn-sm");
+                SystemButton.classList.add("btn-grape");
+                map.controls[google.maps.ControlPosition.TOP_CENTER].push(SystemButton);
+                SystemButton.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const pos = {
+                                    lat: @(Model.Property.GPSLat.HasValue ? Model.Property.GPSLat.ToString() : "0"),
+                                    lng: @(Model.Property.GPSLong.HasValue ? Model.Property.GPSLong.ToString() : "0"),
+                                };
+
+                                infoWindow.setPosition(pos);
+                                infoWindow.setContent("System Location");
+                                infoWindow.open(map);
+                                map.setCenter(pos);
+                            },
+                            () => {
+                                handleLocationError(true, infoWindow, map.getCenter());
+                            }
+                        );
+                    } else {
+                        // Browser doesn't support Geolocation
+                        handleLocationError(false, infoWindow, map.getCenter());
+                    }
+                });
+
+            }
+
+
+            const locationButton = document.createElement("button");
+
+            locationButton.textContent = "Your location";
+            locationButton.classList.add("custom-map-control-button");
+            locationButton.classList.add("btn");
+            locationButton.classList.add("btn-sm");
+            locationButton.classList.add("btn-grape");
+            locationButton.classList.add("mx-1");
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+            locationButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const pos = {
+                                lat: position.coords.latitude,
+
+                                lng: position.coords.longitude,
+                            };
+
+                            infoWindow.setPosition(pos);
+                            infoWindow.setContent("Your location");
+                            infoWindow.open(map);
+                            map.setCenter(pos);
+                        },
+                        () => {
+                            handleLocationError(true, infoWindow, map.getCenter());
+                        }
+                    );
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false, infoWindow, map.getCenter());
+                }
+            });
+
+            function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+                infoWindow.setPosition(pos);
+                infoWindow.setContent(
+                    browserHasGeolocation
+                        ? "Error: The Geolocation service failed."
+                        : "Error: Your browser doesn't support geolocation."
+                );
+                infoWindow.open(map);
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+
+                        infoWindow.setPosition(pos);
+                        infoWindow.setContent("Your location");
+                        infoWindow.open(map);
+                        map.setCenter(pos);
+                    },
+                    () => {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                    }
+                );
+            } else   
+            
+            
+            
+            {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+
+        }
+        initMap();
+
+
+        function expandAll() {
+            $(".accordion-button").attr("aria-expanded", "true");
+            $(".accordion-collapse").addClass("show");
+            $(".accordion-collapse").removeAttr("data-bs-parent", "");
+        }
+
+        function collapseAll() {
+            $(".accordion-button").attr("aria-expanded", "false");
+            $(".accordion-collapse").removeClass("show");
+            $(".accordion-collapse").attr("data-bs-parent", "#leadAccordion");
+        }
+
+        
+
+        function checkForms() {
+            let allElements = $('#leadAccordion').find('.accordion-item');
+
+            allElements.each((index, item) => {
+                let formEl = $(item).find('form')
+                let headEl = $(item).find('.accordion-header')
+
+                checkFormStatus(formEl, headEl);
+            });
+
+            if($(`.edit-history-tbl tbody tr`)?.length>0){
+                $('#editHistAccod').addClass('completed')
+                $('#editHistAccod').css('background-color', '#bbbfcd');
+            }else{
+                $('#editHistAccod').css('background-color', '#fff');
+                $('#editHistAccod').removeClass("completed");
+            }
+
+        }
+
+        function checkFormStatus(formEl, headEl) {
+            formEl.each(function () {
+                let inputs = $("input, textarea, select", this);
+                let isComplete = true;
+                let isInComplete = true;
+
+                //inputs.filter((index, item) => item.hasAttribute('data-val-required')).each((j, k) => {
+                inputs.filter((index, item) => item).each((j, k) => {
+                    if (k.type != 'hidden') {
+                        if (($(k).attr('type') === 'number' && $(k).val() === '0') || $(k).val().length == 0) {
+                            isComplete = false;
+                        } else {
+                            isInComplete = false;
+                        }
+                    }
+                });
+
+                if (this.id == 'trackingInfo' || this.id == 'salesAnalysis') {
+                    $(`#${this.id} .data_value`).each((index, item) => {
+                        if (item.type != 'hidden') {
+                            if ($(item).text().trim() == '') {
+                                isComplete = false;
+                            } else {
+                                isInComplete = false;
+                            }
+                        }
+                    })
+                } else if (this.id == "leadProducts") {
+                    isComplete = false;
+                    isInComplete = false;
+                    if ($('input[name="ProductID"]:checked').val() == undefined 
+                        && $('input[name="ServiceID"]:checked').val() == undefined 
+                        && $('#ProductComments').val() == '') {
+                            isInComplete = true;
+                    }
+                    if ($('input[name="ProductID"]:checked').val() != undefined
+                        && $('input[name="ServiceID"]:checked').val() != undefined
+                        && $('#ProductComments').val() != ''){
+                            isComplete = true;
+                    }
+                }
+
+                if (isComplete) {
+                    $('.property_info').show();
+                    headEl.css('background-color', '#bbbfcd');
+                    headEl.addClass("completed");
+                } else if (isInComplete) {
+                    headEl.css('background-color', '#fff');
+                    headEl.removeClass("completed");
+                } else {
+                    headEl.css('background-color', '#e7e9ee');
+                    headEl.removeClass("completed");
+                }
+
+            });
+
+        }
+
+        function fetchEditHistory(){
+            $("#loaderContent").css("display", "block");
+            $.get(`/leaduser/D01_Leads_Properties_EditHistory/@Model.PropertyID`)
+            .done(response=>{
+                let tbodyItem = "";
+                response?.forEach((item, index) => {
+                    let outputDateString = item?.dateCreated?.slice(0, 10) + " " + item?.dateCreated?.slice(11, 16);
+                    tbodyItem += `
+                        <tr>
+                            <td class="text-nowrap" >  ${outputDateString}</td>
+                            <td class="text-nowrap" > ${item.username}</td>
+                            <td>
+                                <div class="edit-history-overflow"> ${item.systemDescription}<div>
+                            </td>
+                        </tr>
+                    `
+                });
+
+                    if (checkDataExists('propertiesTbl') && propertiestableEl && $.fn.DataTable.isDataTable('#propertiesTbl'))
+                        propertiestableEl.destroy();
+
+                    $('#propertiesRws').empty();
+                    $('#topPagingBtns').html('');
+
+                $('#editHistRows').html(tbodyItem);
+            })
+            .fail()
+            .always(()=>{
+                $("#loaderContent").css("display", "none");
+            })
+        }
+
+
+        // Function to check if all columns in a row are filled
+        function isRowComplete($row) {
+            var isComplete = true;
+            $row.find('td').each(function () {
+                if ($(this).text().trim() === '') {
+                    isComplete = false;
+                    return false; // Break out of the loop if an empty cell is found
+                }
+            });
+            return isComplete;
+        }
+
+        // Iterate through the rows in the table body
+
+        function contactCompleted(){
+            let isCompleted = false;
+            $('#contactsTblID tbody tr').each(function () {
+                var $row = $(this);
+                if (isRowComplete($row)) {
+                   isCompleted =  true;
+                } else {
+                    isCompleted = false;
+                }
+            });
+            return isCompleted;
+        }
+
+        
+
+        function enableProspectBtn(){
+            let isRequiredFieldsCompleted = true;
+            let forms = $('form')
+
+            forms.each((index, item)=>{
+
+                var $form = $(`#${item.id}`);
+
+                if(item.id === 'contactDetails')
+                    return true;
+
+                // Find all elements with data-val-required attribute inside the form
+                var $requiredFields = $form.find('[data-val-required]');
+
+                // Filter required fields that are empty
+                var $emptyRequiredFields = $requiredFields.filter(function () {
+                    return $(this).val() === '';
+                });
+
+                // Check if there are any empty required fields
+                if ($emptyRequiredFields.length !== 0) {
+                    isRequiredFieldsCompleted = false;
+                    return false;
+                }
+
+            })
+
+
+            //let isRequiredFieldsCompleted = true;
+
+            //$('[data-val-required]').each((index, item) => {
+            //    if($(item).val() === ''){
+            //        isRequiredFieldsCompleted = false;
+            //        return;
+            //    }
+            //})
+
+            if (isRequiredFieldsCompleted && contactCompleted() && $('input[name="formConditions1"]').is(':checked') && $('input[name="formConditions2"]').is(':checked')) {
+                $('.prospectMeet').removeClass('disabled');
+            }else{
+                $('.prospectMeet').addClass('disabled');
+            }
+        }
+
+        $('.cond1form, .cond2form').change(()=>{
+            enableProspectBtn();
+        })
+
+        //function selectContact(id){
+        //    if(id){
+        //        $("#loaderContent").css("display", "block");
+        //        $('#Properties_ContactDetailsForm').load(`@Url.Content($"/leaduser/D01_Leads_Properties_ContactDetailsForm/{Html.Raw(Model.PropertyID)}")/${id}`, ()=>{
+        //            $("#loaderContent").css("display", "none");
+        //            $.validator.unobtrusive.parse('#Properties_ContactDetailsForm');
+        //            $('.add-ano-cont').click(() => {
+        //                $('#contFullName').val('');
+        //            })
+        //            $('#contactPropName').val($('#Name').val());
+        //        });
+        //    }
+        //}
+
+        $(document).on("click", ".add-contact-property", ()=>{
+            let name = $('#contFullName').val();
+            if(name?.trim() == ''){
+                $('#contFullNameError').text('Full name field is required.');
+                return;
+            }
+            $("#loaderContent").css("display", "block");
+            $('#addAnotherContactID').modal('hide');
+
+            let propID = $('#hidden-PropertyID').val();
+
+            var jqxhr = $.post('/leaduser/D01_Leads_Contacts_Add', {FullName: name, PropertyID: propID, contPropertyP: 't'}, function (response) {
+                if(response){
+                    $.post(`/leaduser/D01_Leads_Contacts_AddToProperty`, { PropertyID: response?.propertyID, ContactID: response?.resultContactID, contPropertyP: 't' })
+                        .done(function (response) {
+                            if(response){
+                                loadProptertyContacts();
+                                fetchLinkedContacts();
+                                toastr.success('Contact added successfully');
+                            }else
+                                toastr.error('Error');
+                        })
+                        .fail(function () {
+                            toastr.error('Error')
+                        })
+                        .always(function () {
+                            $("#loaderContent").css("display", "none");
+                        });
+                }
+            })
+                .done(function () {
+                    
+                })
+                .fail(function () {
+                    toastr.error('Error')
+                })
+                .always(function () {
+                    $("#loaderContent").css("display", "none");
+                });
+
+        })
+
+        function fetchLinkedContacts(){
+            $("#loaderContent").css("display", "block");
+            let url = '/leaduser/D01_Leads_Properties_LinkedContacts/@Model.PropertyID';
+            $.get(url)
+            .done((response)=>{
+                let contactHtml = '';
+                response.forEach((item, index) => {
+                        contactHtml += `<tr>
+                            <td class="text-nowrap">${item?.fullName}</td>
+                            <td class="text-nowrap">${item?.phoneNumber}</td>
+                            <td class="text-nowrap">${item?.email}</td>
+                            <td class="text-nowrap">@Model.Property.Name</td>
+                            <td class="text-nowrap">
+                                <div class="d-flex action_btns">
+                                    <span title="Edit Agents" onclick="loadProptertyContacts('${item?.id}')"><i class="fas fa-pen"></i></span>
+                                    <span title="Delete Agents" onclick="removeContactLink('${item?.id}')"><i class="fas fa-trash-alt"></i></span>
+                                </div>
+                            </td>
+                        </tr>`
+                })
+                $('#propContTblBdy').html(contactHtml);
+            })
+            .always(()=>{
+                    $("#loaderContent").css("display", "none");
+            })
+        }
+
+        $(document).on('click', '.paginate_button', ()=>{
+            var $panel = $('#editHistAccod').closest('.accordion-item');
+            $('html,body').animate({
+                scrollTop: $panel.offset().top - 30
+            }, 50);
+        })
+
+        $('.accordion-body').on('click', function (event) {
+            event.stopPropagation(); // Prevent the click event from propagating to the form
+        });
+
+        function removeContactLink(contactID){
+            debugger;
+            $("#loaderContent").css("display", "block");
+            $.get(`/leaduser/D01_Leads_Contacts_DeleteFromProperty?PropertyID=@Model.Property.ID&ContactID=${contactID}&J=t`)
+            .done((response)=>{
+                if(response){
+                    loadProptertyContacts();
+                    fetchLinkedContacts();
+                    $("#loaderContent").css("display", "none");
+                    toastr.success("Success");
+                }
+            })
+        }
+
+    </script>
+}

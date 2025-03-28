@@ -1,0 +1,670 @@
+@model MyVoltage.Models.OperationalModels.Customer.CustomerDashboardModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider
+
+@{
+    ViewData["Title"] = "Customer - Dashboard";
+}
+
+@*@{
+        await Html.RenderPartialAsync("customerRecharge");
+    }
+    <a class="btn btn-cta mt-3" href="/recharge"><i class="fas fa-plus-circle"></i> Recharge</a>*@
+
+<div class="row mt-0 mt-md-5">
+    <div class="col"><h3>Total Balance</h3></div>
+    <div class="col text-right">
+        <h4>Balance: <span class="text-primary">@operationalProvider.AccountBalanceForSelectedCustomer</span></h4>
+        @if (operationalProvider.AccountTypeForSelectedCustomer == MyVoltage.Data.AccountTypeEnum.PrepaidCredit)
+        {
+            <h4>Units: <span class="text-primary">@operationalProvider.AccountRemainingCreditForSelectedCustomer</span></h4>
+        }
+    </div>
+</div>
+
+
+<div class="row mt-4 dash-stats">
+    <div class="col">
+        <div class="card dash-stats-bg">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 col-lg-5 dash-details p-2 p-md-4">
+                        <div class="balance">@operationalProvider.AccountBalanceForSelectedCustomer</div>
+                        <div id="elecdisp" style="display:none;" class="elec"><img src="/images/power-icon.png" alt="" height="24" class="pr-1"><span id="totalkWh">0</span></div>
+                        <div style="display:none;" class="charges" id="divRent"><img src="/images/home-icon.png" alt="" height="24" class="pr-1"><span id="totalRent">0</span></div>
+                        <div id="waterdisp" style="display:none;" class="water"><img src="/images/water-icon.png" alt="" height="24" class="pr-1"> <span id="totalkL">0</span></div>
+                        <div id="gasdisp" style="display:none;" class="gas"><img src="/images/gas-icon.png" alt="" height="24" class="pr-1"> <span id="totalM3">0</span></div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-7">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@foreach (var meter in @Model.CustomerDashboardModelMeterItems)
+{
+    <div class="dash-block @meter.MeterType mt-4">
+        <div class="row">
+            <div class="col">
+                <span class="number">@meter.MeterNumber</span>
+                <span class="address">@meter.Name</span>
+                <span class="icon">
+                    <span class="@meter.MeterType">
+                        @switch (meter.MeterType)
+                        {
+                            case "elec":
+                                <i class="fas fa-bolt"></i>
+                                break;
+                            case "water":
+                                <i class="fas fa-tint"></i>
+                                break;
+                            case "gas":
+                                <i class="fas fa-fire"></i>
+                                break;
+                        }
+                    </span>
+                </span>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col">
+                                <div class="row pt-4">
+                                    <div class="col"><span class="cost" id="meterCost@(meter.MeterNumber.Replace("&", String.Empty).Replace("-", String.Empty).Replace(" ", String.Empty))"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div style="height:200px">
+                                    <canvas id="meterChart@(meter.MeterNumber.Replace(" ", String.Empty).Replace("&", String.Empty).Replace("-", String.Empty).Replace(" ", String.Empty))"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="card-body">
+                            <div class="row">
+                                <div class="col">
+                                    <a href="/usage/@(meter.MeterNumber)/" class="detailed-analysis d-none d-md-block">
+                                        @if (meter.MeterType != "home")
+                                        {
+                                            <div class="card-footer">Detailed Analysis<i class="fas fa-chevron-right float-right"></i></div>
+                                        }
+                                    </a>
+                                </div>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row my-5">
+    <div class="col"></div>
+</div>
+
+
+<a href="/recharge">
+    <div class="top-up-mobile d-block d-md-none">
+        <span><i class="fas fa-plus-circle"></i> Recharge</span>
+    </div>
+</a>
+
+
+@section Scripts {
+    <script src="/js/Chart.bundle.min.js"></script>
+    <script src="~/js/chart.utils.js"></script>
+    <!--Temporary solution to remove the gradient bg after logged in. -->
+    <script>
+    $(function cleanBody()
+    {
+        var body = $('body');
+
+        if (body.is('.mv-gradient'))
+        {
+            body.removeClass('mv-gradient');
+        } else
+        {
+            setTimeout(cleanBody, 500);
+        }
+    });
+
+    var configMain = {
+        type: 'line',
+        data: {
+            datasets: [{
+                data: null,
+                backgroundColor: [],
+                fill:false,
+                borderWidth: 0,
+                label: 'kWh'
+            }]
+            ,
+            labels: null
+        },
+        options: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: false,
+                text: 'Main Colours'
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data)
+                    {
+                        var label = parseFloat(tooltipItem.yLabel)
+                        return data.datasets[tooltipItem.datasetIndex].label + " " + numberWithCommas(label)
+                    }
+                }
+            },
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        //Added autoSkip: false
+                        autoSkip: false,
+                    },
+
+                }],
+                yAxes: [{
+                    ticks: {
+
+                        beginAtZero: false,
+                        min: 0,
+                        fontColor: 'rgba(0,0,0, 0.7)',
+                        callback: function (label, index, labels)
+                        {
+                             label = parseFloat(label)
+                             return numberWithCommas(label)
+                        },
+                    },
+                    gridLines: {
+                        color: 'rgba(0,0,0, 0.2)',
+                        lineWidth: 0.5,
+                        zeroLineColor: 'rgba(0,0,0, 0.2)'
+                    }
+                }]
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    };
+
+    var config = {
+        type: 'bar',
+        data: {
+            datasets: [{
+                data: null,
+                backgroundColor: [],
+                borderWidth: 0,
+                label: 'kWh'
+            }]
+            ,
+            labels: null
+        },
+        options: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: false,
+                text: 'Main Colours'
+            },
+            onClick: function (e)
+            {
+                var element = this.getElementAtEvent(e);
+
+                // changes only the color of the active object
+                //this.active[0]._chart.config.data.datasets[0].backgroundColor = "red";
+
+                if (element.length > 0)
+                {
+                    var dataset = this.active[0]._chart.config.data.datasets[0];
+
+                    var url = "/operational/changeActiveMeter/" + dataset.MeterNumber + "?R=" + encodeURIComponent("/operational/Customer/Customer_Usage/"  + dataset.Years[element[0]._index] + "/" + dataset.Months[element[0]._index]);
+
+                    window.location.href = url;
+                }
+            },
+
+            scales: {
+                xAxes: [{
+                   // display: false,
+                    ticks: {
+                        //Added autoSkip: false
+                        autoSkip: false,
+
+                        fontColor: 'rgba(0,0,0, 0.7)'
+                    },
+                    gridLines: {
+                        color: 'rgba(0,0,0, 0.2)',
+                        lineWidth: 1,
+                        zeroLineWidth: 0
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+
+                        beginAtZero: false,
+                        min: 0,
+                        fontColor: 'rgba(0,0,0, 0.7)',
+                        callback: function (label, index, labels)
+                        {
+                            label = parseFloat(label)
+                            return numberWithCommas(label)
+                        },
+                    },
+                    gridLines: {
+                        color: 'rgba(0,0,0, 0.2)',
+                        lineWidth: 0.5,
+                        zeroLineColor: 'rgba(0,0,0, 0.2)'
+                    }
+                }]
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    };
+
+    var totalkWh = 0;
+    var totalkL = 0;
+    var totalRent = 0;
+    var totalM3 = 0;
+    var charts = [];
+    var promises = [];
+    var mainChartData = {};
+    var mainChartLabels = [];
+    var meters = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CustomerDashboardModelMeterItems));
+    var monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+
+    for (var i in meters)
+    {
+        var currentMeter = meters[i];
+
+        var promise = $.get('/operational/customer/customer_dashboard/monthlyUsage/' + currentMeter.MeterNumber + '/' + currentMeter.MeterType + '/@DateTime.Now.Year',
+            function (data)
+            {
+                var meter;
+
+                for (var i in meters)
+                {
+                    if (meters[i].MeterNumber == data.MeterNumber)
+                        meter = meters[i]
+                }
+
+                var ctx = document.getElementById('meterChart' + data.MeterNumber.replace(/\s/g, "").replace(/&/g, "").replace(/-/g, "")).getContext("2d");
+
+                var newConfig = $.extend(true, {}, config);
+
+                newConfig.options.tooltips = {
+                    callbacks: {
+                        label: function (tooltipItem, data)
+                        {
+                            return ""
+                        },
+                        afterLabel: function (tooltipItem, data)
+                        {
+                            var label = parseFloat(tooltipItem.yLabel)
+
+                            if (data.meterType == "home")
+                                return "R " + label.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                            var x = numberWithCommas(label) + " " + data.datasets[tooltipItem.datasetIndex].label
+                            var y = data.dataAvgs[tooltipItem.index]
+                            var z = data.dataTotals[tooltipItem.index]
+
+                            var str = ["Cost: R " + toFixed(z, 2)]
+                            str.push("Cons: " + x)
+                            str.push("Avg Unit: R " + toFixed(y, 2))
+                            str.push("Click to go to details")
+
+                            return str;
+                        }
+                    }
+                }
+
+                var isElectricity = (meter.MeterType == "elec")
+                var isWater = (meter.MeterType == "water")
+                var isGas = (meter.MeterType == "gas")
+                var isRent = (meter.MeterType == "home")
+
+                var waterColor = 'rgb(65,105,225)'
+                var gasColor = 'rgb(128, 128, 128)'
+                var electrictyColor = 'rgb(255,221,120)'
+                var rentColor = 'rgb(32,202,58)'
+
+                var waterLastColor = 'rgb(0,0,255)'
+                var gasLastColor = 'rgb(105,105,105)'
+                var electrictyLastColor = 'rgb(255,192,1)'
+                var rentLastColor = 'rgb(32,202,58)'
+
+                var unit = isWater ? "kL" : (isElectricity ? "kWh" : "m3")
+                unit = isRent ? "" : unit;
+
+                var years = []
+                var months = []
+
+                for (var itm in data.Labels)
+                {
+                    if (isWater)
+                    {
+                        newConfig.data.datasets[0].label = "kL"
+                        newConfig.data.datasets[0].backgroundColor.push(waterColor);
+                    }
+                    else if (isElectricity)
+                    {
+                        newConfig.data.datasets[0].backgroundColor.push(electrictyColor);
+                    }
+                    else if (isGas)
+                    {
+                        newConfig.data.datasets[0].label = "m3"
+                        newConfig.data.datasets[0].backgroundColor.push(gasColor);
+                    }
+                    else
+                    {
+                        newConfig.data.datasets[0].label = "";
+                        newConfig.data.datasets[0].backgroundColor.push(rentColor);
+                    }
+
+                    var lableAndYear = data.Labels[itm].split(' ');
+
+                    var month = lableAndYear[0];
+                    var year = lableAndYear[1];
+
+                    months.push(month);
+
+                    years.push(year);
+
+                }
+
+                newConfig.data.datasets[0].Years = years
+                newConfig.data.datasets[0].Months = months
+                newConfig.data.datasets[0].data = data.Data.Item1;
+                newConfig.data.labels = FilterLabels(data.Labels);
+
+                if (mainChartData[meter.MeterType.toString()] == undefined)
+                    mainChartData[meter.MeterType.toString()] = [];
+
+
+                mainChartData[meter.MeterType.toString()].push(data.Data.Item1);
+                mainChartLabels = newConfig.data.labels
+
+                if (isWater)
+                {
+                    newConfig.data.datasets[0].backgroundColor[data.Labels.length - 1] = waterLastColor;
+                    totalkL += data.CurrentUsage;
+
+                }
+                else if (isElectricity)
+                {
+                    newConfig.data.datasets[0].backgroundColor[data.Labels.length - 1] = electrictyLastColor;
+                    totalkWh += data.CurrentUsage;
+                }
+                else if (isGas)
+                {
+                    newConfig.data.datasets[0].backgroundColor[data.Labels.length - 1] = gasLastColor;
+                    totalM3 += data.CurrentUsage;
+                }
+                else
+                {
+                    newConfig.data.datasets[0].backgroundColor[data.Labels.length - 1] = rentLastColor;
+                    totalRent += data.CurrentCost;
+                }
+
+                newConfig.data.datasets[0].MeterNumber = meter.MeterNumber
+                newConfig.data.datasets[0].Name = meter.Name
+                newConfig.data.datasets[0].Type = meter.MeterType
+
+                newConfig.data.dataAvgs = data.Avgs
+                newConfig.data.dataTotals = data.Totals
+                newConfig.data.meterType = meter.MeterType;
+
+                var chart = new Chart(ctx, newConfig);
+                charts.push(chart);
+
+                $('#meterCost' + data.MeterNumber.replace(/\s/g, "").replace(/&/g, "").replace(/-/g, "")).html('R ' + toFixed(meter.MonthlyTotal, 2));
+
+                $('#meter' + data.MeterNumber.replace(/\s/g, "").replace(/&/g, "").replace(/-/g, "")).html(data.CurrentUsage.toFixed(2) + unit)
+
+                if (totalkWh == 0) {
+                    $('#elecdisp').css('display', 'none');
+                }
+                else {
+                    $('#elecdisp').css('display', 'block');
+                    $('#totalkWh').html(totalkWh.toFixed(2) + 'kWh');
+                }
+
+                if (totalM3 == 0) {
+                    $('#gasdisp').css('display', 'none');
+                }
+                else {
+                    $('#gasdisp').css('display', 'block');
+                    $('#totalM3').html(totalM3.toFixed(2) + 'm3');
+                }
+
+                if (totalkL == 0) {
+                    $('#waterdisp').css('display', 'none');
+                }
+                else {
+                    $('#waterdisp').css('display', 'block');
+                    $('#totalkL').html(totalkL.toFixed(2) + 'kL');
+                }
+
+                if (totalRent == 0) {
+                    $('#divRent').css('display', 'none');
+                }
+                else {
+                    $('#divRent').css('display', 'block');
+                    $('#totalRent').html('R ' + totalRent.toFixed(2));
+                }
+
+            });
+
+        promises.push(promise);
+    }
+
+    function FilterLabels(labels, isShortMonth)
+    {
+        var newLabels = [];
+
+        for (i in labels)
+        {
+            var date = labels[i];
+
+            if (!isShortMonth)
+            {
+                var dateParts = date.split(' ');
+                var trimmed = dateParts[0].trim();
+
+                if (trimmed.startsWith("0"))
+                    trimmed = dateParts[0].replace('0', '').trim();
+
+                newLabels.push(monthNames[trimmed - 1].substring(0, 3) + ' ' + dateParts[1].trim());
+            }
+            else
+            {
+                newLabels.push(date);
+            }
+        }
+
+        return newLabels;
+        }
+
+    $.when.apply(this, promises).done(function ()
+    {
+        var waterColor = 'rgb(65,105,225)'
+        var electrictyColor = 'rgb(255,221,120)'
+        var rentColor = 'rgb(32,202,58)'
+        var gasColor = 'rgb(128,128,128)'
+
+        var datasets = [];
+
+        var waterData;
+
+        var gasData;
+
+        var otherData;
+
+        $.each(mainChartData, function (name, value)
+        {
+            var total = value[0];
+
+            if (name == 'home')
+                return;
+
+            for (var i = 1; i < value.length; i++)
+            {
+                var array = value[i];
+
+                for (var j = 0; j < array.length; j++)
+                {
+                    total[j] += array[j];
+                }
+            }
+
+            if (name == 'water')
+            {
+                waterData = {
+                    data: total,
+                    borderColor: waterColor,
+                    borderWidth: 0,
+                    label: 'kL'
+                };
+            }
+            else if (name == "elec")
+            {
+                otherData = {
+                    data: total,
+                    borderColor: electrictyColor,
+                    borderWidth: 0,
+                    label: 'kWh'
+                };
+            }
+            else if (name == "gas")
+            {
+                gasData = {
+                    data: total,
+                    borderColor: gasColor,
+                    borderWidth: 0,
+                    label: 'm3'
+                };
+            }
+        });
+
+        var ctx = $('#mainChart')[0].getContext("2d");
+
+        var mainChartConfig = $.extend(true, {}, configMain);
+
+        var slot = 0
+
+        if (otherData != undefined)
+        {
+            mainChartConfig.options.scales.yAxes[slot] = [
+                {
+                    stacked: false,
+                    ticks: {
+
+                        min: 0,
+                        fontColor: 'rgba(0,0,0, 0.7)',
+                        callback: function (label, index)
+                        {
+                            label = parseFloat(label)
+                            return numberWithCommas(label)
+                        },
+                    },
+                    id: "y-axis-0",
+                    position: 'right',
+                    gridLines: {
+                        color: 'rgba(0,0,0, 0.2)',
+                        lineWidth: 0.5,
+                        zeroLineColor: 'rgba(0,0,0, 0.2)'
+                    }
+                }];
+            mainChartConfig.data.datasets[slot] = otherData;
+            mainChartConfig.data.datasets[slot].yAxisID = "y-axis-" + slot;
+            slot++;
+        }
+
+        if (waterData != undefined)
+        {
+            mainChartConfig.options.scales.yAxes[slot] = [
+                {
+                    stacked: false,
+                    ticks: {
+
+                        min: 0,
+                        fontColor: 'rgba(0,0,0, 0.7)',
+                        callback: function (label, index)
+                        {
+                            return numberWithCommas(label)
+                        },
+                    },
+                    id: "y-axis-0",
+                    position: (slot > 0) ? 'right' : 'left',
+                    gridLines: {
+                        color: 'rgba(0,0,0, 0.2)',
+                        lineWidth: 0.5,
+                        zeroLineColor: 'rgba(0,0,0, 0.2)'
+                    }
+                }];
+            mainChartConfig.data.datasets[slot] = waterData;
+            mainChartConfig.data.datasets[slot].yAxisID = "y-axis-" + slot;
+            slot++;
+        }
+
+        if (gasData != undefined)
+        {
+            mainChartConfig.options.scales.yAxes[slot] = [
+                {
+                    stacked: false,
+                    ticks: {
+
+                        min: 0,
+                        fontColor: 'rgba(0,0,0, 0.7)',
+                        callback: function (label, index)
+                        {
+                            label = parseFloat(label)
+                            return numberWithCommas(label)
+                        },
+                    },
+                    id: "y-axis-0",
+                    position: (slot > 0) ? 'right' : 'left',
+                    gridLines: {
+                        color: 'rgba(0,0,0, 0.2)',
+                        lineWidth: 0.5,
+                        zeroLineColor: 'rgba(0,0,0, 0.2)'
+                    }
+                }];
+            mainChartConfig.data.datasets[slot] = gasData;
+            mainChartConfig.data.datasets[slot].yAxisID = "y-axis-" + slot;
+        }
+
+        mainChartConfig.data.labels = mainChartLabels;
+
+
+        var chartTotal = new Chart(ctx, mainChartConfig);
+        });
+
+    function numberWithCommas(number)
+    {
+        return parseFloat(number).toFixed(2);
+        //return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function toFixed(number, decimals)
+    {
+        var x = Math.pow(10, Number(decimals) + 1);
+        return (Number(number) + (1 / x)).toFixed(decimals)
+    }
+
+    </script>
+}

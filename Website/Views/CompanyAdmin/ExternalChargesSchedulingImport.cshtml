@@ -1,0 +1,121 @@
+@model MyVoltage.Models.CompanyAdminViewModels.ExternalChargesSchedulingImportModel
+@{
+    ViewData["Title"] = "External Charges";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="row">
+    <a href="/billing/getexternalchargesschedulingimports" class="btn btn-outline-primary btn-sm float-right my-4">Download Scheduled &amp; Processed</a>
+    &nbsp;
+    <a href="/billing/externalchargesschedulingimportreverse" class="btn btn-outline-primary btn-sm float-right my-4">Reverse Scheduled &amp; Processed</a>
+</div>
+<form asp-action="ExternalChargesSchedulingImport" enctype="multipart/form-data">
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card p-md-4">
+                <div class="card-content">
+                    @if (Model == null || !Model.IsSuccess)
+                    {
+                        <div class="row">
+                            <div class="col"><label asp-for="SkybillCustomerNos" class="control-label"></label>:</div>
+                            <div class="col">
+                                @foreach (var item in Model.SkybillCustomerNos)
+                                {
+                                <div class="checkbox">
+                                    <input type="checkbox" name="selectedSkybillCustomerNos" value="@item.Value" @(item.Selected ? "checked" : "") /> @item.Text
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="PostingDate" class="control-label"></label>&nbsp;(eg. @DateTime.Now.ToString("yyyy-MM-dd HH:00")):</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="PostingDate" value="@(Model.PostingDate != DateTime.MinValue ? Model.PostingDate.ToString("yyyy-MM-dd HH:00") : "")" />
+                                <span asp-validation-for="PostingDate" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="ReferenceNumber" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="ReferenceNumber" />
+                                <span asp-validation-for="ReferenceNumber" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="Amount" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="Amount" />
+                                <span asp-validation-for="Amount" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="UploadConfirmationEmail" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="UploadConfirmationEmail" />
+                                <span asp-validation-for="UploadConfirmationEmail" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="file" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="file" />
+                                <span asp-validation-for="file" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label asp-for="NotifyClient" class="control-label"></label>:</div>
+                            <div class="col">
+                                <input class="form-group" asp-for="NotifyClient" />
+                                <span asp-validation-for="NotifyClient" class="text-red"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <input type="submit" value="Create" class="btn btn-default" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            Your External Charges has been added to the schedule successfully.
+                        </div>
+                        <div class="row">
+                            <a href="/billing/externalchargesschedulingimport" class="btn btn-default">Ok</a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#SkybillCustomerNo_Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/billing/externalchargesschedulingimportcustomersearch",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.text, value: item.value };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+        })
+    </script>
+}

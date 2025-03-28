@@ -1,0 +1,20 @@
+2018-09-04 16:03:01.595 +02:00 [INF] Hello, world!
+2018-09-04 16:03:02.061 +02:00 [DBG] Dividing 10 by 0
+2018-09-04 16:03:02.146 +02:00 [ERR] Something went wrong
+System.DivideByZeroException: Attempted to divide by zero.
+   at MyVoltage.Program.Main(String[] args) in C:\Users\Grant\projects\MyVoltage\Website\Program.cs:line 33
+2018-09-04 16:03:48.300 +02:00 [INF] Hello, world!
+2018-09-04 16:03:48.363 +02:00 [DBG] Dividing 10 by 0
+2018-09-04 16:03:48.372 +02:00 [ERR] Something went wrong
+System.DivideByZeroException: Attempted to divide by zero.
+   at MyVoltage.Program.Main(String[] args) in C:\Users\Grant\projects\MyVoltage\Website\Program.cs:line 33
+2018-09-04 16:04:03.637 +02:00 [INF] Hello, world!
+2018-09-04 16:04:05.535 +02:00 [DBG] Dividing 10 by 0
+2018-09-04 16:04:11.470 +02:00 [ERR] Something went wrong
+System.DivideByZeroException: Attempted to divide by zero.
+   at MyVoltage.Program.Main(String[] args) in C:\Users\Grant\projects\MyVoltage\Website\Program.cs:line 33
+2018-09-04 16:04:22.737 +02:00 [INF] Hello, world!
+2018-09-04 16:04:22.788 +02:00 [DBG] Dividing 10 by 0
+2018-09-04 16:04:22.796 +02:00 [ERR] Something went wrong
+System.DivideByZeroException: Attempted to divide by zero.
+   at MyVoltage.Program.Main(String[] args) in C:\Users\Grant\projects\MyVoltage\Website\Program.cs:line 33

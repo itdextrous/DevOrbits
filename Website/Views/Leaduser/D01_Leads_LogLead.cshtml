@@ -1,0 +1,195 @@
+@model MyVoltage.Models.LeaduserModels.D01_Leads_LogLeadModel
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D01_Leads_LogLead.GetDescription()}";
+    Layout = "LayoutLeaduser";
+}
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Lead successfully added
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        @*<div class="col">
+                    <a href="/" class="btn btn-outline-primary"><i class="fas fa-file-alt"></i>&nbsp;View Lead</a>
+                    </div>*@
+                        <div class="col">
+                            <a href="/leaduser/D01_Leads_MyLeads" class="btn btn-grape"><i class="fas fa-list"></i>&nbsp;Show All My Leads</a>
+                        </div>
+                        <div class="col">
+                            <a href="/leaduser/D01_Leads_LogLead" class="btn btn-grape"><i class="fas fa-plus-circle"></i>&nbsp;Create New Lead</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+                </div>
+                <form asp-action="D01_Leads_LogLead" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <input type="hidden" id="hidden-ContactID" name="hidden-ContactID" value="@(Model.ResultContactID)">
+                        <input type="hidden" id="hidden-PropertyID" name="hidden-PropertyID" value="@(Model.ResultPropertyID)">
+
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <label asp-for="ContactID" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                @if (string.IsNullOrEmpty(Model.ContactID) && string.IsNullOrEmpty(Model.PropertyID))
+                                {
+                                    <input type="text" asp-for="ContactID" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input type="text" asp-for="ContactID" class="form-control" disabled="disabled" />
+                                }
+                                <span asp-validation-for="ContactID" class="text-red"></span>
+                            </div>
+                            <div class="col">
+                                <a href="/leaduser/D01_Leads_Contacts_Add?L=t" class="btn btn-grape"><i class="fas fa-plus-circle"></i>&nbsp;Add New</a>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <label asp-for="PropertyID" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                @if (string.IsNullOrEmpty(Model.ContactID) && string.IsNullOrEmpty(Model.PropertyID))
+                                {
+                                    <input type="text" asp-for="PropertyID" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input type="text" asp-for="PropertyID" class="form-control" disabled="disabled" />
+                                }
+                                <span asp-validation-for="PropertyID" class="text-red"></span>
+                            </div>
+                            <div class="col">
+                                <a href="/leaduser/D01_Leads_Properties_Add?L=t" class="btn btn-grape"><i class="fas fa-plus-circle"></i>&nbsp;Add New</a>
+                            </div>
+                        </div>
+
+
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <label asp-for="ProductID" class="control-label"></label>
+                            </div>
+                            <div class="col">
+                                @Html.DropDownList("ProductID", Model.ProductID, new { @class = "form-control" })
+                                <span asp-validation-for="ProductID" class="text-red"></span>
+                            </div>
+                            <div class="col">
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="row mb-md-2">
+                            <div class="col-12 text-right">
+                                <a href="#" class="btn btn-grape" onclick="DoPost();"><i class="fas fa-save"></i>&nbsp;Add Lead</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Hidden field to store the selected value
+            var hiddenFieldC = $("#hidden-ContactID");
+
+            $("#ContactID").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/leaduser/D01_Leads_Contacts_AddToProperty_SearchContacts',
+                        type: 'POST',
+                        data: {
+                            Prefix: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    // Set the selected value in the hidden field
+                    hiddenFieldC.val(ui.item.value);
+                    // Display the selected text in the text box
+                    $(this).val(ui.item.label);
+                    return false;
+                }
+            });
+            // Hidden field to store the selected value
+            var hiddenFieldP = $("#hidden-PropertyID");
+
+            $("#PropertyID").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/leaduser/D01_Leads_Propertys_AddToProperty_SearchPropertys',
+                        type: 'POST',
+                        data: {
+                            Prefix: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    // Set the selected value in the hidden field
+                    hiddenFieldP.val(ui.item.value);
+                    // Display the selected text in the text box
+                    $(this).val(ui.item.label);
+                    return false;
+                }
+            });
+        });
+
+        function DoPost() {
+            $("#loaderContent").css("display", "block");
+
+            $.post("/leaduser/D01_Leads_LogLead",
+                {
+                    ContactID: $("#hidden-ContactID").val(),
+                    PropertyID: $("#hidden-PropertyID").val(),
+                    ProductID: $("#ProductID").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data.split(':')[0] == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        document.location.href = "/leaduser/D01_Leads_ViewLead/" + data.split(':')[1];
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please make sure you have a Contact or Property selected.");
+                    }
+                });
+        }
+    </script>
+}

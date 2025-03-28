@@ -1,0 +1,165 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_VehiclesModels.SiteAdmin_VehiclesEditModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.ParentSecureAreaEnum.SiteAdmin.GetDescription()} - {MyVoltage.Data.SecureAreaEnum.SiteAdmin_Vehicles.GetDescription()} - Edit";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-4 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Vehicle successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/SiteAdmin/SiteAdmin_Vehicles/Edit/@Model.Vehicle.ID" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+                <div class="card-header">
+                    Vehicle Details:
+                </div>
+                <form asp-action="SiteAdmin_Vehicles_Edit" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DeviceIDLinked" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input id="deviceIDLinked" name="deviceIDLinked" onchange="AutoFillMeterDetails();" type="text" class="form-control" asp-for="DeviceIDLinked" />
+                                <span asp-validation-for="DeviceIDLinked" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-12">
+                                <div class="border border-primary rounded p-2 ">
+                                    <div class="row">
+                                        <div class="col-12"><h6>M2M Details for Selected Meter ID</h6></div>
+                                    </div>
+                                    <div class="row">
+                                        <div id="meterDetails" class="col-12">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="RegistrationNumber" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="RegistrationNumber" />
+                                <span asp-validation-for="RegistrationNumber" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="VehicleTypeName" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="VehicleTypeName" />
+                                <span asp-validation-for="VehicleTypeName" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="RatePerKM" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" asp-for="RatePerKM" />
+                                <span asp-validation-for="RatePerKM" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="RegularDriverID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("RegularDriverID", Model.RegularDriverID, new { @class = "form-control" })
+                                <span asp-validation-for="RegularDriverID" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="OwnerID" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                @Html.DropDownList("OwnerID", Model.OwnerID, new { @class = "form-control" })
+                                <span asp-validation-for="OwnerID" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <a href="/operational/SiteAdmin/SiteAdmin_Vehicles" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to Vehicles</a>
+                            </div>
+                            <div class="col-6 text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                    </div>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            AutoFillMeterDetails();
+        });
+
+        $("#deviceIDLinked").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/SiteAdmin/SiteAdmin_Vehicles/SearchMeterID",
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+        });
+
+        function AutoFillMeterDetails() {
+            if ($("#deviceIDLinked").val() != "") {
+                $("#meterDetails").load('@Url.Content("/operational/SiteAdmin/SiteAdmin_Vehicles_M2MDetails/")' + $("#deviceIDLinked").val());
+            }
+        }
+
+    </script>
+}

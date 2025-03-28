@@ -1,0 +1,79 @@
+@model MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.A07_CreditControlAndNotifierProcess_CreditControlDetailsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A07_CreditControlAndNotifierProcess_CreditControlResults.GetDescription()} - {operationalProvider.CompanyName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_CreditControlSummary" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back</a>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        @if (operationalProvider.CompanyID == 0)
+        {
+            <span>Please select a company from the sidebar to see results.</span>
+        }
+        else
+        {
+            if (Model.A07_CreditControlAndNotifierProcess_CreditControlDetailsItems.Count == 0)
+            {
+                <span>There are no offline devices for @operationalProvider.CompanyName</span>
+            }
+            else
+            {
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Customer No</th>
+                            <th scope="col">Customer Name</th>
+                            <th scope="col">Occupancy Status</th>
+                            <th scope="col" class="text-right">Balance</th>
+                            <th scope="col">Account Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var itemC in Model.A07_CreditControlAndNotifierProcess_CreditControlDetailsItems)
+                        {
+                            string rowclass = "";
+                            string cellClass = "";
+                            if (itemC.Status == MyVoltage.Models.OperationalModels.A07_CreditControlAndNotifierProcess.StatusType.Ok)
+                            {
+                                rowclass = " class=\"table-success\"";
+                                cellClass = " class=\"text-green font-weight-bold\"";
+                            }
+                            else
+                            {
+                                rowclass = " class=\"table-danger\"";
+                                cellClass = " class=\"text-red font-weight-bold\"";
+                            }
+                            <tr @Html.Raw(rowclass) style="cursor:pointer;" title="@itemC.CustomerNo" onclick="RedirectToReview('@itemC.MeterSerial');">
+                                <td scope="col">@itemC.CustomerNo</td>
+                                <td scope="col">@itemC.CustomerName</td>
+                                <td scope="col">@itemC.Occupancy</td>
+                                <td scope="col" class="text-right">@itemC.Balance.ToMoney("R")</td>
+                                <td scope="col">@itemC.AccountType</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="border-table-total" colspan="3">Total</td>
+                            <td class="border-table-total text-right">@(Model.A07_CreditControlAndNotifierProcess_CreditControlDetailsItems.Select(p => p.Balance).Sum().ToMoney("R"))</td>
+                            <td class="border-table-total"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToReview(serial) {
+            document.location.href = '/operational/changeActiveMeter/' + serial + '?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_CreditControlReview';
+        }
+    </script>
+}

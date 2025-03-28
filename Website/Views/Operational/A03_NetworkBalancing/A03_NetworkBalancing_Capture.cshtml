@@ -1,0 +1,114 @@
+@model MyVoltage.Models.OperationalModels.A03_NetworkBalancing.A03_NetworkBalancing_CaptureModel
+@{
+    ViewData["Title"] = "Network Balancing - Capture";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (operationalProvider.CompanyID == 0)
+            {
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <span>Please select a company from the sidebar to continue.</span>
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+            else
+            {
+                @if (Model != null && Model.IsSuccessfull)
+                {
+                    <div class="card-header">
+                        Success!
+                    </div>
+                    <div class="card-body">
+                        Details successfully updated.
+                    </div>
+                    <div class="card-footer">
+                        <a href="/operational/A03_NetworkBalancing/A03_NetworkBalancing_Details" class="btn btn-outline-primary"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-header">
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="A03_NetworkBalancing_Capture" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label class="control-label">Company Name</label>
+                                        </div>
+                                        <div class="col">
+                                            @operationalProvider.CompanyName
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ReportMonth" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="ReportMonth" type="date" />
+                                            <span asp-validation-for="ReportMonth" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="UtilityType" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("UtilityType", Model.UtilityType, new { @class = "form-control" })
+                                            <span asp-validation-for="UtilityType" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="ReportType" class="control-label"></label>
+                                        </div>
+                                        <div class="col">
+                                            @Html.DropDownList("ReportType", Model.ReportType, new { @class = "form-control" })
+                                            <span asp-validation-for="ReportType" class="text-red"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 mt-2">
+                                        <div class="col text-uppercase font-weight-bold">
+                                            <label asp-for="Attachment" class="control-label"></label>
+                                            @if (!string.IsNullOrEmpty(Model.AttachmentURL))
+                                            {
+                                                <a href="@Model.AttachmentURL" target="_blank" class="btn btn-sm btn-outline-primary-sm">View</a>
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            <input class="form-control" asp-for="Attachment" />
+                                            <span asp-validation-for="Attachment" class="text-red"></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.A03_NetworkBalancing_Capture, MyVoltage.Data.SecureAreaActionEnum.Edit))
+                            {
+                                <div class="col-12 text-right">
+                                    <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                </div>
+                            }
+
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

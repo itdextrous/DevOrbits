@@ -1,0 +1,158 @@
+@model MyVoltage.Models.OperationalModels.S_CombinedReports.S_CombinedReportsModels.S_CombinedReports_CostAnalysis_Amount_SummaryModel
+@{
+    ViewData["Title"] = "Combined Reports - Cost Analysis - Amount Summary";
+}
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+<div class="row mt-md-2 col-12">
+    <div class="col-2">Billed Between</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" /></div>
+    <div class="col-1">And</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+<div class="row mt-md-2 col-12">
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th rowspan="2" scope="col">Company Name</th>
+                <th rowspan="2" scope="col">Customers</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">Total</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">Elec</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">Water</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">Gas</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">GPS</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">Valve</th>
+                <th colspan="2" scope="col" class="text-center" style="border-left: 2px solid black;border-right:2px solid black;border-top:2px solid black;">Other</th>
+            </tr>
+            <tr>
+                @*Total*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+                @*Elec*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+                @*Water*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+                @*Gas*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+                @*GPS*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+                @*Valve*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+                @*Other*@
+                <th scope="col" class="text-center" style="border-left: 2px solid black;">Count</th>
+                <th scope="col" class="text-center" style="border-right: 2px solid black;">Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var uC in operationalProvider.UserCompanies)
+            {
+                var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                <tr id="S_CombinedReports_CostAnalysis_Amount_SummaryItem_@company.CompanyID" style="cursor:pointer;" onclick="RedirectToDetails('@company.CompanyID');">
+                    <td scope="col">
+                        <div class="text-orange">
+                            @company.Name
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                    <td scope="col">
+                        <div class="text-orange">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompanies)));
+        $(companies).each(function() {
+            $("#S_CombinedReports_CostAnalysis_Amount_SummaryItem_" + this.CompanyID).load('/operational/S_CombinedReports/S_CombinedReports_CostAnalysis_Amount_SummaryItem/' + this.CompanyID + '/' + "S_CombinedReports_CostAnalysis_Amount_SummaryItem_" + this.CompanyID + '?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val(), function() {
+                });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/S_CombinedReports/S_CombinedReports_CostAnalysis_Amount_Monthly';
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/S_CombinedReports/S_CombinedReports_CostAnalysis_Amount_Summary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

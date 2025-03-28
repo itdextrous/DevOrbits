@@ -1,0 +1,365 @@
+@model MyVoltage.Models.OperationalModels.C02_GeneralLedgerReportModels.C02_GeneralLedgerReport_ConsolidatedTBModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_ConsolidatedTB.GetDescription();
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        Latest Sync Ended: @(operationalProvider.LatestGenLedgerSync.HasValue ? operationalProvider.LatestGenLedgerSync.Value.ToDateAndTimeShort() : "In Progress")
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12">
+        From Date:
+        <input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort())" />
+        To Date:
+        <input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort())" />
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("PartnerID", Model.PartnerID, new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        @Html.DropDownList("MovementReport", Model.MovementReport, new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-12">
+                @if (!Model.HideNoData)
+                {
+                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" checked="checked" />
+                    <span>Show All</span>
+                }
+                else
+                {
+                    <input type="radio" name="showhide" id="showAll" class="form-check-inline" />
+                    <span>Show All</span>
+                }
+                @if (Model.HideNoData)
+                {
+                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" checked="checked" />
+                    <span>Hide No Data Items</span>
+                }
+                else
+                {
+                    <input type="radio" name="showhide" id="hideNoData" class="form-check-inline" />
+                    <span>Hide No Data Items</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_ConsolidatedTB" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+        &nbsp;
+        <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        &nbsp;
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th colspan=@(2 + Model.Companies.Count)>
+                        <h5 class="text-orange">Balance Sheet</h5>
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col">Ledger Name</th>
+                    <th scope="col" style="width:120px;">Total</th>
+                    @foreach (var co in Model.Companies.OrderBy(p => p.Value))
+                    {
+                        <th scope="col" class="text-center text-wrap" style="cursor:pointer;" onclick="RedirectToDetails('@co.Key')">@co.Value</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_BalanceSheet)
+                {
+                    string rowClass = "";
+                    //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+                    //{
+                    //    rowClass = "table-danger";
+                    //}
+                    <tr>
+                        <td scope="col" class="text-nowrap text-nowrap">
+                            @item.JournalNo - @item.JournalName
+                        </td>
+                        @{
+                            decimal? colTotalBS = null;
+                        }
+                        @foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.Amount.HasValue).ToList())
+                        {
+                            if (colTotalBS.HasValue)
+                            {
+                                colTotalBS = colTotalBS.Value + subItem.Amount.Value;
+                            }
+                            else
+                            {
+                                colTotalBS = subItem.Amount;
+                            }
+                        }
+                        <td scope="col" class="table-secondary font-weight-bold text-right text-nowrap" style="width:120px;">
+                            @(colTotalBS.ToMoneyNoDecimal("R"))
+                        </td>
+                        @foreach (var co in Model.Companies.OrderBy(p => p.Value))
+                        {
+                            var monthlyItem = item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.CompanyID == co.Key).SingleOrDefault();
+                            <td scope="col" class="text-right text-nowrap @monthlyItem.CellStyle" style="width:120px;cursor:pointer;" onclick="RedirectToDetails('@co.Key')">
+                                @(monthlyItem != null ? monthlyItem.Amount.ToMoneyNoDecimal("R") : "")
+                            </td>
+                        }
+
+                    </tr>
+                }
+                <tr class="table-secondary font-weight-bold">
+                    <td scope="col" class="text-nowrap">
+                        Balance Sheet (Total)
+                    </td>
+                    @{
+                        decimal? totalBS = null;
+                    }
+                    @foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_BalanceSheet)
+                    {
+                        foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.Amount.HasValue).ToList())
+                        {
+                            if (totalBS.HasValue)
+                            {
+                                totalBS = totalBS.Value + subItem.Amount.Value;
+                            }
+                            else
+                            {
+                                totalBS = subItem.Amount;
+                            }
+                        }
+                    }
+                    <td scope="col" class="text-right text-nowrap" style="width:120px;">
+                        @(totalBS.ToMoneyNoDecimal("R"))
+                    </td>
+                    @foreach (var co in Model.Companies.OrderBy(p => p.Value))
+                    {
+                        decimal? subTotalBS = null;
+
+                        foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_BalanceSheet)
+                        {
+                            foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.CompanyID == co.Key && p.Amount.HasValue).ToList())
+                            {
+                                if (subTotalBS.HasValue)
+                                {
+                                    subTotalBS = subTotalBS.Value + subItem.Amount.Value;
+                                }
+                                else
+                                {
+                                    subTotalBS = subItem.Amount;
+                                }
+                            }
+                        }
+                        <td scope="col" class="text-right text-nowrap" style="width:120px;cursor:pointer;" onclick="RedirectToDetails('@co.Key')">
+                            @(subTotalBS.ToMoneyNoDecimal("R"))
+                        </td>
+                    }
+
+                </tr>
+
+            </tbody>
+            <thead>
+                <tr>
+                    <th colspan=@(2 + Model.Companies.Count)>
+                        <h5 class="text-orange">Income Statement</h5>
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col">Ledger Name</th>
+                    <th scope="col" style="width:120px;">Total</th>
+                    @foreach (var co in Model.Companies.OrderBy(p => p.Value))
+                    {
+                        <th scope="col" class="text-center text-wrap" style="cursor:pointer;" onclick="RedirectToDetails('@co.Key')">@co.Value</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_IncomeStatement)
+                {
+                    string rowClass = "";
+                    //if (item.MonthlyValues.Where(p => p.Value.HasValue).Count() == 0)
+                    //{
+                    //    rowClass = "table-danger";
+                    //}
+                    <tr>
+                        <td scope="col" class="text-nowrap">
+                            @item.JournalNo - @item.JournalName
+                        </td>
+                        @{
+                            decimal? colTotalIS = null;
+                        }
+
+                        @foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.Amount.HasValue).ToList())
+                        {
+                            if (colTotalIS.HasValue)
+                            {
+                                colTotalIS = colTotalIS.Value + subItem.Amount.Value;
+                            }
+                            else
+                            {
+                                colTotalIS = subItem.Amount;
+                            }
+                        }
+                        <td scope="col" class="table-secondary font-weight-bold text-right text-nowrap" style="width:120px;">
+                            @(colTotalIS.ToMoneyNoDecimal("R"))
+                        </td>
+                        @foreach (var co in Model.Companies.OrderBy(p => p.Value))
+                        {
+                            var monthlyItem = item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.CompanyID == co.Key).SingleOrDefault();
+                            <td scope="col" class="text-right text-nowrap @monthlyItem.CellStyle" style="width:120px;cursor:pointer;" onclick="RedirectToDetails('@co.Key')">
+                                @(monthlyItem != null ? monthlyItem.Amount.ToMoneyNoDecimal("R") : "")
+                            </td>
+                        }
+                    </tr>
+                }
+                <tr class="table-secondary font-weight-bold">
+                    <td scope="col">
+                        Income Statement (Total)
+                    </td>
+                    @{
+                        decimal? totalIS = null;
+                    }
+
+                    @foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_IncomeStatement)
+                    {
+                        foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.Amount.HasValue).ToList())
+                        {
+                            if (totalIS.HasValue)
+                            {
+                                totalIS = totalIS.Value + subItem.Amount.Value;
+                            }
+                            else
+                            {
+                                totalIS = subItem.Amount;
+                            }
+                        }
+                    }
+                    <td scope="col" class="text-right text-nowrap" style="width:120px;">
+                        @(totalIS.ToMoneyNoDecimal("R"))
+                    </td>
+                    @foreach (var co in Model.Companies.OrderBy(p => p.Value))
+                    {
+                        decimal? subTotalIS = null;
+
+                        foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_IncomeStatement)
+                        {
+                            foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.CompanyID == co.Key && p.Amount.HasValue).ToList())
+                            {
+                                if (subTotalIS.HasValue)
+                                {
+                                    subTotalIS = subTotalIS.Value + subItem.Amount.Value;
+                                }
+                                else
+                                {
+                                    subTotalIS = subItem.Amount;
+                                }
+                            }
+                        }
+                        <td scope="col" class="text-right text-nowrap" style="width:120px;cursor:pointer;" onclick="RedirectToDetails('@co.Key')">
+                            @(subTotalIS.ToMoneyNoDecimal("R"))
+                        </td>
+                    }
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <h5 class="text-orange">Combined Total</h5>
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12 text-right table-secondary font-weight-bold">
+        @{
+            decimal? totalCombined = null;
+        }
+
+        @foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_IncomeStatement)
+        {
+            foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.Amount.HasValue).ToList())
+            {
+                if (totalCombined.HasValue)
+                {
+                    totalCombined = totalCombined.Value + subItem.Amount.Value;
+                }
+                else
+                {
+                    totalCombined = subItem.Amount;
+                }
+            }
+        }
+        @foreach (var item in Model.C02_GeneralLedgerReport_ConsolidatedTBItems_BalanceSheet)
+        {
+            foreach (var subItem in item.C02_GeneralLedgerReport_ConsolidatedTBSubItems.Where(p => p.Amount.HasValue).ToList())
+            {
+                if (totalCombined.HasValue)
+                {
+                    totalCombined = totalCombined.Value + subItem.Amount.Value;
+                }
+                else
+                {
+                    totalCombined = subItem.Amount;
+                }
+            }
+        }
+        @(totalCombined.ToMoneyNoDecimal("R"))
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function RedirectToFilter() {
+        $("#loaderContent").css("display", "block");
+        var hideNoData = "false";
+        if ($("#hideNoData").prop("checked") == true) {
+            hideNoData = "true";
+        }
+
+            document.location.href = '/operational/changeActivePartner/' + $("#PartnerID").val() + '?R=' + encodeURIComponent('/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_ConsolidatedTB?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&hideNoData=' + hideNoData + '&MovementReport=' + $("#MovementReport").val());
+    }
+    function RedirectToDetails(companyID) {
+        $("#loaderContent").css("display", "block");
+        var hideNoData = "false";
+        if ($("#hideNoData").prop("checked") == true) {
+            hideNoData = "true";
+        }
+
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=' + encodeURIComponent('/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_Daily?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val() + '&hideNoData=' + hideNoData + '&MovementReport=' + $("#MovementReport").val());
+    }
+</script>
+}

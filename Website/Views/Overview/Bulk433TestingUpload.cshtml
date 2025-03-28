@@ -1,0 +1,66 @@
+﻿@model MyVoltage.Models.MeterViewModels.Bulk433TestingUploadModel
+
+@{
+    ViewData["Title"] = "Bulk 433 Testing Upload";
+}
+@using (Html.BeginForm())
+{
+
+    <div class="historic-data mt-0 mt-md-5 mb-5">
+        <div class="row dash-top">
+            <div class="col">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-link" onclick="DeleteAllDevicesOn515()"><b>Delete All Devices on 433 WATER TEST GATEWAY</b></button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>SerialNos <a href="#" title="Meter Serial Numbers">?</a></span>
+                <textarea asp-for="SerialNos" class="form-control" type="" title="Meter Serial Numbers"></textarea>
+            </div>
+            <div class="col">
+                <span>Create Pulse 2 Input</span>
+                <input asp-for="DoSecondInput" class="form-control" type="checkbox" title="Create Pulse 2 Input" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-1">
+            </div>
+            <div class="col-1">
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-link">Import</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="row">
+                <span class="text-red">@Model.ErrorMessage</span>
+            </div>
+        }
+    </div>
+
+}
+@section Scripts
+{
+    <script>
+        function DeleteAllDevicesOn515() {
+
+            if (confirm('Are you sure you want to delete all devices on 433 WATER TEST GATEWAY')) {
+                $.ajax({
+                    url: '/DeleteAllDevicesOn515',
+                    type: 'POST',
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        if (data == true) {
+                            alert("Devices successfully deleted.\nPLEASE NOTE: Devices might take a few minutes to delete.");
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,22 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedCustomerModels.CustomerUsageModel
+
+<div class="row">
+    <div class="col text-left"><h5 class="text-orange">Account Details</h5></div>
+    <div class="col text-right"><a class="btn btn-outline-primary-sm" href="/operational/Customer/Customer_Billing">Details</a></div>    
+</div>
+<div class="row">
+    <div class="col">Balance</div>
+    <div class="col">R @Model.CustomerBalance.ToString("N")</div>
+</div>
+<div class="row">
+    <div class="col">Last Payment</div>
+    <div class="col">@(Model.CustomerLastPaymentDate.HasValue ? Model.CustomerLastPaymentDate.Value.ToString("dd MMM yyyy HH:mm") : "")</div>
+</div>
+<div class="row">
+    <div class="col">Method</div>
+    <div class="col">@Model.CustomerLastPaymentMethod</div>
+</div>
+<div class="row">
+    <div class="col">Amount</div>
+    <div class="col">@(Model.CustomerLastPaymentAmount.HasValue ? "R " + Model.CustomerLastPaymentAmount.Value.ToString("N") : "")</div>
+</div>

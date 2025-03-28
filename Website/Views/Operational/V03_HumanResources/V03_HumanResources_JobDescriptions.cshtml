@@ -1,0 +1,316 @@
+@model MyVoltage.Models.OperationalModels.V03_HumanResources.V03_HumanResources_JobDescriptionsModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@inject UserManager<ApplicationUser> userManager;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.V03_HumanResources_JobDescriptions.GetDescription()}";
+}
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccess)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Job Descriptions successfully updated.
+                </div>
+                <div class="card-footer">
+                    <a href="" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back To Job Descriptions</a>
+                    &nbsp;
+                    <a href="/operational/V03_HumanResources/V03_HumanResources_AllHumanResources" class="btn btn-outline-primary-sm"><i class="fas fa-list"></i>&nbsp;Back to List</a>
+                </div>
+            }
+            else
+            {
+                <div class="card-header">
+
+                    <div class="row mt-2">
+                        <div class="col-md-4 text-nowrap">
+                            <h4>Human Resource Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Employee Email
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.EmployeeEmail
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            First Name
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.OperationalProfile.FirstName
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Last Name
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.OperationalProfile.LastName
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Job Title
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.OperationalProfile.JobTitle
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-4 text-nowrap">
+                            <h4>Organisational Details:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Reporting To
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.ReportingToUser
+                        </div>
+                    </div>
+
+                    <div class="row mb-md-2">
+                        <div class="col-6">
+                            Company
+                        </div>
+                        <div class="col-6">
+                            @Model.V03_HumanResources_AllHumanResourcesItem.CompanyName
+                        </div>
+                    </div>
+
+
+                </div>
+                <form asp-action="V03_HumanResources_JobDescriptions" enctype="multipart/form-data">
+                    <div class="card-body">
+
+                        <div class="row mt-2">
+                            <div class="col-md-4 text-nowrap">
+                                <h4>Duties and responsibilities:</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DutiesAndResponsibilities_Primary" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="DutiesAndResponsibilities_Primary"></textarea>
+                                <span asp-validation-for="DutiesAndResponsibilities_Primary" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DutiesAndResponsibilities_Secondary" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="DutiesAndResponsibilities_Secondary"></textarea>
+                                <span asp-validation-for="DutiesAndResponsibilities_Secondary" class="text-red"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-md-2">
+                            <div class="col-6">
+                                <label asp-for="DutiesAndResponsibilities_Overall" class="control-label"></label>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" asp-for="DutiesAndResponsibilities_Overall"></textarea>
+                                <span asp-validation-for="DutiesAndResponsibilities_Overall" class="text-red"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-md-2">
+                            <div class="col">
+                                <a href="/operational/V03_HumanResources/V03_HumanResources_AllHumanResources" class="btn btn-outline-primary-sm"><i class="fas fa-chevron-left"></i>&nbsp;Back to List</a>
+                            </div>
+                            <div class="col">
+                                @if (!Model.ResponsibleUserAccepted.HasValue && Model.V03_HumanResources_AllHumanResourcesItem.OperationalUserID == userManager.GetUserId(User))
+                                {
+                                    <a href="#" onclick="ConfirmAcceptResponsible('@Model.V03_HumanResources_AllHumanResourcesItem.ID');" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Accept My Details</a>
+                                }
+                                @if (Model.ResponsibleUserAccepted.HasValue)
+                                {
+                                    @if (Model.ResponsibleUserAccepted.Value)
+                                    {
+                                        <span class="text-green text-nowrap" title="@Model.V03_HumanResources_AllHumanResourcesItem.OperationalUser approved"><i class="fas fa-check-circle"></i>&nbsp;@Model.V03_HumanResources_AllHumanResourcesItem.OperationalUser&nbsp;Accepted @Model.ResponsibleUserAcceptedDate.ToDateAndTimeShort()</span><br />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red text-nowrap" title="@Model.V03_HumanResources_AllHumanResourcesItem.OperationalUser rejected"><i class="fas fa-times-circle"></i>&nbsp;@Model.V03_HumanResources_AllHumanResourcesItem.OperationalUser&nbsp;Rejected @Model.ResponsibleUserAcceptedDate.ToDateAndTimeShort()</span><br />
+                                    }
+                                }
+                            </div>
+                            <div class="col">
+                            @if (!Model.ReportingToUserAccepted.HasValue && Model.V03_HumanResources_AllHumanResourcesItem.ReportingToUserID == userManager.GetUserId(User))
+                            {
+                                <a href="#" onclick="ConfirmAcceptReportingTo('@Model.V03_HumanResources_AllHumanResourcesItem.ID');" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Accept Responsiblity</a>
+                            }
+                            @if (Model.ReportingToUserAccepted.HasValue)
+                            {
+                                @if (Model.ReportingToUserAccepted.Value)
+                                {
+                                    <span class="text-green text-nowrap" title="@Model.V03_HumanResources_AllHumanResourcesItem.ReportingToUser approved"><i class="fas fa-check-circle"></i>&nbsp;@Model.V03_HumanResources_AllHumanResourcesItem.ReportingToUser&nbsp;Accepted @Model.ReportingToUserAcceptedDate.ToDateAndTimeShort()</span><br />
+                                }
+                                else
+                                {
+                                    <span class="text-red text-nowrap" title="@Model.V03_HumanResources_AllHumanResourcesItem.ReportingToUser rejected"><i class="fas fa-times-circle"></i></span><br />
+                                }
+                            }
+                            </div>
+                            <div class="col text-right">
+                                <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card-body">
+
+                    <div class="row mt-2">
+                        <div class="col-md-4 text-nowrap">
+                            <h4>System generated tasks:</h4>
+                        </div>
+                    </div>
+
+                    <div class="row col-12">
+
+                        <table class="table table-responsive-xl table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Heading</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Linked Secure Area</th>
+                                    <th scope="col">Responsible User</th>
+                                    <th scope="col">Reporting To User</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.V02_Workflow_Allocations_AllTaskAllocationsItems)
+                                {
+                                    <tr style="cursor:pointer;" title="View / Edit" onclick="RedirectToV02_Workflow_Allocations_ViewTaskAllocations('@item.ID');">
+                                        <td scope="col" class="text-nowrap">@item.Heading</td>
+                                        <td scope="col">@item.Description</td>
+                                        <td scope="col" class="text-nowrap">@item.SecureAreaName</td>
+                                        <td scope="col" class="font-weight-bold text-nowrap">
+                                            @if (item.ResponsibleUserAccepted.HasValue)
+                                            {
+                                                @if (item.ResponsibleUserAccepted.Value)
+                                                {
+                                                    <span class="text-green text-nowrap" title="@item.ResponsibleUsername approved"><i class="fas fa-check-circle"></i>&nbsp;@item.ResponsibleUsername</span><br />
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-red text-nowrap" title="@item.ResponsibleUsername rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.ResponsibleUsername</span><br />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-orange" title="@item.ResponsibleUsername pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.ResponsibleUsername</span><br />
+                                            }
+                                        </td>
+                                        <td scope="col" class="font-weight-bold">
+                                            @if (item.ReportingToUserAccepted.HasValue)
+                                            {
+                                                @if (item.ReportingToUserAccepted.Value)
+                                                {
+                                                    <span class="text-green text-nowrap" title="@item.ReportingToUsername approved"><i class="fas fa-check-circle"></i>&nbsp;@item.ReportingToUsername</span><br />
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-red text-nowrap" title="@item.ReportingToUsername rejected"><i class="fas fa-times-circle"></i>&nbsp;@item.ReportingToUsername</span><br />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-orange text-nowrap" title="@item.ReportingToUsername pending"><i class="fas fa-hourglass-half"></i>&nbsp;@item.ReportingToUsername</span><br />
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="card-footer">
+                    <div class="row col-12">
+                        <h5 class="text-orange">Edit History</h5>
+                    </div>
+                    <div class="row col-12">
+                        <table class="table table-sm table-striped table-hover table-bordered">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Changes</th>
+                            </tr>
+
+                            @foreach (var item in Model.V03_JobDescriptions_LogItems)
+                            {
+                                <tr>
+                                    <td>@item.DateCreated.ToDateAndTimeShort()</td>
+                                    <td>@item.Username</td>
+                                    <td>
+                                        @(Html.Raw(item.SystemDescription))
+                                    </td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+
+                </div>
+
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToV02_Workflow_Allocations_ViewTaskAllocations(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/changeTaskTypeID/' + ID + '?R=@Html.UrlEncoder.Encode("/operational/V02_Workflow_Allocations/V02_Workflow_Allocations_ViewTaskAllocations")';
+        }
+        function ConfirmAcceptResponsible(ID) {
+            if (confirm('By clicking this button you agree the details above are correct. This action cannot be undone. Are you sure you wish to continue?')) {
+                document.location.href = '/operational/V03_HumanResources/V03_HumanResources_JobDescriptions_ResponsibleUserAccept/' + ID;
+            }
+        }
+        function ConfirmAcceptReportingTo(ID) {
+            if (confirm('By clicking this button you agree the details above are correct. This action cannot be undone. Are you sure you wish to continue?')) {
+                document.location.href = '/operational/V03_HumanResources/V03_HumanResources_JobDescriptions_ReportingToUserAccept/' + ID;
+            }
+        }
+    </script>
+}

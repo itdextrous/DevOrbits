@@ -1,0 +1,131 @@
+@model MyVoltage.Models.OperationalModels.D02_SaleModels.D02_SaleTasks_Type_DetailsModel
+@using MyVoltage.Extensions;
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.D02_SaleTasks_Type_Details.GetDescription()} - {Model.TypeName}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <div class="row">
+                    <div class="col-2">Due Date Between</div>
+                    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" /></div>
+                    <div class="col-1">And</div>
+                    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" /></div>
+                    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+                </div>
+            </div>
+            <div class="card-body">
+                (Tip: Use Ctrl + F to search)<br />
+                Click on a Task ID to view details
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Task ID</th>
+                    <th scope="col">Task Type</th>
+                    <th scope="col">Task Description</th>
+                    <th scope="col">Level</th>
+                    <th scope="col">Company</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Due Date</th>
+                    <th scope="col">Responsible Person</th>
+                    <th scope="col">Reporting To Person</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.D02_SaleTasks_TypeDetailsItems)
+                {
+                    string companyName = item.CompanyID.HasValue ? opProv.Companies.Where(p => p.CompanyID == item.CompanyID.Value).SingleOrDefault().Name : "All Companies";
+                    string rowclass = "";
+                    if (item.Level.HasValue)
+                    {
+                        switch (item.Level.Value)
+                        {
+                            case 5:
+                                rowclass = "table-danger";
+                                break;
+                            case 4:
+                                rowclass = "table-primary";
+                                break;
+                            case 3:
+                                rowclass = "table-warning";
+                                break;
+                            case 2:
+                                rowclass = "table-success";
+                                break;
+                            case 1:
+                                rowclass = "table-info";
+                                break;
+                        }
+                    }
+                    if (item.Status.IsResolvedStatus.HasValue && item.Status.IsResolvedStatus.Value)
+                    {
+                        rowclass = "table-success";
+                    }
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col" title="View @item.ID Task Details" style="max-width:150px;">
+                            <a class="btn btn-outline-primary-sm btn-sm" href="/operational/D02_Sale/D02_SaleTask_Review/@item.TaskTypeID/@item.ID">@item.ID</a>
+                        </td>
+                        <td scope="col">
+                            <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @item.D02_SaleTasks_TypeItem.Heading." href="/operational/Change_D02_TaskTypeID/@item.TaskTypeID?R=/operational/D02_Sale/D02_SaleTasks_Type_Details">@item.D02_SaleTasks_TypeItem.Heading</a>
+                        </td>
+                        <td scope="col">
+                            @item.D02_SaleTasks_TypeItem.Description
+                        </td>
+                        <td scope="col" title="Level">@item.Level</td>
+                        <td scope="col">
+                            @if (item.CompanyID.HasValue)
+                            {
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/@item.CompanyID.Value?R=/operational/D02_Sale/D02_SaleTasks_Company_Details">@companyName</a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks for @companyName." href="/operational/changeActiveCompany/0?R=/operational/D02_Sale/D02_SaleTasks_Company_Details">@companyName</a>
+                            }
+                        </td>
+                        <td scope="col" title="Created @((DateTime.Now - item.DateCreated).TotalDays.ToString("N")) days ago">@item.DateCreated.ToDateAndTimeShort()</td>
+                        <td scope="col" title="Due Date">@item.DueDate.ToDateShort()</td>
+                        <td scope="col">
+                            <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ResponsibleUserUsername is responsible for." href="/operational/changeTaskResponsibleUserID/@item.ResponsibleUserID?R=/operational/D02_Sale/D02_SaleTasks_User_Details">@item.ResponsibleUserUsername</a>
+                        </td>
+                        <td scope="col">
+                            <a class="btn btn-outline-primary-sm btn-sm" title="View All Tasks @item.ReportingToUserUsername is reporting on." href="/operational/changeTaskReportingToUserID/@item.ReportingToUserID?R=/operational/D02_Sale/D02_SaleTasks_User_Details">@item.ReportingToUserUsername</a>
+                        </td>
+                        <td scope="col">@(item.D02_SaleTasks_TypeItem.SiteAdmin_Priority != null ? item.D02_SaleTasks_TypeItem.SiteAdmin_Priority.PriorityName : "")</td>
+                        <td scope="col">@item.Status.GroupName - @item.Status.ActionName - @item.Status.ReportingName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            document.location.href = '/operational/D02_Sale/D02_SaleTasks_Type_Details?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

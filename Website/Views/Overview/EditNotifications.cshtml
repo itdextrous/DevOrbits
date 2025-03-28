@@ -1,0 +1,57 @@
+﻿@model NotificationSettingsViewModel;
+@{
+    ViewData["Title"] = "Edit Notifications";
+}
+
+<div class="row">
+    <div class="col-md-9 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-10">
+                                <b>Mobile Number :</b> @(Model.NotificationPhoneNumber == null ? "-" : Model.NotificationPhoneNumber)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-10">
+                                <b>Email :</b> @Model.NotificationEmail
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <b>Disconnection notices:</b> When balance is ZERO
+                    </div>
+                    <div class="form-group">
+                        <label><b>Low Balance Notification 1</b></label>
+                        <input asp-for="DisconnectionLowBalanceNotification1" class="form-control" placeholder="Low Balance Notification 1 (e.g. R200)" value="@Model.DisconnectionLowBalanceNotification1" />
+                        <span asp-validation-for="DisconnectionLowBalanceNotification1"></span>
+                    </div>
+                    <div class="form-group">
+                        <label><b>Receive High Usage Notifications</b></label>
+                        <select asp-for="HighUsageNotifications" class="form-control"
+                                asp-items="@(new SelectList(Model.YesNoSelectListItems,"Value","Text"))"></select>
+                        <span asp-validation-for="HighUsageNotifications"></span>
+                    </div>
+                    <div class="form-group">
+                        <label><b>Receive Leak Notifications</b></label>
+                        <select asp-for="LeakNotifications" class="form-control"
+                                asp-items="@(new SelectList(Model.YesNoSelectListItems,"Value","Text"))"></select>
+                        <span asp-validation-for="LeakNotifications"></span>
+                    </div>
+                    <div class="form-group">
+                        <label><b>Receive Newsletters</b></label>
+                        <select asp-for="NewsLetters" class="form-control"
+                                asp-items="@(new SelectList(Model.YesNoSelectListItems,"Value","Text"))"></select>
+                        <span asp-validation-for="NewsLetters"></span>
+                    </div>
+                    <button class="btn btn-primary float-right" type="submit" value="Register">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

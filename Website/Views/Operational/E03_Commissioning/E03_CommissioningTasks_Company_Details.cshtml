@@ -1,0 +1,429 @@
+﻿@model MyVoltage.Models.OperationalModels.E03_CommissioningModels.E03_CommissioningTasks_Company_DetailsModel
+@using MyVoltage.Extensions;
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-left">
+                <h5>Page Filters</h5>
+            </div>
+            <div class="card-body">
+                <form enctype="multipart/form-data">
+
+                    <div class="row">
+                        <div class="col-md-auto">Customer</div>
+                        <div class="col-md-auto" title="Select to include Customer is Registered">
+                            <i class="fa fa-user text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="CustomerRegistered" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Customer is not Registered">
+                            <i class="fa fa-user text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="CustomerNotRegistered" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Customer Has Email">
+                            <i class="fa fa-envelope text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="CustomerEmail" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Customer Has No Email">
+                            <i class="fa fa-envelope text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="CustomerNoEmail" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Customer Has Phone">
+                            <i class="fa fa-phone text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="CustomerPhone" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Customer Has No Phone">
+                            <i class="fa fa-phone text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="CustomerNoPhone" />
+                        </div>
+                        <div class="col-md-auto">Occupancy</div>
+                        <div class="col-md-auto" title="Select to include Occupancy Occupied">
+                            <i class="fa fa-home text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="OccupancyOccupied" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Occupancy Other">
+                            <i class="fa fa-home text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="OccupancyOther" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Occupancy User Approved">
+                            <i class="fa fa-user" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="OccupancyUserApproved" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Occupancy System Approved">
+                            <i class="fa fa-server" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="OccupancySystemApproved" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Occupancy Valid">
+                            <i class="fa fa-check-circle text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="OccupancyValid" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Occupancy InValid">
+                            <i class="fa fa-times-circle text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="OccupancyInValid" />
+                        </div>
+                        <div class="col-md-auto">Meters</div>
+                        @*                         <div class="col-md-auto" title="Select to include Meters Online">
+                        <i class="fa fa-circle text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="MeterIsOnline" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Meters Offline">
+                        <i class="fa fa-circle text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="MeterIsOffline" />
+                        </div>
+                        *@
+                        <div class="col-md-auto" title="Online Type">
+                            @Html.DropDownList("OnlineType", Model.OnlineType, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-auto" title="Disconnect Type">
+                            @Html.DropDownList("DisconnectType", Model.DisconnectType, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-auto" title="Select to include Meter Calibrated">
+                            <i class="fa fa-balance-scale text-success" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="MeterIsCalibrated" />
+                        </div>
+                        <div class="col-md-auto" title="Select to include Meter Not Calibrated">
+                            <i class="fa fa-balance-scale text-red" aria-hidden="true"></i><input type="checkbox" class="form-control" asp-for="MeterIsNotCalibrated" />
+                        </div>
+                        <div class="col-md-auto">
+                            <a onclick="RedirectToFilter(1);" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div class="col">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Service Address<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center">Customer No<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center">Customer Name<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center">Customer Balance<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center">Disconnect<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center">Customer Registered<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center">Latest Billing<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-left">Occupancy<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center table-warning">Electricity<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center table-info">Water<span></span></th>
+                    <th style="cursor:pointer;" scope="col" class="text-center table-secondary">Gas<span></span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.E03_CommissioningTasks_CompanyDetailsItems)
+                {
+                    string rowclass = "";
+                    <tr class="@Html.Raw(rowclass)">
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/dashboard');">
+                            @item.ServiceAddress
+                        </td>
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/dashboard');">
+                            @item.CustomerNo
+                        </td>
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/dashboard');">
+                            @(item.SkybillCustomer != null ? item.SkybillCustomer.Name : "")
+                        </td>
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/Customer/Customer_Billing');">
+                            @if (item.SkybillCustomer != null)
+                            {
+                                <span class="@(item.SkybillCustomer.RealBalance <= 0 ? "text-red" : "text-success")">@item.SkybillCustomer.RealBalance.ToDecimal(2)</span>
+                            }
+                        </td>
+                        @if (item.E03_CommissioningTasks_Company_DetailsSubItems.Where(p => !p.IsOnAuto).Count() == 0)
+                        {
+                            <td scope="col" class="text-success">
+                                Auto
+                            </td>
+                        }
+                        else
+                        {
+                            <td scope="col" class="text-red" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems.Where(p => !p.IsOnAuto).FirstOrDefault().Serial)?R=/operational/A07_CreditControlAndNotifierProcess/A07_CreditControlAndNotifierProcess_MeterOnManualRequestReview');">
+                                Manual
+                            </td>
+                        }
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/Customer/Customer_Profile');">
+                            @if (item.Customer == null)
+                            {
+                                <i class="fa fa-user text-red" aria-hidden="true" title="@item.CustomerNo Registered"></i>
+                            }
+                            else
+                            {
+                                <i class="fa fa-user text-success" aria-hidden="true" title="@item.CustomerNo Registered"></i>
+                                @if (string.IsNullOrEmpty(item.Customer.NotificationEmail))
+                                {
+                                    <i class="fa fa-envelope text-red" aria-hidden="true" title="@item.CustomerNo Email"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-envelope text-success" aria-hidden="true" title="@item.CustomerNo Email"></i>
+                                }
+                                @if (string.IsNullOrEmpty(item.Customer.PhoneNumber))
+                                {
+                                    <i class="fa fa-phone text-red" aria-hidden="true" title="@item.CustomerNo PhoneNumber"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-phone text-success" aria-hidden="true" title="@item.CustomerNo PhoneNumber"></i>
+                                }
+                            }
+                        </td>
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/A06_BillingControlReport/A06_BillingControlReport_NotBilledVerification');">
+                            @foreach (var bItem in item.LatestBillings)
+                            {
+                                <span class="@(bItem.Value <= 0 ? "text-red" : "text-success")">@bItem.Value.ToDecimal(2) - @bItem.Key.ToDateShort()<br /></span>
+                            }
+                        </td>
+                        <td scope="col" style="cursor:pointer;" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(item.E03_CommissioningTasks_Company_DetailsSubItems[0].Serial)?R=/operational/A06_BillingControlReport/A06_BillingControlReport_OccupancyVerification');">
+                            @if (item.Log_BillingControlReport_OccupancyVerification == null)
+                            {
+                                <i class="fa fa-home text-red" aria-hidden="true" title="@item.CustomerNo Occupancy"></i>
+                            }
+                            else
+                            {
+                                <span>@item.Log_BillingControlReport_OccupancyVerification.Occupancy</span>
+                                @switch (item.Log_BillingControlReport_OccupancyVerification.Occupancy)
+                                {
+                                    default:
+                                        <i class="fa fa-home text-secondary" aria-hidden="true" title="@item.CustomerNo Occupancy"></i>
+                                        break;
+                                    case "Occupied":
+                                        <i class="fa fa-home text-success" aria-hidden="true" title="@item.CustomerNo Occupancy"></i>
+                                        break;
+                                }
+                                @if (item.Log_BillingControlReport_OccupancyVerification.UserID == "5bcfeae0-fc6b-4baf-97cc-5ae9da0aeb4e")
+                                {
+                                    <i class="fa fa-server" aria-hidden="true" title="@item.CustomerNo Occupancy System Approved"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-user" aria-hidden="true" title="@item.CustomerNo Occupancy User Approved"></i>
+                                }
+                                @if ((DateTime.Now - item.Log_BillingControlReport_OccupancyVerification.CreateDate).TotalDays > 60)
+                                {
+                                    <i class="fa fa-times-circle text-red" aria-hidden="true" title="@item.CustomerNo Occupancy Expired"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-check-circle text-success" aria-hidden="true" title="@item.CustomerNo Occupancy Valid"></i>
+                                }
+                            }
+                        </td>
+                        <td scope="col" class="table-warning text-right">
+                            @foreach (var subItem in item.E03_CommissioningTasks_Company_DetailsSubItems.Where(p => p.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Electricity).ToList())
+                            {
+                                <div class="col-md-auto border-1 rounded">
+                                    @subItem.Serial
+                                    @switch (subItem.IsOnline)
+                                    {
+                                        case true:
+                                            <i class="fa fa-circle text-success" aria-hidden="true" title="@subItem.Serial Online Status"></i>
+                                            break;
+                                        case false:
+                                            <span>(<i class="fa fa-circle text-red" aria-hidden="true" title="@subItem.Serial Online Status"></i> @subItem.OfflineDuration)</span>
+                                            break;
+                                        case null:
+                                            <i class="fa fa-circle text-secondary" aria-hidden="true" title="@subItem.Serial Online Status"></i>
+                                            break;
+                                    }
+                                    @switch (subItem.IsContactorConnected)
+                                    {
+                                        case true:
+                                            <i class="fa fa-power-off text-success" aria-hidden="true" title="@subItem.Serial Is Contactor Connected"></i>
+                                            break;
+                                        case false:
+                                            <i class="fa fa-power-off text-red" aria-hidden="true" title="@subItem.Serial Is Contactor Connected"></i>
+                                            break;
+                                        case null:
+                                            break;
+                                    }
+                                    @if (subItem.IsBlocked)
+                                    {
+                                        <i class="fa fa-ban text-red" aria-hidden="true" title="@subItem.Serial Blocked"></i>
+                                    }
+                                </div>
+                            }
+                        </td>
+                        <td scope="col" class="table-info text-right">
+                            @foreach (var subItem in item.E03_CommissioningTasks_Company_DetailsSubItems.Where(p => p.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Water).ToList())
+                            {
+                                <div class="col-md-auto border-1 rounded">
+                                    @subItem.Serial
+                                    @switch (subItem.IsOnline)
+                                    {
+                                        case true:
+                                            <i class="fa fa-circle text-success" aria-hidden="true" title="@subItem.Serial Online Status"></i>
+                                            break;
+                                        case false:
+                                            <span>(<i class="fa fa-circle text-red" aria-hidden="true" title="@subItem.Serial Online Status"></i> @subItem.OfflineDuration)</span>
+                                            break;
+                                        case null:
+                                            <i class="fa fa-circle text-secondary" aria-hidden="true" title="@subItem.Serial Online Status"></i>
+                                            break;
+                                    }
+                                    @switch (subItem.IsContactorConnected)
+                                    {
+                                        case true:
+                                            <i class="fa fa-power-off text-success" aria-hidden="true" title="@subItem.Serial Is Contactor Connected"></i>
+                                            break;
+                                        case false:
+                                            <i class="fa fa-power-off text-red" aria-hidden="true" title="@subItem.Serial Is Contactor Connected"></i>
+                                            break;
+                                        case null:
+                                            break;
+                                    }
+                                    <a href="#" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(subItem.Serial)?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification');">
+                                        @switch (subItem.CalibrationStatus)
+                                        {
+                                            case MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.Calibrated:
+                                                <i class="fa fa-balance-scale text-success" aria-hidden="true" title="@subItem.Serial Calibration Status (@subItem.CalibrationStatus.GetDescription())"></i>
+                                                break;
+                                            case MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.UnCalibrated:
+                                                <i class="fa fa-balance-scale text-red" aria-hidden="true" title="@subItem.Serial Calibration Status (@subItem.CalibrationStatus.GetDescription())"></i>
+                                                break;
+                                            default:
+                                                <i class="fa fa-balance-scale text-secondary" aria-hidden="true" title="@subItem.Serial Calibration Status (@subItem.CalibrationStatus.GetDescription())"></i>
+                                                break;
+                                        }
+                                    </a>
+                                    <a href="#" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(subItem.Serial)?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingVerification');">
+                                        <i class="fa fa-camera text-success" aria-hidden="true" title="@subItem.LatestOdoTimeLogged.ToDateAndTimeShort(true)"></i>
+                                    </a>
+                                    @if (subItem.IsBlocked)
+                                    {
+                                        <i class="fa fa-ban text-red" aria-hidden="true" title="@subItem.Serial Blocked"></i>
+                                    }
+                                </div>
+                            }
+                        </td>
+                        <td scope="col" class="table-secondary text-right">
+                            @foreach (var subItem in item.E03_CommissioningTasks_Company_DetailsSubItems.Where(p => p.DeviceType == MyVoltage.Data.DeviceType.DeviceTypeEnum.Gas).ToList())
+                            {
+                                <div class="col-md-auto border-1 rounded">
+                                    @subItem.Serial
+                                    @switch (subItem.IsOnline)
+                                    {
+                                        case true:
+                                            <i class="fa fa-circle text-success" aria-hidden="true" title="@subItem.Serial Online Status"></i>
+                                            break;
+                                        case false:
+                                            <span>(<i class="fa fa-circle text-red" aria-hidden="true" title="@subItem.Serial Online Status"></i> @subItem.OfflineDuration)</span>
+                                            break;
+                                        case null:
+                                            <i class="fa fa-circle text-secondary" aria-hidden="true" title="@subItem.Serial Online Status"></i>
+                                            break;
+                                    }
+                                    @switch (subItem.IsContactorConnected)
+                                    {
+                                        case true:
+                                            <i class="fa fa-power-off text-success" aria-hidden="true" title="@subItem.Serial Is Contactor Connected"></i>
+                                            break;
+                                        case false:
+                                            <i class="fa fa-power-off text-red" aria-hidden="true" title="@subItem.Serial Is Contactor Connected"></i>
+                                            break;
+                                        case null:
+                                            break;
+                                    }
+                                    <a href="#" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(subItem.Serial)?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MeterCalibrationVerification');">
+                                        @switch (subItem.CalibrationStatus)
+                                        {
+                                            case MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.Calibrated:
+                                                <i class="fa fa-balance-scale text-success" aria-hidden="true" title="@subItem.Serial Calibration Status (@subItem.CalibrationStatus.GetDescription())"></i>
+                                                break;
+                                            case MyVoltage.Data.A02_MirrorMeterAuditing_MeterCalibrationVerification.StatusTypes.UnCalibrated:
+                                                <i class="fa fa-balance-scale text-red" aria-hidden="true" title="@subItem.Serial Calibration Status (@subItem.CalibrationStatus.GetDescription())"></i>
+                                                break;
+                                            default:
+                                                <i class="fa fa-balance-scale text-secondary" aria-hidden="true" title="@subItem.Serial Calibration Status (@subItem.CalibrationStatus.GetDescription())"></i>
+                                                break;
+                                        }
+                                    </a>
+                                    <a href="#" onclick="OpenWindowToUrl('/operational/changeActiveMeter/@(subItem.Serial)?R=/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingVerification');">
+                                        <i class="fa fa-camera text-success" aria-hidden="true" title="@subItem.LatestOdoTimeLogged.ToDateAndTimeShort(true)"></i>
+                                    </a>
+                                    @if (subItem.IsBlocked)
+                                    {
+                                        <i class="fa fa-ban text-red" aria-hidden="true" title="@subItem.Serial Blocked"></i>
+                                    }
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function OpenWindowToUrl(url) {
+            window.open(url);
+        }
+        // var items = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.E03_CommissioningTasks_CompanyDetailsItems.ToList())));
+        // $(items).each(function () {
+        //     $(this.E03_CommissioningTasks_Company_DetailsSubItems).each(function () {
+        //         if (this.M2MDeviceID && this.M2MDeviceID.trim() !== '') {
+        //             PopulateLabelsForUpdate(this.M2MDeviceID);
+        //         }
+        //     });
+        // });
+        // function PopulateLabelsForUpdate(itemID) {
+        //     $.post('/operational/E03_Commissioning/E03_CommissioningTasks_Company_Details_GetRegisters',
+        //         {
+        //             deviceid: itemID,
+        //         })
+        //         .done(function (data) {
+        //             $("#isContactorConnected_" + itemID).html(data.isContactorConnected);
+        //         });
+        // }
+
+        function RedirectToFilter(pageIndex) {
+            document.location.href = window.location.href.split('?')[0] + '?EntriesPerPage=' + $("#EntriesPerPage").val()
+                + '&pageIndex=' + pageIndex
+                + '&OnlineType=' + $("#OnlineType").val()
+                + '&DisconnectType=' + $("#DisconnectType").val()
+                + '&CustomerRegistered=' + $("#CustomerRegistered").prop('checked')
+                + '&CustomerNotRegistered=' + $("#CustomerNotRegistered").prop('checked')
+                + '&CustomerEmail=' + $("#CustomerEmail").prop('checked')
+                + '&CustomerNoEmail=' + $("#CustomerNoEmail").prop('checked')
+                + '&CustomerPhone=' + $("#CustomerPhone").prop('checked')
+                + '&CustomerNoPhone=' + $("#CustomerNoPhone").prop('checked')
+                + '&OccupancyOccupied=' + $("#OccupancyOccupied").prop('checked')
+                + '&OccupancyOther=' + $("#OccupancyOther").prop('checked')
+                + '&OccupancyUserApproved=' + $("#OccupancyUserApproved").prop('checked')
+                + '&OccupancySystemApproved=' + $("#OccupancySystemApproved").prop('checked')
+                + '&OccupancyValid=' + $("#OccupancyValid").prop('checked')
+                + '&OccupancyInValid=' + $("#OccupancyInValid").prop('checked')
+                + '&MeterIsOnline=' + $("#MeterIsOnline").prop('checked')
+                + '&MeterIsOffline=' + $("#MeterIsOffline").prop('checked')
+                + '&MeterIsCalibrated=' + $("#MeterIsCalibrated").prop('checked')
+                + '&MeterIsNotCalibrated=' + $("#MeterIsNotCalibrated").prop('checked')
+                ;
+        }
+        $(document).ready(function () {
+            $("th").click(function () {
+                var table = $(this).parents('table').eq(0)
+                var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+                this.asc = !this.asc
+                if (!this.asc) { rows = rows.reverse() }
+                for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
+                resetArrows($(this));
+            })
+            function resetArrows(clickedTh) {
+                $("th").not(clickedTh).find('span').html('');
+                if (clickedTh.find('span').html() === " ▲") {
+                    clickedTh.find('span').html(" ▼");
+                } else {
+                    clickedTh.find('span').html(" ▲");
+                }
+            }
+            function comparer(index) {
+                return function (a, b) {
+                    var valA = getCellValue(a, index), valB = getCellValue(b, index)
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+                }
+            }
+            function getCellValue(row, index) { return $(row).children('td').eq(index).text() }
+        });
+    </script>
+}

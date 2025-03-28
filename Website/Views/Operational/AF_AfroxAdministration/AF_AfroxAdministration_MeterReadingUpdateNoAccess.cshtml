@@ -1,0 +1,182 @@
+@model MyVoltage.Models.OperationalModels.AF_AfroxAdministration.AF_AfroxAdministrationModels.AF_AfroxAdministration_MeterReadingUpdateNoAccessModel
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.AF_AfroxAdministration_MeterReadingUpdate.GetDescription()} No Access - {operationalProvider.CompanyName} - {operationalProvider.CustomerMeterSerial}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card p-md-1 mv-gradient">
+            @if (Model != null && Model.IsSuccessful)
+            {
+                <div class="card-header">
+                    Success!
+                </div>
+                <div class="card-body">
+                    Odo Reading successfully added.
+                </div>
+                <div class="card-footer">
+                    <a href="/operational/AF_AfroxAdministration/AF_AfroxAdministration_MeterReadingUpdateNoAccess" class="btn btn-outline-primary-sm"><i class="fas fa-check-circle"></i>&nbsp;Ok</a>
+                </div>
+
+            }
+            else
+            {
+
+                <div class="card-header">
+
+                    <div class="row col-12 text-orange">
+                        <h6>Search Meter:</h6>
+                    </div>
+
+                    <div class="row text-orange">
+                        <div class="col-10">
+                            <input id="serialSearch" type="text" class="form-control" />
+                        </div>
+                        <div class="col-2">
+                            <a id="searchButton" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Search</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(operationalProvider.CustomerMeterSerial))
+                    {
+                        @if (operationalProvider.MirrorDevices.Where(p => p.Value == operationalProvider.CustomerMeterSerial).Count() > 0)
+                        {
+                            <form asp-action="AF_AfroxAdministration_MeterReadingUpdateNoAccess" enctype="multipart/form-data">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="row text-orange mb-md-2">
+                                            <div class="col-12">
+                                                <h5>NO ACCESS</h5>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-md-2">
+                                            <div class="col-12">
+                                                Please upload a photo showing access was denied to meter below.
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Company:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CompanyName
+                                    </div>
+                                    <div class="col">
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Customer Number:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CustomerNumber
+                                    </div>
+                                    <div class="col">
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Meter No:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CustomerMeterNo
+                                    </div>
+                                    <div class="col">
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Serial:
+                                    </div>
+                                    <div class="col">
+                                        @operationalProvider.CustomerMeterSerial
+                                    </div>
+                                    <div class="col">
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        Pulsar Serial (Remote Addr):
+                                    </div>
+                                    <div class="col">
+                                        @Model.RemoteAddress
+                                    </div>
+                                    <div class="col">
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col">
+                                        <label asp-for="Photo" class="control-label"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-control" asp-for="Photo" />
+                                    </div>
+                                    <div class="col">
+                                        <span asp-validation-for="Photo" class="text-red"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-md-2">
+                                    <div class="col-6 text-left">
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <button class="btn btn-outline-primary-sm"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                                    </div>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div>@operationalProvider.CustomerMeterSerial not found in mirror...</div>
+                        }
+                    }
+                    else
+                    {
+                        <div>Select or Search a meter to start...</div>
+                    }
+                </div>
+                <div class="card-footer">
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#serialSearch").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/operational/A02_MirrorMeterAuditing/A02_MirrorMeterAuditing_MirrorReadingUpdate_Search",
+                    type: "POST",
+                    dataType: "json",
+                    data: { serialOrName: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.value };
+                        }))
+
+                    }
+                })
+            },
+            messages: {
+                noResults: "", results: ""
+            }
+        });
+        $("#searchButton").click(function () {
+            var returnUrl = document.location.href;
+            document.location.href = '/operational/changeActiveMeter/' + $("#serialSearch").val() + '?R=' + returnUrl;
+        });
+
+        $(document).ready(function () {
+
+        });
+    </script>
+}

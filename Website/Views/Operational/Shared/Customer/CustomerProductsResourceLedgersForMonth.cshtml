@@ -1,0 +1,81 @@
+@model MyVoltage.Models.OperationalModels.Shared.SharedCustomerModels.CustomerProductsResourceLedgersForMonthModel
+@using MyVoltage.Extensions;
+<div class="row">
+    <div class="col text-left">
+        <h5 class="text-orange">
+            @if (string.IsNullOrEmpty(Model.CustomTitle))
+            {
+                <span>Product Resources: @Model.BillingMonth.ToMonth()</span>
+            }
+            else
+            {
+                <span>@Model.CustomTitle</span>
+            }
+        </h5>
+    </div>
+    <div class="col text-right"><a class="btn btn-outline-primary-sm" href="/operational/Customer/Customer_Usage/@Model.BillingMonth.Year/@Model.BillingMonth.Month">Details</a></div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <table class="table table-responsive-xl table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Charge Type</th>
+                    <th scope="col" class="text-right">No. of <br />Units</th>
+                    <th scope="col" class="text-right">Unit Price</th>
+                    @if (Model.ShowIncVAT)
+                    {
+                        <th scope="col" class="text-right">Total<br />In VAT</th>
+                    }
+                    else
+                    {
+                        <th scope="col" class="text-right">Total<br />Ex VAT</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.CustomerProductsResourceLedgersForMonthItems.Count > 0)
+                {
+                    @foreach (var item in Model.CustomerProductsResourceLedgersForMonthItems)
+                    {
+                        <tr>
+                            <td scope="col">@item.ProductName</td>
+                            <td scope="col">@item.ChargeType.GetDescription()</td>
+                            <td scope="col" class="text-right">@item.Units.ToReading()</td>
+                            <td scope="col" class="text-right">@item.PricePerUnit.ToMoney("R")</td>
+                            @if (Model.ShowIncVAT)
+                            {
+                                <td scope="col" class="text-right">@item.TotalInVat.ToMoneyNoDecimal("R")</td>
+                            }
+                            else
+                            {
+                                <td scope="col" class="text-right">@item.Total.ToMoneyNoDecimal("R")</td>
+                            }
+                        </tr>
+                    }
+                    <tr>
+                        <td scope="col">Total</td>
+                        <td scope="col"></td>
+                        <td scope="col"></td>
+                        <td scope="col"></td>
+                        @if (Model.ShowIncVAT)
+                        {
+                            <td scope="col" class="text-right" style="border-top:1px solid black; border-bottom:3px double black;">@Model.CustomerProductsResourceLedgersForMonthItems.Select(p => p.TotalInVat).Sum().ToMoneyNoDecimal("R")</td>
+                        }
+                        else
+                        {
+                            <td scope="col" class="text-right" style="border-top:1px solid black; border-bottom:3px double black;">@Model.CustomerProductsResourceLedgersForMonthItems.Select(p => p.Total).Sum().ToMoneyNoDecimal("R")</td>
+                        }
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td scope="col" colspan="5">No results</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

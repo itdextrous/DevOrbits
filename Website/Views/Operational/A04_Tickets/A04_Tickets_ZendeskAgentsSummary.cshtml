@@ -1,0 +1,110 @@
+@model MyVoltage.Models.OperationalModels.A04_Tickets.A04_TicketsModels.A04_Tickets_ZendeskAgentsSummaryModel
+
+@{
+    ViewData["Title"] = "Zendesk Tickets - Agents Summary";
+}
+@using MyVoltage.Extensions;
+<div class="row">
+    <div class="col-2">Created Between</div>
+    <div class="col-2"><input type="date" name="fromDate" id="fromDate" value="@(Model.FromDate.ToDateShort(true))" /></div>
+    <div class="col-1">And</div>
+    <div class="col-2"><input type="date" name="toDate" id="toDate" value="@(Model.ToDate.ToDateShort(true))" /></div>
+    <div class="col-2"><a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary"><i class="fas fa-search"></i>&nbsp;Filter</a></div>
+</div>
+
+<div class="row mt-3">
+    <table class="table table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th rowspan="2" scope="col" style="border-left:1px solid black;border-top:1px solid black;">Agent Name</th>
+                <th rowspan="2" scope="col" style="border-top:1px solid black;">Status</th>
+
+                <th colspan="7" scope="col" style="border-left:1px solid black;border-top:1px solid black;" class="text-center">Unresolved Older Than Count</th>
+
+                <th colspan="4" scope="col" style="border-left:1px solid black;border-top:1px solid black;" class="text-center">Unresolved</th>
+                <th colspan="2" scope="col" style="border-left:1px solid black;border-top:1px solid black;border-right:1px solid black;" class="text-center">Resolved</th>
+                <th rowspan="2" scope="col" style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">Total</th>
+            </tr>
+            <tr>
+                <th scope="col" style="border-left:1px solid black;border-top:1px solid black;" class="text-nowrap text-center">Today Count</th>
+                <th scope="col" style="border-top:1px solid black;" class="text-nowrap text-center">1 Day</th>
+                <th scope="col" style="border-top:1px solid black;" class="text-nowrap text-center">3 Days</th>
+                <th scope="col" style="border-top:1px solid black;" class="text-nowrap text-center">7 Days</th>
+                <th scope="col" style="border-top:1px solid black;" class="text-nowrap text-center">14 Days</th>
+                <th scope="col" style="border-top:1px solid black;" class="text-nowrap text-center">1 Month</th>
+                <th scope="col" style="border-top:1px solid black;" class="text-nowrap text-center">Oldest</th>
+
+                <th scope="col" style="border-left:1px solid black;border-top:1px solid black;">Open</th>
+                <th scope="col" style="border-top:1px solid black;">Pending</th>
+                <th scope="col" style="border-top:1px solid black;">Hold</th>
+                <th scope="col" style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">Total</th>
+
+                <th scope="col" style="border-left:1px solid black;border-top:1px solid black;">Solved</th>
+                <th scope="col" style="border-top:1px solid black;">Closed</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A04_Tickets_ZendeskAgentsSummaryItems)
+            {
+                string rowclass = "";
+                string cellClass = "";
+                if (item.Status == "Action Required")
+                {
+                    cellClass = " class=\"text-red font-weight-bold\"";
+                    rowclass = " class=\"table-danger\"";
+                }
+                else if (item.Status == "In Progress")
+                {
+                    cellClass = " class=\"text-orange font-weight-bold\"";
+                    rowclass = " class=\"table-warning\"";
+                }
+                else if (item.Status == "Good")
+                {
+                    cellClass = " class=\"text-green font-weight-bold\"";
+                    rowclass = " class=\"table-success\"";
+                }
+                <tr style="cursor:pointer;" title="View @(item.Agent.Name)" onclick="RedirectToDetails('@item.Agent.ID');" @Html.Raw(rowclass)>
+                    <td style="border-left:1px solid black;" scope="col">@item.Agent.Name</td>
+                    <td title="@item.Agent.Name - Status" scope="col" @Html.Raw(cellClass)>@item.Status</td>
+
+                    <td title="@item.Agent.Name - Older Than 3 Days Count" style="border-left:1px solid black;" scope="col">@item.TodayCount</td>
+                    <td title="@item.Agent.Name - Older Than 1 Day Count" scope="col">@item.OlderThan1DayCount</td>
+                    <td title="@item.Agent.Name - Older Than 3 Days Count" scope="col">@item.OlderThan3DaysCount</td>
+                    <td title="@item.Agent.Name - Older Than 7 Days Count" scope="col">@item.OlderThan7DaysCount</td>
+                    <td title="@item.Agent.Name - Older Than 14 Days Count" scope="col">@item.OlderThan14DaysCount</td>
+                    <td title="@item.Agent.Name - Older Than 1 Month Count" scope="col">@item.OlderThan1MonthCount</td>
+                    <td title="@item.Agent.Name - Oldest Unresolved Ticket" scope="col">
+                        @if (item.OldestUnresolvedTicketDate.HasValue)
+                        {
+                            <span>@item.OldestUnresolvedTicketDate.ToDateAndTimeShort(true) (@item.OldestUnresolvedTicketID)</span>
+                        }
+                    </td>
+
+                    <td title="@item.Agent.Name - Open Count" style="border-left:1px solid black;" scope="col">@item.OpenCount</td>
+                    <td title="@item.Agent.Name - Pending Count" scope="col">@item.PendingCount</td>
+                    <td title="@item.Agent.Name - Hold Count" scope="col">@item.HoldCount</td>
+
+                    <td title="@item.Agent.Name - Unresolved Count" style="border-left:1px solid black;" scope="col">@(item.OpenCount + item.PendingCount + item.HoldCount)</td>
+
+                    <td title="@item.Agent.Name - Solved Count" scope="col" style="border-left:1px solid black;">@item.SolvedCount</td>
+                    <td title="@item.Agent.Name - Closed Count" scope="col">@item.ClosedCount</td>
+                    <td title="@item.Agent.Name - Total Tickets" scope="col" style="border-left:1px solid black;border-right:1px solid black;">@item.TotalTickets</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeZendeskAgentID/' + companyID + '?R=/operational/A04_Tickets/A04_Tickets_ZendeskAgentsDetails%3Ffrom=' + $("#fromDate").val() + '%26to=' + $("#toDate").val();
+        }
+        function RedirectToFilter() {
+            document.location.href = '/operational/A04_Tickets/A04_Tickets_ZendeskAgentsSummary?from=' + $("#fromDate").val() + '&to=' + $("#toDate").val();
+        }
+    </script>
+}

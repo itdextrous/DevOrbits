@@ -1,0 +1,74 @@
+﻿@model MyVoltage.Models.CompanyAdminViewModels.OfflineDevicesViewModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = $"Offline Devices - {Model.CompanyName}";
+}
+
+<div class="row mt-0 mt-md-5">
+    <div class="col-12 col-md-6">
+        <h3>@ViewData["Title"]</h3>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered admin-table-detail mt-3 table-striped">
+        <tbody style="height:auto;">
+        <thead>
+            <tr>
+                <td>Serial Number</td>
+                <td>Meter Description</td>
+                <td>Meter Type</td>
+                <td>Status</td>
+                <td>Last Communicated</td>
+                <td>Signal</td>
+                <td>Battery</td>
+                <td>GatewayID</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.OfflineDevices.Count == 0)
+            {
+                <tr>
+                    <td colspan="7">Hooray! No offline devices for @Model.CompanyName</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var device in Model.OfflineDevices)
+                {
+                    <tr style="cursor:pointer;" onclick="RedirectToUsage('@device.SerialNumber');" title="Click to view Usage Details for @device.SerialNumber">
+                        <td>@device.SerialNumber</td>
+                        <td>@device.MeterDescription </td>
+                        <td>@device.MeterType </td>
+                        <td class="status font-weight-bold">@device.Status</td>
+                        <td>@device.LastCommunicated</td>
+                        <td>@device.Signal</td>
+                        <td>@device.Battery</td>
+                        <td>@device.GatewayID</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <script src="~/js/knockout.js"></script>
+    <script src="~/js/markerclusterer.js"></script>
+    <script src="~/js/date.format.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZrm-r6PKi_zpTM2-iT-K4yFG-7y_cEOk"></script>
+    <script>
+        $(document).ready(function () {
+            $(".status:contains('online')").addClass("text-green");
+            $(".status:contains('offline')").addClass("text-red");
+        });
+        function RedirectToUsage(serial) {
+            if ('True' == '@User.IsInRole("CompanyAdmin")') {
+                document.location.href = '/companyAdmin/usage/' + serial;
+            }
+            else {
+                document.location.href = '/usage/' + serial;
+                }
+        }
+    </script>
+}

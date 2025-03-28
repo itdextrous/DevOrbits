@@ -1,0 +1,53 @@
+@model MyVoltage.Models.OperationalModels.A10_VirtualMeters.A10_VirtualMeters_TOUReconReport_SummaryModel
+@inject MyVoltage.Services.OperationalProvider opProv;
+@using MyVoltage.Extensions;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A10_VirtualMeters_TOUReconReport_Summary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header text-right">
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-sm table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Master Meters</th>
+                            <th scope="col">TOU Meters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.A10_VirtualMeters_TOUReconReport_SummaryItems)
+                        {
+                            string rowclass = "";
+                            <tr style="cursor:pointer;" title="View @item.Company.Name" onclick="RedirectToDetails('@item.Company.CompanyID');" @Html.Raw(rowclass)>
+                                <td scope="col">@item.Company.Name</td>
+                                <td scope="col">@item.MasterMeters</td>
+                                <td scope="col">@item.TOUMeters</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A10_VirtualMeters/A10_VirtualMeters_TOUReconReport_Details';
+        }
+    </script>
+}

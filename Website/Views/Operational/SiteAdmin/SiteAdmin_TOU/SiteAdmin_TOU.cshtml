@@ -1,0 +1,199 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_TOUModels.SiteAdmin_TOUModel
+@{
+    ViewData["Title"] = "System Admin - TOU";
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h3 class="text-orange">Current TOU Months Defined</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Month</th>
+                            <th scope="col">Demand Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TOU_DemandTypeMonths)
+                        {
+                            string month = new DateTime(DateTime.Now.Year, item.Month, 1).ToString("MMMM");
+                            <tr>
+                                <td scope="col">@month</td>
+                                <td scope="col">@item.DemandType.GetDescription()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h3 class="text-orange">Current TOU Holidays</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Holiday Name</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Actual Day</th>
+                            <th scope="col">TOU Day</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td scope="col"><input id="addHolidayName" type="text" class="form-control" /></td>
+                            <td scope="col"><input id="addHolidayDate" type="date" class="form-control" /></td>
+                            <td scope="col">
+                                Calculated
+                            </td>
+                            <td scope="col">
+                                <select id="addHolidayTOUDay" class="form-control">
+                                    @for (int i = 0; i < 7; i++)
+                                    {
+                                        DayOfWeek dayOfWeek = (DayOfWeek)i;
+                                        <option value="@i">@dayOfWeek</option>
+                                    }
+                                </select>
+                            </td>
+                            <td scope="col" class="text-right"><a onclick="DoAddHoliday();" href="#" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add / Update</a></td>
+                        </tr>
+                        @foreach (var item in Model.TOU_Holidays)
+                        {
+                            <tr style="cursor:pointer;" title="View / Edit @item.HolidayName" onclick="AutoFillTOUHolidayEditValues('@(Html.Encode(item.HolidayName))', '@item.Date.ToDateShort()', '@item.TOU_Day');">
+                                <td scope="col">@item.HolidayName</td>
+                                <td scope="col">@item.Date.ToDateShort()</td>
+                                <td scope="col">@item.ActualDayOfWeek</td>
+                                <td scope="col">@item.TOU_DayOfWeek</td>
+                                <td scope="col"></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div class="card-header">
+                <h3 class="text-orange">Current TOU Hours</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Day Type</th>
+                            <th scope="col">Hour</th>
+                            <th scope="col">Low Peak</th>
+                            <th scope="col">High Peak</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TOU_Hours)
+                        {
+                            <tr>
+                                <td scope="col">@item.DayType.GetDescription()</td>
+                                <td scope="col">@item.Hour</td>
+                                <td scope="col">@item.LowPeakType.GetDescription()</td>
+                                <td scope="col">@item.HighPeakType.GetDescription()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function AutoFillTOUHolidayEditValues(addHolidayName, addHolidayDate, addHolidayTOUDay) {
+            $("#addHolidayName").val(addHolidayName);
+            $("#addHolidayDate").val(addHolidayDate);
+            $("#addHolidayTOUDay").val(addHolidayTOUDay);
+        }
+
+        function DoAddHoliday() {
+            $("#loaderContent").css("display", "block");
+
+            if ($("#addHolidayName").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Holiday Name');
+                $("#addHolidayName").focus();
+                return;
+            }
+
+            if ($("#addHolidayDate").val() == '') {
+                $("#loaderContent").css("display", "none");
+                alert('Please enter Holiday Date');
+                $("#addHolidayDate").focus();
+                return;
+            }
+
+            $.post("/operational/SiteAdmin/SiteAdmin_TOU_DoAddHoliday",
+                {
+                    addHolidayName: $("#addHolidayName").val(),
+                    addHolidayDate: $("#addHolidayDate").val(),
+                    addHolidayTOUDay: $("#addHolidayTOUDay").val()
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action. Please confirm all fields are filled in correctly.");
+                    }
+                });
+
+        }
+
+    </script>
+}

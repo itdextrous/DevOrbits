@@ -1,0 +1,400 @@
+@model MyVoltage.Models.OperationalModels.C02_GeneralLedgerReportModels.C02_GeneralLedgerReport_GLAuditViewModel
+@inject UserManager<ApplicationUser> userManager;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditView.GetDescription()} - {operationalProvider.CompanyName}";
+}
+@using MyVoltage.Extensions;
+<div id="loaderContent" class="loader-overlay-content">
+    <div class="loader">
+        <div class="text-orange text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading...
+        </div>
+    </div>
+</div>
+<div class="row mb-md-2">
+
+    <div class="col">
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                From:
+                <input type="date" asp-for="FromDate" value="@(Model.FromDate.ToDateShort())" class="form-control" />
+                &nbsp;
+                To:
+                <input type="date" asp-for="ToDate" value="@(Model.ToDate.ToDateShort())" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                @Html.DropDownList("LedgerNo", Model.LedgerNo, new { @class = "browser-default custom-select form-control-trim js-select" })
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                @Html.DropDownList("ApprovalRequired", Model.ApprovalRequired, new { @class = "browser-default custom-select form-control-trim js-select" })
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                @Html.DropDownList("PendingIssue", Model.PendingIssue, new { @class = "browser-default custom-select form-control-trim js-select" })
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                @Html.DropDownList("Classification", Model.Classification, new { @class = "browser-default custom-select form-control-trim js-select" })
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12">
+                @Html.DropDownList("AmountClassification", Model.AmountClassification, new { @class = "browser-default custom-select form-control-trim js-select" })
+            </div>
+        </div>
+
+        <div class="row mb-md-2">
+            <div class="col-12 text-left">
+                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView" class="btn btn-outline-primary-sm"><i class="fas fa-undo"></i>&nbsp;Clear</a>
+                &nbsp;
+                <a onclick="RedirectToFilter();" href="#" class="btn btn-outline-primary-sm"><i class="fas fa-search"></i>&nbsp;Filter</a>
+            </div>
+        </div>
+
+    </div>
+    @if (operationalProvider.CompanyID != 0)
+    {
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="2" scope="col" class="text-center">Latest Accounting Checklist Rerun</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Requested By</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_AccountingChecklist_Request != null ? Model.Latest_AccountingChecklist_Request.CreatedByUsername : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Requested Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_AccountingChecklist_Request != null ? Model.Latest_AccountingChecklist_Request.CreatedDate.ToDateAndTimeShort() : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Started Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_AccountingChecklist_Request != null ? Model.Latest_AccountingChecklist_Request.DateStarted.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Ended Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_AccountingChecklist_Request != null ? Model.Latest_AccountingChecklist_Request.DateEnded.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Progress</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_AccountingChecklist_Request != null ? Model.Latest_AccountingChecklist_Request.Progress.ToMoney() : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" scope="col" class="text-nowrap text-right">
+                            @if (Model.Latest_AccountingChecklist_Request == null || Model.Latest_AccountingChecklist_Request.DateEnded.HasValue)
+                            {
+                                <a href="#" onclick="RedirectToRequestRerun();" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request Rerun</a>
+                            }
+                            else
+                            {
+                                <span>Report in progress...</span>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <table class="table table-sm table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="2" scope="col" class="text-center">Latest Bulk Journal Post Request</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Requested By</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_Journal_Request != null ? Model.Latest_Journal_Request.CreatedByUsername : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Requested Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_Journal_Request != null ? Model.Latest_Journal_Request.CreatedDate.ToDateAndTimeShort() : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Started Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_Journal_Request != null ? Model.Latest_Journal_Request.DateStarted.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Ended Date</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_Journal_Request != null ? Model.Latest_Journal_Request.DateEnded.ToDateAndTimeShort(true) : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td scope="col" class="text-nowrap">Progress</td>
+                        <td scope="col" class="text-nowrap">@(Model.Latest_Journal_Request != null ? Model.Latest_Journal_Request.Progress.ToMoney() : "Not requested yet")</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" scope="col" class="text-nowrap text-right">
+                            @if (Model.Latest_Journal_Request == null || Model.Latest_Journal_Request.DateEnded.HasValue)
+                            {
+                                @*                                 <a href="#" onclick="RedirectToRequestRerun();" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Request Rerun</a>
+                        *@                            }
+                            else
+                            {
+                                <span>Report in progress...</span>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        &nbsp;
+    </div>
+</div>
+<div class="row mb-md-2">
+    <div class="col-12 text-left">
+        <table class="table table-sm table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th rowspan="2" scope="col" class="">Company</th>
+                    <th rowspan="2" scope="col" class="">Date</th>
+                    <th rowspan="2" scope="col" class="">Ledger No</th>
+                    <th rowspan="2" scope="col" class="">Ledger Name</th>
+                    <th rowspan="2" scope="col" class="">Classification</th>
+                    <th rowspan="2" scope="col" class=""></th>
+                    <th rowspan="2" scope="col" class="">Sage Company</th>
+                    <th rowspan="2" scope="col" class="">
+                        Sage Journal ID
+                        @if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditView, MyVoltage.Data.SecureAreaActionEnum.ManagementApproval)
+                        && Model.C02_GeneralLedgerReport_GLAuditViewItems.Where(p => (!p.SageJournalID.HasValue && p.ShowJournalLink) || (!p.SageJournalID.HasValue && p.SageAmount.HasValue && p.SageAmount.Value != p.MovementAmount)).Count() != 0
+                        && (Model.Latest_Journal_Request == null || Model.Latest_Journal_Request.DateEnded.HasValue)
+                        )
+                        {
+                            <a href="#" onclick="DoBulkJournalPost();" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-dollar-sign"></i>&nbsp;Bulk Post</a>
+                        }
+                    </th>
+                    <th colspan="9" scope="col" class="text-center">Movement</th>
+                    <th colspan="9" scope="col" class="text-center">Balance</th>
+                    <th rowspan="2" scope="col" class="">Pending Issue</th>
+                    <th rowspan="2" scope="col" class="">Comments</th>
+                    <th rowspan="2" scope="col" class="">Flag ID</th>
+                    <th rowspan="2" scope="col" class="">Task ID</th>
+                    <th rowspan="2" scope="col" class="">Attachment</th>
+                    <th rowspan="2" scope="col" class="">Date Checked</th>
+                </tr>
+                <tr>
+                    <th scope="col" class="text-center">Snapshot<br />Amount</th>
+                    <th scope="col" class="text-center">Confirmed<br />Amount</th>
+                    <th scope="col" class="text-center">Snapshot<br />Date</th>
+                    <th scope="col" class="">Reviewed Name</th>
+                    <th scope="col" class="">Reviewed Date</th>
+                    <th scope="col" class="">Approved Name</th>
+                    <th scope="col" class="">Approved Date</th>
+                    <th scope="col" class="">Audit Name</th>
+                    <th scope="col" class="">Audit Date</th>
+
+                    <th scope="col" class="text-center">Snapshot<br />Amount</th>
+                    <th scope="col" class="text-center">Confirmed<br />Amount</th>
+                    <th scope="col" class="text-center">Snapshot<br />Date</th>
+                    <th scope="col" class="">Reviewed Name</th>
+                    <th scope="col" class="">Reviewed Date</th>
+                    <th scope="col" class="">Approved Name</th>
+                    <th scope="col" class="">Approved Date</th>
+                    <th scope="col" class="">Audit Name</th>
+                    <th scope="col" class="">Audit Date</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.C02_GeneralLedgerReport_GLAuditViewItems)
+                {
+                    string rowClass = "";
+                    //if (item.DetailsValues.Where(p => p.Value.HasValue).Count() == 0)
+                    //{
+                    //    rowClass = "table-danger";
+                    //}
+                    <tr>
+                        <td scope="col" class="text-nowrap">@item.CompanyName</td>
+                        <td scope="col" class="text-nowrap">@item.Date.ToMonth()</td>
+                        <td scope="col" class="text-nowrap">@item.LedgerNo</td>
+                        <td scope="col" class="text-nowrap">@item.LedgerName</td>
+                        <td scope="col" class="text-nowrap">@(item.LedgerNo < 6000 ? "Balance Sheet" : "Income Statement")</td>
+                        <td scope="col" class="text-nowrap"> <a href="#" onclick="RedirectToDetails('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-edit"></i>&nbsp;Edit</a></td>
+                        <td scope="col" class="text-nowrap">@item.SageCompanyName</td>
+                        <td scope="col" class="text-nowrap">
+                            @if (Model.Latest_Journal_Request == null || Model.Latest_Journal_Request.DateEnded.HasValue)
+                            {
+                                @if (item.SageJournalID.HasValue)
+                                {
+                                    <text>@item.SageJournalID</text>
+                                    @if (item.SageAmount.HasValue && item.SageAmount.Value != item.MovementAmount && item.ShowJournalLink
+                                   )
+                                    {
+                                        <a href="#" onclick="RedirectToSageRePost('@item.ID');" class="btn btn-sm btn-outline-warning"><i class="fas fa-dollar-sign"></i>&nbsp;REPost to Sage</a>
+                                    }
+                                }
+                                else if (item.ShowJournalLink)
+                                {
+                                    <a href="#" onclick="RedirectToSagePost('@item.ID');" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-dollar-sign"></i>&nbsp;Post to Sage</a>
+                                }
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap text-right">@item.MovementAmount.ToMoney()</td>
+                        <td scope="col" class="text-nowrap text-right @(item.MovementAmountConfirmed.HasValue ? (item.AuditDate.HasValue ? "table-info" : "") : "table-danger")">@item.MovementAmountConfirmed.ToMoney()</td>
+                        <td scope="col" class="text-nowrap text-right">@item.MovementSyncDate.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-nowrap @(item.ReviewedDate.HasValue ? (item.AuditDate.HasValue ? "table-info" : "") : "table-danger")">@item.ReviewedByUsername</td>
+                        <td scope="col" class="text-nowrap @(item.ReviewedDate.HasValue ? (item.AuditDate.HasValue ? "table-info" : "") : "table-danger")">@item.ReviewedDate.ToDateAndTimeShort(true)</td>
+                        <td scope="col" class="text-nowrap @(item.ApprovedDate.HasValue ? (item.AuditDate.HasValue ? "table-info" : "") : "table-danger")">
+                            @if (item.ApprovedDate.HasValue)
+                            {
+                                <span>@item.ApprovedByUsername</span>
+                            }
+                            else if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate, MyVoltage.Data.SecureAreaActionEnum.Approval)
+                            && item.MovementAmountConfirmed.HasValue
+                            && userManager.GetUserId(User) != item.ReviewedBy.Trim()
+                            && item.MovementAmount == item.MovementAmountConfirmed.Value
+                            )
+                            {
+                                <a onclick="RedirectToApprove('@item.ID');" href="#" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Approve</a>
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap @(item.ApprovedDate.HasValue ? "" : "table-danger")">@item.ApprovedDate.ToDateAndTimeShort(true)</td>
+                        <td scope="col" class="text-nowrap @(item.AuditDate.HasValue ? "" : "table-danger")">
+                            @if (item.AuditDate.HasValue)
+                            {
+                                <span>@item.AuditByUsername</span>
+                            }
+                            @*                            else if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate, MyVoltage.Data.SecureAreaActionEnum.Approval)
+                        && item.MovementAmountConfirmed.HasValue
+                        && userManager.GetUserId(User) != item.ReviewedBy.Trim()
+                        && item.MovementAmount == item.MovementAmountConfirmed.Value
+                        )
+                        {
+                        <a onclick="RedirectToApprove('@item.ID');" href="#" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Approve</a>
+                        }
+                        *@
+                        </td>
+                        <td scope="col" class="text-nowrap @(item.AuditDate.HasValue ? "" : "table-danger")">@item.AuditDate.ToDateAndTimeShort(true)</td>
+                        <td scope="col" class="text-nowrap text-right">@item.BalanceAmount.ToMoney()</td>
+                        <td scope="col" class="text-nowrap text-right @(item.BalanceAmountConfirmed.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">@item.BalanceAmountConfirmed.ToMoney()</td>
+                        <td scope="col" class="text-nowrap text-right">@item.BalanceSyncDate.ToDateAndTimeShort()</td>
+                        <td scope="col" class="text-nowrap @(item.ReviewedDateBalance.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">@item.ReviewedByUsernameBalance</td>
+                        <td scope="col" class="text-nowrap @(item.ReviewedDateBalance.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">@item.ReviewedDateBalance.ToDateAndTimeShort(true)</td>
+                        <td scope="col" class="text-nowrap @(item.ApprovedDateBalance.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">
+                            @if (item.ApprovedDateBalance.HasValue)
+                            {
+                                <span>@item.ApprovedByUsernameBalance</span>
+                            }
+                            else if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate, MyVoltage.Data.SecureAreaActionEnum.Approval)
+                            && item.BalanceAmountConfirmed.HasValue
+                            && userManager.GetUserId(User) != item.ReviewedByBalance.Trim()
+                            && item.BalanceAmount == item.BalanceAmountConfirmed.Value
+                            )
+                            {
+                                <a onclick="RedirectToApproveBalance('@item.ID');" href="#" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Approve</a>
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap @(item.ApprovedDateBalance.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">@item.ApprovedDateBalance.ToDateAndTimeShort(true)</td>
+                        <td scope="col" class="text-nowrap @(item.AuditDateBalance.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">
+                            @if (item.AuditDateBalance.HasValue)
+                            {
+                                <span>@item.AuditByUsernameBalance</span>
+                            }
+                            @*                            else if (operationalProvider.HasAccess(MyVoltage.Data.SecureAreaEnum.C02_GeneralLedgerReport_GLAuditUpdate, MyVoltage.Data.SecureAreaActionEnum.Approval)
+                        && item.BalanceAmountConfirmed.HasValue
+                        && userManager.GetUserId(User) != item.ReviewedByBalance.Trim()
+                        && item.BalanceAmount == item.BalanceAmountConfirmed.Value
+                        )
+                        {
+                        <a onclick="RedirectToApproveBalance('@item.ID');" href="#" class="btn btn-outline-success"><i class="fas fa-check-circle"></i>&nbsp;Approve</a>
+                        }
+                        *@
+                        </td>
+                        <td scope="col" class="text-nowrap @(item.AuditDateBalance.HasValue ? (item.AuditDateBalance.HasValue ? "table-info" : "") : "table-danger")">@item.AuditDateBalance.ToDateAndTimeShort(true)</td>
+                        <td scope="col" class="text-nowrap">@item.PendingIssue</td>
+                        <td scope="col" class="text-nowrap">@item.Comments</td>
+                        <td scope="col" class="text-nowrap">@item.FlagID</td>
+                        <td scope="col" class="text-nowrap">@item.TaskID</td>
+                        <td scope="col" class="text-nowrap">
+                            @if (!string.IsNullOrEmpty(item.AttachmentFileName))
+                            {
+                                <a href="/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAudit_GetAttachment/@item.ID" class="btn btn-sm btn-outline-primary-sm"><i class="fas fa-file-download"></i>&nbsp;@item.AttachmentFileName</a>
+                            }
+                        </td>
+                        <td scope="col" class="text-nowrap text-right">@item.LastCheckedDate.ToDateAndTimeShort(true)</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function RedirectToFilter() {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView?FromDate=' + $("#FromDate").val() + '&ToDate=' + $("#ToDate").val() + '&LedgerNo=' + $("#LedgerNo").val() + '&ApprovalRequired=' + $("#ApprovalRequired").val() + '&PendingIssue=' + $("#PendingIssue").val() + '&Classification=' + $("#Classification").val() + '&AmountClassification=' + $("#AmountClassification").val();
+        }
+        function RedirectToSagePost(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView_JournalPost/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToSageRePost(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView_JournalRePost/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToDetails(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToApprove(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_Approve/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToApproveBalance(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_ApproveBalance/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToAudit(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_Audit/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToAuditBalance(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditUpdate_AuditBalance/' + ID + '?R=' + encodeURIComponent(document.location.href);
+        }
+        function RedirectToRequestRerun(ID) {
+            $("#loaderContent").css("display", "block");
+            document.location.href = '/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView_RequestRerun?R=' + encodeURIComponent(document.location.href);
+        }
+        function DoBulkJournalPost() {
+            $("#loaderContent").css("display", "block");
+            $.post("/operational/C02_GeneralLedgerReport/C02_GeneralLedgerReport_GLAuditView_JournalBulkPost",
+                {
+                    accountingChecklistIDs: "@(string.Join(',', Model.C02_GeneralLedgerReport_GLAuditViewItems.Where(p => (!p.SageJournalID.HasValue && p.ShowJournalLink) || (!p.SageJournalID.HasValue && p.SageAmount.HasValue && p.SageAmount.Value != p.MovementAmount)).Select(p => p.ID)))"
+                })
+                .done(function (data) {
+                    $("#loaderContent").css("display", "none");
+                    if (data == "true") {
+                        alert("Success");
+                        $("#loaderContent").css("display", "block");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("There was a problem completing requested action.");
+                    }
+                });
+        }
+    </script>
+}

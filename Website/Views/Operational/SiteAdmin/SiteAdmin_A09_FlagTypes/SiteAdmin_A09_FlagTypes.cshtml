@@ -1,0 +1,99 @@
+@model MyVoltage.Models.OperationalModels.SiteAdmin.SiteAdmin_A09_FlagTypesModels.SiteAdmin_A09_FlagTypesModel
+@{
+    ViewData["Title"] = "System Admin - Flag Types";
+}
+@using MyVoltage.Extensions;
+<div class="row mb-4">
+    <div class="col">
+        <a href="/operational/SiteAdmin/SiteAdmin_A09_FlagTypes/Add" class="btn btn-outline-primary-sm"><i class="fas fa-plus-circle"></i>&nbsp;Add New Flag Type</a>
+
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col">
+        <table id="myTable" class="display compact table table-sm" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col">Identifier</th>
+                    <th scope="col">Workflow Group</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Pillar</th>
+                    <th scope="col">Flag Type Name</th>
+                    <th scope="col">Default Responsible Person</th>
+                    <th scope="col">Default Reporting To Person</th>
+                    <th scope="col">Linked To Secure Area&nbsp;<i class="fas fa-question-circle" title="Note: New links does not know where to redirect automatically. Please contact developers to add 'from flag to solve problem page' redirects."></i></th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status Group</th>
+                    <th scope="col">Default Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SiteAdmin_A09_FlagTypesItems)
+                {
+                    string desc = "";
+                    if (item.SecureAreaID.HasValue)
+                    {
+                        @foreach (var psa in MyVoltage.Data.ParentSecureAreaDefaults.DefaultSecureAreas.OrderBy(p => p.Key.Item3))
+                        {
+                            foreach (var dsa in psa.Value.OrderBy(p => p.Item3))
+                            {
+                                if (item.SecureAreaID.Value == ((int)dsa.Item1))
+                                {
+                                    if (MyVoltage.Data.ParentSecureAreaDefaults.SecureAreasProgrammedForFlags.Contains(dsa.Item1))
+                                    {
+                                        desc = $"<span class=\"text-green font-weight-bold\">{psa.Key.Item3} - {dsa.Item3}</span>";
+                                    }
+                                    else
+                                    {
+                                        desc = $"<span class=\"text-red font-weight-bold\">{psa.Key.Item3} - {dsa.Item3}</span>";
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    string rowclass = "";
+                    string cellClass = "";
+                    if (!item.Active)
+                    {
+                        cellClass = " class=\"text-red font-weight-bold\"";
+                        rowclass = " class=\"table-danger\"";
+                    }
+                    <tr style="cursor:pointer;" title="View / Edit @item.FlagTypeName" onclick="RedirectToEditFlag('@item.ID');" @Html.Raw(rowclass)>
+                        <td scope="col">@item.Identifier</td>
+                        <td scope="col">@item.WorkflowGroupName</td>
+                        <td scope="col">@item.BusinessDepartmentName</td>
+                        <td scope="col">@item.BusinessPillarName</td>
+                        <td scope="col">@item.FlagTypeName</td>
+                        <td scope="col">@item.DefaultUsername</td>
+                        <td scope="col">@item.ReportingToUserUsername</td>
+                        <td scope="col">@(Html.Raw(desc))</td>
+                        <td scope="col" @Html.Raw(cellClass)>@(item.Active ? "Active" : "Inactive")</td>
+                        <td scope="col">@(item.SiteAdmin_Priority != null ? item.SiteAdmin_Priority.PriorityName : "")</td>
+                        <td scope="col">@(item.SiteAdmin_StatusGroup != null ? item.SiteAdmin_StatusGroup.StatusGroupName : "[NONE]")</td>
+                        <td scope="col">@item.SiteAdmin_Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.7/datatables.min.js"></script>
+    <script>
+        new DataTable('#myTable', {
+            lengthMenu: [
+                [50, 100, 250, -1],
+                [50, 100, 250, 'All']
+            ]
+        });
+        function RedirectToEditFlag(flagID) {
+            document.location.href = '/operational/SiteAdmin/SiteAdmin_A09_FlagTypes/Edit/' + flagID;
+        }
+    </script>
+}

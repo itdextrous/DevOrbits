@@ -1,0 +1,67 @@
+@model MyVoltage.Models.OperationalModels.InsightsModels.AnnualCostTotalModel;
+@using MyVoltage.Extensions;
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+
+            <div class="card-header">
+                <h5 class="text-orange">
+                    <span>Annual Cost Total</span>
+                </h5>
+            </div>
+            <div class="card-body bg-white">
+                <table class="table table-sm table-hover table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Month</th>
+                            @foreach (var item in Model.ProductItems)
+                            {
+                                <th scope="col" class="text-right">@item.ProductName</th>
+                            }
+                            <th scope="col" class="text-right font-weight-bold">
+                                Total                                    
+                                <br />
+                                @if (operationalProvider.ShowCostInclVAT)
+                                {
+                                    <span class="text-green font-weight-bold">Incl Vat</span>
+                                }
+                                else
+                                {
+                                    <span class="text-red font-weight-bold">Excl Vat</span>
+                                }
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < 12; i++)
+                        {
+                            DateTime currentMonth = Model.Month.AddMonths(i * -1);
+                            decimal productTotal = 0;
+                            <tr>
+                                <td scope="col">@currentMonth.ToMonth()</td>
+                                @foreach (var item in Model.ProductItems)
+                                {
+                                    if (item.MonthlyValues.ContainsKey(currentMonth) && item.MonthlyValues[currentMonth].HasValue)
+                                    {
+                                        productTotal += item.MonthlyValues[currentMonth].Value;
+                                    }
+                                    <td scope="col" class="text-right">@(item.MonthlyValues.ContainsKey(currentMonth) ? item.MonthlyValues[currentMonth].ToMoneyNoDecimal(unit:"R", blankValue:"") : "-")</td>
+                                }
+                                <td scope="col" class="text-right font-weight-bold">@productTotal.ToMoneyNoDecimal("R")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>

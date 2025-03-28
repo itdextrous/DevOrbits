@@ -1,0 +1,43 @@
+@model MyVoltage.Models.OperationalModels.Dashboards.Dashboards_AModels.A3_011_Network_Balancing_SummaryModel
+@using MyVoltage.Extensions;
+<div class="row col-12">
+    <h5>@MyVoltage.Data.SecureAreaEnum.A03_NetworkBalancing_Summary.GetDescription() Details</h5>
+</div>
+@if (Model.A3_011_Network_Balancing_SummaryItems.Count == 0)
+{
+    <div class="row col-12">
+        <h5 class="text-green"><i class="far fa-smile"></i>&nbsp;No issues detected.</h5>
+    </div>
+}
+else
+{
+    <table class="table table-sm table-responsive-xl table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Company Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Latest Report Month</th>
+                <th scope="col">No Of Reports</th>
+                <th scope="col">Problematic Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.A3_011_Network_Balancing_SummaryItems)
+            {
+                string fixitURL = $"/operational/changeActiveCompany/{item.CompanyID}?R={Html.UrlEncoder.Encode("/operational/A03_NetworkBalancing/A03_NetworkBalancing_Details")}";
+                <tr style="cursor:pointer;" title="View @item.Name" onclick="RedirectToDetails('@fixitURL');">
+                    <td scope="col">@item.Name</td>
+                    <td scope="col">@item.Status.GetDescription()</td>
+                    <td scope="col">@item.LatestReportMonth.ToDateAndTimeShort()</td>
+                    <td scope="col">@item.ReportCount</td>
+                    <td scope="col">@item.ProblematicReportCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script>
+    function RedirectToDetails(url) {
+        document.location.href = url;
+    }
+</script>

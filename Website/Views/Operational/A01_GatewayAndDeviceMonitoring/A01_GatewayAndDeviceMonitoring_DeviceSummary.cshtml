@@ -1,0 +1,98 @@
+@inject MyVoltage.Services.OperationalProvider operationalProvider;
+@using MyVoltage.Extensions;
+
+@{
+    ViewData["Title"] = $"{MyVoltage.Data.SecureAreaEnum.A01_GatewayAndDeviceMonitoring_DeviceSummary.GetDescription()}";
+}
+
+<div class="row mb-4">
+    <div class="col">
+
+        <div class="card p-md-1 mv-gradient">
+            <div id="latestSync" class="card-header text-left">
+                <div class="text-orange">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp;Loading Sync Status...
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Status</th>
+
+                            <th scope="col">More Than 7 Days</th>
+                            <th scope="col">Less Than 7 Days</th>
+                            <th scope="col">Less Than 3 Days</th>
+                            <th scope="col">Less Than 24 Hours</th>
+                            <th scope="col">Less Than 4 Hours</th>
+                            <th scope="col">Offline</th>
+                            <th scope="col">Online</th>
+
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var uC in operationalProvider.UserCompaniesWithNone)
+                        {
+                            var company = operationalProvider.Companies.Where(p => p.CompanyID == uC.CompanyID).SingleOrDefault();
+                            if (uC.CompanyID == 0)
+                            {
+                                company = new MyVoltage.Data.Company()
+                    {
+                        Name = "NONE",
+                        CompanyID = 0,
+                    };
+                            }
+                            <tr id="NotBilledSummaryItem_@company.CompanyID" style="cursor:pointer;" title="View @company.Name" onclick="RedirectToDetails('@company.CompanyID');">
+                                <td scope="col">
+                                    <div class="text-orange">
+                                        @company.Name
+                                    </div>
+                                </td>
+                                <td scope="col" colspan="9">
+                                    <div class="text-orange">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $("#latestSync").load('@Url.Content("/operational/shared/meter/DeviceSyncStatus")');
+        var companies = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(operationalProvider.UserCompaniesWithNone)));
+        $(companies).each(function () {
+            $("#NotBilledSummaryItem_" + this.CompanyID).load('@(Url.Content("/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_DeviceSummaryItem/"))' + this.CompanyID + '/' + "NotBilledSummaryItem_" + this.CompanyID, function (response, status, xhr) {
+                var col = $("#" + this.id + "_col");
+                if (col.length > 0) {
+                    var text = col[0].innerHTML;
+                    if (text == 'Reviewed') {
+                        $("#" + this.id).addClass("table-success");
+                    }
+                    else if (text == 'Outstanding') {
+                        $("#" + this.id).addClass("table-danger");
+                    }
+                }
+            });
+        });
+        function RedirectToDetails(companyID) {
+            document.location.href = '/operational/changeActiveCompany/' + companyID + '?R=/operational/A01_GatewayAndDeviceMonitoring/A01_GatewayAndDeviceMonitoring_DeviceDetails';
+        }
+        $(document).ready(function () {
+        });
+    </script>
+}
