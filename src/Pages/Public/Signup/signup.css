@@ -1,0 +1,172 @@
+
+ .top_card.card {
+    display: flex;
+    text-align: center;
+    padding: 15px;
+    font-size: 25px;
+    border-radius:20px;
+}
+ h1 {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+.plan_table{
+        display: flex;
+        justify-content: center;
+        text-align: center;
+}
+.plan_name{
+    display: flex;
+    justify-content: center;
+}
+.form_row{
+    display: flex;
+    margin-top: 1%;
+}
+.submit_button{
+    display: flex;
+    justify-content: center;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    font-size: 22px;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    margin-top: 1rem;
+    padding: 9px 16px;
+}
+.plan_card.card {
+     background: #fff;;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0px 0px 12px 0px rgb(0 0 0 / 20%); 
+}
+.plan_name h3 {
+    color: #6c757d;
+    font-size: 42px;
+    font-weight: 500;
+    padding-top:30px;
+
+}
+.Plan_list_Item {
+    margin-top: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    padding:20px;
+    display: flex;
+    justify-content: flex-start;
+}
+.plan_heading_list {
+    margin-top: 22px;
+    line-height: 1;
+}
+.plan_card_text.card {
+    padding: 25px;
+    border-radius:20px;
+}
+.Plan_list_Item ul li span{
+    font-size: 16px;
+    line-height: 2;
+}
+input.input.form-control:hover {
+    align-items: center;
+    background-color: hsl(0, 0%, 100%);
+    border-color: #2684FF;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 0 0 1px #2684ff;
+}
+
+.StripeElement {
+    box-sizing: border-box;
+  
+    height: 40px;
+    width: 100%;
+  
+    padding: 10px 12px;
+  
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: white;
+  
+    box-shadow: 0 1px 3px 0 #e6ebf1;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
+    margin-bottom: 10px;
+  }
+  
+  .StripeElement--focus {
+    box-shadow: 0 1px 3px 0 #cfd7df;
+  }
+  
+  .StripeElement--invalid {
+    border-color: #fa755a;
+  }
+  
+  .StripeElement--webkit-autofill {
+    background-color: #fefde5 !important;}/**
+   * The CSS shown here will not be introduced in the Quickstart guide, but shows
+   * how you can use CSS to style your Element's container.
+   */
+  .StripeElement {
+    box-sizing: border-box;
+  
+    height: 40px;
+  
+    padding: 10px 12px;
+  
+    border: 1px solid #00000021;
+    border-radius: 8px;
+    background-color: white;
+  
+    box-shadow: 0 1px 3px 0 #e6ebf1;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
+  }
+  
+  .StripeElement--focus {
+    box-shadow: 0 1px 3px 0 #cfd7df;
+  }
+  
+  .StripeElement--invalid {
+    border-color: #fa755a;
+  }
+
+  .stripeForm form{
+      width: 98%;
+      margin-top: 20px;
+  }
+
+  .stripeForm form button{
+    margin-left: calc(50% - 150px);
+    margin-top: 25px;
+  }
+  .btnspace    
+{    
+margin: 15px;    
+} 
+
+.loader_style{
+  width: 80vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 99;
+  margin: auto;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+.loader_style div{
+  margin: 0;
+  text-align: center;
+  margin-top: 40%;
+}
+.margin_right{
+  margin-right: 10px;
+}
